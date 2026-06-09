@@ -14,7 +14,10 @@ allprojects {
 }
 
 ext {
+    assertjVersion = '3.27.7'
     junitVersion = '6.0.3'
+    springBootVersion = '4.0.6'
+    springAiVersion = '2.0.0-RC1'
 }
 
 subprojects {
@@ -27,6 +30,8 @@ subprojects {
     }
 
     dependencies {
+        // Source: https://mvnrepository.com/artifact/org.assertj/assertj-core
+        testImplementation("org.assertj:assertj-core:${assertjVersion}")
         testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher:${junitVersion}")
     }

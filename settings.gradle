@@ -2,3 +2,4 @@ rootProject.name = 'setaccio-lab'
 
 include 'setaccio-core'
 include 'setaccio-lab'
+include 'setaccio-testcontainers'

@@ -6,10 +6,6 @@ plugins {
 
 description = 'Setaccio Lab'
 
-ext {
-    set('springAiVersion', '2.0.0-RC1')
-}
-
 dependencies {
     implementation project(':setaccio-core')
 
@@ -24,7 +20,7 @@ dependencies {
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+        mavenBom "org.springframework.ai:spring-ai-bom:${rootProject.ext.springAiVersion}"
     }
 }
 

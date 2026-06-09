@@ -1,0 +1,23 @@
+plugins {
+    id 'java-library'
+    id 'io.spring.dependency-management'
+}
+
+description = 'Optional Testcontainers-backed integration harness for Setaccio Lab'
+
+dependencies {
+    implementation project(':setaccio-lab')
+
+    testImplementation 'org.springframework.ai:spring-ai-spring-boot-testcontainers'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.boot:spring-boot-dependencies:${rootProject.ext.springBootVersion}"
+        mavenBom "org.springframework.ai:spring-ai-bom:${rootProject.ext.springAiVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

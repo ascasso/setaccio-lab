@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 class Blake3ImplementationSwitchingTest {
 
@@ -22,11 +22,11 @@ class Blake3ImplementationSwitchingTest {
         String bouncyCastleHash = bouncyCastleService.hashBytes(testBytes);
 
         // All implementations should produce identical hashes for the same input
-        assertEquals(apacheHash, bouncyCastleHash, "Apache Commons and BouncyCastle implementations should produce identical hashes");
+        assertThat(bouncyCastleHash).as("Apache Commons and BouncyCastle implementations should produce identical hashes").isEqualTo(apacheHash);
 
         // All should be 64 character hex strings
-        assertEquals(64, apacheHash.length());
-        assertEquals(64, bouncyCastleHash.length());
+        assertThat(apacheHash.length()).isEqualTo(64);
+        assertThat(bouncyCastleHash.length()).isEqualTo(64);
     }
 
     @Test
@@ -37,7 +37,7 @@ class Blake3ImplementationSwitchingTest {
         String bouncyCastleHash = bouncyCastleService.hashBytes(emptyData);
 
         // All implementations should produce identical hashes for empty input
-        assertEquals(apacheHash, bouncyCastleHash);
+        assertThat(bouncyCastleHash).isEqualTo(apacheHash);
     }
 
     @Test
@@ -49,7 +49,7 @@ class Blake3ImplementationSwitchingTest {
         String bouncyCastleHash = bouncyCastleService.hashBytes(largeBytes);
 
         // All implementations should produce identical hashes for large data
-        assertEquals(apacheHash, bouncyCastleHash);
+        assertThat(bouncyCastleHash).isEqualTo(apacheHash);
     }
 
     @Test
@@ -58,29 +58,30 @@ class Blake3ImplementationSwitchingTest {
         String testData = "Primary service test";
         String primaryHash = primaryService.hashString(testData);
 
-        assertNotNull(primaryHash);
-        assertEquals(64, primaryHash.length());
+        assertThat(primaryHash).isNotNull();
+        assertThat(primaryHash.length()).isEqualTo(64);
 
         // Primary service should default to Apache Commons Codec implementation
         String apacheHash = apacheCommonsService.hashString(testData);
-        assertEquals(apacheHash, primaryHash, "Primary service should default to Apache Commons Codec implementation");
+        assertThat(primaryHash).as("Primary service should default to Apache Commons Codec implementation").isEqualTo(apacheHash);
     }
 
     @Test
     void testImplementationEnumValues() {
         // Test that all enum values are properly configured
-        assertEquals("apache-commons-codec", Blake3Implementation.APACHE_COMMONS_CODEC.getKey());
-        assertEquals("bouncy-castle", Blake3Implementation.BOUNCY_CASTLE.getKey());
+        assertThat(Blake3Implementation.APACHE_COMMONS_CODEC.getKey()).isEqualTo("apache-commons-codec");
+        assertThat(Blake3Implementation.BOUNCY_CASTLE.getKey()).isEqualTo("bouncy-castle");
 
         // Test fromKey method
-        assertEquals(Blake3Implementation.APACHE_COMMONS_CODEC, Blake3Implementation.fromKey("apache-commons-codec"));
-        assertEquals(Blake3Implementation.BOUNCY_CASTLE, Blake3Implementation.fromKey("bouncy-castle"));
+        assertThat(Blake3Implementation.fromKey("apache-commons-codec")).isEqualTo(Blake3Implementation.APACHE_COMMONS_CODEC);
+        assertThat(Blake3Implementation.fromKey("bouncy-castle")).isEqualTo(Blake3Implementation.BOUNCY_CASTLE);
 
         // Test case insensitivity
-        assertEquals(Blake3Implementation.APACHE_COMMONS_CODEC, Blake3Implementation.fromKey("APACHE-COMMONS-CODEC"));
+        assertThat(Blake3Implementation.fromKey("APACHE-COMMONS-CODEC")).isEqualTo(Blake3Implementation.APACHE_COMMONS_CODEC);
 
         // Test invalid key
-        assertThrows(IllegalArgumentException.class, () -> Blake3Implementation.fromKey("invalid-implementation"));
+        assertThatThrownBy(() -> Blake3Implementation.fromKey("invalid-implementation"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -91,8 +92,8 @@ class Blake3ImplementationSwitchingTest {
         String hashFromApache = apacheCommonsService.hashString(testData);
 
         // Verify with both implementations
-        assertTrue(apacheCommonsService.verifyHash(testData.getBytes(StandardCharsets.UTF_8), hashFromApache));
-        assertTrue(bouncyCastleService.verifyHash(testData.getBytes(StandardCharsets.UTF_8), hashFromApache));
+        assertThat(apacheCommonsService.verifyHash(testData.getBytes(StandardCharsets.UTF_8), hashFromApache)).isTrue();
+        assertThat(bouncyCastleService.verifyHash(testData.getBytes(StandardCharsets.UTF_8), hashFromApache)).isTrue();
     }
 
     @Test
@@ -106,6 +107,6 @@ class Blake3ImplementationSwitchingTest {
             new java.io.ByteArrayInputStream(testData.getBytes(StandardCharsets.UTF_8))
         );
 
-        assertEquals(apacheStreamHash, bouncyCastleStreamHash);
+        assertThat(bouncyCastleStreamHash).isEqualTo(apacheStreamHash);
     }
 }

@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
 
 class ApacheCommonsBlake3HashingServiceTest {
 
@@ -18,19 +18,17 @@ class ApacheCommonsBlake3HashingServiceTest {
         byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
         String hash = blake3HashingService.hashBytes(data);
         
-        assertNotNull(hash);
-        assertEquals(64, hash.length()); // Blake3 produces 32 bytes = 64 hex chars
+        assertThat(hash).isNotNull();
+        assertThat(hash.length()).isEqualTo(64); // Blake3 produces 32 bytes = 64 hex chars
         
         // Test consistency - same input should produce same hash
         String hash2 = blake3HashingService.hashBytes(data);
-        assertEquals(hash, hash2);
+        assertThat(hash2).isEqualTo(hash);
     }
 
     @Test
     void testHashBytes_withNullData_throwsException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            blake3HashingService.hashBytes(null);
-        });
+        assertThatThrownBy(() -> blake3HashingService.hashBytes(null)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -38,8 +36,8 @@ class ApacheCommonsBlake3HashingServiceTest {
         byte[] emptyData = new byte[0];
         String hash = blake3HashingService.hashBytes(emptyData);
         
-        assertNotNull(hash);
-        assertEquals(64, hash.length());
+        assertThat(hash).isNotNull();
+        assertThat(hash.length()).isEqualTo(64);
     }
 
     @Test
@@ -47,27 +45,25 @@ class ApacheCommonsBlake3HashingServiceTest {
         String input = "Hello, World!";
         String hash = blake3HashingService.hashString(input);
         
-        assertNotNull(hash);
-        assertEquals(64, hash.length());
+        assertThat(hash).isNotNull();
+        assertThat(hash.length()).isEqualTo(64);
         
         // Should be same as hashing the bytes directly
         String expectedHash = blake3HashingService.hashBytes(input.getBytes(StandardCharsets.UTF_8));
-        assertEquals(expectedHash, hash);
+        assertThat(hash).isEqualTo(expectedHash);
     }
 
     @Test
     void testHashString_withNullString_throwsException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            blake3HashingService.hashString(null);
-        });
+        assertThatThrownBy(() -> blake3HashingService.hashString(null)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void testHashString_withEmptyString_returnsHash() {
         String hash = blake3HashingService.hashString("");
         
-        assertNotNull(hash);
-        assertEquals(64, hash.length());
+        assertThat(hash).isNotNull();
+        assertThat(hash.length()).isEqualTo(64);
     }
 
     @Test
@@ -77,19 +73,17 @@ class ApacheCommonsBlake3HashingServiceTest {
         
         String hash = blake3HashingService.hashInputStream(inputStream);
         
-        assertNotNull(hash);
-        assertEquals(64, hash.length());
+        assertThat(hash).isNotNull();
+        assertThat(hash.length()).isEqualTo(64);
         
         // Should be same as hashing the string directly
         String expectedHash = blake3HashingService.hashString(data);
-        assertEquals(expectedHash, hash);
+        assertThat(hash).isEqualTo(expectedHash);
     }
 
     @Test
     void testHashInputStream_withNullInputStream_throwsException() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            blake3HashingService.hashInputStream(null);
-        });
+        assertThatThrownBy(() -> blake3HashingService.hashInputStream(null)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -103,8 +97,8 @@ class ApacheCommonsBlake3HashingServiceTest {
         InputStream inputStream = new ByteArrayInputStream(largeData.toString().getBytes(StandardCharsets.UTF_8));
         String hash = blake3HashingService.hashInputStream(inputStream);
         
-        assertNotNull(hash);
-        assertEquals(64, hash.length());
+        assertThat(hash).isNotNull();
+        assertThat(hash.length()).isEqualTo(64);
     }
 
     @Test
@@ -112,7 +106,7 @@ class ApacheCommonsBlake3HashingServiceTest {
         byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
         String hash = blake3HashingService.hashBytes(data);
         
-        assertTrue(blake3HashingService.verifyHash(data, hash));
+        assertThat(blake3HashingService.verifyHash(data, hash)).isTrue();
     }
 
     @Test
@@ -120,16 +114,14 @@ class ApacheCommonsBlake3HashingServiceTest {
         byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
         String incorrectHash = "0000000000000000000000000000000000000000000000000000000000000000";
         
-        assertFalse(blake3HashingService.verifyHash(data, incorrectHash));
+        assertThat(blake3HashingService.verifyHash(data, incorrectHash)).isFalse();
     }
 
     @Test
     void testVerifyHash_withNullExpectedHash_throwsException() {
         byte[] data = "Hello, World!".getBytes(StandardCharsets.UTF_8);
         
-        assertThrows(IllegalArgumentException.class, () -> {
-            blake3HashingService.verifyHash(data, null);
-        });
+        assertThatThrownBy(() -> blake3HashingService.verifyHash(data, null)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -138,7 +130,7 @@ class ApacheCommonsBlake3HashingServiceTest {
         String expectedHash = blake3HashingService.hashString(data);
         InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
         
-        assertTrue(blake3HashingService.verifyHash(inputStream, expectedHash));
+        assertThat(blake3HashingService.verifyHash(inputStream, expectedHash)).isTrue();
     }
 
     @Test
@@ -147,7 +139,7 @@ class ApacheCommonsBlake3HashingServiceTest {
         String incorrectHash = "0000000000000000000000000000000000000000000000000000000000000000";
         InputStream inputStream = new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8));
         
-        assertFalse(blake3HashingService.verifyHash(inputStream, incorrectHash));
+        assertThat(blake3HashingService.verifyHash(inputStream, incorrectHash)).isFalse();
     }
 
     @Test
@@ -160,20 +152,20 @@ class ApacheCommonsBlake3HashingServiceTest {
             new ByteArrayInputStream(testData.getBytes(StandardCharsets.UTF_8))
         );
         
-        assertEquals(hashFromString, hashFromBytes);
-        assertEquals(hashFromBytes, hashFromStream);
+        assertThat(hashFromBytes).isEqualTo(hashFromString);
+        assertThat(hashFromStream).isEqualTo(hashFromBytes);
     }
 
     @Test
     void testKnownVector_apacheCommonsCodec() {
         // Test with known vector - empty string should produce a specific hash
         String emptyHash = blake3HashingService.hashString("");
-        assertNotNull(emptyHash);
-        assertEquals(64, emptyHash.length());
+        assertThat(emptyHash).isNotNull();
+        assertThat(emptyHash.length()).isEqualTo(64);
         
         // Test with "hello world"
         String helloWorldHash = blake3HashingService.hashString("hello world");
-        assertNotNull(helloWorldHash);
-        assertEquals(64, helloWorldHash.length());
+        assertThat(helloWorldHash).isNotNull();
+        assertThat(helloWorldHash.length()).isEqualTo(64);
     }
 }

@@ -7,7 +7,8 @@
 This repository is intended to contain:
 
 - `setaccio-core`: a minimal plain Java library for reusable Setaccio primitives.
-- `setaccio-lab`: a Spring Boot / Spring AI evaluation app for model, prompt, tool-calling, and later MCP experiments.
+- `setaccio-lab`: a Spring Boot / Spring AI evaluation app for model, provider, model-type, prompt, tool-calling, and later MCP experiments.
+- `setaccio-testcontainers`: an optional Testcontainers-backed integration harness that must not be required by `setaccio-lab`.
 
 The private Setaccio application code remains outside this repository. Do not copy private product docs, private roadmap text, private deployment details, private API modules, database code, UI code, or private server code into this repo.
 
@@ -17,7 +18,9 @@ Public:
 
 - `setaccio-core`
 - `setaccio-lab`
+- `setaccio-testcontainers`
 - Public-facing README, changelog, test plan, examples, and benchmark fixtures that are safe to publish.
+- Public environment/setup docs that avoid committing credentials or private deployment details.
 
 Private:
 
@@ -45,6 +48,8 @@ Current intended runtime dependencies:
 - `bcprov-jdk18on`
 - `slf4j-api`
 
+Test assertions should use AssertJ.
+
 Not allowed in `setaccio-core`:
 
 - Spring Framework.
@@ -66,11 +71,29 @@ Allowed:
 - Spring AI.
 - Local Ollama integration.
 - Optional Anthropic integration.
+- Future optional provider integrations for OpenAI, Microsoft, Amazon, and Google.
 - HTTP endpoints for local evaluation.
 - Public benchmark fixtures and prompts.
 - Result files written under ignored build directories.
 
 Do not turn `setaccio-lab` into the private Setaccio product. It should remain a focused evaluation harness.
+
+### setaccio-testcontainers
+
+`setaccio-testcontainers` is the optional Docker/Testcontainers integration harness.
+
+Allowed:
+
+- Testcontainers dependencies.
+- Spring AI Testcontainers support.
+- Optional container-backed integration tests.
+- Test-only wiring that depends on `setaccio-lab`.
+
+Not allowed:
+
+- `setaccio-lab` depending on `setaccio-testcontainers`.
+- Docker or Testcontainers being required for default `setaccio-lab` builds.
+- Container tests that run without an explicit task, profile, or property.
 
 ## Current State
 
@@ -79,6 +102,7 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - Root Gradle build with Java 25.
 - `setaccio-core` copied and cleaned into a plain Java library.
 - `setaccio-lab` created as a minimal Spring Boot / Spring AI app.
+- `setaccio-testcontainers` created as an optional skeleton for future container-backed integration tests.
 - Spring AI version is currently `2.0.0-RC1` in `setaccio-lab`.
 - Spring AI `2.0.0-RC1` was verified available in Maven Central on 2026-06-08.
 - No git commits were made during the initial scaffold work.
@@ -103,6 +127,14 @@ Relevant upgrade concerns for this repo:
 
 - Keep future Spring AI upgrades focused and separate from mechanical repo split work.
 - Watch direct `ChatModel.call(Prompt)` usage with per-request options. Spring AI 2.0 M5+ changed how partial options are merged. Prefer `ChatClient` where practical, or explicitly combine options with model defaults.
+- The long-term harness should cover Spring AI's major provider surface: Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama.
+- The long-term harness should cover Spring AI model types: chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
+- Provider-backed tests must be opt-in and must not run by default in CI.
+- Keep provider environment variable requirements documented in `docs/ENVIRONMENT.md`.
+- For Ollama chat config, follow Spring AI's `spring.ai.ollama.base-url`, `spring.ai.model.chat`, `spring.ai.ollama.chat.model`, and `spring.ai.ollama.init.pull-model-strategy` properties. `OLLAMA_API_BASE` is only a repo-supported environment alias.
+- For evaluation tests, track Spring AI's `Evaluator`, `EvaluationRequest`, `RelevancyEvaluator`, and `FactCheckingEvaluator`, but re-check the exact RC1 API before implementation.
+- For container-backed tests, track Spring AI's `spring-ai-spring-boot-testcontainers` support and service connections, but keep Docker/Testcontainers opt-in.
+- Keep Testcontainers dependencies isolated in `setaccio-testcontainers`; do not add them to `setaccio-lab`.
 - Tool-calling tests should wait until the chosen Spring AI RC1 tool API is confirmed.
 - MCP should remain a later phase, after direct Spring AI tool tests are reliable.
 
@@ -156,7 +188,10 @@ Avoid copying prematurely:
    - Return structured benchmark rows.
    - Persist raw result JSON under `build/lab-results/`.
 4. Add public sample prompts and ignored sample image folders.
-5. Add tests before expanding into chat, tools, or MCP.
+5. Add detailed local Ollama setup docs before requiring Ollama for any live workflow.
+6. Add Spring AI evaluation and Testcontainers planning docs before wiring evaluator or container-backed integration tests.
+7. Keep container-backed work in `setaccio-testcontainers`.
+8. Add tests before expanding into additional model types, providers, tools, or MCP.
 
 ## Test Direction
 
@@ -196,15 +231,18 @@ When benchmark execution is added:
 
 ### Optional Live Tests
 
-Live model tests must be opt-in.
+Live model and provider tests must be opt-in.
 
 Rules:
 
-- Never run live Ollama tests by default in CI.
+- Never run live Ollama or remote-provider tests by default in CI.
 - Never auto-pull large models in tests.
 - Require an explicit Gradle property or profile for live runs.
-- Require explicit model names.
+- Require explicit provider and model names.
+- Require explicit credentials through local environment variables or ignored local config for remote providers.
+- Keep the required environment variables in `docs/ENVIRONMENT.md` current when adding providers or model types.
 - Store live outputs only under ignored build directories.
+- Keep AI-judged evaluator tests and Testcontainers-backed tests opt-in.
 
 ### Later Test Phases
 
@@ -213,6 +251,22 @@ Text benchmark phase:
 - Structured output validity.
 - Prompt regression tests.
 - JSON parse reliability.
+
+Provider/model-type phase:
+
+- Chat completion output quality and option handling.
+- Embedding dimensionality, determinism expectations, and similarity checks.
+- Text-to-image request metadata and generated artifact handling.
+- Audio transcription fixture handling and transcript comparison.
+- Text-to-speech generated artifact handling.
+- Moderation category and score mapping.
+
+Evaluation/Testcontainers phase:
+
+- Relevancy evaluator tests for context-grounded responses.
+- Fact-checking evaluator tests for claim-versus-context behavior.
+- Configurable judge/evaluator provider and model selection.
+- Optional Spring AI Testcontainers service connections for local model services and vector stores.
 
 Tool-calling phase:
 
@@ -232,7 +286,8 @@ MCP phase:
 ```bash
 ./gradlew :setaccio-core:build
 ./gradlew :setaccio-lab:build
-./gradlew :setaccio-core:build :setaccio-lab:build
+./gradlew :setaccio-testcontainers:build
+./gradlew :setaccio-core:build :setaccio-lab:build :setaccio-testcontainers:build
 ./gradlew allDeps
 ```
 
