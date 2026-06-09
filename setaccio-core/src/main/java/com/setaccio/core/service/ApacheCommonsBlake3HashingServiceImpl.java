@@ -1,0 +1,101 @@
+package com.setaccio.core.service;
+
+import com.setaccio.core.exception.HashingException;
+import org.apache.commons.codec.digest.Blake3;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
+
+public class ApacheCommonsBlake3HashingServiceImpl implements Blake3HashingService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ApacheCommonsBlake3HashingServiceImpl.class);
+    private static final int BUFFER_SIZE = 8192;
+
+    @Override
+    public String hashBytes(byte[] data) {
+        if (data == null) {
+            throw new IllegalArgumentException("Data cannot be null");
+        }
+
+        logger.debug("Hashing {} bytes with Apache Commons BLAKE3", data.length);
+        try {
+            Blake3 blake3 = Blake3.initHash();
+            blake3.update(data);
+            byte[] hash = blake3.doFinalize(32); // 32 bytes = 256 bits
+            String result = HexFormat.of().formatHex(hash);
+            logger.debug("Successfully hashed {} bytes, result: {}", data.length, result);
+            return result;
+        } catch (Exception e) {
+            logger.error("Failed to hash {} bytes", data.length, e);
+            throw e;
+        }
+    }
+
+    @Override
+    public String hashString(String input) {
+        if (input == null) {
+            throw new IllegalArgumentException("Input string cannot be null");
+        }
+
+        logger.debug("Hashing string of length {} with Apache Commons BLAKE3", input.length());
+        return hashBytes(input.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @Override
+    public String hashInputStream(InputStream inputStream) {
+        if (inputStream == null) {
+            throw new IllegalArgumentException("InputStream cannot be null");
+        }
+
+        logger.debug("Hashing InputStream with Apache Commons BLAKE3");
+        try {
+            Blake3 blake3 = Blake3.initHash();
+            byte[] buffer = new byte[BUFFER_SIZE];
+            int bytesRead;
+            long totalBytes = 0;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                blake3.update(buffer, 0, bytesRead);
+                totalBytes += bytesRead;
+            }
+
+            byte[] hash = blake3.doFinalize(32); // 32 bytes = 256 bits
+            String result = HexFormat.of().formatHex(hash);
+            logger.debug("Successfully hashed {} bytes from InputStream, result: {}", totalBytes, result);
+            return result;
+        } catch (IOException e) {
+            logger.error("Error reading from InputStream during hashing", e);
+            throw new HashingException("Error reading from InputStream", e);
+        }
+    }
+
+    @Override
+    public boolean verifyHash(byte[] data, String expectedHash) {
+        if (expectedHash == null) {
+            throw new IllegalArgumentException("Expected hash cannot be null");
+        }
+
+        logger.debug("Verifying hash for {} bytes", data.length);
+        String actualHash = hashBytes(data);
+        boolean matches = actualHash.equalsIgnoreCase(expectedHash);
+        logger.debug("Hash verification result: {}", matches);
+        return matches;
+    }
+
+    @Override
+    public boolean verifyHash(InputStream inputStream, String expectedHash) {
+        if (expectedHash == null) {
+            throw new IllegalArgumentException("Expected hash cannot be null");
+        }
+
+        logger.debug("Verifying hash for InputStream");
+        String actualHash = hashInputStream(inputStream);
+        boolean matches = actualHash.equalsIgnoreCase(expectedHash);
+        logger.debug("Hash verification result: {}", matches);
+        return matches;
+    }
+}

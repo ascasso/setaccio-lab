@@ -1,0 +1,18 @@
+server:
+  port: 0
+
+spring:
+  ai:
+    anthropic:
+      api-key: ""
+    ollama:
+      base-url: http://localhost:11434
+      init:
+        pull-model-strategy: never
+      chat:
+        model: stub-model
+
+logging:
+  level:
+    com.setaccio: WARN
+    org.springframework.ai: WARN

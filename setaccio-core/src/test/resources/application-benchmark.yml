@@ -1,0 +1,24 @@
+# Setaccio Core - BLAKE3 Configuration Examples
+# Copy these configurations to test different implementations
+
+# Default configuration (recommended for production)
+blake3:
+  implementation: apache-commons-codec
+
+# Alternative configurations for testing:
+
+#blake3:
+#  implementation: rctcwyvrn
+
+#blake3:
+#  implementation: bouncy-castle
+
+# For CLI testing, you can override via command line:
+# java -Dblake3.implementation=rctcwyvrn ...
+
+# Logging configuration for performance analysis
+logging:
+  level:
+    com.setaccio.core.service: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
