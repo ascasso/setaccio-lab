@@ -20,3 +20,6 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Added `OLLAMA_API_BASE` as a supported fallback alias for local Ollama configuration.
 - Added Spring AI evaluation testing and Testcontainers planning notes.
 - Added AssertJ as the shared test assertion library.
+- Documented Spring AI Anthropic chat configuration and future Anthropic-specific test surfaces.
+- Documented Spring AI Google GenAI credential mapping and future Google-specific test surfaces.
+- Expanded Google GenAI notes for grounding, server-side tool metadata, cached content, thought signatures, and thinking option compatibility.

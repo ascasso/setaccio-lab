@@ -48,6 +48,8 @@
 
 - Add structured-output reliability tests for text prompts.
 - Add provider comparison tests for Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama as integrations are added.
+- Add Anthropic-specific chat tests for default options, per-request option overrides, streaming, multimodal image/PDF inputs, tool choice/tool calling, and extended thinking constraints.
+- Add Google GenAI-specific chat tests for Gemini Developer API key mode, Vertex AI mode, multimodal prompts, response MIME type, Google Search grounding, server-side tool invocation metadata, safety settings, cached content, thought signatures, and thinking option compatibility.
 - Add model-type tests for chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Add detailed local Ollama setup docs before adding required Ollama live-test workflows.
 - Add a dedicated `setaccio-testcontainers` integration-test task before adding Docker-backed tests.
