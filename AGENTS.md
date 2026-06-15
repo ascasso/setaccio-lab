@@ -9,8 +9,9 @@ This repository is intended to contain:
 - `setaccio-core`: a minimal plain Java library for reusable Setaccio primitives.
 - `setaccio-lab`: a Spring Boot / Spring AI evaluation app for model, provider, model-type, prompt, tool-calling, and later MCP experiments.
 - `setaccio-testcontainers`: an optional Testcontainers-backed integration harness that must not be required by `setaccio-lab`.
+- Public-safe AI/file-processing server primitives that make the lab runnable and useful as a technical showcase.
 
-The private Setaccio application code remains outside this repository. Do not copy private product docs, private roadmap text, private deployment details, private API modules, database code, UI code, or private server code into this repo.
+The private Setaccio application code remains outside this repository. Curated, public-safe AI/file-processing server capabilities may move here when they support the lab and showcase goals, but do not copy private product docs, private roadmap text, private deployment details, private API modules, database code, UI code, or private product-specific server code into this repo.
 
 ## Current Split Boundary
 
@@ -76,7 +77,7 @@ Allowed:
 - Public benchmark fixtures and prompts.
 - Result files written under ignored build directories.
 
-Do not turn `setaccio-lab` into the private Setaccio product. It should remain a focused evaluation harness.
+Do not turn `setaccio-lab` into the private Setaccio product. It should remain a focused evaluation harness and public reference server for reusable AI/file-processing behavior.
 
 ### setaccio-testcontainers
 

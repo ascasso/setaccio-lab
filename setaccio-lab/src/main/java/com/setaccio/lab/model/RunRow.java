@@ -3,7 +3,7 @@ package com.setaccio.lab.model;
 public record RunRow(
         String model,
         String input,
-        String inputBlake3,
+        String inputHash,
         long latencyMs,
         Integer tokensIn,
         Integer tokensOut,
