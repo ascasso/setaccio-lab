@@ -104,8 +104,8 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - `setaccio-core` copied and cleaned into a plain Java library.
 - `setaccio-lab` created as a minimal Spring Boot / Spring AI app.
 - `setaccio-testcontainers` created as an optional skeleton for future container-backed integration tests.
-- Spring AI version is currently `2.0.0-RC1` in `setaccio-lab`.
-- Spring AI `2.0.0-RC1` was verified available in Maven Central on 2026-06-08.
+- Spring AI version is currently `2.0.0` in `setaccio-lab`.
+- Spring AI `2.0.0` was verified available in Maven Central on 2026-06-15.
 - No git commits were made during the initial scaffold work.
 
 ## Versioning Policy
@@ -122,7 +122,7 @@ Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) for changelog st
 
 ## Important Spring AI Notes
 
-Spring AI `2.0.0-RC1` replaced the older M8/M4 planning target.
+Spring AI `2.0.0` replaced the older RC1/M8/M4 planning targets.
 
 Relevant upgrade concerns for this repo:
 
@@ -133,15 +133,15 @@ Relevant upgrade concerns for this repo:
 - Provider-backed tests must be opt-in and must not run by default in CI.
 - Keep provider environment variable requirements documented in `docs/ENVIRONMENT.md`.
 - For Ollama chat config, follow Spring AI's `spring.ai.ollama.base-url`, `spring.ai.model.chat`, `spring.ai.ollama.chat.model`, and `spring.ai.ollama.init.pull-model-strategy` properties. `OLLAMA_API_BASE` is only a repo-supported environment alias.
-- For Anthropic chat config, follow Spring AI's `spring.ai.anthropic.api-key`, `spring.ai.anthropic.base-url`, and `spring.ai.anthropic.chat.options.*` properties. Re-check exact RC1 defaults before changing models or option names.
+- For Anthropic chat config, follow Spring AI's `spring.ai.anthropic.api-key`, `spring.ai.anthropic.base-url`, and `spring.ai.anthropic.chat.options.*` properties. Re-check exact Spring AI 2.0 defaults before changing models or option names.
 - Anthropic live tests should eventually cover sync chat, streaming, multimodal image/PDF input, tool choice/tool calling, and extended thinking where the selected Claude model supports it.
 - For Google GenAI chat config, follow Spring AI's `spring.ai.google.genai.api-key`, Vertex AI properties, and `spring.ai.google.genai.chat.*` properties. `GEMINI_API_KEY` is only a repo-supported alias for local Gemini Developer API setup.
 - Do not use `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` for Spring AI Google GenAI chat tests; those are OAuth client credentials, not GenAI API-key credentials.
 - Google GenAI tests should account for Gemini Developer API versus Vertex AI mode, multimodal input, response MIME type, Google Search grounding, server-side tool metadata, safety settings, cached content, thought signatures, and model-specific thinking option compatibility.
-- For evaluation tests, track Spring AI's `Evaluator`, `EvaluationRequest`, `RelevancyEvaluator`, and `FactCheckingEvaluator`, but re-check the exact RC1 API before implementation.
+- For evaluation tests, track Spring AI's `Evaluator`, `EvaluationRequest`, `RelevancyEvaluator`, and `FactCheckingEvaluator`, but re-check the exact Spring AI 2.0 API before implementation.
 - For container-backed tests, track Spring AI's `spring-ai-spring-boot-testcontainers` support and service connections, but keep Docker/Testcontainers opt-in.
 - Keep Testcontainers dependencies isolated in `setaccio-testcontainers`; do not add them to `setaccio-lab`.
-- Tool-calling tests should wait until the chosen Spring AI RC1 tool API is confirmed.
+- Tool-calling tests should wait until the chosen Spring AI 2.0 tool API is confirmed.
 - MCP should remain a later phase, after direct Spring AI tool tests are reliable.
 
 ## Public-Safe Copy Guidance
@@ -279,7 +279,7 @@ Tool-calling phase:
 - Expected tool selected.
 - Arguments valid.
 - Tool result incorporated correctly.
-- Tool-call observability checked against the Spring AI RC1 API.
+- Tool-call observability checked against the Spring AI 2.0 API.
 
 MCP phase:
 

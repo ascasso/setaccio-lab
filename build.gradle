@@ -17,7 +17,7 @@ ext {
     assertjVersion = '3.27.7'
     junitVersion = '6.0.3'
     springBootVersion = '4.0.6'
-    springAiVersion = '2.0.0-RC1'
+    springAiVersion = '2.0.0'
 }
 
 subprojects {
