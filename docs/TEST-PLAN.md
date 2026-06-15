@@ -7,7 +7,7 @@
 - Add known BLAKE3 test vectors for empty input, strings, byte arrays, and streams.
 - Keep `setaccio-lab` context smoke tests on the `test` profile with no live Ollama or Anthropic calls.
 - Add controller validation tests for missing files, missing model names, and malformed model lists.
-- Keep Spring AI evaluation and Testcontainers APIs under review before adding harness abstractions; the current Spring AI 2.0 docs pages for these areas may lag the RC1 API.
+- Keep Spring AI evaluation and Testcontainers APIs under review before adding harness abstractions; verify exact Spring AI 2.0 APIs before implementation.
 
 ## Vision Benchmark Phase
 
