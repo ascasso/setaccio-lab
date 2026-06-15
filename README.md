@@ -1,6 +1,6 @@
 # setaccio-lab
 
-`setaccio-lab` is an open source Java workspace for experimenting with AI-assisted file analysis, benchmark design, prompt behavior, model types, provider behavior, and tool integration.
+`setaccio-lab` is an open source Java workspace for experimenting with AI-assisted file analysis, benchmark design, prompt behavior, model types, provider behavior, and tool integration. It is also the public technical showcase for reusable Setaccio AI/file-processing work that can be inspected without the private product repository.
 
 The goal is to make repeatable AI evaluation work easier to inspect. Instead of hiding model behavior behind a product UI, this repo keeps the primitives, prompts, test fixtures, and benchmark outputs close to the code so they can be reviewed, changed, and compared over time.
 
@@ -18,12 +18,12 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 The first lab track is local vision benchmarking:
 
 - accept uploaded image files,
-- run one or more local Ollama models through Spring AI,
+- run one or more local Ollama models through Spring AI with per-request model selection,
 - hash inputs with `setaccio-core`,
 - return structured result rows,
 - write raw benchmark results under ignored build directories.
 
-The local vision endpoint exists as a guarded Spring Boot endpoint, and benchmark execution is being wired in small, testable steps. Live model runs will remain opt-in so normal builds and CI do not call Ollama or pull models unexpectedly.
+The local vision endpoint is a guarded Spring Boot endpoint at `POST /api/lab/vision`. It accepts multipart `files` and a comma-separated `models` parameter, returns one result row per file/model pair, and writes raw JSON results under `build/lab-results/` by default. Live model runs remain opt-in so normal builds and CI do not call Ollama or pull models unexpectedly.
 
 ## Evaluation scope
 

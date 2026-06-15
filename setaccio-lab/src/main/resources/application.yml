@@ -2,6 +2,8 @@ spring:
   application:
     name: setaccio-lab
   ai:
+    model:
+      chat: ollama
     anthropic:
       api-key: ${ANTHROPIC_API_KEY:}
       base-url: ${ANTHROPIC_BASE_URL:}
@@ -11,8 +13,14 @@ spring:
           max-tokens: ${ANTHROPIC_MAX_TOKENS:4096}
     ollama:
       base-url: ${OLLAMA_BASE_URL:${OLLAMA_API_BASE:http://localhost:11434}}
+      init:
+        pull-model-strategy: never
       chat:
         model: ${OLLAMA_MODEL:granite3.2-vision}
 
 server:
   port: 8082
+
+setaccio:
+  lab:
+    results-dir: ${SETACCIO_LAB_OUTPUT_DIR:build/lab-results}

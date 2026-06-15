@@ -21,6 +21,7 @@ These variables are supported by the current `setaccio-lab` application config.
 | `OLLAMA_BASE_URL` | No | Ollama integration | Preferred Ollama base URL variable. Defaults through `OLLAMA_API_BASE`, then `http://localhost:11434`. |
 | `OLLAMA_API_BASE` | No | Ollama integration | Supported fallback alias for local setups that already use this name. |
 | `OLLAMA_MODEL` | No | Ollama chat/vision model | Defaults to `granite3.2-vision`. |
+| `SETACCIO_LAB_OUTPUT_DIR` | No | Benchmark result output | Defaults to `build/lab-results/`; keep outputs under ignored build directories. |
 
 The current Spring AI Anthropic mapping is:
 
@@ -97,7 +98,7 @@ The current Spring AI Ollama mapping is:
 | --- | --- |
 | `spring.ai.ollama.base-url` | `${OLLAMA_BASE_URL:${OLLAMA_API_BASE:http://localhost:11434}}` |
 | `spring.ai.ollama.chat.model` | `${OLLAMA_MODEL:granite3.2-vision}` |
-| `spring.ai.model.chat` | Spring AI defaults to `ollama` when the Ollama chat starter is active. Set explicitly when multiple chat model starters are enabled. |
+| `spring.ai.model.chat` | `ollama`, set explicitly because multiple chat model starters are present. |
 | `spring.ai.ollama.init.pull-model-strategy` | Should stay `never` for tests unless a deliberate opt-in workflow is added. |
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.

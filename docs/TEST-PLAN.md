@@ -11,11 +11,11 @@
 
 ## Vision Benchmark Phase
 
-- Add service-level tests with a mocked `OllamaChatModel`.
+- Maintain service-level tests with a mocked `OllamaChatModel`.
 - Verify per-request model selection is passed through Spring AI options.
 - Verify uploaded files are copied to temporary files and cleaned up.
 - Verify result rows include model, input name, input hash, latency, output text, and failure details.
-- Verify JSON result writing once result persistence is introduced.
+- Verify JSON result writing under ignored `build/lab-results/` output.
 
 ## Optional Integration Tests
 
