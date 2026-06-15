@@ -16,7 +16,7 @@ spring:
       init:
         pull-model-strategy: never
       chat:
-        model: ${OLLAMA_MODEL:granite3.2-vision}
+        model: ${OLLAMA_MODEL:gemma4:e2b}
 
 server:
   port: 8082

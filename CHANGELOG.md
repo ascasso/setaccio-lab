@@ -16,6 +16,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Changed the default local Ollama chat/vision model to `gemma4:e2b`.
 - Clarified that `setaccio-lab` is also the public showcase/reference surface for reusable AI/file-processing work, while private Setaccio product code stays out of the repository.
 - Upgraded `setaccio-lab` from Spring AI `2.0.0-M4` to `2.0.0-RC1`.
 - Expanded public documentation to describe the intended Spring AI provider and model-type test harness scope.
