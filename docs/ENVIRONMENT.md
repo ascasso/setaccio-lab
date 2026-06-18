@@ -21,7 +21,7 @@ These variables are supported by the current `setaccio-lab` application config o
 | `OLLAMA_BASE_URL` | No | Ollama integration | Preferred Ollama base URL variable. Defaults through `OLLAMA_API_BASE`, then `http://localhost:11434`. |
 | `OLLAMA_API_BASE` | No | Ollama integration | Supported fallback alias for local setups that already use this name. |
 | `OLLAMA_MODEL` | No | Ollama chat/vision model | Defaults to `gemma4:e2b`. |
-| `SETACCIO_LAB_INPUT_DIR` | No | Local image workspace | Optional local directory for comparison images, such as `/Users/ascasso/Pictures/lab`. Used by manual scripts and ad hoc workflows, not required by the app at startup. |
+| `SETACCIO_LAB_INPUT_DIR` | No | Local image workspace | Optional local directory for comparison images, such as `/Users/username/Pictures/lab`. If unset, there is no default input directory and the app continues to use uploaded files and other explicit inputs. |
 | `SETACCIO_LAB_OUTPUT_DIR` | No | Benchmark result output | Defaults to `build/lab-results/`; keep outputs under ignored build directories. |
 
 The current Spring AI Anthropic mapping is:
