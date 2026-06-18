@@ -1,8 +1,8 @@
 # setaccio-lab
 
-`setaccio-lab` is an open source Java workspace for experimenting with AI-assisted file analysis, benchmark design, prompt behavior, model types, provider behavior, and tool integration. It is also the public technical showcase for reusable Setaccio AI/file-processing work that can be inspected without the private product repository.
+A local-first Spring Boot lab for comparing how AI models analyze real files, starting with image benchmarking, hashing, and reproducible result output.
 
-The goal is to make repeatable AI evaluation work easier to inspect. Instead of hiding model behavior behind a product UI, this repo keeps the primitives, prompts, test fixtures, and benchmark outputs close to the code so they can be reviewed, changed, and compared over time.
+`setaccio-lab` is the public technical showcase for reusable Setaccio AI/file-processing work that can be inspected without the private product repository. It keeps the primitives, prompts, test fixtures, and benchmark outputs close to the code so model behavior can be reviewed, changed, and compared over time.
 
 ## What is in this repo
 
@@ -61,6 +61,7 @@ Useful contribution areas include:
 - Optional: local Ollama for live lab runs
 
 Provider credentials and live-test switches are documented in [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md). Default builds do not require AI provider credentials.
+For local image comparison work, set `SETACCIO_LAB_INPUT_DIR` to your working image folder and `SETACCIO_LAB_OUTPUT_DIR` to the benchmark result directory. If `SETACCIO_LAB_INPUT_DIR` is unset, the lab does not substitute a default path.
 
 ## Build
 
