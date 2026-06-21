@@ -10,10 +10,10 @@ java {
 
 dependencies {
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
-	api 'commons-codec:commons-codec:1.21.0'
+	api 'commons-codec:commons-codec:1.22.0'
 	// Source: https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
 	api 'org.bouncycastle:bcprov-jdk18on:1.84'
-	implementation 'org.slf4j:slf4j-api:2.0.17'
+	implementation 'org.slf4j:slf4j-api:2.0.18'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 

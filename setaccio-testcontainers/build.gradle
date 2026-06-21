@@ -16,6 +16,10 @@ dependencyManagement {
         mavenBom "org.springframework.boot:spring-boot-dependencies:${rootProject.ext.springBootVersion}"
         mavenBom "org.springframework.ai:spring-ai-bom:${rootProject.ext.springAiVersion}"
     }
+    dependencies {
+        dependency 'commons-codec:commons-codec:1.22.0'
+        dependency 'org.slf4j:slf4j-api:2.0.18'
+    }
 }
 
 tasks.named('test') {
