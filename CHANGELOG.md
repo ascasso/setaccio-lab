@@ -19,7 +19,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 - Upgraded Spring Boot to `4.1.0` across the Gradle build.
 - Forced `commons-codec` to `1.22.0` and `slf4j-api` to `2.0.18` across all subprojects.
-- Upgraded the Gradle wrapper from `9.5.1` to `9.6.0`.
+- Upgraded the Gradle wrapper from `9.6.0` to `9.6.1`.
 - Changed the default local Ollama chat/vision model to `gemma4:e2b`.
 - Upgraded `setaccio-lab` from Spring AI `2.0.0-RC1` to `2.0.0`.
 - Clarified that `setaccio-lab` is also the public showcase/reference surface for reusable AI/file-processing work, while private Setaccio product code stays out of the repository.
