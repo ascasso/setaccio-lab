@@ -1,5 +1,19 @@
 # AGENTS.md
 
+This file is the repo-local guide for Codex, Claude Code, and other AI agents working in this repository. Follow it unless the user gives a direct conflicting instruction or a higher-priority system rule applies. When in doubt, preserve the public/private boundary, do less, and ask.
+
+Do not stage, commit, or push unless explicitly asked.
+
+## Agent Hard Stops
+
+- Never copy private Setaccio product code, docs, deployment details, issue history, roadmap text, API modules, database code, or UI code into this repo.
+- Never add Spring, Spring Boot, Spring AI, or Spring annotations to `setaccio-core`.
+- Never make default tests call live Ollama, Anthropic, or other remote providers.
+- Never add credentials, tokens, API keys, or private endpoint details to tracked files.
+- Never add Docker or Testcontainers dependencies to `setaccio-lab`; keep them in `setaccio-testcontainers`.
+- Never make `setaccio-lab` depend on `setaccio-testcontainers`.
+- Never stage, commit, or push without explicit user instruction.
+
 ## Repository Purpose
 
 `setaccio-lab` is the public, Apache-2.0 side of the Setaccio split.
@@ -29,6 +43,14 @@ Private:
 - Private product docs, deployment docs, logs, workflows, and implementation plans.
 
 The future private repo is expected to depend on this public repo first through a Gradle composite build, then later through published artifacts if/when `setaccio-lab` or `setaccio-core` are published.
+
+## Package Conventions
+
+| Purpose | Module | Base package |
+|---|---|---|
+| Plain Java primitives | `setaccio-core` | `com.setaccio.core` |
+| Spring/Spring AI lab app | `setaccio-lab` | `com.setaccio.lab` |
+| Optional container tests | `setaccio-testcontainers` | `com.setaccio.testcontainers` |
 
 ## Module Rules
 
@@ -77,6 +99,14 @@ Allowed:
 - Public benchmark fixtures and prompts.
 - Result files written under ignored build directories.
 
+Not allowed in `setaccio-lab`:
+
+- Private Setaccio product modules, APIs, database code, UI code, deployment details, or product-specific server behavior.
+- Direct database access or persistence code unless it is a public lab fixture explicitly added for benchmark evaluation.
+- Docker or Testcontainers runtime/build requirements.
+- Dependencies on `setaccio-testcontainers`.
+- Live model/provider calls from default tests or CI.
+
 Do not turn `setaccio-lab` into the private Setaccio product. It should remain a focused evaluation harness and public reference server for reusable AI/file-processing behavior.
 
 ### setaccio-testcontainers
@@ -96,17 +126,16 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State
+## Current State Snapshot (as of 2026-06-18)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
 - Root Gradle build with Java 25.
-- `setaccio-core` copied and cleaned into a plain Java library.
-- `setaccio-lab` created as a minimal Spring Boot / Spring AI app.
-- `setaccio-testcontainers` created as an optional skeleton for future container-backed integration tests.
-- Spring AI version is currently `2.0.0` in `setaccio-lab`.
-- Spring AI `2.0.0` was verified available in Maven Central on 2026-06-15.
-- No git commits were made during the initial scaffold work.
+- `setaccio-core` is a plain Java BLAKE3 utility library.
+- `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.0`.
+- The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses local Ollama through Spring AI, hashes inputs through `setaccio-core`, returns structured rows, and writes JSON under `build/lab-results/`.
+- The default Ollama model is `gemma4:e2b`.
+- `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
 
 ## Versioning Policy
 
@@ -183,21 +212,20 @@ Avoid copying prematurely:
 
 ## Near-Term Implementation Plan
 
-1. Keep `setaccio-core` Spring-free and buildable.
-2. Keep `setaccio-lab` as the Spring/Spring AI host.
-3. Wire the existing local-only vision benchmark endpoint through the first real benchmark service:
-   - Accept uploaded images.
-   - Accept one or more model names.
-   - Use local Ollama through Spring AI.
-   - Use per-request model selection.
-   - Hash inputs through `setaccio-core`.
-   - Return structured benchmark rows.
-   - Persist raw result JSON under `build/lab-results/`.
-4. Add public sample prompts and ignored sample image folders.
-5. Add detailed local Ollama setup docs before requiring Ollama for any live workflow.
-6. Add Spring AI evaluation and Testcontainers planning docs before wiring evaluator or container-backed integration tests.
-7. Keep container-backed work in `setaccio-testcontainers`.
-8. Add tests before expanding into additional model types, providers, tools, or MCP.
+Completed:
+
+- Keep `setaccio-core` Spring-free and buildable.
+- Keep `setaccio-lab` as the Spring/Spring AI host.
+- Wire the first local-only vision benchmark service with uploaded images, per-request model names, Ollama calls, core hashing, structured rows, and JSON output under `build/lab-results/`.
+- Document local Ollama setup and provider environment variables.
+- Add tests for the current core and vision benchmark behavior.
+
+Pending:
+
+- Add public sample prompts and ignored sample image folders.
+- Add or refine Spring AI evaluation and Testcontainers planning docs before wiring evaluator or container-backed integration tests.
+- Keep container-backed work isolated in `setaccio-testcontainers`.
+- Add tests before expanding into additional model types, providers, tools, or MCP.
 
 ## Test Direction
 
@@ -290,6 +318,9 @@ MCP phase:
 ## Build Commands
 
 ```bash
+./gradlew :setaccio-core:test
+./gradlew :setaccio-lab:test
+./gradlew :setaccio-testcontainers:test
 ./gradlew :setaccio-core:build
 ./gradlew :setaccio-lab:build
 ./gradlew :setaccio-testcontainers:build
@@ -307,7 +338,7 @@ The lab app uses port `8082`.
 
 ## Git Workflow
 
-Do not commit unless explicitly asked.
+Do not stage, commit, or push unless explicitly asked. Leave changes unstaged by default, then report the modified files, tests run, and what would be committed if requested.
 
 Before committing in a future session:
 
