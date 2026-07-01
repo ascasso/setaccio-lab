@@ -31,9 +31,9 @@ subprojects {
 
     dependencies {
         // Source: https://mvnrepository.com/artifact/org.assertj/assertj-core
-        testImplementation("org.assertj:assertj-core:${assertjVersion}")
-        testImplementation("org.junit.jupiter:junit-jupiter:${junitVersion}")
-        testRuntimeOnly("org.junit.platform:junit-platform-launcher:${junitVersion}")
+        testImplementation("org.assertj:assertj-core:${rootProject.ext.assertjVersion}")
+        testImplementation("org.junit.jupiter:junit-jupiter:${rootProject.ext.junitVersion}")
+        testRuntimeOnly("org.junit.platform:junit-platform-launcher:${rootProject.ext.junitVersion}")
     }
 
     configurations.configureEach {
