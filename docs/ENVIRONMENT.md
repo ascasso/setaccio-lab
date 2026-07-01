@@ -4,9 +4,9 @@ This project should keep default builds local-safe. Unit tests and smoke tests m
 
 Live provider checks are opt-in and should use environment variables or ignored local config only. Do not commit `.env`, credentials, generated audio/image outputs, or provider response payloads outside ignored build directories.
 
-## Current Local Variables
+## Local and Planned Variables
 
-These variables are supported by the current `setaccio-lab` application config or are used by the documented local workflow.
+These variables are supported by the current `setaccio-lab` application config, used by the documented local workflow, or reserved for the planned provider sections below.
 
 | Variable | Required for default build | Used for | Notes |
 | --- | --- | --- | --- |
@@ -29,9 +29,9 @@ The current Spring AI Anthropic mapping is:
 | Spring AI property | Repo environment mapping |
 | --- | --- |
 | `spring.ai.anthropic.api-key` | `${ANTHROPIC_API_KEY:}` |
-| `spring.ai.anthropic.base-url` | Planned: `${ANTHROPIC_BASE_URL:}` when a base URL override is needed. |
-| `spring.ai.anthropic.chat.options.model` | Planned: `${ANTHROPIC_MODEL:}` for explicit live Anthropic chat runs. |
-| `spring.ai.anthropic.chat.options.max-tokens` | Planned: `${ANTHROPIC_MAX_TOKENS:}` for explicit live Anthropic chat runs. |
+| `spring.ai.anthropic.base-url` | `${ANTHROPIC_BASE_URL:}` |
+| `spring.ai.anthropic.chat.options.model` | `${ANTHROPIC_MODEL:claude-haiku-4-5}` |
+| `spring.ai.anthropic.chat.options.max-tokens` | `${ANTHROPIC_MAX_TOKENS:4096}` |
 | `spring.ai.anthropic.chat.options.temperature` | Planned: explicit test option, not a default requirement. |
 
 Spring AI also supports Anthropic runtime options through `AnthropicChatOptions` and per-request `Prompt` options. Future tests should cover default options versus request-specific overrides.
@@ -125,7 +125,7 @@ Use provider-specific credentials only for explicit live tests. Exact requiremen
 
 | Provider | Expected variables | Notes |
 | --- | --- | --- |
-| Anthropic | `ANTHROPIC_API_KEY`, optional `ANTHROPIC_BASE_URL`, `ANTHROPIC_MODEL`, `ANTHROPIC_MAX_TOKENS` | Existing config maps the API key into `spring.ai.anthropic.api-key`. Other variables are planned for explicit live Anthropic runs. |
+| Anthropic | `ANTHROPIC_API_KEY`, optional `ANTHROPIC_BASE_URL`, `ANTHROPIC_MODEL`, `ANTHROPIC_MAX_TOKENS` | Existing config maps these into Spring AI Anthropic API key, base URL, model, and max-token properties. |
 | OpenAI | `OPENAI_API_KEY` | Planned config should map this into `spring.ai.openai.api-key`. |
 | Microsoft Azure OpenAI | `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT` | Some setups may also require deployment/model names and API version. |
 | Amazon Bedrock | `AWS_REGION` plus standard AWS credentials such as `AWS_PROFILE` or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Prefer standard AWS credential resolution where practical. |

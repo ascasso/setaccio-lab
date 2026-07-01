@@ -2,6 +2,8 @@ plugins {
 	id 'java-library'
 }
 
+def libs = extensions.getByName('libs')
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(25)
@@ -9,12 +11,13 @@ java {
 }
 
 dependencies {
-    // https://mvnrepository.com/artifact/commons-codec/commons-codec
-	api 'commons-codec:commons-codec:1.22.0'
+    api libs.commons.codec
 	// Source: https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
 	api 'org.bouncycastle:bcprov-jdk18on:1.84'
-	implementation 'org.slf4j:slf4j-api:2.0.18'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation libs.slf4j.api
+	testImplementation libs.assertj
+	testImplementation libs.junit.jupiter
+	testRuntimeOnly libs.junit.platform.launcher
 }
 
 tasks.named('test') {

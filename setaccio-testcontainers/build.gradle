@@ -5,20 +5,25 @@ plugins {
 
 description = 'Optional Testcontainers-backed integration harness for Setaccio Lab'
 
+def libs = extensions.getByName('libs')
+
 dependencies {
     implementation project(':setaccio-lab')
 
-    testImplementation 'org.springframework.ai:spring-ai-spring-boot-testcontainers'
+    testImplementation libs.spring.ai.spring.boot.testcontainers
+    testImplementation libs.assertj
+    testImplementation libs.junit.jupiter
+    testRuntimeOnly libs.junit.platform.launcher
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.boot:spring-boot-dependencies:${rootProject.ext.springBootVersion}"
-        mavenBom "org.springframework.ai:spring-ai-bom:${rootProject.ext.springAiVersion}"
+        mavenBom libs.spring.boot.dependencies.get().toString()
+        mavenBom libs.spring.ai.bom.get().toString()
     }
     dependencies {
-        dependency 'commons-codec:commons-codec:1.22.0'
-        dependency 'org.slf4j:slf4j-api:2.0.18'
+        dependency libs.commons.codec.get().toString()
+        dependency libs.slf4j.api.get().toString()
     }
 }
 

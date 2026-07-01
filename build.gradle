@@ -7,17 +7,6 @@ plugins {
 allprojects {
     group = 'com.setaccio'
     version = '0.1.0-alpha.2'
-
-    repositories {
-        mavenCentral()
-    }
-}
-
-ext {
-    assertjVersion = '3.27.7'
-    junitVersion = '6.0.3'
-    springBootVersion = '4.1.0'
-    springAiVersion = '2.0.0'
 }
 
 subprojects {
@@ -26,26 +15,6 @@ subprojects {
     java {
         toolchain {
             languageVersion = JavaLanguageVersion.of(25)
-        }
-    }
-
-    dependencies {
-        // Source: https://mvnrepository.com/artifact/org.assertj/assertj-core
-        testImplementation("org.assertj:assertj-core:${rootProject.ext.assertjVersion}")
-        testImplementation("org.junit.jupiter:junit-jupiter:${rootProject.ext.junitVersion}")
-        testRuntimeOnly("org.junit.platform:junit-platform-launcher:${rootProject.ext.junitVersion}")
-    }
-
-    configurations.configureEach {
-        resolutionStrategy.eachDependency { details ->
-            if (details.requested.group == 'commons-codec' && details.requested.name == 'commons-codec') {
-                details.useVersion '1.22.0'
-                details.because 'Keep commons-codec aligned on 1.22.0 across all modules'
-            }
-            if (details.requested.group == 'org.slf4j' && details.requested.name == 'slf4j-api') {
-                details.useVersion '2.0.18'
-                details.because 'Keep slf4j-api aligned on 2.0.18 across all modules'
-            }
         }
     }
 }
