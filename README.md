@@ -71,6 +71,14 @@ For local image comparison work, set `SETACCIO_LAB_INPUT_DIR` to your working im
 ./gradlew :setaccio-core:build :setaccio-lab:build :setaccio-testcontainers:build
 ```
 
+## Dependency Versions
+
+Gradle dependency and plugin versions are centralized in [`gradle/libs.versions.toml`](gradle/libs.versions.toml).
+
+- Update dependency versions there instead of in `build.gradle` files.
+- Version catalog aliases are used from the module build scripts for shared libraries and Spring BOMs.
+- This replaces the old root `ext` version block and keeps version changes in one place.
+
 ## Run the lab locally
 
 ```bash

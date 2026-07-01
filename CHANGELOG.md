@@ -17,6 +17,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Centralized Gradle dependency and plugin versions in `gradle/libs.versions.toml` and updated the module build scripts to use the version catalog.
 - Upgraded Spring Boot to `4.1.0` across the Gradle build.
 - Forced `commons-codec` to `1.22.0` and `slf4j-api` to `2.0.18` across all subprojects.
 - Upgraded the Gradle wrapper from `9.6.0` to `9.6.1`.
