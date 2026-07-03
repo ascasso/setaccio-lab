@@ -6,28 +6,30 @@ plugins {
 
 description = 'Setaccio Lab'
 
+def libs = extensions.getByName('libs')
+
 dependencies {
     implementation project(':setaccio-core')
 
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
-    implementation 'org.springframework.ai:spring-ai-starter-model-anthropic'
-    implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
-    implementation 'org.springframework.boot:spring-boot-starter-cache'
-    implementation 'com.github.ben-manes.caffeine:caffeine'
-    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+    implementation libs.spring.boot.starter.actuator
+    implementation libs.spring.boot.starter.webmvc
+    implementation libs.spring.ai.starter.model.anthropic
+    implementation libs.spring.ai.starter.model.ollama
+    implementation libs.spring.boot.starter.cache
+    implementation libs.caffeine
+    implementation libs.jackson.datatype.jsr310
 
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation libs.spring.boot.starter.test
+    testRuntimeOnly libs.junit.platform.launcher
 }
 
 dependencyManagement {
     imports {
-        mavenBom "org.springframework.ai:spring-ai-bom:${rootProject.ext.springAiVersion}"
+        mavenBom libs.spring.ai.bom.get().toString()
     }
     dependencies {
-        dependency 'commons-codec:commons-codec:1.22.0'
-        dependency 'org.slf4j:slf4j-api:2.0.18'
+        dependency libs.commons.codec.get().toString()
+        dependency libs.slf4j.api.get().toString()
     }
 }
 

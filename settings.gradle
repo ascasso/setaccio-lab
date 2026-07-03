@@ -1,5 +1,11 @@
 rootProject.name = 'setaccio-lab'
 
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+}
+
 include 'setaccio-core'
 include 'setaccio-lab'
 include 'setaccio-testcontainers'
