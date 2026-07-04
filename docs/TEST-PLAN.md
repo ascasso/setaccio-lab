@@ -35,6 +35,16 @@
 - Keep deterministic fixture-based assertions for default tests. AI-judged evaluator tests must be opt-in unless backed by mocks or recorded fixtures.
 - If custom evaluator prompts are added, keep prompt templates public-safe and test the required placeholders.
 
+## Tool Calling and Tool Search
+
+- Keep Spring AI Tool Search Tool support disabled for default tests and normal local runs.
+- Add a dedicated tool-calling benchmark surface before enabling tool search in executable workflows.
+- Compare standard `ToolCallingAdvisor` behavior with `ToolSearchToolCallingAdvisor` behavior using the same prompts, models, and deterministic public-safe tool fixtures.
+- Start with local deterministic tools such as arithmetic, date/time fixtures, small catalog lookups, and policy lookup fixtures. Do not call live network services from default tests.
+- Cover `regex` and `lucene` indexes first; keep `vector` search opt-in until a public-safe `VectorStore` fixture is added.
+- Verify result rows capture selected advisor mode, requested tools, executed tools, tool errors, model/provider, prompt, output, latency, and any token-usage metadata exposed by Spring AI.
+- Keep live model runs behind explicit live-test switches and use mocks or stubs for default tests.
+
 ## Testcontainers
 
 - Keep Docker/Testcontainers dependencies isolated in `setaccio-testcontainers`; `setaccio-lab` must not require them.
@@ -53,5 +63,5 @@
 - Add model-type tests for chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Add detailed local Ollama setup docs before adding required Ollama live-test workflows.
 - Add a dedicated `setaccio-testcontainers` integration-test task before adding Docker-backed tests.
-- Add tool-calling tests only after the selected Spring AI tool-calling API is stable for this project.
+- Implement the dedicated tool-calling benchmark and Spring AI Tool Search Tool comparison path before adding MCP tests.
 - Add MCP tests after direct Spring AI tool-calling tests are reliable.

@@ -6,7 +6,7 @@ springAi = "2.0.0"
 commonsCodec = "1.22.0"
 slf4j = "2.0.18"
 caffeine = "3.2.0"
-jacksonDatatypeJsr310 = "2.20.1"
+bouncycastle = "1.84"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }
@@ -18,10 +18,12 @@ spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-
 spring-boot-starter-webmvc = { module = "org.springframework.boot:spring-boot-starter-webmvc" }
 spring-ai-starter-model-anthropic = { module = "org.springframework.ai:spring-ai-starter-model-anthropic" }
 spring-ai-starter-model-ollama = { module = "org.springframework.ai:spring-ai-starter-model-ollama" }
+spring-ai-starter-tool-search-advisor = { module = "org.springframework.ai:spring-ai-starter-tool-search-advisor", version.ref = "springAi" }
 spring-boot-starter-cache = { module = "org.springframework.boot:spring-boot-starter-cache" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 spring-ai-spring-boot-testcontainers = { module = "org.springframework.ai:spring-ai-spring-boot-testcontainers" }
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
-jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jacksonDatatypeJsr310" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310" }
 commons-codec = { module = "commons-codec:commons-codec", version.ref = "commonsCodec" }
+bouncycastle-bcprov-jdk18on = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }

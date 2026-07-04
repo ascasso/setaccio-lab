@@ -12,16 +12,39 @@ java {
 
 dependencies {
     api libs.commons.codec
-	// Source: https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
-	api 'org.bouncycastle:bcprov-jdk18on:1.84'
+	api libs.bouncycastle.bcprov.jdk18on
 	implementation libs.slf4j.api
 	testImplementation libs.assertj
 	testImplementation libs.junit.jupiter
 	testRuntimeOnly libs.junit.platform.launcher
 }
 
+tasks.register('assertSpringFreeRuntimeClasspath') {
+	group = 'verification'
+	description = 'Fails if setaccio-core runtimeClasspath contains Spring Framework, Spring Boot, or Spring AI artifacts.'
+
+	doLast {
+		def forbiddenGroups = ['org.springframework', 'org.springframework.boot', 'org.springframework.ai'] as Set
+		def forbiddenArtifacts = configurations.runtimeClasspath.incoming.resolutionResult.allComponents.findAll { component ->
+			def id = component.id
+			id instanceof org.gradle.api.artifacts.component.ModuleComponentIdentifier && forbiddenGroups.contains(id.group)
+		}.collect { component ->
+			def id = component.id
+			"${id.group}:${id.module}:${id.version}"
+		}.sort()
+
+		if (!forbiddenArtifacts.empty) {
+			throw new GradleException("setaccio-core runtimeClasspath must stay Spring-free, but found: ${forbiddenArtifacts.join(', ')}")
+		}
+	}
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.named('check') {
+	dependsOn tasks.named('assertSpringFreeRuntimeClasspath')
 }
 
 tasks.named('jar') {

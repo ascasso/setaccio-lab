@@ -15,6 +15,7 @@ dependencies {
     implementation libs.spring.boot.starter.webmvc
     implementation libs.spring.ai.starter.model.anthropic
     implementation libs.spring.ai.starter.model.ollama
+    implementation libs.spring.ai.starter.tool.search.advisor
     implementation libs.spring.boot.starter.cache
     implementation libs.caffeine
     implementation libs.jackson.datatype.jsr310
