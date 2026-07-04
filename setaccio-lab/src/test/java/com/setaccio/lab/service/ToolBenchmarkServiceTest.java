@@ -14,6 +14,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.chat.metadata.ChatResponseMetadata;
+import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -80,18 +82,24 @@ class ToolBenchmarkServiceTest {
         when(ollamaChatModel.call(any(Prompt.class))).thenAnswer(invocation -> {
             Prompt prompt = invocation.getArgument(0);
             if (calls.getAndIncrement() == 0) {
-                return new ChatResponse(List.of(new Generation(AssistantMessage.builder()
-                        .content("")
-                        .toolCalls(List.of(new AssistantMessage.ToolCall(
-                                "call-1",
-                                "function",
-                                ArithmeticBenchmarkTools.ADD_TOOL_NAME,
-                                "{\"left\":2,\"right\":3}")))
-                        .build())));
+                assertThat(((OllamaChatOptions) prompt.getOptions()).getModel()).isEqualTo("model-a");
+                assertThat(((OllamaChatOptions) prompt.getOptions()).getToolCallbacks())
+                        .extracting(callback -> callback.getToolDefinition().name())
+                        .containsExactly(ArithmeticBenchmarkTools.ADD_TOOL_NAME);
+                return chatResponse(AssistantMessage.builder()
+                                .content("")
+                                .toolCalls(List.of(new AssistantMessage.ToolCall(
+                                        "call-1",
+                                        "function",
+                                        ArithmeticBenchmarkTools.ADD_TOOL_NAME,
+                                        "{\"left\":2,\"right\":3}")))
+                                .build(),
+                        10,
+                        2);
             }
             assertThat(prompt.getInstructions())
                     .anySatisfy(message -> assertThat(message).isInstanceOf(ToolResponseMessage.class));
-            return new ChatResponse(List.of(new Generation(new AssistantMessage("The result is 5."))));
+            return chatResponse(new AssistantMessage("The result is 5."), 20, 5);
         });
 
         ToolBenchmarkService service = newService(outputDir, ollamaChatModel);
@@ -115,6 +123,8 @@ class ToolBenchmarkServiceTest {
                 assertThat(response.name()).isEqualTo(ArithmeticBenchmarkTools.ADD_TOOL_NAME);
                 assertThat(response.responseData()).contains("\"result\":5");
             });
+            assertThat(row.tokensIn()).isEqualTo(30);
+            assertThat(row.tokensOut()).isEqualTo(7);
             assertThat(row.outputText()).isEqualTo("The result is 5.");
         });
     }
@@ -154,6 +164,15 @@ class ToolBenchmarkServiceTest {
                 config.arithmeticBenchmarkTools(),
                 config.fixtureTimeTools("2026-01-15T12:00:00Z"),
                 config.fixtureCatalogTools()
+        );
+    }
+
+    private ChatResponse chatResponse(AssistantMessage assistantMessage, Integer promptTokens, Integer completionTokens) {
+        return new ChatResponse(
+                List.of(new Generation(assistantMessage)),
+                ChatResponseMetadata.builder()
+                        .usage(new DefaultUsage(promptTokens, completionTokens))
+                        .build()
         );
     }
 

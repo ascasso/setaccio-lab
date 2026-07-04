@@ -20,10 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.ollama.OllamaChatModel;
-import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.ToolCallbackProvider;
 import org.springframework.beans.factory.ObjectProvider;
@@ -158,15 +157,9 @@ public class ToolBenchmarkService {
             String text = response == null || response.getResult() == null
                     ? null
                     : response.getResult().getOutput().getText();
-            Integer tokensIn = response == null || response.getMetadata() == null || response.getMetadata().getUsage() == null
-                    ? null
-                    : response.getMetadata().getUsage().getPromptTokens();
-            Integer tokensOut = response == null || response.getMetadata() == null || response.getMetadata().getUsage() == null
-                    ? null
-                    : response.getMetadata().getUsage().getCompletionTokens();
             return ToolBenchmarkRow.ok(PROVIDER, model, prompt, advisorMode, selectedTools,
                     advisor.selectedToolCalls(), advisor.executedToolResponses(), elapsedMillis(started),
-                    tokensIn, tokensOut, text);
+                    advisor.promptTokens(), advisor.completionTokens(), text);
         } catch (Exception e) {
             logger.warn("Tool benchmark failed for model={} prompt={}: {}", model, prompt.id(), e.getMessage());
             return failed(model, prompt, advisorMode, selectedTools, advisor, started, e.getMessage());
@@ -175,15 +168,12 @@ public class ToolBenchmarkService {
 
     ChatResponse invoke(OllamaChatModel ollamaChatModel, String model, ToolBenchmarkPrompt prompt,
                         List<ToolCallback> selectedCallbacks, RecordingToolCallingAdvisor advisor) {
-        OllamaChatOptions options = OllamaChatOptions.builder()
-                .model(model)
-                .toolCallbacks(selectedCallbacks)
-                .build();
-        Prompt requestPrompt = new Prompt(prompt.text(), options);
         return ChatClient.builder(ollamaChatModel)
                 .defaultAdvisors(advisor)
                 .build()
-                .prompt(requestPrompt)
+                .prompt(prompt.text())
+                .options(ChatOptions.builder().model(model))
+                .tools(selectedCallbacks)
                 .call()
                 .chatResponse();
     }

@@ -13,8 +13,8 @@ import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.model.tool.ToolExecutionEligibilityChecker;
 import org.springframework.ai.model.tool.ToolExecutionResult;
 
 final class RecordingToolCallingAdvisor extends ToolCallingAdvisor {
@@ -22,6 +22,10 @@ final class RecordingToolCallingAdvisor extends ToolCallingAdvisor {
     private final List<ToolCallObservation> selectedToolCalls = new ArrayList<>();
     private final List<ToolExecutionObservation> executedToolResponses = new ArrayList<>();
     private final Set<String> recordedToolResponseKeys = new HashSet<>();
+    private int promptTokens;
+    private int completionTokens;
+    private boolean sawPromptTokens;
+    private boolean sawCompletionTokens;
 
     RecordingToolCallingAdvisor(ToolCallingManager toolCallingManager) {
         super(toolCallingManager, DEFAULT_TOOL_EXECUTION_ELIGIBILITY_CHECKER, DEFAULT_ORDER, true);
@@ -32,6 +36,7 @@ final class RecordingToolCallingAdvisor extends ToolCallingAdvisor {
         if (chatClientResponse.chatResponse() == null) {
             return chatClientResponse;
         }
+        accumulateUsage(chatClientResponse.chatResponse().getMetadata().getUsage());
         chatClientResponse.chatResponse().getResults().stream()
                 .map(generation -> generation.getOutput().getToolCalls())
                 .flatMap(List::stream)
@@ -66,8 +71,30 @@ final class RecordingToolCallingAdvisor extends ToolCallingAdvisor {
         return List.copyOf(executedToolResponses);
     }
 
+    Integer promptTokens() {
+        return sawPromptTokens ? promptTokens : null;
+    }
+
+    Integer completionTokens() {
+        return sawCompletionTokens ? completionTokens : null;
+    }
+
     private ToolCallObservation toObservation(AssistantMessage.ToolCall toolCall) {
         return new ToolCallObservation(toolCall.id(), toolCall.type(), toolCall.name(), toolCall.arguments());
+    }
+
+    private void accumulateUsage(Usage usage) {
+        if (usage == null) {
+            return;
+        }
+        if (usage.getPromptTokens() != null) {
+            promptTokens += usage.getPromptTokens();
+            sawPromptTokens = true;
+        }
+        if (usage.getCompletionTokens() != null) {
+            completionTokens += usage.getCompletionTokens();
+            sawCompletionTokens = true;
+        }
     }
 
     private boolean notAlreadyRecorded(ToolExecutionObservation observation) {
