@@ -14,6 +14,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Added environment variable documentation for `SETACCIO_LAB_INPUT_DIR` and `SETACCIO_LAB_OUTPUT_DIR` to support local image comparison workflows.
 - Added disabled-by-default Spring AI Tool Search Advisor dependency and planning docs for future tool-calling benchmarks.
 - Added a Gradle verification guard that fails if `setaccio-core` runtime dependencies include Spring Framework, Spring Boot, or Spring AI artifacts.
+- Added deterministic Spring AI tool fixtures for arithmetic, fixed time, and small public-safe catalog lookups to seed future tool-calling benchmarks.
 - Initial public repository skeleton with `setaccio-core` as a plain Java library and `setaccio-lab` as a Spring Boot / Spring AI application.
 - Added `setaccio-testcontainers` as an optional skeleton module for future Docker/Testcontainers-backed integration tests.
 
