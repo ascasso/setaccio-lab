@@ -4,6 +4,11 @@ spring:
   ai:
     model:
       chat: ollama
+    chat:
+      client:
+        tool-search-advisor:
+          enabled: ${SETACCIO_LAB_TOOL_SEARCH_ENABLED:false}
+          tool-index-type: ${SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE:regex}
     anthropic:
       api-key: ${ANTHROPIC_API_KEY:}
       base-url: ${ANTHROPIC_BASE_URL:}

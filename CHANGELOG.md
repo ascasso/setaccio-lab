@@ -12,6 +12,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Wired the local vision benchmark endpoint through a public Spring AI/Ollama service that hashes inputs with `setaccio-core`, returns one row per file/model pair, and writes raw JSON results under `build/lab-results/`.
 - Added public-safe lab server support for upload temp-file handling, MIME detection, Caffeine-backed result caches, and benchmark output configuration.
 - Added environment variable documentation for `SETACCIO_LAB_INPUT_DIR` and `SETACCIO_LAB_OUTPUT_DIR` to support local image comparison workflows.
+- Added disabled-by-default Spring AI Tool Search Advisor dependency and planning docs for future tool-calling benchmarks.
 - Initial public repository skeleton with `setaccio-core` as a plain Java library and `setaccio-lab` as a Spring Boot / Spring AI application.
 - Added `setaccio-testcontainers` as an optional skeleton module for future Docker/Testcontainers-backed integration tests.
 
