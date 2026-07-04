@@ -5,6 +5,7 @@ import com.setaccio.lab.model.BenchmarkResult;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,10 +27,14 @@ public class LabResultWriter {
     }
 
     public Path write(BenchmarkResult result) {
+        return write(result.suite(), result.startedAt(), result);
+    }
+
+    public Path write(String suite, Instant startedAt, Object result) {
         try {
             Files.createDirectories(resultsDir);
-            String timestamp = FILE_TIMESTAMP.format(result.startedAt());
-            Path output = resultsDir.resolve(timestamp + "-" + sanitize(result.suite()) + ".json");
+            String timestamp = FILE_TIMESTAMP.format(startedAt);
+            Path output = resultsDir.resolve(timestamp + "-" + sanitize(suite) + ".json");
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(output.toFile(), result);
             return output;
         } catch (IOException e) {

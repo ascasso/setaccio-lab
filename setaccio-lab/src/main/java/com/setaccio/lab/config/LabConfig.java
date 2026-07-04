@@ -19,10 +19,15 @@ public class LabConfig {
         return Executors.newFixedThreadPool(Math.max(2, Runtime.getRuntime().availableProcessors() / 2));
     }
 
+    @Bean("toolBenchmarkExecutor")
+    public ExecutorService toolBenchmarkExecutor() {
+        return Executors.newFixedThreadPool(Math.max(2, Runtime.getRuntime().availableProcessors() / 2));
+    }
+
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "file-metadata", "vision-benchmark-results", "image-analysis-results"
+                "file-metadata", "vision-benchmark-results", "tool-benchmark-results", "image-analysis-results"
         );
         cacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(10_000)
