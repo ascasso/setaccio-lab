@@ -107,6 +107,42 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
+## Local Tool-Calling Benchmark
+
+The standard Spring AI tool-calling benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.
+
+Start the app explicitly:
+
+```bash
+./gradlew :setaccio-lab:bootRun --args='--spring.profiles.active=local'
+```
+
+Run the local tool benchmark against one or more already-pulled Ollama models:
+
+```bash
+curl -sS http://localhost:8082/api/lab/tools \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "models": "gemma4:e2b",
+    "advisorMode": "standard",
+    "useDefaultPrompts": true
+  }'
+```
+
+The endpoint writes `*-tool-calling.json` result files under `SETACCIO_LAB_OUTPUT_DIR`, which defaults to `build/lab-results/`.
+
+Optional request fields:
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `models` | Yes | Comma-separated Ollama model names. Models must be pulled manually before the request. |
+| `advisorMode` | No | Defaults to `standard`. `tool_search` is recognized but rejected until the comparison slice is implemented. |
+| `useDefaultPrompts` | No | Defaults to `true`. Set to `false` only when supplying explicit `prompts`. |
+| `prompts` | No | List of `{ "id": "...", "text": "..." }` prompt objects. Required when `useDefaultPrompts` is `false`. |
+| `requestedTools` | No | List of deterministic tool names to expose. Defaults to all arithmetic, fixed-time, and catalog fixture tools. |
+
+No new environment variables are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
+
 ## Tool Search Advisor
 
 Spring AI's Tool Search Tool support is available on the `setaccio-lab` classpath through `spring-ai-starter-tool-search-advisor`, but it is disabled by default. Keep it off for normal local runs, default tests, and the current vision benchmark path.
@@ -118,7 +154,7 @@ The current Spring AI Tool Search Advisor mapping is:
 | `spring.ai.chat.client.tool-search-advisor.enabled` | `${SETACCIO_LAB_TOOL_SEARCH_ENABLED:false}` |
 | `spring.ai.chat.client.tool-search-advisor.tool-index-type` | `${SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE:regex}` |
 
-Future tool-calling benchmarks should enable this only for explicit comparison runs and should compare it against standard `ToolCallingAdvisor` behavior. The current deterministic tool fixtures cover arithmetic, fixed time, and small catalog lookup behavior. Default tests should continue to call those tools directly or through Spring AI `ToolCallback` metadata without live model calls.
+Future tool-calling benchmarks should enable this only for explicit comparison runs and should compare it against the implemented standard `ToolCallingAdvisor` benchmark behavior. The current deterministic tool fixtures cover arithmetic, fixed time, and small catalog lookup behavior. Default tests should continue to call those tools directly or through Spring AI `ToolCallback` metadata without live model calls.
 
 Supported Spring AI index types are:
 
