@@ -28,6 +28,9 @@ replay_pid*
 build/
 **/build/
 
+# Generated local artifacts
+outputs/
+
 # macOS
 .DS_Store
 .idea/
