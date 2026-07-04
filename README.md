@@ -13,17 +13,33 @@ A local-first Spring Boot lab for comparing how AI models analyze real files, st
 
 This repository is Apache-2.0 licensed and intentionally public-safe. Private Setaccio application code, deployment details, product workflows, and closed-source modules do not belong here.
 
-## Current focus
+## Current capabilities
 
-The first lab track is local vision benchmarking:
+### Local Vision Benchmark
 
-- accept uploaded image files,
-- run one or more local Ollama models through Spring AI with per-request model selection,
-- hash inputs with `setaccio-core`,
-- return structured result rows,
-- write raw benchmark results under ignored build directories.
+`POST /api/lab/vision` runs under the `local` profile. It:
 
-The local vision endpoint is a guarded Spring Boot endpoint at `POST /api/lab/vision`. It accepts multipart `files` and a comma-separated `models` parameter, returns one result row per file/model pair, and writes raw JSON results under `build/lab-results/` by default. Live model runs remain opt-in so normal builds and CI do not call Ollama or pull models unexpectedly.
+- accepts uploaded images through multipart `files`,
+- runs each image against one or more local Ollama models through Spring AI,
+- hashes inputs with the BLAKE3 utilities in `setaccio-core`,
+- returns structured rows with model, input hash, latency, output, and error details,
+- writes raw JSON results to `build/lab-results/` by default, configurable with `SETACCIO_LAB_OUTPUT_DIR`.
+
+### Local Tool-Calling Benchmark
+
+`POST /api/lab/tools` runs under the `local` profile. It:
+
+- runs deterministic, public-safe tool prompts across explicit Ollama models,
+- uses the standard Spring AI `ToolCallingAdvisor` path, with Tool Search Advisor comparison scaffolded for a later slice,
+- exercises fixed fixtures for arithmetic, deterministic time, and catalog lookup,
+- captures selected tool calls, executed tool responses, cumulative token usage, latency, and final output,
+- writes structured `*-tool-calling.json` results to the same output directory.
+
+Both benchmarks are local-first and offline-safe by default:
+
+- default builds and tests require no credentials or running Ollama instance,
+- live model runs require the `local` profile or explicit configuration,
+- generated benchmark outputs stay under ignored `build/` directories.
 
 ## Evaluation scope
 
