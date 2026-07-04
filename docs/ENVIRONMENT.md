@@ -23,6 +23,7 @@ These variables are supported by the current `setaccio-lab` application config, 
 | `OLLAMA_MODEL` | No | Ollama chat/vision model | Defaults to `gemma4:e2b`. |
 | `SETACCIO_LAB_INPUT_DIR` | No | Local image workspace | Optional local directory for comparison images, such as `/Users/username/Pictures/lab`. If unset, there is no default input directory and the app continues to use uploaded files and other explicit inputs. |
 | `SETACCIO_LAB_OUTPUT_DIR` | No | Benchmark result output | Defaults to `build/lab-results/`; keep outputs under ignored build directories. |
+| `SETACCIO_LAB_TOOL_FIXTURE_INSTANT` | No | Deterministic tool fixtures | Defaults to `2026-01-15T12:00:00Z`. Used by the fixed-time benchmark tools so default tests never depend on the machine clock. |
 | `SETACCIO_LAB_TOOL_SEARCH_ENABLED` | No | Spring AI Tool Search Tool | Defaults to `false`. Reserved for explicit tool-calling benchmark runs. |
 | `SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE` | No | Spring AI Tool Search Tool | Defaults to `regex`. Future benchmark runs may compare `regex`, `lucene`, and `vector` indexes. |
 
@@ -117,7 +118,7 @@ The current Spring AI Tool Search Advisor mapping is:
 | `spring.ai.chat.client.tool-search-advisor.enabled` | `${SETACCIO_LAB_TOOL_SEARCH_ENABLED:false}` |
 | `spring.ai.chat.client.tool-search-advisor.tool-index-type` | `${SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE:regex}` |
 
-Future tool-calling benchmarks should enable this only for explicit comparison runs and should compare it against standard `ToolCallingAdvisor` behavior. Start with deterministic public-safe tools and mock or stub Spring AI model calls in default tests.
+Future tool-calling benchmarks should enable this only for explicit comparison runs and should compare it against standard `ToolCallingAdvisor` behavior. The current deterministic tool fixtures cover arithmetic, fixed time, and small catalog lookup behavior. Default tests should continue to call those tools directly or through Spring AI `ToolCallback` metadata without live model calls.
 
 Supported Spring AI index types are:
 

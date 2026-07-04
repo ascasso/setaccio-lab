@@ -40,7 +40,8 @@
 - Keep Spring AI Tool Search Tool support disabled for default tests and normal local runs.
 - Add a dedicated tool-calling benchmark surface before enabling tool search in executable workflows.
 - Compare standard `ToolCallingAdvisor` behavior with `ToolSearchToolCallingAdvisor` behavior using the same prompts, models, and deterministic public-safe tool fixtures.
-- Start with local deterministic tools such as arithmetic, date/time fixtures, small catalog lookups, and policy lookup fixtures. Do not call live network services from default tests.
+- Maintain local deterministic tools for arithmetic, fixed date/time, and small public-safe catalog lookups. Do not call live network services from default tests.
+- Verify Spring AI `ToolCallback` metadata for the deterministic fixtures so future advisor comparisons can use stable tool names and input schemas.
 - Cover `regex` and `lucene` indexes first; keep `vector` search opt-in until a public-safe `VectorStore` fixture is added.
 - Verify result rows capture selected advisor mode, requested tools, executed tools, tool errors, model/provider, prompt, output, latency, and any token-usage metadata exposed by Spring AI.
 - Keep live model runs behind explicit live-test switches and use mocks or stubs for default tests.
