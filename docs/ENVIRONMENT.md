@@ -4,9 +4,9 @@ This project should keep default builds local-safe. Unit tests and smoke tests m
 
 Live provider checks are opt-in and should use environment variables or ignored local config only. Do not commit `.env`, credentials, generated audio/image outputs, or provider response payloads outside ignored build directories.
 
-## Current Local Variables
+## Local and Planned Variables
 
-These variables are supported by the current `setaccio-lab` application config or are used by the documented local workflow.
+These variables are supported by the current `setaccio-lab` application config, used by the documented local workflow, or reserved for the planned provider sections below.
 
 | Variable | Required for default build | Used for | Notes |
 | --- | --- | --- | --- |
@@ -23,15 +23,18 @@ These variables are supported by the current `setaccio-lab` application config o
 | `OLLAMA_MODEL` | No | Ollama chat/vision model | Defaults to `gemma4:e2b`. |
 | `SETACCIO_LAB_INPUT_DIR` | No | Local image workspace | Optional local directory for comparison images, such as `/Users/username/Pictures/lab`. If unset, there is no default input directory and the app continues to use uploaded files and other explicit inputs. |
 | `SETACCIO_LAB_OUTPUT_DIR` | No | Benchmark result output | Defaults to `build/lab-results/`; keep outputs under ignored build directories. |
+| `SETACCIO_LAB_TOOL_FIXTURE_INSTANT` | No | Deterministic tool fixtures | Defaults to `2026-01-15T12:00:00Z`. Used by the fixed-time benchmark tools so default tests never depend on the machine clock. |
+| `SETACCIO_LAB_TOOL_SEARCH_ENABLED` | No | Spring AI Tool Search Tool | Defaults to `false`. Reserved for explicit tool-calling benchmark runs. |
+| `SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE` | No | Spring AI Tool Search Tool | Defaults to `regex`. Future benchmark runs may compare `regex`, `lucene`, and `vector` indexes. |
 
 The current Spring AI Anthropic mapping is:
 
 | Spring AI property | Repo environment mapping |
 | --- | --- |
 | `spring.ai.anthropic.api-key` | `${ANTHROPIC_API_KEY:}` |
-| `spring.ai.anthropic.base-url` | Planned: `${ANTHROPIC_BASE_URL:}` when a base URL override is needed. |
-| `spring.ai.anthropic.chat.options.model` | Planned: `${ANTHROPIC_MODEL:}` for explicit live Anthropic chat runs. |
-| `spring.ai.anthropic.chat.options.max-tokens` | Planned: `${ANTHROPIC_MAX_TOKENS:}` for explicit live Anthropic chat runs. |
+| `spring.ai.anthropic.base-url` | `${ANTHROPIC_BASE_URL:}` |
+| `spring.ai.anthropic.chat.options.model` | `${ANTHROPIC_MODEL:claude-haiku-4-5}` |
+| `spring.ai.anthropic.chat.options.max-tokens` | `${ANTHROPIC_MAX_TOKENS:4096}` |
 | `spring.ai.anthropic.chat.options.temperature` | Planned: explicit test option, not a default requirement. |
 
 Spring AI also supports Anthropic runtime options through `AnthropicChatOptions` and per-request `Prompt` options. Future tests should cover default options versus request-specific overrides.
@@ -104,6 +107,27 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
+## Tool Search Advisor
+
+Spring AI's Tool Search Tool support is available on the `setaccio-lab` classpath through `spring-ai-starter-tool-search-advisor`, but it is disabled by default. Keep it off for normal local runs, default tests, and the current vision benchmark path.
+
+The current Spring AI Tool Search Advisor mapping is:
+
+| Spring AI property | Repo environment mapping |
+| --- | --- |
+| `spring.ai.chat.client.tool-search-advisor.enabled` | `${SETACCIO_LAB_TOOL_SEARCH_ENABLED:false}` |
+| `spring.ai.chat.client.tool-search-advisor.tool-index-type` | `${SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE:regex}` |
+
+Future tool-calling benchmarks should enable this only for explicit comparison runs and should compare it against standard `ToolCallingAdvisor` behavior. The current deterministic tool fixtures cover arithmetic, fixed time, and small catalog lookup behavior. Default tests should continue to call those tools directly or through Spring AI `ToolCallback` metadata without live model calls.
+
+Supported Spring AI index types are:
+
+| Index type | Intended use |
+| --- | --- |
+| `regex` | Default no-extra-store option for simple tool-name and description matching. |
+| `lucene` | Keyword-oriented comparison runs. The starter includes Lucene support. |
+| `vector` | Semantic tool discovery. Requires an explicit `VectorStore` bean and should remain a later opt-in benchmark path. |
+
 ## Planned Live-Test Switches
 
 Before any provider-backed test is added, introduce explicit switches so CI and normal local builds stay offline.
@@ -125,7 +149,7 @@ Use provider-specific credentials only for explicit live tests. Exact requiremen
 
 | Provider | Expected variables | Notes |
 | --- | --- | --- |
-| Anthropic | `ANTHROPIC_API_KEY`, optional `ANTHROPIC_BASE_URL`, `ANTHROPIC_MODEL`, `ANTHROPIC_MAX_TOKENS` | Existing config maps the API key into `spring.ai.anthropic.api-key`. Other variables are planned for explicit live Anthropic runs. |
+| Anthropic | `ANTHROPIC_API_KEY`, optional `ANTHROPIC_BASE_URL`, `ANTHROPIC_MODEL`, `ANTHROPIC_MAX_TOKENS` | Existing config maps these into Spring AI Anthropic API key, base URL, model, and max-token properties. |
 | OpenAI | `OPENAI_API_KEY` | Planned config should map this into `spring.ai.openai.api-key`. |
 | Microsoft Azure OpenAI | `AZURE_OPENAI_API_KEY`, `AZURE_OPENAI_ENDPOINT` | Some setups may also require deployment/model names and API version. |
 | Amazon Bedrock | `AWS_REGION` plus standard AWS credentials such as `AWS_PROFILE` or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` | Prefer standard AWS credential resolution where practical. |
