@@ -38,13 +38,15 @@
 ## Tool Calling and Tool Search
 
 - Keep Spring AI Tool Search Tool support disabled for default tests and normal local runs.
-- Add a dedicated tool-calling benchmark surface before enabling tool search in executable workflows.
-- Compare standard `ToolCallingAdvisor` behavior with `ToolSearchToolCallingAdvisor` behavior using the same prompts, models, and deterministic public-safe tool fixtures.
+- Maintain the dedicated local-only tool-calling benchmark surface at `POST /api/lab/tools`.
+- Use mocked `OllamaChatModel` service tests for automated coverage; do not add live Ollama integration tests to the default Gradle lifecycle.
+- Verify the standard `ToolCallingAdvisor` path with deterministic public-safe tool fixtures before enabling Tool Search comparison in executable workflows.
+- Compare standard `ToolCallingAdvisor` behavior with `ToolSearchToolCallingAdvisor` behavior in a later slice using the same prompts, models, and deterministic public-safe tool fixtures.
 - Maintain local deterministic tools for arithmetic, fixed date/time, and small public-safe catalog lookups. Do not call live network services from default tests.
 - Verify Spring AI `ToolCallback` metadata for the deterministic fixtures so future advisor comparisons can use stable tool names and input schemas.
 - Cover `regex` and `lucene` indexes first; keep `vector` search opt-in until a public-safe `VectorStore` fixture is added.
 - Verify result rows capture selected advisor mode, requested tools, executed tools, tool errors, model/provider, prompt, output, latency, and any token-usage metadata exposed by Spring AI.
-- Keep live model runs behind explicit live-test switches and use mocks or stubs for default tests.
+- Keep live model runs behind the `local` profile and explicit API calls, with any future automated live checks behind explicit live-test switches.
 
 ## Testcontainers
 
@@ -64,5 +66,5 @@
 - Add model-type tests for chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Add detailed local Ollama setup docs before adding required Ollama live-test workflows.
 - Add a dedicated `setaccio-testcontainers` integration-test task before adding Docker-backed tests.
-- Implement the dedicated tool-calling benchmark and Spring AI Tool Search Tool comparison path before adding MCP tests.
+- Implement the Spring AI Tool Search Tool comparison path before adding MCP tests.
 - Add MCP tests after direct Spring AI tool-calling tests are reliable.
