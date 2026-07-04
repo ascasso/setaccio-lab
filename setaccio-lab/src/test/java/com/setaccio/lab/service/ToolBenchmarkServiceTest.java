@@ -60,6 +60,8 @@ class ToolBenchmarkServiceTest {
         assertThat(result.suite()).isEqualTo("tool-calling");
         assertThat(result.provider()).isEqualTo("ollama");
         assertThat(result.ollamaBaseUrl()).isEqualTo("http://localhost:11434");
+        assertThat(result.availableTools()).contains(ArithmeticBenchmarkTools.ADD_TOOL_NAME);
+        assertThat(result.requestedTools()).isEqualTo(result.availableTools());
         assertThat(result.runs()).hasSize(2);
         assertThat(result.runs()).allSatisfy(row -> {
             assertThat(row.provider()).isEqualTo("ollama");

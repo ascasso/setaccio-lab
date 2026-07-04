@@ -161,7 +161,7 @@ public class ToolBenchmarkService {
                     advisor.selectedToolCalls(), advisor.executedToolResponses(), elapsedMillis(started),
                     advisor.promptTokens(), advisor.completionTokens(), text);
         } catch (Exception e) {
-            logger.warn("Tool benchmark failed for model={} prompt={}: {}", model, prompt.id(), e.getMessage());
+            logger.warn("Tool benchmark failed for model={} promptId={}: {}", model, prompt.id(), e.getMessage());
             return failed(model, prompt, advisorMode, selectedTools, advisor, started, e.getMessage());
         }
     }
