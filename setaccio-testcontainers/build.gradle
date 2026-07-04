@@ -8,7 +8,7 @@ description = 'Optional Testcontainers-backed integration harness for Setaccio L
 def libs = extensions.getByName('libs')
 
 dependencies {
-    implementation project(':setaccio-lab')
+    testImplementation project(':setaccio-lab')
 
     testImplementation libs.spring.ai.spring.boot.testcontainers
     testImplementation libs.assertj
