@@ -107,6 +107,43 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
+## Local Chat Benchmark
+
+The simple chat benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.
+
+Start the app explicitly:
+
+```bash
+./gradlew :setaccio-lab:bootRun --args='--spring.profiles.active=local'
+```
+
+Run the local chat benchmark against one or more already-pulled Ollama models:
+
+```bash
+curl -sS http://localhost:8082/api/lab/chat \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "models": "gemma4:e2b",
+    "advisorMode": "standard",
+    "useDefaultPrompts": true
+  }'
+```
+
+The chat benchmark invokes the model names supplied in the request `models` field. In the example above, Ollama receives requests for `gemma4:e2b`. To compare multiple local models, pass a comma-separated list such as `"gemma4:e2b,llama3.2:3b"`. The app-level `OLLAMA_MODEL` setting defaults to `gemma4:e2b`, but this endpoint still requires an explicit `models` value so benchmark runs cannot silently switch models.
+
+The endpoint writes `*-chat.json` result files under `SETACCIO_LAB_OUTPUT_DIR`, which defaults to `build/lab-results/`.
+
+Optional request fields:
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `models` | Yes | Comma-separated Ollama model names used for this run. Models must be pulled manually before the request. |
+| `advisorMode` | No | Defaults to `standard`. `tool_search` is recognized but rejected until a comparison slice is implemented. |
+| `useDefaultPrompts` | No | Defaults to `true`. Set to `false` only when supplying explicit `prompts`. |
+| `prompts` | No | List of `{ "id": "...", "text": "..." }` prompt objects. Required when `useDefaultPrompts` is `false`. |
+
+No new environment variables are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE` and `SETACCIO_LAB_OUTPUT_DIR`.
+
 ## Local Tool-Calling Benchmark
 
 The standard Spring AI tool-calling benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.
