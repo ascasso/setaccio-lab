@@ -25,6 +25,16 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 - returns structured rows with model, input hash, latency, output, and error details,
 - writes raw JSON results to `build/lab-results/` by default, configurable with `SETACCIO_LAB_OUTPUT_DIR`.
 
+### Local Chat Benchmark
+
+`POST /api/lab/chat` runs under the `local` profile. It:
+
+- runs text prompts across explicit Ollama model lists without tools,
+- uses the comma-separated `models` request field for each run; the documented `gemma4:e2b` example is only the repo default Ollama model and can be replaced with any already-pulled local model,
+- accepts default public-safe prompts or caller-provided `{ "id": "...", "text": "..." }` prompts,
+- captures provider/model metadata, prompt id/text, token usage when Spring AI exposes it, latency, output, and errors,
+- writes structured `*-chat.json` results to the same output directory.
+
 ### Local Tool-Calling Benchmark
 
 `POST /api/lab/tools` runs under the `local` profile. It:
@@ -35,7 +45,7 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 - captures selected tool calls, executed tool responses, cumulative token usage, latency, and final output,
 - writes structured `*-tool-calling.json` results to the same output directory.
 
-Both benchmarks are local-first and offline-safe by default:
+All benchmarks are local-first and offline-safe by default:
 
 - default builds and tests require no credentials or running Ollama instance,
 - live model runs require the `local` profile or explicit configuration,

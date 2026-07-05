@@ -17,6 +17,15 @@
 - Verify result rows include model, input name, input hash, latency, output text, and failure details.
 - Verify JSON result writing under ignored `build/lab-results/` output.
 
+## Chat Benchmark Phase
+
+- Maintain the dedicated local-only chat benchmark surface at `POST /api/lab/chat`.
+- Keep service-level tests backed by a mocked `OllamaChatModel`; do not add live Ollama calls to default tests.
+- Verify per-request model selection is passed through Spring AI chat options for every prompt/model pair.
+- Verify default prompts and caller-provided prompt lists through controller tests.
+- Verify result rows capture provider/model, prompt id/text, advisor mode, latency, output, failure details, and token-usage metadata when Spring AI exposes it.
+- Verify JSON result writing under ignored `build/lab-results/` output as `*-chat.json`.
+
 ## Optional Integration Tests
 
 - Keep live Ollama and remote-provider tests opt-in behind a dedicated Gradle property or profile.

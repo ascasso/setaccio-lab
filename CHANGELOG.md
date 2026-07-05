@@ -15,6 +15,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Added disabled-by-default Spring AI Tool Search Advisor dependency and planning docs for future tool-calling benchmarks.
 - Added a Gradle verification guard that fails if `setaccio-core` runtime dependencies include Spring Framework, Spring Boot, or Spring AI artifacts.
 - Added deterministic Spring AI tool fixtures for arithmetic, fixed time, and small public-safe catalog lookups to seed future tool-calling benchmarks.
+- Added an opt-in local Ollama chat benchmark endpoint that runs text prompts across explicit model lists without tools, records provider/model/prompt metadata and token usage where available, and writes `*-chat.json` results under `build/lab-results/`.
 - Added an opt-in local Ollama tool-calling benchmark endpoint that runs deterministic tool prompts across explicit model lists, records standard Spring AI tool-calling observations where exposed, and writes JSON results under `build/lab-results/`.
 - Improved tool-calling benchmark token accounting to accumulate Spring AI usage metadata across advisor loop iterations, and moved tool injection to the portable `ChatClient` request API.
 - Initial public repository skeleton with `setaccio-core` as a plain Java library and `setaccio-lab` as a Spring Boot / Spring AI application.
