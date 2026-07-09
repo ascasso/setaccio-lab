@@ -32,7 +32,7 @@ public class LabConfig {
     @Bean
     public CacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager(
-                "file-metadata", "vision-benchmark-results", "tool-benchmark-results",
+                "file-metadata", "vision-benchmark-results", "tool-benchmark-results", "tool-benchmark-comparison-results",
                 "chat-benchmark-results", "image-analysis-results"
         );
         cacheManager.setCaffeine(Caffeine.newBuilder()

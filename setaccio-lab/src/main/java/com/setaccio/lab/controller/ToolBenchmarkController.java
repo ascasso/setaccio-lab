@@ -1,6 +1,7 @@
 package com.setaccio.lab.controller;
 
 import com.setaccio.lab.model.AdvisorMode;
+import com.setaccio.lab.model.ToolBenchmarkComparisonResult;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
 import com.setaccio.lab.model.ToolBenchmarkRequest;
 import com.setaccio.lab.model.ToolBenchmarkResult;
@@ -32,15 +33,15 @@ public class ToolBenchmarkController {
     }
 
     @PostMapping
-    public ResponseEntity<ToolBenchmarkResult> run(@RequestBody ToolBenchmarkRequest request) {
+    public ResponseEntity<?> run(@RequestBody ToolBenchmarkRequest request) {
         if (request == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
         }
         List<String> models = parseCsv(request.models(), "models");
         AdvisorMode advisorMode = request.resolvedAdvisorMode();
-        if (advisorMode != AdvisorMode.STANDARD) {
+        if (advisorMode == AdvisorMode.TOOL_SEARCH) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Only advisorMode=standard is implemented in this slice");
+                    "Use advisorMode=compare for Tool Search comparison runs");
         }
         List<ToolBenchmarkPrompt> prompts = resolvePrompts(request);
         List<String> requestedTools = parseOptionalCsv(request.requestedTools());
@@ -48,6 +49,10 @@ public class ToolBenchmarkController {
         try {
             logger.info("Tool benchmark requested: {} models, {} prompts, advisorMode={}",
                     models.size(), prompts.size(), advisorMode.jsonValue());
+            if (advisorMode == AdvisorMode.COMPARE) {
+                ToolBenchmarkComparisonResult result = toolBenchmarkService.compare(models, prompts, requestedTools);
+                return ResponseEntity.ok(result);
+            }
             return ResponseEntity.ok(toolBenchmarkService.run(models, advisorMode, prompts, requestedTools));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
