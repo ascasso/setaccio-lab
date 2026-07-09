@@ -36,8 +36,10 @@
 
 ## Evaluation Testing
 
-- Use Spring AI's `Evaluator` contract as the model for AI-judged evaluation rows where practical.
-- Track each evaluation input as user text, optional context/data, model response, evaluator provider/model, pass/fail result, and raw evaluator explanation.
+- Maintain the dedicated local-only `POST /api/lab/evaluations` fixture benchmark with no live model or provider call.
+- Use Spring AI's `Evaluator` contract for deterministic fixture rows before adding AI-judged evaluation.
+- Track each evaluation input as user text, optional context/data, model response, evaluator provider/model, pass/fail result, score, raw evaluator explanation, and evaluator metadata.
+- Keep public fixtures deterministic and make the evaluator implementation and required terms explicit in result metadata.
 - Use `RelevancyEvaluator` for RAG/context relevance checks when retrieval benchmarks are added.
 - Use `FactCheckingEvaluator` for claim-versus-context checks when factuality benchmarks are added.
 - Keep evaluator models configurable and separate from the model being tested; the judge model may be different from the generation model.

@@ -180,6 +180,32 @@ Optional request fields:
 
 No new environment variables are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
 
+## Local Fixture Evaluation Benchmark
+
+The deterministic evaluation path is available only through the `local` profile, but it does not call Ollama, Anthropic, or another provider. It evaluates a small public fixture set through Spring AI's `Evaluator` contract and writes `*-evaluation.json` under `SETACCIO_LAB_OUTPUT_DIR`.
+
+Start the app explicitly:
+
+```bash
+./gradlew :setaccio-lab:bootRun --args='--spring.profiles.active=local'
+```
+
+Run all default fixtures:
+
+```bash
+curl -sS http://localhost:8082/api/lab/evaluations
+```
+
+Select particular fixture cases:
+
+```bash
+curl -sS http://localhost:8082/api/lab/evaluations \
+  -H 'Content-Type: application/json' \
+  -d '{"fixtureIds": ["result-output-supported", "offline-test-partial"]}'
+```
+
+Each row records the user text, fixture context, response text, evaluator provider/model, deterministic pass/fail verdict, score, feedback, and evaluator metadata. The current evaluator is `fixture` / `term-containment-v1`; it verifies documented required terms and is not an AI quality judgment. No new environment variables or credentials are required.
+
 ## Tool Search Advisor
 
 Spring AI's Tool Search Tool support is available on the `setaccio-lab` classpath through `spring-ai-starter-tool-search-advisor`, but it is disabled by default. Keep it off for normal local runs, default tests, and the current vision benchmark path.

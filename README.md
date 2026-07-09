@@ -45,6 +45,17 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 - captures selected tool calls, executed tool responses, cumulative token usage, latency, and final output,
 - writes structured `*-tool-calling.json` results to the same output directory.
 
+### Local Fixture Evaluation Benchmark
+
+`POST /api/lab/evaluations` runs under the `local` profile. It:
+
+- evaluates public deterministic fixtures through Spring AI's `Evaluator` contract without calling a model or provider,
+- records user input, optional context, response text, evaluator provider/model, pass/fail, score, feedback, and evaluator metadata,
+- accepts an optional `fixtureIds` list to select the public fixture cases,
+- writes structured `*-evaluation.json` results to the same output directory.
+
+This establishes the result-row contract for later AI-judged evaluation. It does not claim to measure model quality; live evaluator models remain a separate opt-in phase.
+
 All benchmarks are local-first and offline-safe by default:
 
 - default builds and tests require no credentials or running Ollama instance,
