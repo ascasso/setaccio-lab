@@ -40,10 +40,23 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 `POST /api/lab/tools` runs under the `local` profile. It:
 
 - runs deterministic, public-safe tool prompts across explicit Ollama models,
-- uses the standard Spring AI `ToolCallingAdvisor` path, with Tool Search Advisor comparison scaffolded for a later slice,
+- runs either the standard Spring AI `ToolCallingAdvisor` path or an explicit standard-versus-Tool Search comparison,
 - exercises fixed fixtures for arithmetic, deterministic time, and catalog lookup,
 - captures selected tool calls, executed tool responses, cumulative token usage, latency, and final output,
-- writes structured `*-tool-calling.json` results to the same output directory.
+- writes structured `*-tool-calling.json` results for standard runs and `*-tool-calling-comparison.json` results for comparison runs.
+
+Tool Search comparison is disabled by default and currently supports the in-memory regex index only. A comparison request runs the same models, prompts, and selected tools through both advisor modes and returns both result sets without assigning an aggregate winner.
+
+### Local Fixture Evaluation Benchmark
+
+`POST /api/lab/evaluations` runs under the `local` profile. It:
+
+- evaluates public deterministic fixtures through Spring AI's `Evaluator` contract without calling a model or provider,
+- records user input, optional context, response text, evaluator provider/model, pass/fail, score, feedback, and evaluator metadata,
+- accepts an optional `fixtureIds` list to select the public fixture cases,
+- writes structured `*-evaluation.json` results to the same output directory.
+
+This establishes the result-row contract for later AI-judged evaluation. It does not claim to measure model quality; live evaluator models remain a separate opt-in phase.
 
 All benchmarks are local-first and offline-safe by default:
 

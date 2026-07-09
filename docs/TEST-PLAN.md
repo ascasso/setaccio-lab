@@ -36,8 +36,10 @@
 
 ## Evaluation Testing
 
-- Use Spring AI's `Evaluator` contract as the model for AI-judged evaluation rows where practical.
-- Track each evaluation input as user text, optional context/data, model response, evaluator provider/model, pass/fail result, and raw evaluator explanation.
+- Maintain the dedicated local-only `POST /api/lab/evaluations` fixture benchmark with no live model or provider call.
+- Use Spring AI's `Evaluator` contract for deterministic fixture rows before adding AI-judged evaluation.
+- Track each evaluation input as user text, optional context/data, model response, evaluator provider/model, pass/fail result, score, raw evaluator explanation, and evaluator metadata.
+- Keep public fixtures deterministic and make the evaluator implementation and required terms explicit in result metadata.
 - Use `RelevancyEvaluator` for RAG/context relevance checks when retrieval benchmarks are added.
 - Use `FactCheckingEvaluator` for claim-versus-context checks when factuality benchmarks are added.
 - Keep evaluator models configurable and separate from the model being tested; the judge model may be different from the generation model.
@@ -49,11 +51,11 @@
 - Keep Spring AI Tool Search Tool support disabled for default tests and normal local runs.
 - Maintain the dedicated local-only tool-calling benchmark surface at `POST /api/lab/tools`.
 - Use mocked `OllamaChatModel` service tests for automated coverage; do not add live Ollama integration tests to the default Gradle lifecycle.
-- Verify the standard `ToolCallingAdvisor` path with deterministic public-safe tool fixtures before enabling Tool Search comparison in executable workflows.
-- Compare standard `ToolCallingAdvisor` behavior with `ToolSearchToolCallingAdvisor` behavior in a later slice using the same prompts, models, and deterministic public-safe tool fixtures.
+- Maintain mocked comparison coverage that runs standard `ToolCallingAdvisor` and `ToolSearchToolCallingAdvisor` sequentially with the same models, prompts, and deterministic public-safe tool fixtures.
+- Keep Tool Search comparison behind `SETACCIO_LAB_TOOL_SEARCH_ENABLED=true`, and reject standalone `tool_search` requests so each Tool Search result includes its standard baseline.
 - Maintain local deterministic tools for arithmetic, fixed date/time, and small public-safe catalog lookups. Do not call live network services from default tests.
 - Verify Spring AI `ToolCallback` metadata for the deterministic fixtures so future advisor comparisons can use stable tool names and input schemas.
-- Cover `regex` and `lucene` indexes first; keep `vector` search opt-in until a public-safe `VectorStore` fixture is added.
+- Keep `regex` as the only executable index until separate, deterministic comparison coverage is added for another index. Keep `lucene` and `vector` rejected; `vector` also needs a public-safe `VectorStore` fixture.
 - Verify result rows capture selected advisor mode, requested tools, executed tools, tool errors, model/provider, prompt, output, latency, and any token-usage metadata exposed by Spring AI.
 - Keep live model runs behind the `local` profile and explicit API calls, with any future automated live checks behind explicit live-test switches.
 
@@ -75,5 +77,4 @@
 - Add model-type tests for chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Add detailed local Ollama setup docs before adding required Ollama live-test workflows.
 - Add a dedicated `setaccio-testcontainers` integration-test task before adding Docker-backed tests.
-- Implement the Spring AI Tool Search Tool comparison path before adding MCP tests.
 - Add MCP tests after direct Spring AI tool-calling tests are reliable.

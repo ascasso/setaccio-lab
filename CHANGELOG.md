@@ -17,6 +17,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Added deterministic Spring AI tool fixtures for arithmetic, fixed time, and small public-safe catalog lookups to seed future tool-calling benchmarks.
 - Added an opt-in local Ollama chat benchmark endpoint that runs text prompts across explicit model lists without tools, records provider/model/prompt metadata and token usage where available, and writes `*-chat.json` results under `build/lab-results/`.
 - Added an opt-in local Ollama tool-calling benchmark endpoint that runs deterministic tool prompts across explicit model lists, records standard Spring AI tool-calling observations where exposed, and writes JSON results under `build/lab-results/`.
+- Added an opt-in Tool Search comparison mode for the local tool benchmark. It runs standard and regex Tool Search advisor modes sequentially against the same request fixtures and persists one structured comparison result without an aggregate winner score.
+- Added a local-only deterministic fixture evaluation endpoint using Spring AI's `Evaluator` contract, with structured pass/fail rows and JSON output under `build/lab-results/` but no live provider call.
 - Improved tool-calling benchmark token accounting to accumulate Spring AI usage metadata across advisor loop iterations, and moved tool injection to the portable `ChatClient` request API.
 - Initial public repository skeleton with `setaccio-core` as a plain Java library and `setaccio-lab` as a Spring Boot / Spring AI application.
 - Added `setaccio-testcontainers` as an optional skeleton module for future Docker/Testcontainers-backed integration tests.

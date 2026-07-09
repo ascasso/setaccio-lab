@@ -1,6 +1,7 @@
 package com.setaccio.lab.controller;
 
 import com.setaccio.lab.model.AdvisorMode;
+import com.setaccio.lab.model.ToolBenchmarkComparisonResult;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
 import com.setaccio.lab.model.ToolBenchmarkResult;
 import com.setaccio.lab.model.ToolBenchmarkRow;
@@ -113,6 +114,31 @@ class ToolBenchmarkControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void runDelegatesComparisonRequestsToTheComparisonService() throws Exception {
+        when(toolBenchmarkService.compare(anyList(), anyList(), anyList()))
+                .thenAnswer(invocation -> {
+                    assertThat(invocation.<List<String>>getArgument(0)).containsExactly("model-a");
+                    assertThat(invocation.<List<ToolBenchmarkPrompt>>getArgument(1)).isNotEmpty();
+                    assertThat(invocation.<List<String>>getArgument(2)).isEmpty();
+                    return comparisonResult();
+                });
+
+        mockMvc.perform(post("/api/lab/tools")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "models": "model-a",
+                                  "advisorMode": "compare"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.suite").value("tool-calling-comparison"))
+                .andExpect(jsonPath("$.toolSearchIndexType").value("regex"))
+                .andExpect(jsonPath("$.standard.advisorMode").value("standard"))
+                .andExpect(jsonPath("$.toolSearch.advisorMode").value("tool_search"));
+    }
+
     private ToolBenchmarkResult result() {
         return new ToolBenchmarkResult(
                 "tool-calling",
@@ -136,6 +162,48 @@ class ToolBenchmarkControllerTest {
                         null,
                         null,
                         "answer"))
+        );
+    }
+
+    private ToolBenchmarkComparisonResult comparisonResult() {
+        ToolBenchmarkResult standard = result();
+        ToolBenchmarkResult toolSearch = new ToolBenchmarkResult(
+                standard.suite(),
+                standard.provider(),
+                AdvisorMode.TOOL_SEARCH,
+                standard.startedAt(),
+                standard.finishedAt(),
+                standard.host(),
+                standard.ollamaBaseUrl(),
+                standard.requestedTools(),
+                standard.availableTools(),
+                standard.runs().stream()
+                        .map(row -> ToolBenchmarkRow.ok(
+                                row.provider(),
+                                row.model(),
+                                new ToolBenchmarkPrompt(row.promptId(), row.promptText()),
+                                AdvisorMode.TOOL_SEARCH,
+                                row.requestedTools(),
+                                row.selectedToolCalls(),
+                                row.executedToolResponses(),
+                                row.latencyMs(),
+                                row.tokensIn(),
+                                row.tokensOut(),
+                                row.outputText()))
+                        .toList()
+        );
+        return new ToolBenchmarkComparisonResult(
+                "tool-calling-comparison",
+                "ollama",
+                "regex",
+                standard.startedAt(),
+                standard.finishedAt(),
+                standard.host(),
+                standard.ollamaBaseUrl(),
+                standard.requestedTools(),
+                standard.availableTools(),
+                standard,
+                toolSearch
         );
     }
 }

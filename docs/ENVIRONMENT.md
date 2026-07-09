@@ -24,8 +24,8 @@ These variables are supported by the current `setaccio-lab` application config, 
 | `SETACCIO_LAB_INPUT_DIR` | No | Local image workspace | Optional local directory for comparison images, such as `/Users/username/Pictures/lab`. If unset, there is no default input directory and the app continues to use uploaded files and other explicit inputs. |
 | `SETACCIO_LAB_OUTPUT_DIR` | No | Benchmark result output | Defaults to `build/lab-results/`; keep outputs under ignored build directories. |
 | `SETACCIO_LAB_TOOL_FIXTURE_INSTANT` | No | Deterministic tool fixtures | Defaults to `2026-01-15T12:00:00Z`. Used by the fixed-time benchmark tools so default tests never depend on the machine clock. |
-| `SETACCIO_LAB_TOOL_SEARCH_ENABLED` | No | Spring AI Tool Search Tool | Defaults to `false`. Reserved for explicit tool-calling benchmark runs. |
-| `SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE` | No | Spring AI Tool Search Tool | Defaults to `regex`. Future benchmark runs may compare `regex`, `lucene`, and `vector` indexes. |
+| `SETACCIO_LAB_TOOL_SEARCH_ENABLED` | No | Spring AI Tool Search Tool | Defaults to `false`. Set to `true` only for an explicit Tool Search comparison request. |
+| `SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE` | No | Spring AI Tool Search Tool | Defaults to `regex`. `regex` is the only executable index type in the current comparison slice. |
 
 The current Spring AI Anthropic mapping is:
 
@@ -138,7 +138,7 @@ Optional request fields:
 | Field | Required | Notes |
 | --- | --- | --- |
 | `models` | Yes | Comma-separated Ollama model names used for this run. Models must be pulled manually before the request. |
-| `advisorMode` | No | Defaults to `standard`. `tool_search` is recognized but rejected until a comparison slice is implemented. |
+| `advisorMode` | No | Defaults to `standard`. The chat benchmark supports only `standard`; Tool Search comparison is available only on `/api/lab/tools`. |
 | `useDefaultPrompts` | No | Defaults to `true`. Set to `false` only when supplying explicit `prompts`. |
 | `prompts` | No | List of `{ "id": "...", "text": "..." }` prompt objects. Required when `useDefaultPrompts` is `false`. |
 
@@ -173,12 +173,47 @@ Optional request fields:
 | Field | Required | Notes |
 | --- | --- | --- |
 | `models` | Yes | Comma-separated Ollama model names. Models must be pulled manually before the request. |
-| `advisorMode` | No | Defaults to `standard`. `tool_search` is recognized but rejected until the comparison slice is implemented. |
+| `advisorMode` | No | Defaults to `standard`. Use `compare` to run standard and Tool Search modes together. `tool_search` is rejected because standalone Tool Search runs are intentionally not comparable. |
 | `useDefaultPrompts` | No | Defaults to `true`. Set to `false` only when supplying explicit `prompts`. |
 | `prompts` | No | List of `{ "id": "...", "text": "..." }` prompt objects. Required when `useDefaultPrompts` is `false`. |
 | `requestedTools` | No | List of deterministic tool names to expose. Defaults to all arithmetic, fixed-time, and catalog fixture tools. |
 
-No new environment variables are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
+For a Tool Search comparison, enable the feature explicitly before starting the local-profile app:
+
+```bash
+SETACCIO_LAB_TOOL_SEARCH_ENABLED=true \
+  ./gradlew :setaccio-lab:bootRun --args='--spring.profiles.active=local'
+```
+
+Then send the same request with `"advisorMode": "compare"`. The endpoint runs the standard advisor first and Tool Search second using the same request models, prompts, and selected deterministic tools. It writes one `*-tool-calling-comparison.json` file containing both result sets; it does not compute a winner.
+
+No new credentials are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
+
+## Local Fixture Evaluation Benchmark
+
+The deterministic evaluation path is available only through the `local` profile, but it does not call Ollama, Anthropic, or another provider. It evaluates a small public fixture set through Spring AI's `Evaluator` contract and writes `*-evaluation.json` under `SETACCIO_LAB_OUTPUT_DIR`.
+
+Start the app explicitly:
+
+```bash
+./gradlew :setaccio-lab:bootRun --args='--spring.profiles.active=local'
+```
+
+Run all default fixtures:
+
+```bash
+curl -sS http://localhost:8082/api/lab/evaluations
+```
+
+Select particular fixture cases:
+
+```bash
+curl -sS http://localhost:8082/api/lab/evaluations \
+  -H 'Content-Type: application/json' \
+  -d '{"fixtureIds": ["result-output-supported", "offline-test-partial"]}'
+```
+
+Each row records the user text, fixture context, response text, evaluator provider/model, deterministic pass/fail verdict, score, feedback, and evaluator metadata. The current evaluator is `fixture` / `term-containment-v1`; it verifies documented required terms and is not an AI quality judgment. No new environment variables or credentials are required.
 
 ## Tool Search Advisor
 
@@ -191,15 +226,15 @@ The current Spring AI Tool Search Advisor mapping is:
 | `spring.ai.chat.client.tool-search-advisor.enabled` | `${SETACCIO_LAB_TOOL_SEARCH_ENABLED:false}` |
 | `spring.ai.chat.client.tool-search-advisor.tool-index-type` | `${SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE:regex}` |
 
-Future tool-calling benchmarks should enable this only for explicit comparison runs and should compare it against the implemented standard `ToolCallingAdvisor` benchmark behavior. The current deterministic tool fixtures cover arithmetic, fixed time, and small catalog lookup behavior. Default tests should continue to call those tools directly or through Spring AI `ToolCallback` metadata without live model calls.
+Set `SETACCIO_LAB_TOOL_SEARCH_ENABLED=true` only for an explicit `advisorMode: "compare"` request. That request runs standard `ToolCallingAdvisor` and `ToolSearchToolCallingAdvisor` sequentially against the same models, prompts, and deterministic tool selection. Direct `advisorMode: "tool_search"` requests are rejected so every Tool Search result has its standard baseline. The current deterministic tool fixtures cover arithmetic, fixed time, and small catalog lookup behavior. Default tests remain mocked and offline.
 
 Supported Spring AI index types are:
 
 | Index type | Intended use |
 | --- | --- |
-| `regex` | Default no-extra-store option for simple tool-name and description matching. |
-| `lucene` | Keyword-oriented comparison runs. The starter includes Lucene support. |
-| `vector` | Semantic tool discovery. Requires an explicit `VectorStore` bean and should remain a later opt-in benchmark path. |
+| `regex` | The only executable index in this slice. It needs no extra store and matches tool names and descriptions. |
+| `lucene` | Planned keyword-oriented comparison option; rejected by the current endpoint. |
+| `vector` | Planned semantic discovery option. It requires an explicit public-safe `VectorStore` fixture and is rejected by the current endpoint. |
 
 ## Planned Live-Test Switches
 
