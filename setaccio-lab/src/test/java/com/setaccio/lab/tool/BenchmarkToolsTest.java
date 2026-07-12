@@ -13,6 +13,7 @@ import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.method.MethodToolCallbackProvider;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class BenchmarkToolsTest {
 
@@ -83,7 +84,8 @@ class BenchmarkToolsTest {
                 FixtureTimeTools.FIXED_UTC_NOW_TOOL_NAME,
                 FixtureTimeTools.FIXED_TIME_FOR_ZONE_TOOL_NAME,
                 FixtureCatalogTools.LOOKUP_ITEM_TOOL_NAME,
-                FixtureCatalogTools.LIST_ITEMS_TOOL_NAME
+                FixtureCatalogTools.LIST_ITEMS_TOOL_NAME,
+                FailureBenchmarkTools.FAIL_TOOL_NAME
         );
         assertThat(callbacks.get(ArithmeticBenchmarkTools.ADD_TOOL_NAME).getToolDefinition().inputSchema())
                 .contains("\"left\"", "\"right\"");
@@ -103,12 +105,22 @@ class BenchmarkToolsTest {
         assertThat(result).contains("\"result\":6.75");
     }
 
+    @Test
+    void failureToolUsesStablePublicMarker() {
+        FailureBenchmarkTools tools = new FailureBenchmarkTools();
+
+        assertThatThrownBy(tools::failFixture)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(FailureBenchmarkTools.FAILURE_MARKER);
+    }
+
     private Map<String, ToolCallback> callbacksByName() {
         return Arrays.stream(MethodToolCallbackProvider.builder()
                         .toolObjects(
                                 new ArithmeticBenchmarkTools(),
                                 new FixtureTimeTools(FIXED_CLOCK),
-                                new FixtureCatalogTools()
+                                new FixtureCatalogTools(),
+                                new FailureBenchmarkTools()
                         )
                         .build()
                         .getToolCallbacks())

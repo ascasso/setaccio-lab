@@ -11,6 +11,8 @@ public record ToolBenchmarkComparisonResult(
         Instant finishedAt,
         String host,
         String ollamaBaseUrl,
+        ToolBenchmarkRunSettings runSettings,
+        String executionStrategy,
         List<String> requestedTools,
         List<String> availableTools,
         ToolBenchmarkResult standard,

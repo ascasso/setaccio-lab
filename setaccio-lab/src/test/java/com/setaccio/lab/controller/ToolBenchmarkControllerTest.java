@@ -2,9 +2,11 @@ package com.setaccio.lab.controller;
 
 import com.setaccio.lab.model.AdvisorMode;
 import com.setaccio.lab.model.ToolBenchmarkComparisonResult;
+import com.setaccio.lab.model.ToolBenchmarkComparisonOrder;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
 import com.setaccio.lab.model.ToolBenchmarkResult;
 import com.setaccio.lab.model.ToolBenchmarkRow;
+import com.setaccio.lab.model.ToolBenchmarkRunSettings;
 import com.setaccio.lab.service.ToolBenchmarkService;
 import java.time.Instant;
 import java.util.List;
@@ -37,14 +39,19 @@ class ToolBenchmarkControllerTest {
 
     @Test
     void runDelegatesToServiceWithParsedModelsAndDefaultPrompts() throws Exception {
-        when(toolBenchmarkService.run(anyList(), any(AdvisorMode.class), anyList(), anyList()))
+        when(toolBenchmarkService.run(
+                anyList(), any(AdvisorMode.class), anyList(), anyList(), any(ToolBenchmarkRunSettings.class)))
                 .thenAnswer(invocation -> {
                     List<String> models = invocation.getArgument(0);
                     AdvisorMode advisorMode = invocation.getArgument(1);
                     List<ToolBenchmarkPrompt> prompts = invocation.getArgument(2);
+                    ToolBenchmarkRunSettings runSettings = invocation.getArgument(4);
                     assertThat(models).containsExactly("model-a", "model-b");
                     assertThat(advisorMode).isEqualTo(AdvisorMode.STANDARD);
                     assertThat(prompts).isNotEmpty();
+                    assertThat(runSettings.repetitions()).isEqualTo(1);
+                    assertThat(runSettings.temperature()).isZero();
+                    assertThat(runSettings.baseSeed()).isEqualTo(42);
                     return result();
                 });
 
@@ -116,11 +123,15 @@ class ToolBenchmarkControllerTest {
 
     @Test
     void runDelegatesComparisonRequestsToTheComparisonService() throws Exception {
-        when(toolBenchmarkService.compare(anyList(), anyList(), anyList()))
+        when(toolBenchmarkService.compare(
+                anyList(), anyList(), anyList(), any(ToolBenchmarkRunSettings.class)))
                 .thenAnswer(invocation -> {
                     assertThat(invocation.<List<String>>getArgument(0)).containsExactly("model-a");
                     assertThat(invocation.<List<ToolBenchmarkPrompt>>getArgument(1)).isNotEmpty();
                     assertThat(invocation.<List<String>>getArgument(2)).isEmpty();
+                    ToolBenchmarkRunSettings runSettings = invocation.getArgument(3);
+                    assertThat(runSettings.repetitions()).isEqualTo(2);
+                    assertThat(runSettings.comparisonOrder()).isEqualTo(ToolBenchmarkComparisonOrder.ALTERNATE);
                     return comparisonResult();
                 });
 
@@ -139,6 +150,68 @@ class ToolBenchmarkControllerTest {
                 .andExpect(jsonPath("$.toolSearch.advisorMode").value("tool_search"));
     }
 
+    @Test
+    void runPassesExplicitExpectationsAndComparisonSettings() throws Exception {
+        when(toolBenchmarkService.compare(
+                anyList(), anyList(), anyList(), any(ToolBenchmarkRunSettings.class)))
+                .thenAnswer(invocation -> {
+                    List<ToolBenchmarkPrompt> prompts = invocation.getArgument(1);
+                    assertThat(prompts).singleElement().satisfies(prompt -> {
+                        assertThat(prompt.id()).isEqualTo("opaque-lookup");
+                        assertThat(prompt.expectation().requiredExecutedTools())
+                                .containsExactly("lab_lookup_catalog_item");
+                        assertThat(prompt.expectation().requiredOutputTerms())
+                                .containsExactly("Policy FAQ");
+                    });
+                    ToolBenchmarkRunSettings runSettings = invocation.getArgument(3);
+                    assertThat(runSettings.repetitions()).isEqualTo(4);
+                    assertThat(runSettings.temperature()).isEqualTo(0.2);
+                    assertThat(runSettings.baseSeed()).isEqualTo(100);
+                    assertThat(runSettings.maxTokens()).isEqualTo(256);
+                    assertThat(runSettings.comparisonOrder())
+                            .isEqualTo(ToolBenchmarkComparisonOrder.TOOL_SEARCH_FIRST);
+                    return comparisonResult();
+                });
+
+        mockMvc.perform(post("/api/lab/tools")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "models": "model-a",
+                                  "advisorMode": "compare",
+                                  "useDefaultPrompts": false,
+                                  "repetitions": 4,
+                                  "temperature": 0.2,
+                                  "baseSeed": 100,
+                                  "maxTokens": 256,
+                                  "comparisonOrder": "tool_search_first",
+                                  "prompts": [{
+                                    "id": "opaque-lookup",
+                                    "text": "Look up the fixture.",
+                                    "expectation": {
+                                      "requiredExecutedTools": ["lab_lookup_catalog_item"],
+                                      "requiredOutputTerms": ["Policy FAQ"]
+                                    }
+                                  }]
+                                }
+                                """))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void runRejectsInvalidComparisonSettings() throws Exception {
+        mockMvc.perform(post("/api/lab/tools")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "models": "model-a",
+                                  "advisorMode": "compare",
+                                  "repetitions": 0
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
     private ToolBenchmarkResult result() {
         return new ToolBenchmarkResult(
                 "tool-calling",
@@ -148,6 +221,8 @@ class ToolBenchmarkControllerTest {
                 Instant.parse("2026-07-04T00:00:01Z"),
                 "test-host",
                 "http://localhost:11434",
+                ToolBenchmarkRunSettings.standardDefaults(),
+                "parallel",
                 List.of("lab_add_numbers"),
                 List.of("lab_add_numbers"),
                 List.of(ToolBenchmarkRow.ok(
@@ -175,13 +250,15 @@ class ToolBenchmarkControllerTest {
                 standard.finishedAt(),
                 standard.host(),
                 standard.ollamaBaseUrl(),
+                ToolBenchmarkRunSettings.comparisonDefaults(),
+                "paired_sequential",
                 standard.requestedTools(),
                 standard.availableTools(),
                 standard.runs().stream()
                         .map(row -> ToolBenchmarkRow.ok(
                                 row.provider(),
                                 row.model(),
-                                new ToolBenchmarkPrompt(row.promptId(), row.promptText()),
+                                new ToolBenchmarkPrompt(row.promptId(), row.promptText(), row.expectation()),
                                 AdvisorMode.TOOL_SEARCH,
                                 row.requestedTools(),
                                 row.selectedToolCalls(),
@@ -200,6 +277,8 @@ class ToolBenchmarkControllerTest {
                 standard.finishedAt(),
                 standard.host(),
                 standard.ollamaBaseUrl(),
+                ToolBenchmarkRunSettings.comparisonDefaults(),
+                "paired_sequential",
                 standard.requestedTools(),
                 standard.availableTools(),
                 standard,

@@ -175,8 +175,15 @@ Optional request fields:
 | `models` | Yes | Comma-separated Ollama model names. Models must be pulled manually before the request. |
 | `advisorMode` | No | Defaults to `standard`. Use `compare` to run standard and Tool Search modes together. `tool_search` is rejected because standalone Tool Search runs are intentionally not comparable. |
 | `useDefaultPrompts` | No | Defaults to `true`. Set to `false` only when supplying explicit `prompts`. |
-| `prompts` | No | List of `{ "id": "...", "text": "..." }` prompt objects. Required when `useDefaultPrompts` is `false`. |
-| `requestedTools` | No | List of deterministic tool names to expose. Defaults to all arithmetic, fixed-time, and catalog fixture tools. |
+| `prompts` | No | List of prompt objects. Each may include an `expectation` with required/forbidden executed tools, required output terms, and required tool-response terms. Required when `useDefaultPrompts` is `false`. |
+| `requestedTools` | No | List of deterministic tool names to expose. Defaults to all arithmetic, fixed-time, catalog, and controlled-failure fixture tools. |
+| `repetitions` | No | Defaults to `1` for standard runs and `2` for comparisons; allowed range is 1-20. Comparison repetitions are paired. |
+| `temperature` | No | Explicit Ollama temperature recorded with the result. Defaults to `0.0`; allowed range is 0.0-2.0. |
+| `baseSeed` | No | Defaults to `42`. Repetition `n` uses `baseSeed + n - 1`, and each effective seed is recorded on its row. |
+| `maxTokens` | No | Optional Ollama generation limit. When omitted, the configured model default remains in effect. |
+| `comparisonOrder` | No | `alternate` by default. Also accepts `standard_first` and `tool_search_first`. |
+
+The built-in cases declare their own expectations. If `requestedTools` omits a tool required by a selected case, the request is rejected as an invalid benchmark setup instead of recording that setup error as a model failure. Custom prompts without an `expectation` still record the run-completion and Tool Search completion checks that apply to their advisor mode.
 
 For a Tool Search comparison, enable the feature explicitly before starting the local-profile app:
 
@@ -185,7 +192,32 @@ SETACCIO_LAB_TOOL_SEARCH_ENABLED=true \
   ./gradlew :setaccio-lab:bootRun --args='--spring.profiles.active=local'
 ```
 
-Then send the same request with `"advisorMode": "compare"`. The endpoint runs the standard advisor first and Tool Search second using the same request models, prompts, and selected deterministic tools. It writes one `*-tool-calling-comparison.json` file containing both result sets; it does not compute a winner.
+Then send an explicit comparison request. The default two repetitions counterbalance advisor order: repetition one runs standard then Tool Search, while repetition two runs Tool Search then standard. Every pair is sequential so the two advisors do not compete for the local model server at the same time.
+
+```bash
+curl -sS http://localhost:8082/api/lab/tools \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "models": "gemma4:e2b",
+    "advisorMode": "compare",
+    "repetitions": 2,
+    "temperature": 0.0,
+    "baseSeed": 42,
+    "comparisonOrder": "alternate",
+    "useDefaultPrompts": false,
+    "prompts": [{
+      "id": "catalog-lookup",
+      "text": "Use the available tools to look up fixture-policy-faq and summarize it.",
+      "expectation": {
+        "requiredExecutedTools": ["lab_lookup_catalog_item"],
+        "requiredOutputTerms": ["Policy FAQ"]
+      }
+    }],
+    "requestedTools": ["lab_lookup_catalog_item", "lab_list_catalog_items"]
+  }'
+```
+
+The endpoint writes one `*-tool-calling-comparison.json` file containing both result sets. Each row retains its raw trace and also reports normalized Tool Search observations, named assertions, and `contractPassed`. This is a per-case execution contract, not an aggregate model or advisor winner score.
 
 No new credentials are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
 
@@ -226,7 +258,7 @@ The current Spring AI Tool Search Advisor mapping is:
 | `spring.ai.chat.client.tool-search-advisor.enabled` | `${SETACCIO_LAB_TOOL_SEARCH_ENABLED:false}` |
 | `spring.ai.chat.client.tool-search-advisor.tool-index-type` | `${SETACCIO_LAB_TOOL_SEARCH_INDEX_TYPE:regex}` |
 
-Set `SETACCIO_LAB_TOOL_SEARCH_ENABLED=true` only for an explicit `advisorMode: "compare"` request. That request runs standard `ToolCallingAdvisor` and `ToolSearchToolCallingAdvisor` sequentially against the same models, prompts, and deterministic tool selection. Direct `advisorMode: "tool_search"` requests are rejected so every Tool Search result has its standard baseline. The current deterministic tool fixtures cover arithmetic, fixed time, and small catalog lookup behavior. Default tests remain mocked and offline.
+Set `SETACCIO_LAB_TOOL_SEARCH_ENABLED=true` only for an explicit `advisorMode: "compare"` request. That request runs paired standard `ToolCallingAdvisor` and `ToolSearchToolCallingAdvisor` executions sequentially against the same models, prompts, deterministic settings, and tool selection. Direct `advisorMode: "tool_search"` requests are rejected so every Tool Search result has its standard baseline. The current public-safe cases cover arithmetic, fixed time, catalog lookup, multi-step use, no-match behavior, abstention, and deterministic callback failure. Default tests remain mocked and offline.
 
 Supported Spring AI index types are:
 

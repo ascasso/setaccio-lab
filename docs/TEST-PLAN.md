@@ -7,7 +7,7 @@
 - Add known BLAKE3 test vectors for empty input, strings, byte arrays, and streams.
 - Keep `setaccio-lab` context smoke tests on the `test` profile with no live Ollama or Anthropic calls.
 - Add controller validation tests for missing files, missing model names, and malformed model lists.
-- Keep Spring AI evaluation and Testcontainers APIs under review before adding harness abstractions; verify exact Spring AI 2.0 APIs before implementation.
+- Maintain the implemented deterministic Spring AI evaluator contract, and keep AI-judged evaluation and Testcontainers APIs under review before adding either live abstraction.
 
 ## Vision Benchmark Phase
 
@@ -51,12 +51,14 @@
 - Keep Spring AI Tool Search Tool support disabled for default tests and normal local runs.
 - Maintain the dedicated local-only tool-calling benchmark surface at `POST /api/lab/tools`.
 - Use mocked `OllamaChatModel` service tests for automated coverage; do not add live Ollama integration tests to the default Gradle lifecycle.
-- Maintain mocked comparison coverage that runs standard `ToolCallingAdvisor` and `ToolSearchToolCallingAdvisor` sequentially with the same models, prompts, and deterministic public-safe tool fixtures.
+- Maintain mocked comparison coverage that runs paired standard `ToolCallingAdvisor` and `ToolSearchToolCallingAdvisor` executions sequentially with the same models, prompts, selected tools, and deterministic generation settings.
 - Keep Tool Search comparison behind `SETACCIO_LAB_TOOL_SEARCH_ENABLED=true`, and reject standalone `tool_search` requests so each Tool Search result includes its standard baseline.
-- Maintain local deterministic tools for arithmetic, fixed date/time, and small public-safe catalog lookups. Do not call live network services from default tests.
+- Maintain local deterministic tools and expectation-aware cases for arithmetic, fixed date/time, catalog lookup, multi-step behavior, no-match behavior, tool abstention, and controlled callback failure. Do not call live network services from default tests.
 - Verify Spring AI `ToolCallback` metadata for the deterministic fixtures so future advisor comparisons can use stable tool names and input schemas.
 - Keep `regex` as the only executable index until separate, deterministic comparison coverage is added for another index. Keep `lucene` and `vector` rejected; `vector` also needs a public-safe `VectorStore` fixture.
-- Verify result rows capture selected advisor mode, requested tools, executed tools, tool errors, model/provider, prompt, output, latency, and any token-usage metadata exposed by Spring AI.
+- Verify result rows capture selected advisor mode, repetition, pair order, effective seed, requested tools, executed tools, tool errors, normalized Tool Search queries/discoveries, named contract assertions, model/provider, prompt, output, latency, and any token-usage metadata exposed by Spring AI.
+- Keep comparison order counterbalanced across repetitions by default, and retain a test proving the standard-first/tool-search-first alternation.
+- Verify repeated writes with the same suite and start instant produce distinct result files rather than overwriting an earlier run.
 - Keep live model runs behind the `local` profile and explicit API calls, with any future automated live checks behind explicit live-test switches.
 
 ## Testcontainers

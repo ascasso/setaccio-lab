@@ -1,6 +1,7 @@
 package com.setaccio.lab.config;
 
 import com.setaccio.lab.tool.ArithmeticBenchmarkTools;
+import com.setaccio.lab.tool.FailureBenchmarkTools;
 import com.setaccio.lab.tool.FixtureCatalogTools;
 import com.setaccio.lab.tool.FixtureTimeTools;
 import java.time.Clock;
@@ -32,12 +33,18 @@ public class BenchmarkToolConfig {
     }
 
     @Bean
+    public FailureBenchmarkTools failureBenchmarkTools() {
+        return new FailureBenchmarkTools();
+    }
+
+    @Bean
     public ToolCallbackProvider benchmarkToolCallbackProvider(
             ArithmeticBenchmarkTools arithmeticBenchmarkTools,
             FixtureTimeTools fixtureTimeTools,
-            FixtureCatalogTools fixtureCatalogTools) {
+            FixtureCatalogTools fixtureCatalogTools,
+            FailureBenchmarkTools failureBenchmarkTools) {
         return MethodToolCallbackProvider.builder()
-                .toolObjects(arithmeticBenchmarkTools, fixtureTimeTools, fixtureCatalogTools)
+                .toolObjects(arithmeticBenchmarkTools, fixtureTimeTools, fixtureCatalogTools, failureBenchmarkTools)
                 .build();
     }
 }

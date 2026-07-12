@@ -3,11 +3,13 @@ package com.setaccio.lab.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.model.BenchmarkResult;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,7 @@ import org.springframework.stereotype.Service;
 public class LabResultWriter {
 
     private static final DateTimeFormatter FILE_TIMESTAMP =
-            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC);
+            DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss.SSSSSSSSS'Z'").withZone(ZoneOffset.UTC);
 
     private final ObjectMapper objectMapper;
     private final Path resultsDir;
@@ -31,15 +33,36 @@ public class LabResultWriter {
     }
 
     public Path write(String suite, Instant startedAt, Object result) {
+        Path output = null;
         try {
             Files.createDirectories(resultsDir);
             String timestamp = FILE_TIMESTAMP.format(startedAt);
-            Path output = resultsDir.resolve(timestamp + "-" + sanitize(suite) + ".json");
+            output = createUniqueOutput(timestamp, sanitize(suite));
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(output.toFile(), result);
             return output;
         } catch (IOException e) {
+            if (output != null) {
+                try {
+                    Files.deleteIfExists(output);
+                } catch (IOException cleanupFailure) {
+                    e.addSuppressed(cleanupFailure);
+                }
+            }
             throw new IllegalStateException("Failed to write lab result JSON", e);
         }
+    }
+
+    private Path createUniqueOutput(String timestamp, String suite) throws IOException {
+        for (int attempt = 0; attempt < 100; attempt++) {
+            String runId = UUID.randomUUID().toString().substring(0, 8);
+            Path output = resultsDir.resolve(timestamp + "-" + runId + "-" + suite + ".json");
+            try {
+                return Files.createFile(output);
+            } catch (FileAlreadyExistsException ignored) {
+                // Generate another id without ever truncating the existing result.
+            }
+        }
+        throw new IOException("Unable to allocate a unique lab result filename");
     }
 
     private String sanitize(String value) {
