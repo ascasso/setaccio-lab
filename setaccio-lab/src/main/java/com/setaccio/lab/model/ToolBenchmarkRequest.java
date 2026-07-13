@@ -7,7 +7,12 @@ public record ToolBenchmarkRequest(
         AdvisorMode advisorMode,
         List<ToolBenchmarkPrompt> prompts,
         List<String> requestedTools,
-        Boolean useDefaultPrompts
+        Boolean useDefaultPrompts,
+        Integer repetitions,
+        Double temperature,
+        Integer baseSeed,
+        Integer maxTokens,
+        ToolBenchmarkComparisonOrder comparisonOrder
 ) {
     public AdvisorMode resolvedAdvisorMode() {
         return advisorMode == null ? AdvisorMode.STANDARD : advisorMode;
@@ -15,5 +20,16 @@ public record ToolBenchmarkRequest(
 
     public boolean resolvedUseDefaultPrompts() {
         return useDefaultPrompts == null || useDefaultPrompts;
+    }
+
+    public ToolBenchmarkRunSettings resolvedRunSettings(boolean comparison) {
+        return ToolBenchmarkRunSettings.resolve(
+                repetitions,
+                temperature,
+                baseSeed,
+                maxTokens,
+                comparisonOrder,
+                comparison
+        );
     }
 }

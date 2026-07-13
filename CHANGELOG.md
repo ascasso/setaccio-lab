@@ -18,6 +18,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Added an opt-in local Ollama chat benchmark endpoint that runs text prompts across explicit model lists without tools, records provider/model/prompt metadata and token usage where available, and writes `*-chat.json` results under `build/lab-results/`.
 - Added an opt-in local Ollama tool-calling benchmark endpoint that runs deterministic tool prompts across explicit model lists, records standard Spring AI tool-calling observations where exposed, and writes JSON results under `build/lab-results/`.
 - Added an opt-in Tool Search comparison mode for the local tool benchmark. It runs standard and regex Tool Search advisor modes sequentially against the same request fixtures and persists one structured comparison result without an aggregate winner score.
+- Added expectation-aware public tool benchmark cases for single-step, multi-step, no-match, abstention, and deterministic callback-failure behavior, with named assertions for required/forbidden tool execution and required output/response terms.
+- Added normalized Tool Search observations that retain each search query, completion state, and discovered tool names alongside raw calls and responses.
+- Added repeatable tool benchmark settings for repetitions, temperature, base seed, optional token limit, and comparison order, with effective seeds and pair order recorded per row.
 - Added a local-only deterministic fixture evaluation endpoint using Spring AI's `Evaluator` contract, with structured pass/fail rows and JSON output under `build/lab-results/` but no live provider call.
 - Improved tool-calling benchmark token accounting to accumulate Spring AI usage metadata across advisor loop iterations, and moved tool injection to the portable `ChatClient` request API.
 - Initial public repository skeleton with `setaccio-core` as a plain Java library and `setaccio-lab` as a Spring Boot / Spring AI application.
@@ -44,3 +47,5 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Documented Spring AI Anthropic chat configuration and future Anthropic-specific test surfaces.
 - Documented Spring AI Google GenAI credential mapping and future Google-specific test surfaces.
 - Expanded Google GenAI notes for grounding, server-side tool metadata, cached content, thought signatures, and thinking option compatibility.
+- Changed Tool Search comparison execution to paired sequential runs that alternate advisor order across repetitions by default.
+- Made benchmark result filenames collision-safe with nanosecond timestamps, unique run identifiers, and non-overwriting file creation.

@@ -41,11 +41,13 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 
 - runs deterministic, public-safe tool prompts across explicit Ollama models,
 - runs either the standard Spring AI `ToolCallingAdvisor` path or an explicit standard-versus-Tool Search comparison,
-- exercises fixed fixtures for arithmetic, deterministic time, and catalog lookup,
-- captures selected tool calls, executed tool responses, cumulative token usage, latency, and final output,
+- exercises first-class fixture cases for arithmetic, deterministic time, catalog lookup, multi-step execution, no-match behavior, tool abstention, and deterministic callback failure,
+- attaches explicit expectations for required and forbidden tools, output terms, and tool-response terms to each case,
+- captures selected tool calls, executed tool responses, normalized Tool Search queries and discovered tools, named contract assertions, cumulative token usage, latency, and final output,
+- applies and records deterministic Ollama temperature, seed, and optional token-limit settings,
 - writes structured `*-tool-calling.json` results for standard runs and `*-tool-calling-comparison.json` results for comparison runs.
 
-Tool Search comparison is disabled by default and currently supports the in-memory regex index only. A comparison request runs the same models, prompts, and selected tools through both advisor modes and returns both result sets without assigning an aggregate winner.
+Tool Search comparison is disabled by default and currently supports the in-memory regex index only. A comparison request runs paired advisor executions sequentially, alternates which advisor runs first across repetitions by default, and retains both result sets without assigning an aggregate winner. Each row reports whether its explicit case contract passed, while preserving every named assertion and raw trace needed to interpret that verdict.
 
 ### Local Fixture Evaluation Benchmark
 
@@ -63,6 +65,8 @@ All benchmarks are local-first and offline-safe by default:
 - default builds and tests require no credentials or running Ollama instance,
 - live model runs require the `local` profile or explicit configuration,
 - generated benchmark outputs stay under ignored `build/` directories.
+
+Result filenames include nanosecond timestamps and short run identifiers so repeated runs cannot overwrite one another when they start at the same instant.
 
 ## Evaluation scope
 
