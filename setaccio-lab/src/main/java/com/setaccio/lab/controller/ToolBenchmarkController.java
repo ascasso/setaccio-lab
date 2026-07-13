@@ -1,9 +1,11 @@
 package com.setaccio.lab.controller;
 
 import com.setaccio.lab.model.AdvisorMode;
+import com.setaccio.lab.model.ToolBenchmarkComparisonResult;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
 import com.setaccio.lab.model.ToolBenchmarkRequest;
 import com.setaccio.lab.model.ToolBenchmarkResult;
+import com.setaccio.lab.model.ToolBenchmarkRunSettings;
 import com.setaccio.lab.service.ToolBenchmarkService;
 import java.util.Arrays;
 import java.util.List;
@@ -32,23 +34,30 @@ public class ToolBenchmarkController {
     }
 
     @PostMapping
-    public ResponseEntity<ToolBenchmarkResult> run(@RequestBody ToolBenchmarkRequest request) {
+    public ResponseEntity<?> run(@RequestBody ToolBenchmarkRequest request) {
         if (request == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body is required");
         }
         List<String> models = parseCsv(request.models(), "models");
         AdvisorMode advisorMode = request.resolvedAdvisorMode();
-        if (advisorMode != AdvisorMode.STANDARD) {
+        if (advisorMode == AdvisorMode.TOOL_SEARCH) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Only advisorMode=standard is implemented in this slice");
+                    "Use advisorMode=compare for Tool Search comparison runs");
         }
         List<ToolBenchmarkPrompt> prompts = resolvePrompts(request);
         List<String> requestedTools = parseOptionalCsv(request.requestedTools());
 
         try {
-            logger.info("Tool benchmark requested: {} models, {} prompts, advisorMode={}",
-                    models.size(), prompts.size(), advisorMode.jsonValue());
-            return ResponseEntity.ok(toolBenchmarkService.run(models, advisorMode, prompts, requestedTools));
+            ToolBenchmarkRunSettings runSettings = request.resolvedRunSettings(advisorMode == AdvisorMode.COMPARE);
+            logger.info("Tool benchmark requested: {} models, {} prompts, {} repetitions, advisorMode={}",
+                    models.size(), prompts.size(), runSettings.repetitions(), advisorMode.jsonValue());
+            if (advisorMode == AdvisorMode.COMPARE) {
+                ToolBenchmarkComparisonResult result = toolBenchmarkService.compare(
+                        models, prompts, requestedTools, runSettings);
+                return ResponseEntity.ok(result);
+            }
+            return ResponseEntity.ok(toolBenchmarkService.run(
+                    models, advisorMode, prompts, requestedTools, runSettings));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
@@ -64,7 +73,10 @@ public class ToolBenchmarkController {
                     "Provide prompts or set useDefaultPrompts to true");
         }
         List<ToolBenchmarkPrompt> normalized = prompts.stream()
-                .map(prompt -> new ToolBenchmarkPrompt(normalizePromptId(prompt), prompt.text() == null ? "" : prompt.text().trim()))
+                .map(prompt -> new ToolBenchmarkPrompt(
+                        normalizePromptId(prompt),
+                        prompt.text() == null ? "" : prompt.text().trim(),
+                        prompt.expectation()))
                 .toList();
         if (normalized.stream().anyMatch(prompt -> prompt.text().isBlank())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Prompt text must not be blank");

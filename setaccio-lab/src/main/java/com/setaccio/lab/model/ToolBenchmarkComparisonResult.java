@@ -3,10 +3,10 @@ package com.setaccio.lab.model;
 import java.time.Instant;
 import java.util.List;
 
-public record ToolBenchmarkResult(
+public record ToolBenchmarkComparisonResult(
         String suite,
         String provider,
-        AdvisorMode advisorMode,
+        String toolSearchIndexType,
         Instant startedAt,
         Instant finishedAt,
         String host,
@@ -15,5 +15,6 @@ public record ToolBenchmarkResult(
         String executionStrategy,
         List<String> requestedTools,
         List<String> availableTools,
-        List<ToolBenchmarkRow> runs
+        ToolBenchmarkResult standard,
+        ToolBenchmarkResult toolSearch
 ) {}

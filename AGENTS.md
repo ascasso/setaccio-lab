@@ -126,7 +126,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-06-18)
+## Current State Snapshot (as of 2026-07-11)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -134,6 +134,10 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - `setaccio-core` is a plain Java BLAKE3 utility library.
 - `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.0`.
 - The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses local Ollama through Spring AI, hashes inputs through `setaccio-core`, returns structured rows, and writes JSON under `build/lab-results/`.
+- The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
+- The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
+- The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
+- Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - The default Ollama model is `gemma4:e2b`.
 - `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
 
@@ -167,10 +171,10 @@ Relevant upgrade concerns for this repo:
 - For Google GenAI chat config, follow Spring AI's `spring.ai.google.genai.api-key`, Vertex AI properties, and `spring.ai.google.genai.chat.*` properties. `GEMINI_API_KEY` is only a repo-supported alias for local Gemini Developer API setup.
 - Do not use `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` for Spring AI Google GenAI chat tests; those are OAuth client credentials, not GenAI API-key credentials.
 - Google GenAI tests should account for Gemini Developer API versus Vertex AI mode, multimodal input, response MIME type, Google Search grounding, server-side tool metadata, safety settings, cached content, thought signatures, and model-specific thinking option compatibility.
-- For evaluation tests, track Spring AI's `Evaluator`, `EvaluationRequest`, `RelevancyEvaluator`, and `FactCheckingEvaluator`, but re-check the exact Spring AI 2.0 API before implementation.
+- The deterministic evaluation benchmark already uses Spring AI's `Evaluator` and `EvaluationRequest`; re-check the exact Spring AI 2.0 APIs before adding `RelevancyEvaluator`, `FactCheckingEvaluator`, or AI-judged execution.
 - For container-backed tests, track Spring AI's `spring-ai-spring-boot-testcontainers` support and service connections, but keep Docker/Testcontainers opt-in.
 - Keep Testcontainers dependencies isolated in `setaccio-testcontainers`; do not add them to `setaccio-lab`.
-- Tool-calling tests should wait until the chosen Spring AI 2.0 tool API is confirmed.
+- Direct Spring AI 2.0 tool-calling and regex Tool Search comparison are implemented. Keep new advisor/index work bounded, expectation-aware, and offline-tested before expanding it.
 - MCP should remain a later phase, after direct Spring AI tool tests are reliable.
 
 ## Public-Safe Copy Guidance
@@ -204,8 +208,6 @@ Avoid copying prematurely:
 
 - Suite loader and YAML suite machinery.
 - Leaderboard/report endpoint.
-- Chat benchmark service.
-- Tool benchmark service.
 - Calculator/weather demo tools.
 - MCP code.
 - Any private Setaccio server utility classes.
@@ -217,13 +219,17 @@ Completed:
 - Keep `setaccio-core` Spring-free and buildable.
 - Keep `setaccio-lab` as the Spring/Spring AI host.
 - Wire the first local-only vision benchmark service with uploaded images, per-request model names, Ollama calls, core hashing, structured rows, and JSON output under `build/lab-results/`.
+- Wire local chat, tool-calling, regex Tool Search comparison, and deterministic evaluation benchmark endpoints.
+- Add deterministic public-safe tool fixtures and expectation-aware cases with normalized trace observations.
+- Make Tool Search comparisons paired and sequential, alternate advisor order across repetitions, and record deterministic generation settings.
 - Document local Ollama setup and provider environment variables.
-- Add tests for the current core and vision benchmark behavior.
+- Add offline tests for the current core, vision, chat, tool, Tool Search, and deterministic evaluator behavior.
 
 Pending:
 
 - Add public sample prompts and ignored sample image folders.
-- Add or refine Spring AI evaluation and Testcontainers planning docs before wiring evaluator or container-backed integration tests.
+- Run controlled, explicitly selected local model matrices against the expectation-aware tool case corpus before choosing another Tool Search index or provider path.
+- Add or refine AI-judged evaluation and Testcontainers planning docs before wiring either live path.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 
@@ -304,10 +310,11 @@ Evaluation/Testcontainers phase:
 
 Tool-calling phase:
 
-- Expected tool selected.
-- Arguments valid.
-- Tool result incorporated correctly.
-- Tool-call observability checked against the Spring AI 2.0 API.
+- Maintain explicit required/forbidden tool, output-term, and tool-response-term assertions for public-safe cases.
+- Preserve normalized Tool Search query/discovery observations together with raw selected calls and executed responses.
+- Keep comparison repetitions paired and sequential; record effective seeds and execution order so latency and reliability results remain interpretable.
+- Add argument-validity checks and more distractor tools only through bounded deterministic fixture slices.
+- Use controlled opt-in local model matrices to decide whether another index or provider path is justified.
 
 MCP phase:
 

@@ -9,15 +9,15 @@ import java.util.Set;
 import org.springframework.ai.chat.client.ChatClientRequest;
 import org.springframework.ai.chat.client.ChatClientResponse;
 import org.springframework.ai.chat.client.advisor.ToolCallingAdvisor;
-import org.springframework.ai.chat.client.advisor.api.CallAdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
+import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.chat.messages.AssistantMessage;
-import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
 import org.springframework.ai.chat.metadata.Usage;
-import org.springframework.ai.model.tool.ToolCallingManager;
-import org.springframework.ai.model.tool.ToolExecutionResult;
 
-final class RecordingToolCallingAdvisor extends ToolCallingAdvisor {
+final class RecordingToolCallAdvisor implements BaseAdvisor {
+
+    private static final int ORDER = ToolCallingAdvisor.DEFAULT_ORDER + 1;
 
     private final List<ToolCallObservation> selectedToolCalls = new ArrayList<>();
     private final List<ToolExecutionObservation> executedToolResponses = new ArrayList<>();
@@ -27,30 +27,9 @@ final class RecordingToolCallingAdvisor extends ToolCallingAdvisor {
     private boolean sawPromptTokens;
     private boolean sawCompletionTokens;
 
-    RecordingToolCallingAdvisor(ToolCallingManager toolCallingManager) {
-        super(toolCallingManager, DEFAULT_TOOL_EXECUTION_ELIGIBILITY_CHECKER, DEFAULT_ORDER, true);
-    }
-
     @Override
-    protected ChatClientResponse doAfterCall(ChatClientResponse chatClientResponse, CallAdvisorChain callAdvisorChain) {
-        if (chatClientResponse.chatResponse() == null) {
-            return chatClientResponse;
-        }
-        accumulateUsage(chatClientResponse.chatResponse().getMetadata().getUsage());
-        chatClientResponse.chatResponse().getResults().stream()
-                .map(generation -> generation.getOutput().getToolCalls())
-                .flatMap(List::stream)
-                .map(this::toObservation)
-                .forEach(selectedToolCalls::add);
-        return chatClientResponse;
-    }
-
-    @Override
-    protected List<Message> doGetNextInstructionsForToolCall(
-            ChatClientRequest chatClientRequest,
-            ChatClientResponse chatClientResponse,
-            ToolExecutionResult toolExecutionResult) {
-        toolExecutionResult.conversationHistory().stream()
+    public ChatClientRequest before(ChatClientRequest chatClientRequest, AdvisorChain advisorChain) {
+        chatClientRequest.prompt().getInstructions().stream()
                 .filter(ToolResponseMessage.class::isInstance)
                 .map(ToolResponseMessage.class::cast)
                 .flatMap(message -> message.getResponses().stream())
@@ -60,7 +39,34 @@ final class RecordingToolCallingAdvisor extends ToolCallingAdvisor {
                         response.responseData()))
                 .filter(this::notAlreadyRecorded)
                 .forEach(executedToolResponses::add);
-        return super.doGetNextInstructionsForToolCall(chatClientRequest, chatClientResponse, toolExecutionResult);
+        return chatClientRequest;
+    }
+
+    @Override
+    public ChatClientResponse after(ChatClientResponse chatClientResponse, AdvisorChain advisorChain) {
+        if (chatClientResponse.chatResponse() == null) {
+            return chatClientResponse;
+        }
+        Usage usage = chatClientResponse.chatResponse().getMetadata() == null
+                ? null
+                : chatClientResponse.chatResponse().getMetadata().getUsage();
+        accumulateUsage(usage);
+        chatClientResponse.chatResponse().getResults().stream()
+                .map(generation -> generation.getOutput().getToolCalls())
+                .flatMap(List::stream)
+                .map(this::toObservation)
+                .forEach(selectedToolCalls::add);
+        return chatClientResponse;
+    }
+
+    @Override
+    public String getName() {
+        return "Tool Benchmark Recording Advisor";
+    }
+
+    @Override
+    public int getOrder() {
+        return ORDER;
     }
 
     List<ToolCallObservation> selectedToolCalls() {

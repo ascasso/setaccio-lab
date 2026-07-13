@@ -3,7 +3,7 @@ package com.setaccio.lab.model;
 import java.time.Instant;
 import java.util.List;
 
-public record ToolBenchmarkResult(
+public record ChatBenchmarkResult(
         String suite,
         String provider,
         AdvisorMode advisorMode,
@@ -11,9 +11,5 @@ public record ToolBenchmarkResult(
         Instant finishedAt,
         String host,
         String ollamaBaseUrl,
-        ToolBenchmarkRunSettings runSettings,
-        String executionStrategy,
-        List<String> requestedTools,
-        List<String> availableTools,
-        List<ToolBenchmarkRow> runs
+        List<ChatBenchmarkRow> runs
 ) {}

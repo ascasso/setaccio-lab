@@ -3,11 +3,17 @@ package com.setaccio.lab.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.config.BenchmarkToolConfig;
 import com.setaccio.lab.model.AdvisorMode;
+import com.setaccio.lab.model.ToolBenchmarkComparisonResult;
+import com.setaccio.lab.model.ToolBenchmarkComparisonOrder;
+import com.setaccio.lab.model.ToolBenchmarkExpectation;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
 import com.setaccio.lab.model.ToolBenchmarkResult;
+import com.setaccio.lab.model.ToolBenchmarkRunSettings;
 import com.setaccio.lab.tool.ArithmeticBenchmarkTools;
+import com.setaccio.lab.tool.FailureBenchmarkTools;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +48,8 @@ class ToolBenchmarkServiceTest {
             assertThat(prompt.getOptions()).isInstanceOf(OllamaChatOptions.class);
             OllamaChatOptions options = (OllamaChatOptions) prompt.getOptions();
             assertThat(options.getModel()).isIn("model-a", "model-b");
+            assertThat(options.getTemperature()).isZero();
+            assertThat(options.getSeed()).isEqualTo(42);
             assertThat(options.getToolCallbacks())
                     .extracting(callback -> callback.getToolDefinition().name())
                     .contains(ArithmeticBenchmarkTools.ADD_TOOL_NAME);
@@ -69,6 +77,9 @@ class ToolBenchmarkServiceTest {
             assertThat(row.advisorMode()).isEqualTo(AdvisorMode.STANDARD);
             assertThat(row.outputText()).isEqualTo("tool benchmark answer");
             assertThat(row.success()).isTrue();
+            assertThat(row.contractPassed()).isTrue();
+            assertThat(row.assertions()).singleElement().satisfies(assertion ->
+                    assertThat(assertion.check()).isEqualTo("run_completed"));
             assertThat(row.requestedTools()).contains(ArithmeticBenchmarkTools.ADD_TOOL_NAME);
         });
         assertThat(Files.list(outputDir))
@@ -109,7 +120,14 @@ class ToolBenchmarkServiceTest {
         ToolBenchmarkResult result = service.run(
                 List.of("model-a"),
                 AdvisorMode.STANDARD,
-                List.of(new ToolBenchmarkPrompt("add", "Add 2 and 3 with a tool.")),
+                List.of(new ToolBenchmarkPrompt(
+                        "add",
+                        "Add 2 and 3 with a tool.",
+                        new ToolBenchmarkExpectation(
+                                List.of(ArithmeticBenchmarkTools.ADD_TOOL_NAME),
+                                List.of(),
+                                List.of("5"),
+                                List.of()))),
                 List.of(ArithmeticBenchmarkTools.ADD_TOOL_NAME)
         );
 
@@ -128,6 +146,60 @@ class ToolBenchmarkServiceTest {
             assertThat(row.tokensIn()).isEqualTo(30);
             assertThat(row.tokensOut()).isEqualTo(7);
             assertThat(row.outputText()).isEqualTo("The result is 5.");
+            assertThat(row.contractPassed()).isTrue();
+            assertThat(row.assertions()).allMatch(assertion -> assertion.passed());
+        });
+    }
+
+    @Test
+    void runRecordsControlledToolFailureAsAnExpectedContract() throws Exception {
+        Path outputDir = Files.createTempDirectory("tool-failure-results-");
+        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        when(ollamaChatModel.getOptions()).thenReturn(OllamaChatOptions.builder().model("stub-model").build());
+        AtomicInteger calls = new AtomicInteger();
+        when(ollamaChatModel.call(any(Prompt.class))).thenAnswer(invocation -> {
+            Prompt prompt = invocation.getArgument(0);
+            if (calls.getAndIncrement() == 0) {
+                return chatResponse(AssistantMessage.builder()
+                                .content("")
+                                .toolCalls(List.of(new AssistantMessage.ToolCall(
+                                        "fail-1",
+                                        "function",
+                                        FailureBenchmarkTools.FAIL_TOOL_NAME,
+                                        "{}")))
+                                .build(),
+                        5,
+                        2);
+            }
+            assertThat(prompt.getInstructions())
+                    .anySatisfy(message -> assertThat(message).isInstanceOf(ToolResponseMessage.class));
+            return chatResponse(new AssistantMessage("The fixture tool returned an error."), 8, 3);
+        });
+
+        ToolBenchmarkResult result = newService(outputDir, ollamaChatModel).run(
+                List.of("model-a"),
+                AdvisorMode.STANDARD,
+                List.of(new ToolBenchmarkPrompt(
+                        "controlled-failure",
+                        "Use the controlled failure tool.",
+                        new ToolBenchmarkExpectation(
+                                List.of(FailureBenchmarkTools.FAIL_TOOL_NAME),
+                                List.of(),
+                                List.of(),
+                                List.of(FailureBenchmarkTools.FAILURE_MARKER)))),
+                List.of(FailureBenchmarkTools.FAIL_TOOL_NAME)
+        );
+
+        assertThat(result.runs()).singleElement().satisfies(row -> {
+            assertThat(row.success()).isTrue();
+            assertThat(row.contractPassed()).isTrue();
+            assertThat(row.executedToolResponses()).singleElement().satisfies(response -> {
+                assertThat(response.name()).isEqualTo(FailureBenchmarkTools.FAIL_TOOL_NAME);
+                assertThat(response.responseData()).contains(FailureBenchmarkTools.FAILURE_MARKER);
+            });
+            assertThat(row.toolErrors()).singleElement()
+                    .asString()
+                    .contains(FailureBenchmarkTools.FAILURE_MARKER);
         });
     }
 
@@ -145,18 +217,205 @@ class ToolBenchmarkServiceTest {
 
         assertThat(result.runs()).singleElement().satisfies(row -> {
             assertThat(row.success()).isFalse();
+            assertThat(row.contractPassed()).isFalse();
             assertThat(row.error()).contains("Ollama chat model is not available");
         });
     }
 
+    @Test
+    void compareRunsStandardAndToolSearchWithTheSameFixtureTool() throws Exception {
+        Path outputDir = Files.createTempDirectory("tool-comparison-results-");
+        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        when(ollamaChatModel.getOptions()).thenReturn(OllamaChatOptions.builder().model("stub-model").build());
+        AtomicInteger calls = new AtomicInteger();
+        when(ollamaChatModel.call(any(Prompt.class))).thenAnswer(invocation -> {
+            Prompt prompt = invocation.getArgument(0);
+            OllamaChatOptions options = (OllamaChatOptions) prompt.getOptions();
+            assertThat(options.getTemperature()).isEqualTo(0.15);
+            assertThat(options.getSeed()).isEqualTo(100);
+            assertThat(options.getNumPredict()).isEqualTo(128);
+            return switch (calls.getAndIncrement()) {
+                case 0 -> chatResponse(new AssistantMessage("standard answer"), 4, 2);
+                case 1 -> {
+                    assertThat(options.getToolCallbacks())
+                            .extracting(callback -> callback.getToolDefinition().name())
+                            .containsExactly("toolSearchTool");
+                    assertThat(options.getToolCallbacks().getFirst().getToolDefinition().inputSchema())
+                            .contains("\"arg0\"");
+                    yield chatResponse(AssistantMessage.builder()
+                                    .content("")
+                                    .toolCalls(List.of(new AssistantMessage.ToolCall(
+                                        "search-1",
+                                        "function",
+                                        "toolSearchTool",
+                                        "{\"arg0\":\"add numbers\"}")))
+                                    .build(),
+                            10,
+                            2);
+                }
+                case 2 -> {
+                    assertThat(options.getToolCallbacks())
+                            .extracting(callback -> callback.getToolDefinition().name())
+                            .contains("toolSearchTool", ArithmeticBenchmarkTools.ADD_TOOL_NAME);
+                    assertThat(prompt.getInstructions())
+                            .anySatisfy(message -> assertThat(message).isInstanceOf(ToolResponseMessage.class));
+                    yield chatResponse(AssistantMessage.builder()
+                                    .content("")
+                                    .toolCalls(List.of(new AssistantMessage.ToolCall(
+                                            "add-1",
+                                            "function",
+                                            ArithmeticBenchmarkTools.ADD_TOOL_NAME,
+                                            "{\"left\":2,\"right\":3}")))
+                                    .build(),
+                            20,
+                            4);
+                }
+                case 3 -> {
+                    assertThat(prompt.getInstructions())
+                            .anySatisfy(message -> assertThat(message).isInstanceOf(ToolResponseMessage.class));
+                    yield chatResponse(new AssistantMessage("The result is 5."), 30, 6);
+                }
+                default -> throw new AssertionError("Unexpected model invocation");
+            };
+        });
+
+        ToolBenchmarkComparisonResult result = newService(outputDir, ollamaChatModel, true, "regex")
+                .compare(
+                        List.of("model-a"),
+                        List.of(new ToolBenchmarkPrompt(
+                                "add",
+                                "Add 2 and 3 with a tool.",
+                                new ToolBenchmarkExpectation(
+                                        List.of(ArithmeticBenchmarkTools.ADD_TOOL_NAME),
+                                        List.of(),
+                                        List.of("5"),
+                                        List.of()))),
+                        List.of(ArithmeticBenchmarkTools.ADD_TOOL_NAME),
+                        new ToolBenchmarkRunSettings(
+                                1,
+                                0.15,
+                                100,
+                                128,
+                                ToolBenchmarkComparisonOrder.ALTERNATE)
+                );
+
+        assertThat(result.suite()).isEqualTo(ToolBenchmarkService.COMPARISON_SUITE);
+        assertThat(result.toolSearchIndexType()).isEqualTo("regex");
+        assertThat(result.standard().advisorMode()).isEqualTo(AdvisorMode.STANDARD);
+        assertThat(result.toolSearch().advisorMode()).isEqualTo(AdvisorMode.TOOL_SEARCH);
+        assertThat(result.standard().runs()).singleElement().satisfies(row -> {
+            assertThat(row.success()).isTrue();
+            assertThat(row.outputText()).isEqualTo("standard answer");
+            assertThat(row.contractPassed()).isFalse();
+            assertThat(row.pairExecutionOrder()).isEqualTo(1);
+        });
+        assertThat(result.toolSearch().runs()).singleElement().satisfies(row -> {
+            assertThat(row.success()).isTrue();
+            assertThat(row.selectedToolCalls()).extracting(call -> call.name())
+                    .containsExactly("toolSearchTool", ArithmeticBenchmarkTools.ADD_TOOL_NAME);
+            assertThat(row.executedToolResponses()).extracting(response -> response.name())
+                    .containsExactly("toolSearchTool", ArithmeticBenchmarkTools.ADD_TOOL_NAME);
+            assertThat(row.tokensIn()).isEqualTo(60);
+            assertThat(row.tokensOut()).isEqualTo(12);
+            assertThat(row.outputText()).isEqualTo("The result is 5.");
+            assertThat(row.contractPassed()).isTrue();
+            assertThat(row.pairExecutionOrder()).isEqualTo(2);
+            assertThat(row.comparisonPairId()).isEqualTo("pair-0001");
+            assertThat(row.toolSearchObservations()).singleElement().satisfies(search -> {
+                assertThat(search.query()).isEqualTo("add numbers");
+                assertThat(search.completed()).isTrue();
+                assertThat(search.discoveredTools()).containsExactly(ArithmeticBenchmarkTools.ADD_TOOL_NAME);
+            });
+            assertThat(row.assertions()).extracting(assertion -> assertion.check())
+                    .contains("tool_search_completed", "required_tool_discovered",
+                            "required_tool_executed", "output_contains");
+        });
+        assertThat(Files.list(outputDir))
+                .anySatisfy(path -> assertThat(path.getFileName().toString())
+                        .endsWith("-tool-calling-comparison.json"));
+    }
+
+    @Test
+    void compareAlternatesPairedExecutionOrderAndIncrementsSeed() throws Exception {
+        Path outputDir = Files.createTempDirectory("tool-comparison-order-");
+        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        when(ollamaChatModel.getOptions()).thenReturn(OllamaChatOptions.builder().model("stub-model").build());
+        List<AdvisorMode> invocationOrder = new ArrayList<>();
+        when(ollamaChatModel.call(any(Prompt.class))).thenAnswer(invocation -> {
+            Prompt prompt = invocation.getArgument(0);
+            OllamaChatOptions options = (OllamaChatOptions) prompt.getOptions();
+            List<String> toolNames = options.getToolCallbacks().stream()
+                    .map(callback -> callback.getToolDefinition().name())
+                    .toList();
+            invocationOrder.add(toolNames.contains("toolSearchTool")
+                    ? AdvisorMode.TOOL_SEARCH
+                    : AdvisorMode.STANDARD);
+            return chatResponse(new AssistantMessage("completed"), 1, 1);
+        });
+
+        ToolBenchmarkComparisonResult result = newService(outputDir, ollamaChatModel, true, "regex")
+                .compare(
+                        List.of("model-a"),
+                        List.of(new ToolBenchmarkPrompt("p1", "Use a tool if needed.")),
+                        List.of(ArithmeticBenchmarkTools.ADD_TOOL_NAME),
+                        new ToolBenchmarkRunSettings(
+                                2,
+                                0.0,
+                                10,
+                                null,
+                                ToolBenchmarkComparisonOrder.ALTERNATE)
+                );
+
+        assertThat(invocationOrder).containsExactly(
+                AdvisorMode.STANDARD,
+                AdvisorMode.TOOL_SEARCH,
+                AdvisorMode.TOOL_SEARCH,
+                AdvisorMode.STANDARD);
+        assertThat(result.executionStrategy()).isEqualTo("paired_sequential");
+        assertThat(result.standard().runs()).extracting(row -> row.repetition())
+                .containsExactly(1, 2);
+        assertThat(result.standard().runs()).extracting(row -> row.pairExecutionOrder())
+                .containsExactly(1, 2);
+        assertThat(result.standard().runs()).extracting(row -> row.generationSeed())
+                .containsExactly(10, 11);
+        assertThat(result.toolSearch().runs()).extracting(row -> row.pairExecutionOrder())
+                .containsExactly(2, 1);
+        assertThat(result.toolSearch().runs()).allMatch(row -> row.success() && !row.contractPassed());
+    }
+
+    @Test
+    void compareRejectsDisabledOrUnsupportedToolSearchConfiguration() throws Exception {
+        Path outputDir = Files.createTempDirectory("tool-comparison-results-");
+
+        ToolBenchmarkService disabled = newService(outputDir, null, false, "regex");
+        ToolBenchmarkService lucene = newService(outputDir, null, true, "lucene");
+
+        assertThat(org.assertj.core.api.Assertions.catchThrowable(() -> disabled.compare(
+                List.of("model-a"), List.of(new ToolBenchmarkPrompt("p1", "Use a tool.")), List.of())))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("SETACCIO_LAB_TOOL_SEARCH_ENABLED=true");
+        assertThat(org.assertj.core.api.Assertions.catchThrowable(() -> lucene.compare(
+                List.of("model-a"), List.of(new ToolBenchmarkPrompt("p1", "Use a tool.")), List.of())))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("TOOL_SEARCH_INDEX_TYPE=regex");
+    }
+
     private ToolBenchmarkService newService(Path outputDir, OllamaChatModel ollamaChatModel) {
+        return newService(outputDir, ollamaChatModel, false, "regex");
+    }
+
+    private ToolBenchmarkService newService(Path outputDir, OllamaChatModel ollamaChatModel,
+                                            boolean toolSearchEnabled, String toolSearchIndexType) {
         return new ToolBenchmarkService(
                 singletonProvider(ollamaChatModel),
                 toolCallbackProvider(),
+                new ObjectMapper().findAndRegisterModules(),
                 new LabResultWriter(new ObjectMapper().findAndRegisterModules(), outputDir.toString()),
-                new ConcurrentMapCacheManager("tool-benchmark-results"),
+                new ConcurrentMapCacheManager("tool-benchmark-results", "tool-benchmark-comparison-results"),
                 Executors.newSingleThreadExecutor(),
-                "http://localhost:11434"
+                "http://localhost:11434",
+                toolSearchEnabled,
+                toolSearchIndexType
         );
     }
 
@@ -165,7 +424,8 @@ class ToolBenchmarkServiceTest {
         return config.benchmarkToolCallbackProvider(
                 config.arithmeticBenchmarkTools(),
                 config.fixtureTimeTools("2026-01-15T12:00:00Z"),
-                config.fixtureCatalogTools()
+                config.fixtureCatalogTools(),
+                config.failureBenchmarkTools()
         );
     }
 

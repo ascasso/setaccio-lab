@@ -6,7 +6,8 @@ import java.util.Locale;
 
 public enum AdvisorMode {
     STANDARD("standard"),
-    TOOL_SEARCH("tool_search");
+    TOOL_SEARCH("tool_search"),
+    COMPARE("compare");
 
     private final String jsonValue;
 
