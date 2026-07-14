@@ -201,6 +201,17 @@ final class ToolBenchmarkTraceEvaluator {
             if (root.isTextual() && !root.asText().isBlank()) {
                 return List.of(root.asText());
             }
+            JsonNode toolReferences = root.get("toolReferences");
+            if (toolReferences != null && toolReferences.isArray()) {
+                List<String> names = new ArrayList<>();
+                for (JsonNode reference : toolReferences) {
+                    JsonNode toolName = reference.get("toolName");
+                    if (toolName != null && toolName.isTextual() && !toolName.asText().isBlank()) {
+                        names.add(toolName.asText());
+                    }
+                }
+                return List.copyOf(names);
+            }
         } catch (Exception ignored) {
             return List.of();
         }

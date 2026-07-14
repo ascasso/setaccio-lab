@@ -49,3 +49,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Expanded Google GenAI notes for grounding, server-side tool metadata, cached content, thought signatures, and thinking option compatibility.
 - Changed Tool Search comparison execution to paired sequential runs that alternate advisor order across repetitions by default.
 - Made benchmark result filenames collision-safe with nanosecond timestamps, unique run identifiers, and non-overwriting file creation.
+
+### Fixed
+
+- Parse Spring AI `ToolSearchResponse.toolReferences` entries when recording discovered tool names, so valid Tool Search runs are not marked as discovery failures.
+- Record null or result-less Ollama chat responses as failed benchmark rows instead of successful rows without model output.

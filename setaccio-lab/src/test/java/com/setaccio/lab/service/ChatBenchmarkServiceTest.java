@@ -110,6 +110,26 @@ class ChatBenchmarkServiceTest {
         });
     }
 
+    @Test
+    void runReturnsFailureRowsWhenOllamaReturnsNoChatResult() throws Exception {
+        Path outputDir = Files.createTempDirectory("chat-results-");
+        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        when(ollamaChatModel.getOptions()).thenReturn(OllamaChatOptions.builder().model("stub-model").build());
+        when(ollamaChatModel.call(any(Prompt.class))).thenReturn(new ChatResponse(List.of()));
+
+        ChatBenchmarkResult result = newService(outputDir, ollamaChatModel).run(
+                List.of("model-a"),
+                AdvisorMode.STANDARD,
+                List.of(new ChatBenchmarkPrompt("p1", "Answer directly."))
+        );
+
+        assertThat(result.runs()).singleElement().satisfies(row -> {
+            assertThat(row.success()).isFalse();
+            assertThat(row.outputText()).isNull();
+            assertThat(row.error()).isEqualTo("Ollama returned no chat result");
+        });
+    }
+
     private ChatBenchmarkService newService(Path outputDir, OllamaChatModel ollamaChatModel) {
         return new ChatBenchmarkService(
                 singletonProvider(ollamaChatModel),
