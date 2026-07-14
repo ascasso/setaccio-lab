@@ -5,6 +5,7 @@ plugins {
 }
 
 import com.setaccio.gradle.ToolSearchSmokeTask
+import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 
 description = 'Setaccio Lab'
 
@@ -68,6 +69,15 @@ tasks.register('toolSearchSmoke', ToolSearchSmokeTask) {
     dependsOn tasks.named('toolSearchSmokeClasses')
     classpath.from(sourceSets.toolSearchSmoke.runtimeClasspath)
     mainClass.set('com.setaccio.lab.smoke.ToolSearchSmokeRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('toolSearchMatrixBaseline', ToolSearchMatrixBaselineTask) {
+    dependsOn tasks.named('toolSearchSmokeClasses')
+    classpath.from(sourceSets.toolSearchSmoke.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.smoke.ToolSearchMatrixBaselineRunner')
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

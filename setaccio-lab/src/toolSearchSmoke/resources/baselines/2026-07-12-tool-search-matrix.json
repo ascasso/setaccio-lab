@@ -1,0 +1,13 @@
+{
+  "date": "2026-07-12",
+  "codeBaseline": "b5922d9",
+  "confounder": "The temporary July 12 request used DETERMINISTIC_TOOL_FAILURE instead of the canonical fixture-tool-failure response marker.",
+  "results": [
+    {"model": "gemma4:e2b", "advisor": "standard", "recordedPassed": 6, "correctedPassed": 8, "total": 10},
+    {"model": "gemma4:e2b", "advisor": "tool_search", "recordedPassed": 2, "correctedPassed": 4, "total": 10},
+    {"model": "granite4.1:3b", "advisor": "standard", "recordedPassed": 8, "correctedPassed": 10, "total": 10},
+    {"model": "granite4.1:3b", "advisor": "tool_search", "recordedPassed": 2, "correctedPassed": 2, "total": 10},
+    {"model": "qwen3.5:0.8b", "advisor": "standard", "recordedPassed": 8, "correctedPassed": 10, "total": 10},
+    {"model": "qwen3.5:0.8b", "advisor": "tool_search", "recordedPassed": 4, "correctedPassed": 6, "total": 10}
+  ]
+}

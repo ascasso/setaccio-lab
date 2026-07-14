@@ -1,6 +1,5 @@
 package com.setaccio.lab.smoke;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.model.AdvisorMode;
 import com.setaccio.lab.model.ToolBenchmarkAssertion;
@@ -8,10 +7,7 @@ import com.setaccio.lab.model.ToolBenchmarkComparisonResult;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
 import com.setaccio.lab.model.ToolBenchmarkResult;
 import com.setaccio.lab.model.ToolBenchmarkRow;
-import com.setaccio.lab.model.ToolCallObservation;
 import com.setaccio.lab.model.ToolExecutionObservation;
-import com.setaccio.lab.model.ToolSearchObservation;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -21,14 +17,13 @@ import java.util.Set;
 
 final class ToolSearchSmokeAnalyzer {
 
-    private static final String TOOL_SEARCH_TOOL_NAME = "toolSearchTool";
     private static final Set<String> OUTPUT_CONTRACT_CHECKS =
             Set.of("output_contains", "tool_response_contains");
 
-    private final ObjectMapper objectMapper;
+    private final ToolSearchTraceVerifier traceVerifier;
 
     ToolSearchSmokeAnalyzer(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
+        this.traceVerifier = new ToolSearchTraceVerifier(objectMapper);
     }
 
     ToolSearchSmokeSummary analyze(ToolBenchmarkComparisonResult result, String model,
@@ -105,86 +100,19 @@ final class ToolSearchSmokeAnalyzer {
 
     private void analyzeSearchRow(ToolBenchmarkRow row, ToolSearchSmokeSummary summary) {
         String caseId = row.promptId();
-        List<ToolCallObservation> calls = safe(row.selectedToolCalls());
         List<ToolExecutionObservation> responses = safe(row.executedToolResponses());
-        List<ToolSearchObservation> normalized = safe(row.toolSearchObservations());
-
-        List<ToolCallObservation> searchCalls = calls.stream()
-                .filter(call -> call != null && TOOL_SEARCH_TOOL_NAME.equals(call.name()))
-                .toList();
-        List<ToolExecutionObservation> searchResponses = responses.stream()
-                .filter(response -> response != null && TOOL_SEARCH_TOOL_NAME.equals(response.name()))
-                .toList();
-
-        if (searchCalls.isEmpty()) {
+        ToolSearchTraceVerifier.Verification verification = traceVerifier.verify(row);
+        verification.integrityFailures().forEach(summary::hardFailure);
+        if (!verification.searchCalled()) {
             summary.add(ToolSearchSmokeSummary.Bucket.NO_TOOL_SEARCH_CALL, caseId);
-            if (!searchResponses.isEmpty() || !normalized.isEmpty()) {
-                summary.hardFailure(caseId + ": Tool Search response/normalization exists without a selected call.");
-            }
             addBehaviorOverlays(row, Set.of(), responses, summary);
             return;
         }
-
-        Map<String, ToolCallObservation> callsById = uniqueCalls(searchCalls, caseId, summary);
-        Map<String, ToolExecutionObservation> responsesById = uniqueResponses(searchResponses, caseId, summary);
-        Map<String, ToolSearchObservation> normalizedById = uniqueNormalized(normalized, caseId, summary);
-        Set<String> discovered = new LinkedHashSet<>();
-        boolean mismatch = false;
-        boolean malformed = false;
-
-        for (Map.Entry<String, ToolCallObservation> entry : callsById.entrySet()) {
-            String id = entry.getKey();
-            ToolExecutionObservation response = responsesById.get(id);
-            ToolSearchObservation observation = normalizedById.get(id);
-            if (response == null || observation == null) {
-                summary.hardFailure(caseId + ": missing Tool Search trace linkage for call ID " + id + ".");
-                malformed = true;
-                continue;
-            }
-            String rawQuery = parseQuery(entry.getValue().arguments());
-            if (rawQuery == null) {
-                summary.hardFailure(caseId + ": malformed Tool Search call arguments for ID " + id + ".");
-                malformed = true;
-            } else if (!rawQuery.equals(observation.query())) {
-                summary.hardFailure(caseId + ": raw and normalized Tool Search queries differ for ID " + id + ".");
-                malformed = true;
-            }
-            List<String> rawTools = parseRawDiscoveredTools(response.responseData());
-            if (rawTools == null) {
-                summary.hardFailure(caseId + ": malformed Tool Search response wrapper for ID " + id + ".");
-                malformed = true;
-                continue;
-            }
-            if (!observation.completed()) {
-                summary.hardFailure(caseId + ": linked normalized Tool Search observation is not completed for ID " + id + ".");
-                malformed = true;
-            }
-            if (!rawTools.equals(observation.discoveredTools())) {
-                mismatch = true;
-                summary.hardFailure(caseId + ": discovery mismatch for ID " + id + " (raw="
-                        + rawTools + ", normalized=" + observation.discoveredTools() + ").");
-            }
-            discovered.addAll(rawTools);
-        }
-
-        for (String responseId : responsesById.keySet()) {
-            if (!callsById.containsKey(responseId)) {
-                summary.hardFailure(caseId + ": orphaned Tool Search response ID " + responseId + ".");
-                malformed = true;
-            }
-        }
-        for (String observationId : normalizedById.keySet()) {
-            if (!callsById.containsKey(observationId)) {
-                summary.hardFailure(caseId + ": orphaned normalized Tool Search observation ID "
-                        + observationId + ".");
-                malformed = true;
-            }
-        }
-
-        if (mismatch) {
+        if (verification.discoveryMismatch()) {
             summary.add(ToolSearchSmokeSummary.Bucket.DISCOVERY_MISMATCH, caseId);
         }
-        if (!malformed) {
+        Set<String> discovered = verification.discoveredToolSet();
+        if (verification.integrityFailures().isEmpty()) {
             summary.add(discovered.isEmpty()
                     ? ToolSearchSmokeSummary.Bucket.ZERO_MATCHES
                     : ToolSearchSmokeSummary.Bucket.NON_EMPTY_DISCOVERY, caseId);
@@ -192,56 +120,12 @@ final class ToolSearchSmokeAnalyzer {
         addBehaviorOverlays(row, discovered, responses, summary);
     }
 
-    private Map<String, ToolCallObservation> uniqueCalls(List<ToolCallObservation> values, String caseId,
-                                                          ToolSearchSmokeSummary summary) {
-        Map<String, ToolCallObservation> byId = new LinkedHashMap<>();
-        for (ToolCallObservation value : values) {
-            String id = value.id();
-            if (id == null || id.isBlank()) {
-                summary.hardFailure(caseId + ": Tool Search call has a blank trace ID.");
-            } else if (byId.putIfAbsent(id, value) != null) {
-                summary.hardFailure(caseId + ": duplicate Tool Search call ID " + id + ".");
-            }
-        }
-        return byId;
-    }
-
-    private Map<String, ToolExecutionObservation> uniqueResponses(List<ToolExecutionObservation> values,
-                                                                   String caseId,
-                                                                   ToolSearchSmokeSummary summary) {
-        Map<String, ToolExecutionObservation> byId = new LinkedHashMap<>();
-        for (ToolExecutionObservation value : values) {
-            String id = value.id();
-            if (id == null || id.isBlank()) {
-                summary.hardFailure(caseId + ": Tool Search response has a blank trace ID.");
-            } else if (byId.putIfAbsent(id, value) != null) {
-                summary.hardFailure(caseId + ": duplicate Tool Search response ID " + id + ".");
-            }
-        }
-        return byId;
-    }
-
-    private Map<String, ToolSearchObservation> uniqueNormalized(List<ToolSearchObservation> values,
-                                                                 String caseId,
-                                                                 ToolSearchSmokeSummary summary) {
-        Map<String, ToolSearchObservation> byId = new LinkedHashMap<>();
-        for (ToolSearchObservation value : values) {
-            if (value == null || value.callId() == null || value.callId().isBlank()) {
-                summary.hardFailure(caseId + ": normalized Tool Search observation has a blank trace ID.");
-            } else if (byId.putIfAbsent(value.callId(), value) != null) {
-                summary.hardFailure(caseId + ": duplicate normalized Tool Search observation ID "
-                        + value.callId() + ".");
-            }
-        }
-        return byId;
-    }
-
     private void addBehaviorOverlays(ToolBenchmarkRow row, Set<String> discovered,
                                      List<ToolExecutionObservation> responses,
                                      ToolSearchSmokeSummary summary) {
         Set<String> executed = new HashSet<>();
         for (ToolExecutionObservation response : responses) {
-            if (response != null && !TOOL_SEARCH_TOOL_NAME.equals(response.name())) {
+            if (response != null && !ToolSearchTraceVerifier.TOOL_SEARCH_TOOL_NAME.equals(response.name())) {
                 executed.add(response.name());
             }
         }
@@ -261,62 +145,6 @@ final class ToolSearchSmokeAnalyzer {
         }
     }
 
-    private String parseQuery(String arguments) {
-        if (arguments == null || arguments.isBlank()) {
-            return null;
-        }
-        try {
-            JsonNode root = objectMapper.readTree(arguments);
-            if (!root.isObject()) {
-                return null;
-            }
-            JsonNode query = root.get("query");
-            if (query == null) {
-                query = root.get("arg0");
-            }
-            return query != null && query.isTextual() && !query.asText().isBlank()
-                    ? query.asText() : null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private List<String> parseRawDiscoveredTools(String responseData) {
-        if (responseData == null || responseData.isBlank()) {
-            return null;
-        }
-        try {
-            JsonNode root = objectMapper.readTree(responseData);
-            if (root.isArray()) {
-                List<String> names = new ArrayList<>();
-                for (JsonNode value : root) {
-                    if (!value.isTextual() || value.asText().isBlank()) {
-                        return null;
-                    }
-                    names.add(value.asText());
-                }
-                return List.copyOf(names);
-            }
-            if (root.isTextual() && !root.asText().isBlank()) {
-                return List.of(root.asText());
-            }
-            JsonNode references = root.isObject() ? root.get("toolReferences") : null;
-            if (references == null || !references.isArray()) {
-                return null;
-            }
-            List<String> names = new ArrayList<>();
-            for (JsonNode reference : references) {
-                JsonNode name = reference.isObject() ? reference.get("toolName") : null;
-                if (name == null || !name.isTextual() || name.asText().isBlank()) {
-                    return null;
-                }
-                names.add(name.asText());
-            }
-            return List.copyOf(names);
-        } catch (Exception e) {
-            return null;
-        }
-    }
 
     private String safeError(String error) {
         return error == null || error.isBlank() ? "no error detail" : error;

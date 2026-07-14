@@ -51,6 +51,8 @@ Tool Search comparison is disabled by default and currently supports the in-memo
 
 An explicitly opt-in `toolSearchSmoke` Gradle task validates the live Tool Search response wrapper and raw-to-normalized trace linkage against one already-installed Ollama model. It is not connected to `test`, `check`, or `build`, enforces Ollama's `never` pull strategy, and treats model behavior categories as diagnostic output rather than merge gates. See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#opt-in-tool-search-smoke-automation) for invocation and case-selection details.
 
+The separate `toolSearchMatrixBaseline` task reproduces the locked July 12 three-model/five-case protocol from canonical Java cases and writes a raw trace, manifest, and Markdown comparison under a new dated `build/tool-search-matrix/` directory. It verifies every raw-to-normalized discovery linkage and classifies contract failures into six explicit diagnostic categories. Its report compares both the originally recorded and corrected July 12 counts, with the request-construction correction called out as a confounder.
+
 ### Local Fixture Evaluation Benchmark
 
 `POST /api/lab/evaluations` runs under the `local` profile. It:
@@ -121,6 +123,8 @@ Offline tests for the isolated Tool Search smoke analyzer are also available exp
 ```bash
 ./gradlew :setaccio-lab:toolSearchSmokeTest
 ```
+
+The same isolated offline suite covers matrix protocol, trace-integrity, and failure-classification behavior. Live matrix execution is an explicit separate task documented in `docs/ENVIRONMENT.md` and is never part of the normal build lifecycle.
 
 ## Build Versions
 

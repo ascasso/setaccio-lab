@@ -63,6 +63,11 @@
 - Require `toolSearchSmoke` to receive an explicit already-installed Ollama model, force `spring.ai.ollama.init.pull-model-strategy=never`, and select cases directly from `ToolBenchmarkCases.defaults()` with the complete `ToolBenchmarkCases.toolNames()` fixture set.
 - Keep `toolSearchSmokeTest` offline. Cover semantic and ordinal case selection, live-wrapper parsing fixtures, raw-to-normalized discovery comparison, malformed results, trace-linkage failures, and every console summary bucket without starting Ollama.
 - Fail the live smoke task only for startup/invocation failures, malformed results, missing trace linkages, or raw-versus-normalized discovery mismatches. Treat missing searches, zero matches, required-but-unexecuted tools, and output-contract failures as diagnostic model behavior unless an explicit hypothesis says otherwise.
+- Keep the post-fix three-model baseline in the separate `toolSearchMatrixBaseline` task with the July 12 models, five canonical case IDs, two repetitions, seeds 42/43, temperature 0.0, no token ceiling, alternate order, paired sequential execution, and complete fixture tool list locked in code.
+- Require a new dated `build/tool-search-matrix/` output directory and retain one raw comparison JSON, `manifest.json`, and `SUMMARY.md`; refuse overwrites and verify the raw artifact SHA-256.
+- Verify every linked non-empty raw Tool Search discovery exactly matches normalized tool names. Treat malformed/linkage/mismatch conditions and unclassified failed contracts as matrix-integrity failures.
+- Classify failed canonical contracts exhaustively as no search call, zero discovery, incomplete discovery, discovered-not-executed, execution failure, or output-contract failure. Preserve precedence tests and a successful zero-discovery abstention test.
+- Compare post-fix counts to both recorded and corrected July 12 counts, and require the summary to name corrected request construction and Issue #20 discovery normalization as confounders. Do not present Issue #21's chat fix as a tool pass-rate cause.
 
 ## Testcontainers
 
