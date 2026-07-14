@@ -221,6 +221,105 @@ The endpoint writes one `*-tool-calling-comparison.json` file containing both re
 
 No new credentials are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
 
+## Opt-In Tool Search Smoke Automation
+
+The `toolSearchSmoke` Gradle task provides a narrow live diagnostic for the Tool Search wrapper produced by the installed Spring AI version. It starts a non-web Spring context, runs one deterministic paired standard-versus-Tool-Search repetition, and compares each raw Tool Search response with the normalized discovery trace. It recognizes the array, textual-singleton, and object `toolReferences` representations covered by the offline parser; any other shape is malformed. It is not part of `test`, `check`, `build`, or default CI.
+
+The model argument is mandatory and must identify a model that is already installed in the configured local Ollama instance:
+
+```bash
+./gradlew toolSearchSmoke \
+  --model=llama3.1:8b \
+  --case-ids=arithmetic-add,fixed-zone-time,catalog-multi-step
+```
+
+Omit `--case-ids` to run all cases from `ToolBenchmarkCases.defaults()`. Semantic IDs are the stable interface. The task also accepts 1-based ordinals for convenient ad hoc subsets:
+
+```bash
+./gradlew toolSearchSmoke \
+  --model=llama3.1:8b \
+  --case-ids=1,3,5,7
+```
+
+Unknown, duplicate, blank, and out-of-range selectors are rejected before Spring starts or Ollama is contacted. The current default corpus contains eight cases, so valid ordinals are `1` through `8`.
+
+The task always exposes the complete `ToolBenchmarkCases.toolNames()` fixture set and forces these effective properties:
+
+- `spring.ai.ollama.init.pull-model-strategy=never`
+- `spring.ai.chat.client.tool-search-advisor.enabled=true`
+- `spring.ai.chat.client.tool-search-advisor.tool-index-type=regex`
+- `spring.ai.model.chat=ollama`
+
+It never downloads or pulls a model. A missing model or unreachable Ollama instance is reported as a hard invocation failure. Raw JSON output remains under the ignored `setaccio-lab/build/lab-results/tool-search-smoke/` directory.
+
+The console summary distinguishes:
+
+- no Tool Search call,
+- search completed with zero matches,
+- non-empty discovery,
+- discovery mismatch between raw and normalized traces,
+- required tool discovered but not executed,
+- required tool executed but its output contract failed.
+
+Only startup or invocation failures, malformed results, missing trace linkages, and discovery mismatches fail the task. The other categories describe model behavior and leave the task successful. Every summary prints this reminder:
+
+> Model behavior categories are for diagnosis only ��� never block merges on them unless a specific hypothesis was stated.
+
+The analyzer and selection logic have a separate offline test task that does not contact Ollama:
+
+```bash
+./gradlew :setaccio-lab:toolSearchSmokeTest
+```
+
+## Post-Fix Tool Search Matrix Baseline
+
+`toolSearchMatrixBaseline` is a dedicated, explicitly live task for reproducing the July 12 diagnostic matrix after the Issue #20/#21 fixes. It is not attached to `test`, `check`, `build`, or default CI and never pulls models.
+
+The protocol is locked in code and the task rejects internal drift:
+
+- models: `gemma4:e2b`, `granite4.1:3b`, `qwen3.5:0.8b`,
+- canonical cases: `arithmetic-add`, `catalog-lookup`, `catalog-multi-step`, `no-applicable-domain-tool`, `deterministic-tool-failure`,
+- two repetitions with effective seeds `42` and `43`,
+- temperature `0.0`, no explicit maximum-token limit,
+- alternate paired sequential standard/Tool Search execution,
+- regex Tool Search index and the complete `ToolBenchmarkCases.toolNames()` fixture set,
+- exactly 60 result rows.
+
+The runner selects prompts and expectations directly from `ToolBenchmarkCases.defaults()`. In particular, the deterministic failure contract comes from `FailureBenchmarkTools.FAILURE_MARKER` (`fixture-tool-failure`); no request JSON transcribes that expectation.
+
+Before running, confirm that all three exact IDs already appear in `ollama list`. Then supply a new, dated directory under `build/tool-search-matrix/`:
+
+```bash
+./gradlew toolSearchMatrixBaseline \
+  --output-dir=build/tool-search-matrix/2026-07-13-post-fix-baseline
+```
+
+The task refuses an existing directory so a prior baseline cannot be overwritten. It forces `spring.ai.ollama.init.pull-model-strategy=never` and writes:
+
+```text
+build/tool-search-matrix/YYYY-MM-DD-post-fix-baseline/
+├── <timestamp>-tool-calling-comparison.json
+├── manifest.json
+└── SUMMARY.md
+```
+
+The manifest records the Git commit, Spring AI version, Issue #20/#21 context, models, cases, canonical prompts/expectations, tool names, run settings, execution/index metadata, Ollama base URL, no-pull strategy, expectation fingerprint, raw filename, and raw SHA-256.
+
+Every Tool Search row is checked independently against its raw linked response. Non-empty raw discoveries must exactly match normalized tool names in order; empty raw responses must normalize empty. Missing, duplicate, malformed, orphaned, or mismatched traces invalidate the baseline.
+
+Failed canonical contracts are assigned exactly one primary category, in this precedence order:
+
+1. no search call,
+2. zero discovery,
+3. incomplete discovery,
+4. discovered-not-executed,
+5. execution failure,
+6. output-contract failure.
+
+A successful abstention with zero discovery is not a failure. The deterministic `fixture-tool-failure` response is expected fixture data rather than an automatic execution failure. Any failed row outside the six categories invalidates analysis instead of being placed in an `other` bucket.
+
+`SUMMARY.md` compares the post-fix pass counts with both the originally recorded and corrected July 12 counts. It always highlights two confounders: the July 12 request used the wrong deterministic marker, and Issue #20 changes normalization of object-shaped Tool Search responses. Issue #21 is recorded as adjacent chat correctness work, not as a direct tool-scoring cause.
+
 ## Local Fixture Evaluation Benchmark
 
 The deterministic evaluation path is available only through the `local` profile, but it does not call Ollama, Anthropic, or another provider. It evaluates a small public fixture set through Spring AI's `Evaluator` contract and writes `*-evaluation.json` under `SETACCIO_LAB_OUTPUT_DIR`.
