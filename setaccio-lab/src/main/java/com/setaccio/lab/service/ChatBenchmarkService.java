@@ -108,10 +108,11 @@ public class ChatBenchmarkService {
             }
 
             ChatResponse response = invoke(ollamaChatModel, model, prompt);
-            String text = response == null || response.getResult() == null
-                    ? null
-                    : response.getResult().getOutput().getText();
-            Usage usage = response == null || response.getMetadata() == null
+            if (response == null || response.getResult() == null) {
+                return failed(model, prompt, advisorMode, started, "Ollama returned no chat result");
+            }
+            String text = response.getResult().getOutput().getText();
+            Usage usage = response.getMetadata() == null
                     ? null
                     : response.getMetadata().getUsage();
             return ChatBenchmarkRow.ok(PROVIDER, model, prompt, advisorMode, elapsedMillis(started),
