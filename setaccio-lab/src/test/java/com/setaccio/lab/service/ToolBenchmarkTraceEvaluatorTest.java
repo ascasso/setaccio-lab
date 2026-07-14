@@ -47,4 +47,33 @@ class ToolBenchmarkTraceEvaluatorTest {
                 .satisfies(assertion -> assertThat(assertion.passed()).isTrue());
         assertThat(assessment.contractPassed()).isTrue();
     }
+
+    @Test
+    void assessAcceptsArgZeroAndRecordsACompletedZeroMatchSearch() {
+        ToolBenchmarkTraceEvaluator evaluator = new ToolBenchmarkTraceEvaluator(new ObjectMapper());
+        ToolBenchmarkPrompt prompt = new ToolBenchmarkPrompt(
+                "no-match",
+                "Find a tool.",
+                new ToolBenchmarkExpectation(List.of(), List.of(), List.of(), List.of()));
+        ToolCallObservation searchCall = new ToolCallObservation(
+                "search-1", "function", ToolBenchmarkTraceEvaluator.TOOL_SEARCH_TOOL_NAME,
+                "{\"arg0\":\"missing domain tool\"}");
+        ToolExecutionObservation searchResponse = new ToolExecutionObservation(
+                "search-1", ToolBenchmarkTraceEvaluator.TOOL_SEARCH_TOOL_NAME,
+                "{\"toolReferences\":[],\"totalMatches\":0}");
+
+        ToolBenchmarkTraceEvaluator.Assessment assessment = evaluator.assess(
+                prompt,
+                AdvisorMode.TOOL_SEARCH,
+                true,
+                "No matching tool.",
+                List.of(searchCall),
+                List.of(searchResponse));
+
+        assertThat(assessment.toolSearchObservations()).singleElement().satisfies(observation -> {
+            assertThat(observation.query()).isEqualTo("missing domain tool");
+            assertThat(observation.completed()).isTrue();
+            assertThat(observation.discoveredTools()).isEmpty();
+        });
+    }
 }

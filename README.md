@@ -49,6 +49,8 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 
 Tool Search comparison is disabled by default and currently supports the in-memory regex index only. A comparison request runs paired advisor executions sequentially, alternates which advisor runs first across repetitions by default, and retains both result sets without assigning an aggregate winner. Each row reports whether its explicit case contract passed, while preserving every named assertion and raw trace needed to interpret that verdict.
 
+An explicitly opt-in `toolSearchSmoke` Gradle task validates the live Tool Search response wrapper and raw-to-normalized trace linkage against one already-installed Ollama model. It is not connected to `test`, `check`, or `build`, enforces Ollama's `never` pull strategy, and treats model behavior categories as diagnostic output rather than merge gates. See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#opt-in-tool-search-smoke-automation) for invocation and case-selection details.
+
 ### Local Fixture Evaluation Benchmark
 
 `POST /api/lab/evaluations` runs under the `local` profile. It:
@@ -112,6 +114,12 @@ For local image comparison work, set `SETACCIO_LAB_INPUT_DIR` to your working im
 ./gradlew :setaccio-core:build
 ./gradlew :setaccio-lab:build
 ./gradlew :setaccio-core:build :setaccio-lab:build :setaccio-testcontainers:build
+```
+
+Offline tests for the isolated Tool Search smoke analyzer are also available explicitly:
+
+```bash
+./gradlew :setaccio-lab:toolSearchSmokeTest
 ```
 
 ## Build Versions

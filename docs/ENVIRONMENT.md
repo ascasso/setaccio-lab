@@ -221,6 +221,56 @@ The endpoint writes one `*-tool-calling-comparison.json` file containing both re
 
 No new credentials are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
 
+## Opt-In Tool Search Smoke Automation
+
+The `toolSearchSmoke` Gradle task provides a narrow live diagnostic for the Tool Search wrapper produced by the installed Spring AI version. It starts a non-web Spring context, runs one deterministic paired standard-versus-Tool-Search repetition, and compares each raw Tool Search response with the normalized discovery trace. It recognizes the array, textual-singleton, and object `toolReferences` representations covered by the offline parser; any other shape is malformed. It is not part of `test`, `check`, `build`, or default CI.
+
+The model argument is mandatory and must identify a model that is already installed in the configured local Ollama instance:
+
+```bash
+./gradlew toolSearchSmoke \
+  --model=llama3.1:8b \
+  --case-ids=arithmetic-add,fixed-zone-time,catalog-multi-step
+```
+
+Omit `--case-ids` to run all cases from `ToolBenchmarkCases.defaults()`. Semantic IDs are the stable interface. The task also accepts 1-based ordinals for convenient ad hoc subsets:
+
+```bash
+./gradlew toolSearchSmoke \
+  --model=llama3.1:8b \
+  --case-ids=1,3,5,7
+```
+
+Unknown, duplicate, blank, and out-of-range selectors are rejected before Spring starts or Ollama is contacted. The current default corpus contains eight cases, so valid ordinals are `1` through `8`.
+
+The task always exposes the complete `ToolBenchmarkCases.toolNames()` fixture set and forces these effective properties:
+
+- `spring.ai.ollama.init.pull-model-strategy=never`
+- `spring.ai.chat.client.tool-search-advisor.enabled=true`
+- `spring.ai.chat.client.tool-search-advisor.tool-index-type=regex`
+- `spring.ai.model.chat=ollama`
+
+It never downloads or pulls a model. A missing model or unreachable Ollama instance is reported as a hard invocation failure. Raw JSON output remains under the ignored `setaccio-lab/build/lab-results/tool-search-smoke/` directory.
+
+The console summary distinguishes:
+
+- no Tool Search call,
+- search completed with zero matches,
+- non-empty discovery,
+- discovery mismatch between raw and normalized traces,
+- required tool discovered but not executed,
+- required tool executed but its output contract failed.
+
+Only startup or invocation failures, malformed results, missing trace linkages, and discovery mismatches fail the task. The other categories describe model behavior and leave the task successful. Every summary prints this reminder:
+
+> Model behavior categories are for diagnosis only ��� never block merges on them unless a specific hypothesis was stated.
+
+The analyzer and selection logic have a separate offline test task that does not contact Ollama:
+
+```bash
+./gradlew :setaccio-lab:toolSearchSmokeTest
+```
+
 ## Local Fixture Evaluation Benchmark
 
 The deterministic evaluation path is available only through the `local` profile, but it does not call Ollama, Anthropic, or another provider. It evaluates a small public fixture set through Spring AI's `Evaluator` contract and writes `*-evaluation.json` under `SETACCIO_LAB_OUTPUT_DIR`.

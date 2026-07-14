@@ -59,7 +59,10 @@
 - Verify result rows capture selected advisor mode, repetition, pair order, effective seed, requested tools, executed tools, tool errors, normalized Tool Search queries/discoveries, named contract assertions, model/provider, prompt, output, latency, and any token-usage metadata exposed by Spring AI.
 - Keep comparison order counterbalanced across repetitions by default, and retain a test proving the standard-first/tool-search-first alternation.
 - Verify repeated writes with the same suite and start instant produce distinct result files rather than overwriting an earlier run.
-- Keep live model runs behind the `local` profile and explicit API calls, with any future automated live checks behind explicit live-test switches.
+- Keep live model runs behind the `local` profile, explicit API calls, or the dedicated opt-in `toolSearchSmoke` task. Do not attach that task to `test`, `check`, `build`, or default CI.
+- Require `toolSearchSmoke` to receive an explicit already-installed Ollama model, force `spring.ai.ollama.init.pull-model-strategy=never`, and select cases directly from `ToolBenchmarkCases.defaults()` with the complete `ToolBenchmarkCases.toolNames()` fixture set.
+- Keep `toolSearchSmokeTest` offline. Cover semantic and ordinal case selection, live-wrapper parsing fixtures, raw-to-normalized discovery comparison, malformed results, trace-linkage failures, and every console summary bucket without starting Ollama.
+- Fail the live smoke task only for startup/invocation failures, malformed results, missing trace linkages, or raw-versus-normalized discovery mismatches. Treat missing searches, zero matches, required-but-unexecuted tools, and output-contract failures as diagnostic model behavior unless an explicit hypothesis says otherwise.
 
 ## Testcontainers
 

@@ -4,6 +4,8 @@ plugins {
     id 'io.spring.dependency-management'
 }
 
+import com.setaccio.gradle.ToolSearchSmokeTask
+
 description = 'Setaccio Lab'
 
 def libs = extensions.getByName('libs')
@@ -40,4 +42,42 @@ tasks.named('test') {
 
 tasks.named('jar') {
     enabled = true
+}
+
+sourceSets {
+    toolSearchSmoke {
+        java.srcDir 'src/toolSearchSmoke/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    toolSearchSmokeTest {
+        java.srcDir 'src/toolSearchSmokeTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.toolSearchSmoke.output
+        runtimeClasspath += output + compileClasspath
+    }
+}
+
+configurations {
+    toolSearchSmokeImplementation.extendsFrom implementation
+    toolSearchSmokeRuntimeOnly.extendsFrom runtimeOnly
+    toolSearchSmokeTestImplementation.extendsFrom testImplementation, toolSearchSmokeImplementation
+    toolSearchSmokeTestRuntimeOnly.extendsFrom testRuntimeOnly, toolSearchSmokeRuntimeOnly
+}
+
+tasks.register('toolSearchSmoke', ToolSearchSmokeTask) {
+    dependsOn tasks.named('toolSearchSmokeClasses')
+    classpath.from(sourceSets.toolSearchSmoke.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.smoke.ToolSearchSmokeRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('toolSearchSmokeTest', Test) {
+    description = 'Runs offline tests for the opt-in Tool Search smoke analyzer.'
+    group = 'verification'
+    testClassesDirs = sourceSets.toolSearchSmokeTest.output.classesDirs
+    classpath = sourceSets.toolSearchSmokeTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
 }
