@@ -4,6 +4,11 @@ This file is the repo-local guide for Codex, Claude Code, and other AI agents wo
 
 Do not stage, commit, or push unless explicitly asked.
 
+Read and follow the repository's `.gitignore` before creating, inspecting, or
+including files. Treat its rules as authoritative for generated outputs,
+local-only configuration, credentials, and other files that must remain
+untracked; do not bypass or weaken those rules without explicit instruction.
+
 ## Agent Hard Stops
 
 - Never copy private Setaccio product code, docs, deployment details, issue history, roadmap text, API modules, database code, or UI code into this repo.
