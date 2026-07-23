@@ -30,6 +30,7 @@ build/
 
 # Generated local artifacts
 outputs/
+plan/
 
 # macOS
 .DS_Store
