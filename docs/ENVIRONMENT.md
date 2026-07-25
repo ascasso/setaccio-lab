@@ -156,6 +156,36 @@ The endpoint continues to write `*-vision.json` under
 `SETACCIO_LAB_OUTPUT_DIR`, which defaults to `build/lab-results/`. Vision output
 uses the neutral host value `local`. No new environment variable is required.
 
+### Local vision corpus
+
+The controlled vision matrix uses the fixed ignored directory
+`setaccio-lab/local/vision-corpus/`. It is separate from the interactive
+endpoint's optional `SETACCIO_LAB_INPUT_DIR`; setting that environment variable
+does not populate or select matrix cases.
+
+Create a local catalog from the tracked public-safe template:
+
+```bash
+mkdir -p setaccio-lab/local/vision-corpus/images
+cp setaccio-lab/src/main/resources/vision-corpus/cases.template.json \
+  setaccio-lab/local/vision-corpus/cases.json
+```
+
+Replace the template placeholders locally and copy each selected input under
+its stable case-ID-based filename. The local catalog and images are ignored as
+one directory and must not be force-added. Do not record original filenames or
+absolute paths.
+
+The template starts every privacy-review field as false. Review sensitive
+visible content before using a case. Before any exact image or derivative is
+made public, strip and recheck EXIF/GPS metadata and obtain explicit user
+approval for that file. Review state does not itself authorize tracking.
+
+See [the local vision corpus contract](vision-corpus/README.md) for the exact
+fields, six target case categories, and public-artifact boundary. This slice
+does not add the matrix command; the future dedicated vision task will consume
+this exact layout.
+
 ## Local Chat Benchmark
 
 The simple chat benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.

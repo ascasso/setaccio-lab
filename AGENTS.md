@@ -131,7 +131,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-07-24)
+## Current State Snapshot (as of 2026-07-25)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -139,6 +139,11 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - `setaccio-core` is a plain Java BLAKE3 utility library.
 - `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.0`.
 - The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses a tracked versioned public-safe prompt through a reusable direct Spring AI invocation boundary, supports optional temperature/seed/token settings, hashes inputs through `setaccio-core`, records prompt/MIME/token/structural/error metadata, returns a neutral `local` host value, and writes JSON under `build/lab-results/`.
+- The local vision corpus contract uses a tracked versioned public-safe template
+  with six stable non-sensitive case IDs and explicit privacy review fields.
+  Personal images and filled metadata belong only under the ignored
+  `setaccio-lab/local/vision-corpus/` directory; no local corpus content is
+  tracked.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
@@ -237,11 +242,14 @@ Completed:
 - Add the reproducible vision invocation contract with a tracked prompt and
   digest, explicit Ollama options, usage metadata, deterministic section
   checks, classified errors, and backward-compatible multipart handling.
+- Add the ignored local vision corpus layout and public-safe case metadata
+  template without tracking personal source images.
 
 Pending:
 
-- Add the ignored local vision corpus layout and public-safe case metadata
-  template without tracking personal source images.
+- Add the sequential vision matrix runner and dedicated reader for the fixed
+  local vision corpus contract, then add offline analysis and evidence
+  lifecycle support before any controlled live run.
 - Run controlled, explicitly selected local model matrices against the expectation-aware tool case corpus before choosing another Tool Search index or provider path.
 - Add or refine AI-judged evaluation and Testcontainers planning docs before wiring either live path.
 - Keep container-backed work isolated in `setaccio-testcontainers`.

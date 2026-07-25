@@ -43,6 +43,18 @@
 - Verify unavailable models, invalid inputs, empty responses, and provider
   exceptions produce classified failure rows rather than aborting a benchmark.
 - Verify JSON result writing under ignored `build/lab-results/` output.
+- Keep the tracked vision corpus template at version 1 with stable,
+  non-sensitive case IDs and relative case-ID-based image filenames.
+- Verify the template contains MIME type, BLAKE3 identity, human reference
+  observation, expected concepts, unsupported details, deliberate limitations,
+  and explicit privacy-review fields, all defaulting to unapproved.
+- Keep personal images and filled case metadata under the explicitly ignored
+  `setaccio-lab/local/vision-corpus/` directory; never use original filenames
+  or absolute paths in the catalog or public evidence.
+- Require sensitive-content and EXIF/GPS review plus explicit user approval
+  before tracking any image or derivative.
+- Keep the future matrix reader specific to this exact corpus contract rather
+  than introducing generic YAML/JSON suite discovery.
 
 ## Chat Benchmark Phase
 

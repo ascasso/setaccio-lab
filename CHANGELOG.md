@@ -17,6 +17,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
   versioned prompt and SHA-256 identity, explicit Ollama generation settings,
   token metadata, deterministic required-section checks, classified failures,
   and a backward-compatible multipart endpoint.
+- Added a versioned public-safe local vision corpus template with six stable
+  non-sensitive case IDs, explicit privacy-review fields, fixed ignored local
+  layout guidance, and offline contract coverage without tracking personal
+  images or filled metadata.
 - Wired the local vision benchmark endpoint through a public Spring AI/Ollama service that hashes inputs with `setaccio-core`, returns one row per file/model pair, and writes raw JSON results under `build/lab-results/`.
 - Added public-safe lab server support for upload temp-file handling, MIME detection, Caffeine-backed result caches, and benchmark output configuration.
 - Added environment variable documentation for `SETACCIO_LAB_INPUT_DIR` and `SETACCIO_LAB_OUTPUT_DIR` to support local image comparison workflows.

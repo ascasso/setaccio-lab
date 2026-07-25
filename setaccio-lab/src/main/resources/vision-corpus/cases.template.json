@@ -1,0 +1,131 @@
+{
+  "corpusVersion": 1,
+  "cases": [
+    {
+      "caseId": "vision-single-subject",
+      "imageFile": "images/vision-single-subject.jpg",
+      "mimeType": "image/jpeg",
+      "blake3": "<64 lowercase hexadecimal BLAKE3 digest>",
+      "referenceObservation": "<concise human-authored observation>",
+      "expectedConcepts": [
+        "<important visible concept>"
+      ],
+      "unsupportedDetails": [
+        "<detail the model must not invent>"
+      ],
+      "limitations": [
+        "<deliberate ambiguity or quality limitation, or none>"
+      ],
+      "privacyReview": {
+        "sensitiveContentReviewed": false,
+        "exifGpsReviewed": false,
+        "approvedForTracking": false
+      }
+    },
+    {
+      "caseId": "vision-complex-scene",
+      "imageFile": "images/vision-complex-scene.jpg",
+      "mimeType": "image/jpeg",
+      "blake3": "<64 lowercase hexadecimal BLAKE3 digest>",
+      "referenceObservation": "<concise human-authored observation>",
+      "expectedConcepts": [
+        "<important visible concept>"
+      ],
+      "unsupportedDetails": [
+        "<detail the model must not invent>"
+      ],
+      "limitations": [
+        "<deliberate ambiguity or quality limitation, or none>"
+      ],
+      "privacyReview": {
+        "sensitiveContentReviewed": false,
+        "exifGpsReviewed": false,
+        "approvedForTracking": false
+      }
+    },
+    {
+      "caseId": "vision-text-heavy",
+      "imageFile": "images/vision-text-heavy.jpg",
+      "mimeType": "image/jpeg",
+      "blake3": "<64 lowercase hexadecimal BLAKE3 digest>",
+      "referenceObservation": "<concise human-authored observation>",
+      "expectedConcepts": [
+        "<important visible concept>"
+      ],
+      "unsupportedDetails": [
+        "<detail the model must not invent>"
+      ],
+      "limitations": [
+        "<deliberate ambiguity or quality limitation, or none>"
+      ],
+      "privacyReview": {
+        "sensitiveContentReviewed": false,
+        "exifGpsReviewed": false,
+        "approvedForTracking": false
+      }
+    },
+    {
+      "caseId": "vision-low-quality",
+      "imageFile": "images/vision-low-quality.jpg",
+      "mimeType": "image/jpeg",
+      "blake3": "<64 lowercase hexadecimal BLAKE3 digest>",
+      "referenceObservation": "<concise human-authored observation>",
+      "expectedConcepts": [
+        "<important visible concept>"
+      ],
+      "unsupportedDetails": [
+        "<detail the model must not invent>"
+      ],
+      "limitations": [
+        "<deliberate ambiguity or quality limitation, or none>"
+      ],
+      "privacyReview": {
+        "sensitiveContentReviewed": false,
+        "exifGpsReviewed": false,
+        "approvedForTracking": false
+      }
+    },
+    {
+      "caseId": "vision-ambiguous",
+      "imageFile": "images/vision-ambiguous.jpg",
+      "mimeType": "image/jpeg",
+      "blake3": "<64 lowercase hexadecimal BLAKE3 digest>",
+      "referenceObservation": "<concise human-authored observation>",
+      "expectedConcepts": [
+        "<important visible concept>"
+      ],
+      "unsupportedDetails": [
+        "<detail the model must not invent>"
+      ],
+      "limitations": [
+        "<deliberate ambiguity or quality limitation, or none>"
+      ],
+      "privacyReview": {
+        "sensitiveContentReviewed": false,
+        "exifGpsReviewed": false,
+        "approvedForTracking": false
+      }
+    },
+    {
+      "caseId": "vision-file-organization",
+      "imageFile": "images/vision-file-organization.jpg",
+      "mimeType": "image/jpeg",
+      "blake3": "<64 lowercase hexadecimal BLAKE3 digest>",
+      "referenceObservation": "<concise human-authored observation>",
+      "expectedConcepts": [
+        "<important visible concept>"
+      ],
+      "unsupportedDetails": [
+        "<detail the model must not invent>"
+      ],
+      "limitations": [
+        "<deliberate ambiguity or quality limitation, or none>"
+      ],
+      "privacyReview": {
+        "sensitiveContentReviewed": false,
+        "exifGpsReviewed": false,
+        "approvedForTracking": false
+      }
+    }
+  ]
+}

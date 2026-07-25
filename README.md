@@ -54,6 +54,29 @@ format compliance is not treated as proof that a model understood an image.
 Vision results use the neutral host value `local` rather than exposing the
 machine hostname.
 
+### Local Vision Corpus Contract
+
+The tracked
+[`cases.template.json`](setaccio-lab/src/main/resources/vision-corpus/cases.template.json)
+defines a versioned, vision-specific metadata shape for the controlled local
+corpus. It provides six stable, non-sensitive case IDs covering a single
+subject, complex scene, text-heavy image, low-quality image, ambiguous image,
+and file-organization image. Each local case records its relative case-ID-based
+image name, detected MIME type, BLAKE3 digest, human reference observation,
+expected concepts, unsupported details, deliberate limitations, and explicit
+privacy-review state.
+
+Personal images and filled case metadata belong only under the explicitly
+ignored `setaccio-lab/local/vision-corpus/` directory. The repository contains
+no selected source images or private observations, and an image or derivative
+requires sensitive-content and EXIF/GPS review plus explicit user approval
+before it may be tracked. See
+[`docs/vision-corpus/README.md`](docs/vision-corpus/README.md) for the fixed
+layout and review procedure.
+
+This contract is ready for the dedicated matrix reader in the next slice; it
+does not yet add a vision matrix task or run a model.
+
 ### Local Chat Benchmark
 
 `POST /api/lab/chat` runs under the `local` profile. It:
