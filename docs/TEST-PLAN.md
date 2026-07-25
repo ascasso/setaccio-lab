@@ -80,6 +80,10 @@
 - With two repetitions, report median and observed latency range rather than
   percentiles. Keep structural completion and exact-output matching explicitly
   separate from semantic image understanding.
+- After offline verification, record human expected-concept and
+  unsupported-detail judgments separately per model/case, label them as human
+  review rather than automated scores, include repetition/token/latency and
+  infrastructure observations, and do not declare an aggregate winner.
 - Reject tampered or missing raw evidence, manifest protocol drift, unexpected
   artifacts, and summaries that differ from deterministic offline analysis.
 

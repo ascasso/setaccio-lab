@@ -157,8 +157,8 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - A controlled local vision matrix completed from clean commit `11e2fa7`
   across three installed model families, four reviewed private cases, and two
   repetitions. All 24 invocations and required-section checks passed, the
-  ignored v1 evidence verified offline, and semantic human review remains a
-  separate next step.
+  ignored v1 evidence verified offline, and Slice 7 human review is recorded
+  separately in public-safe aggregate documentation without ranking models.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
@@ -268,9 +268,9 @@ Completed:
 
 Pending:
 
-- Perform human semantic and unsupported-detail review of the verified vision
-  evidence, then publish only safe aggregate findings without declaring a
-  simplistic winner.
+- Test the bounded prompt hypothesis that explicitly requires `unknown` for
+  exact location, identity, event, and time when the image does not support
+  those details; keep the same corpus, model cohort, and evidence protocol.
 - Run controlled, explicitly selected local model matrices against the expectation-aware tool case corpus before choosing another Tool Search index or provider path.
 - Add or refine AI-judged evaluation and Testcontainers planning docs before wiring either live path.
 - Keep container-backed work isolated in `setaccio-testcontainers`.

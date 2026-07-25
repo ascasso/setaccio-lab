@@ -91,16 +91,21 @@ deterministic summary regenerated with `visionMatrixReanalyze`. Both paths are
 offline: they do not read the private corpus, start Spring, or contact Ollama.
 The analyzer keeps invocation, structural completion, repetition diagnostics,
 token availability, successful-invocation latency, and infrastructure failures
-separate. Expected-concept and unsupported-detail judgments remain explicitly
-unperformed until human review.
+separate from semantic review.
 
 A clean-baseline controlled local matrix completed across three models, four
 reviewed private cases, and two repetitions: 24 sequential rows at temperature
 `0.0`, seeds `42`/`43`, and no explicit token limit. All 24 invocations
 succeeded, all 24 outputs contained the required prompt sections, token
 metadata was available throughout, and the ignored evidence verified offline.
-Human semantic and unsupported-detail review remains a separate closeout step;
-these automated outcomes do not identify an aggregate winner.
+Human review is now complete as a separately labeled assessment of expected
+concepts, unsupported detail, repetition consistency, token metadata, and
+latency. The review found reliable core-scene coverage but recurring
+unsupported geographic, event, and time specificity, plus overconfident image
+quality claims on the intentionally limited case. These observations are
+diagnostic rather than an aggregate model ranking; see the
+[2026-07-25 Slice 7 log](docs/logs/2026-07-25.md#slice-7-human-analysis-and-public-closeout)
+for the bounded findings and next hypothesis.
 
 ### Local Chat Benchmark
 

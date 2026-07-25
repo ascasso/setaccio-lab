@@ -268,8 +268,11 @@ reviewed aggregate findings.
 The summary reports invocation success, structural completion, repetition
 readiness and exact-output diagnostics, token availability, median and observed
 range for successful latencies, and infrastructure failures in separate
-sections. Expected-observation and unsupported-detail judgments are marked
-`not performed`; human review remains the semantic authority.
+sections. Its expected-observation and unsupported-detail fields remain
+`not performed` because the deterministic analyzer never invents semantic
+labels. Slice 7 human review is recorded separately in the dated public log
+and aggregate documentation; it does not rewrite raw evidence or copy private
+reference metadata into the saved run.
 
 ## Local Chat Benchmark
 
