@@ -2,6 +2,7 @@ package com.setaccio.lab.controller;
 
 import com.setaccio.lab.model.BenchmarkResult;
 import com.setaccio.lab.model.UploadedImage;
+import com.setaccio.lab.model.VisionInvocationSettings;
 import com.setaccio.lab.service.VisionBenchmarkService;
 import com.setaccio.lab.util.MultipartUploads;
 import org.slf4j.Logger;
@@ -36,14 +37,18 @@ public class VisionBenchmarkController {
     @PostMapping
     public ResponseEntity<BenchmarkResult> run(
             @RequestParam("files") MultipartFile[] files,
-            @RequestParam("models") String modelsCsv) throws IOException {
+            @RequestParam("models") String modelsCsv,
+            @RequestParam(value = "temperature", required = false) Double temperature,
+            @RequestParam(value = "seed", required = false) Integer seed,
+            @RequestParam(value = "maxTokens", required = false) Integer maxTokens) throws IOException {
 
         List<String> models = parseModels(modelsCsv);
+        List<VisionInvocationSettings> settings = invocationSettings(models, temperature, seed, maxTokens);
         List<UploadedImage> images = MultipartUploads.persistImages(files);
 
         try {
             logger.info("Vision benchmark requested: {} models, {} images", models.size(), images.size());
-            return ResponseEntity.ok(visionBenchmarkService.run(images, models));
+            return ResponseEntity.ok(visionBenchmarkService.runConfigured(images, settings));
         } finally {
             MultipartUploads.cleanup(images);
         }
@@ -61,5 +66,19 @@ public class VisionBenchmarkController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Provide at least one model");
         }
         return models;
+    }
+
+    private List<VisionInvocationSettings> invocationSettings(
+            List<String> models,
+            Double temperature,
+            Integer seed,
+            Integer maxTokens) {
+        try {
+            return models.stream()
+                    .map(model -> new VisionInvocationSettings(model, temperature, seed, maxTokens))
+                    .toList();
+        } catch (IllegalArgumentException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 }

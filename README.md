@@ -37,9 +37,22 @@ shared manifest yet.
 
 - accepts uploaded images through multipart `files`,
 - runs each image against one or more local Ollama models through Spring AI,
+- uses the tracked `vision-image-analysis` prompt version 1 and records its
+  SHA-256 identity on every row,
+- accepts optional temperature, seed, and token-limit settings without changing
+  the existing multipart contract when they are omitted,
 - hashes inputs with the BLAKE3 utilities in `setaccio-core`,
-- returns structured rows with model, input hash, latency, output, and error details,
+- returns structured rows with detected MIME type, model settings, input hash,
+  token usage when available, deterministic required-section checks, latency,
+  output, and classified error details,
 - writes raw JSON results to `build/lab-results/` by default, configurable with `SETACCIO_LAB_OUTPUT_DIR`.
+
+The direct Spring AI vision call lives behind a reusable invocation component,
+while the interactive endpoint retains concurrent file/model coordination.
+Invocation success and required-section completion are recorded separately;
+format compliance is not treated as proof that a model understood an image.
+Vision results use the neutral host value `local` rather than exposing the
+machine hostname.
 
 ### Local Chat Benchmark
 

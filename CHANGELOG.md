@@ -13,6 +13,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Migrated the locked Tool Search matrix to the shared v1 evidence manifest and
   added standalone offline verification and deterministic summary reanalysis
   for both v1 and existing unversioned legacy-v0 saved runs.
+- Added a reusable direct Spring AI vision invocation contract with a tracked
+  versioned prompt and SHA-256 identity, explicit Ollama generation settings,
+  token metadata, deterministic required-section checks, classified failures,
+  and a backward-compatible multipart endpoint.
 - Wired the local vision benchmark endpoint through a public Spring AI/Ollama service that hashes inputs with `setaccio-core`, returns one row per file/model pair, and writes raw JSON results under `build/lab-results/`.
 - Added public-safe lab server support for upload temp-file handling, MIME detection, Caffeine-backed result caches, and benchmark output configuration.
 - Added environment variable documentation for `SETACCIO_LAB_INPUT_DIR` and `SETACCIO_LAB_OUTPUT_DIR` to support local image comparison workflows.

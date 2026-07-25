@@ -25,10 +25,23 @@
 
 ## Vision Benchmark Phase
 
-- Maintain service-level tests with a mocked `OllamaChatModel`.
-- Verify per-request model selection is passed through Spring AI options.
+- Keep the tracked `vision-image-analysis` prompt named and versioned; require an
+  explicit digest-test update when its bytes change.
+- Maintain the reusable direct Spring AI invocation boundary with a mocked
+  `OllamaChatModel`; default tests must not call Ollama.
+- Verify per-request model, temperature, seed, and optional token-limit settings
+  are passed through Spring AI options.
 - Verify uploaded files are copied to temporary files and cleaned up.
-- Verify result rows include model, input name, input hash, latency, output text, and failure details.
+- Verify result rows include prompt identity/digest, detected MIME type, model
+  settings, input name, BLAKE3 hash, latency, token usage when available,
+  output text, structural checks, invocation success, and classified failure
+  details.
+- Keep invocation success separate from deterministic required-section
+  completion; structural checks do not measure semantic image understanding.
+- Preserve the current multipart endpoint when optional generation settings are
+  omitted, and use the neutral result host value `local`.
+- Verify unavailable models, invalid inputs, empty responses, and provider
+  exceptions produce classified failure rows rather than aborting a benchmark.
 - Verify JSON result writing under ignored `build/lab-results/` output.
 
 ## Chat Benchmark Phase

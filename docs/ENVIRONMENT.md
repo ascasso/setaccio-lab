@@ -107,6 +107,55 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
+## Local Vision Benchmark
+
+The vision benchmark is available only through the `local` profile and requires
+explicit uploaded files and model names. Models must already be installed in
+the configured Ollama instance; the application keeps model pulling disabled.
+
+```bash
+./gradlew :setaccio-lab:bootRun --args='--spring.profiles.active=local'
+```
+
+The existing multipart request remains valid:
+
+```bash
+curl -sS http://localhost:8082/api/lab/vision \
+  -F files=@/path/to/image.jpg \
+  -F models=gemma4:e2b
+```
+
+Optional generation settings may be supplied for reproducible calls:
+
+```bash
+curl -sS http://localhost:8082/api/lab/vision \
+  -F files=@/path/to/image.jpg \
+  -F models=gemma4:e2b \
+  -F temperature=0.0 \
+  -F seed=42 \
+  -F maxTokens=1024
+```
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `files` | Yes | One or more JPEG, PNG, GIF, or WebP uploads. Request-scoped temporary copies are deleted after the response. |
+| `models` | Yes | Comma-separated, already-installed Ollama model tags. |
+| `temperature` | No | Value from `0.0` through `2.0`. When omitted, the configured model default remains in effect. |
+| `seed` | No | Non-negative Ollama generation seed. When omitted, the configured model default remains in effect. |
+| `maxTokens` | No | Optional Ollama `num_predict` limit from `1` through `32768`. |
+
+Every row records the tracked `vision-image-analysis` prompt ID, version `1`,
+its calculated SHA-256 digest, detected MIME type, BLAKE3 input hash, requested
+generation settings, token usage when Spring AI exposes it, latency, output,
+and classified failure information. Seven deterministic checks report whether
+the required Markdown sections are present. `success` reports invocation
+success independently from `structureComplete`; neither field is a semantic
+image-quality judgment.
+
+The endpoint continues to write `*-vision.json` under
+`SETACCIO_LAB_OUTPUT_DIR`, which defaults to `build/lab-results/`. Vision output
+uses the neutral host value `local`. No new environment variable is required.
+
 ## Local Chat Benchmark
 
 The simple chat benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.
