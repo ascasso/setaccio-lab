@@ -131,18 +131,39 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-07-11)
+## Current State Snapshot (as of 2026-07-25)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
 - Root Gradle build with Java 25.
 - `setaccio-core` is a plain Java BLAKE3 utility library.
 - `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.0`.
-- The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses local Ollama through Spring AI, hashes inputs through `setaccio-core`, returns structured rows, and writes JSON under `build/lab-results/`.
+- The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses a tracked versioned public-safe prompt through a reusable direct Spring AI invocation boundary, supports optional temperature/seed/token settings, hashes inputs through `setaccio-core`, records prompt/MIME/token/structural/error metadata, returns a neutral `local` host value, and writes JSON under `build/lab-results/`.
+- The local vision corpus contract uses a tracked versioned public-safe template
+  with six stable non-sensitive case IDs and explicit privacy review fields.
+  Personal images and filled metadata belong only under the ignored
+  `setaccio-lab/local/vision-corpus/` directory; no local corpus content is
+  tracked.
+- The opt-in `visionMatrix` task validates that fixed local corpus, then runs
+  explicit models/cases/repetitions sequentially with temperature `0.0`, seeds
+  `42`/`43`, one explicit token policy, and Ollama pull strategy `never`. It
+  resolves full immutable Ollama model digests, writes suite-specific raw JSON,
+  a shared v1 manifest, and deterministic summary under a new dated
+  `build/vision-matrix/` directory.
+- `visionMatrixVerify` and `visionMatrixReanalyze` inspect saved vision
+  evidence without starting Spring, reading the private corpus, or contacting
+  a provider. Human expected-observation and unsupported-detail judgments
+  remain separate from deterministic analysis.
+- A controlled local vision matrix completed from clean commit `11e2fa7`
+  across three installed model families, four reviewed private cases, and two
+  repetitions. All 24 invocations and required-section checks passed, the
+  ignored v1 evidence verified offline, and Slice 7 human review is recorded
+  separately in public-safe aggregate documentation without ranking models.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
+- `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix and sequential vision matrix use the shared v1 manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
 - `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
 
@@ -229,10 +250,27 @@ Completed:
 - Make Tool Search comparisons paired and sequential, alternate advisor order across repetitions, and record deterministic generation settings.
 - Document local Ollama setup and provider environment variables.
 - Add offline tests for the current core, vision, chat, tool, Tool Search, and deterministic evaluator behavior.
+- Add the shared benchmark evidence lifecycle foundation and offline integrity tests.
+- Apply the shared evidence lifecycle to the locked Tool Search matrix and add
+  standalone offline saved-run verification and deterministic summary
+  regeneration with legacy-v0 compatibility.
+- Add the reproducible vision invocation contract with a tracked prompt and
+  digest, explicit Ollama options, usage metadata, deterministic section
+  checks, classified errors, and backward-compatible multipart handling.
+- Add the ignored local vision corpus layout and public-safe case metadata
+  template without tracking personal source images.
+- Add the dedicated sequential vision matrix, strict corpus reader,
+  suite-specific evidence writer, offline analyzer, and saved-run
+  verify/reanalyze tasks.
+- Populate and approve a bounded ignored corpus, smoke-check the selected
+  installed model cohort, lock the no-limit token policy, and complete one
+  clean-baseline controlled local vision matrix with offline verification.
 
 Pending:
 
-- Add public sample prompts and ignored sample image folders.
+- Test the bounded prompt hypothesis that explicitly requires `unknown` for
+  exact location, identity, event, and time when the image does not support
+  those details; keep the same corpus, model cohort, and evidence protocol.
 - Run controlled, explicitly selected local model matrices against the expectation-aware tool case corpus before choosing another Tool Search index or provider path.
 - Add or refine AI-judged evaluation and Testcontainers planning docs before wiring either live path.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
@@ -265,12 +303,14 @@ Maintain tests that prove:
 
 ### Vision Benchmark Tests
 
-When benchmark execution is added:
-
-- Mock `OllamaChatModel` or use a small adapter boundary so service tests do not require a live model.
-- Verify model names are passed through per request.
+- Mock `OllamaChatModel` through the reusable vision invocation boundary so
+  service tests do not require a live model.
+- Verify prompt ID/version/digest and explicit model, temperature, seed, and
+  optional token-limit settings.
 - Verify uploaded files are copied to temporary files and cleaned up.
-- Verify result rows include model, input name, input hash, latency, output text, success flag, and error details.
+- Verify result rows include model settings, prompt metadata, detected MIME
+  type, input name/hash, latency, token metadata, output text, structural
+  checks, success flag, and classified error details.
 - Verify failed model calls produce failed rows rather than crashing the whole benchmark run.
 - Verify result JSON writing uses ignored build output directories.
 
@@ -332,6 +372,7 @@ MCP phase:
 ```bash
 ./gradlew :setaccio-core:test
 ./gradlew :setaccio-lab:test
+./gradlew :setaccio-lab:visionMatrixTest
 ./gradlew :setaccio-testcontainers:test
 ./gradlew :setaccio-core:build
 ./gradlew :setaccio-lab:build

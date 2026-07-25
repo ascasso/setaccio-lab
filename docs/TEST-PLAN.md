@@ -9,13 +9,83 @@
 - Add controller validation tests for missing files, missing model names, and malformed model lists.
 - Maintain the implemented deterministic Spring AI evaluator contract, and keep AI-judged evaluation and Testcontainers APIs under review before adding either live abstraction.
 
+## Shared Evidence Lifecycle
+
+- Keep the shared evidence primitives plain Java and independent of Spring application startup, model providers, and suite-specific result row types.
+- Require a positive versioned manifest envelope with suite and run identity, generation time, Git commit and dirty state, Spring Boot and Spring AI versions, execution engine, run settings, and relative artifact descriptors.
+- Allocate unique run directories atomically and refuse named-directory or manifest overwrites.
+- Use BLAKE3 for benchmark input identity and streaming SHA-256 for generated artifact integrity.
+- Reject absolute, parent-traversing, cross-platform absolute, or symbolic-link artifact paths.
+- Verify saved runs entirely offline and report missing, modified, empty, duplicate, undeclared, or unsafe artifacts clearly.
+- Keep manifest JSON free of hostnames, absolute paths, credentials, and raw private environment details.
+- Keep the locked Tool Search matrix on the shared v1 manifest while retaining
+  legacy-v0 reads for existing unversioned matrix directories.
+- Do not describe vision, chat, or evaluation output as using the shared
+  manifest until each writer is migrated and tested separately.
+
 ## Vision Benchmark Phase
 
-- Maintain service-level tests with a mocked `OllamaChatModel`.
-- Verify per-request model selection is passed through Spring AI options.
+- Keep the tracked `vision-image-analysis` prompt named and versioned; require an
+  explicit digest-test update when its bytes change.
+- Maintain the reusable direct Spring AI invocation boundary with a mocked
+  `OllamaChatModel`; default tests must not call Ollama.
+- Verify per-request model, temperature, seed, and optional token-limit settings
+  are passed through Spring AI options.
 - Verify uploaded files are copied to temporary files and cleaned up.
-- Verify result rows include model, input name, input hash, latency, output text, and failure details.
+- Verify result rows include prompt identity/digest, detected MIME type, model
+  settings, input name, BLAKE3 hash, latency, token usage when available,
+  output text, structural checks, invocation success, and classified failure
+  details.
+- Keep invocation success separate from deterministic required-section
+  completion; structural checks do not measure semantic image understanding.
+- Preserve the current multipart endpoint when optional generation settings are
+  omitted, and use the neutral result host value `local`.
+- Verify unavailable models, invalid inputs, empty responses, and provider
+  exceptions produce classified failure rows rather than aborting a benchmark.
 - Verify JSON result writing under ignored `build/lab-results/` output.
+- Keep the tracked vision corpus template at version 1 with stable,
+  non-sensitive case IDs and relative case-ID-based image filenames.
+- Verify the template contains MIME type, BLAKE3 identity, human reference
+  observation, expected concepts, unsupported details, deliberate limitations,
+  and explicit privacy-review fields, all defaulting to unapproved.
+- Keep personal images and filled case metadata under the explicitly ignored
+  `setaccio-lab/local/vision-corpus/` directory; never use original filenames
+  or absolute paths in the catalog or public evidence.
+- Require sensitive-content and EXIF/GPS review plus explicit user approval
+  before tracking any image or derivative.
+- Keep the dedicated matrix reader specific to this exact corpus contract
+  rather than introducing generic YAML/JSON suite discovery.
+- Maintain the implemented dedicated corpus reader with strict unknown-field,
+  case-ID, relative-path, MIME-byte, BLAKE3, non-empty-file, duplicate, symlink,
+  and sensitive-content-review validation.
+- Keep the opt-in matrix protocol fixed at sequential
+  model/case/repetition execution, two repetitions, temperature `0.0`, seeds
+  `42` and `43`, one explicit token policy, and Ollama pull strategy `never`.
+- Require explicit model tags, the fixed ignored corpus directory, and one new
+  dated output directory. Check the installed Ollama model list with pulling
+  disabled, record each normalized name and full immutable digest, reject
+  duplicate aliases for the same model bytes, and fail before output allocation
+  when a requested tag is missing or its identity is incomplete; never attach
+  `visionMatrix` to `test`, `check`, `build`, or CI.
+- Keep raw vision evidence suite-specific and free of local paths, original
+  filenames, reference observations, expected concepts, and unsupported-detail
+  notes.
+- Write raw JSON, a shared v1 evidence manifest, and deterministic
+  `SUMMARY.md`; verify and reanalyze saved runs without Spring, corpus access,
+  Ollama, or another provider.
+- Keep invocation success, structural completion, human expected-observation
+  review, human unsupported-detail review, repetition diagnostics, token
+  availability, successful-invocation latency, and infrastructure failures as
+  separate dimensions.
+- With two repetitions, report median and observed latency range rather than
+  percentiles. Keep structural completion and exact-output matching explicitly
+  separate from semantic image understanding.
+- After offline verification, record human expected-concept and
+  unsupported-detail judgments separately per model/case, label them as human
+  review rather than automated scores, include repetition/token/latency and
+  infrastructure observations, and do not declare an aggregate winner.
+- Reject tampered or missing raw evidence, manifest protocol drift, unexpected
+  artifacts, and summaries that differ from deterministic offline analysis.
 
 ## Chat Benchmark Phase
 
@@ -64,7 +134,13 @@
 - Keep `toolSearchSmokeTest` offline. Cover semantic and ordinal case selection, live-wrapper parsing fixtures, raw-to-normalized discovery comparison, malformed results, trace-linkage failures, and every console summary bucket without starting Ollama.
 - Fail the live smoke task only for startup/invocation failures, malformed results, missing trace linkages, or raw-versus-normalized discovery mismatches. Treat missing searches, zero matches, required-but-unexecuted tools, and output-contract failures as diagnostic model behavior unless an explicit hypothesis says otherwise.
 - Keep the post-fix three-model baseline in the separate `toolSearchMatrixBaseline` task with the July 12 models, five canonical case IDs, two repetitions, seeds 42/43, temperature 0.0, no token ceiling, alternate order, paired sequential execution, and complete fixture tool list locked in code.
-- Require a new dated `build/tool-search-matrix/` output directory and retain one raw comparison JSON, `manifest.json`, and `SUMMARY.md`; refuse overwrites and verify the raw artifact SHA-256.
+- Require a new dated `build/tool-search-matrix/` output directory and retain one raw comparison JSON, shared v1 `manifest.json`, and `SUMMARY.md`; refuse overwrites and verify both generated artifacts by size and SHA-256.
+- Keep `toolSearchMatrixVerify` and `toolSearchMatrixReanalyze` standalone and
+  offline: neither may start Spring, contact a provider, or join the default
+  Gradle lifecycle.
+- Verify both shared v1 and legacy-v0 saved matrix directories, reject tampered
+  or missing raw results and locked-protocol manifest drift, and require
+  byte-for-byte deterministic summary regeneration.
 - Verify every linked non-empty raw Tool Search discovery exactly matches normalized tool names. Treat malformed/linkage/mismatch conditions and unclassified failed contracts as matrix-integrity failures.
 - Classify failed canonical contracts exhaustively as no search call, zero discovery, incomplete discovery, discovered-not-executed, execution failure, or output-contract failure. Preserve precedence tests and a successful zero-discovery abstention test.
 - Compare post-fix counts to both recorded and corrected July 12 counts, and require the summary to name corrected request construction and Issue #20 discovery normalization as confounders. Do not present Issue #21's chat fix as a tool pass-rate cause.
