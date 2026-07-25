@@ -42,6 +42,15 @@ class EvidenceVerifierTest {
     }
 
     @Test
+    void hashesInMemoryArtifactMetadataWithoutWritingAFile() {
+        assertThat(EvidenceIntegrity.sha256("abc".getBytes(java.nio.charset.StandardCharsets.UTF_8)))
+                .isEqualTo("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+        assertThatIllegalArgumentException()
+                .isThrownBy(() -> EvidenceIntegrity.sha256((byte[]) null))
+                .withMessage("bytes must not be null");
+    }
+
+    @Test
     void reportsAMissingDeclaredArtifact() throws Exception {
         Path runDirectory = EvidenceRunDirectory.createNamed(tempDir, "missing-run");
         Path raw = Files.writeString(runDirectory.resolve("raw.json"), "{\"result\":true}");

@@ -143,7 +143,7 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
-- `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. Existing benchmark writers have not adopted them yet.
+- `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix uses the shared v1 manifest; standalone offline tasks also verify and reanalyze existing unversioned legacy-v0 matrix directories.
 - The default Ollama model is `gemma4:e2b`.
 - `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
 
@@ -231,10 +231,12 @@ Completed:
 - Document local Ollama setup and provider environment variables.
 - Add offline tests for the current core, vision, chat, tool, Tool Search, and deterministic evaluator behavior.
 - Add the shared benchmark evidence lifecycle foundation and offline integrity tests.
+- Apply the shared evidence lifecycle to the locked Tool Search matrix and add
+  standalone offline saved-run verification and deterministic summary
+  regeneration with legacy-v0 compatibility.
 
 Pending:
 
-- Apply the shared evidence lifecycle to the locked Tool Search matrix and add standalone saved-run verification and summary regeneration.
 - Add public sample prompts and ignored sample image folders.
 - Run controlled, explicitly selected local model matrices against the expectation-aware tool case corpus before choosing another Tool Search index or provider path.
 - Add or refine AI-judged evaluation and Testcontainers planning docs before wiring either live path.

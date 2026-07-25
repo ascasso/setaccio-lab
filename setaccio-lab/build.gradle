@@ -6,6 +6,7 @@ plugins {
 
 import com.setaccio.gradle.ToolSearchSmokeTask
 import com.setaccio.gradle.ToolSearchMatrixBaselineTask
+import com.setaccio.gradle.ToolSearchMatrixOfflineTask
 
 description = 'Setaccio Lab'
 
@@ -78,6 +79,28 @@ tasks.register('toolSearchMatrixBaseline', ToolSearchMatrixBaselineTask) {
     dependsOn tasks.named('toolSearchSmokeClasses')
     classpath.from(sourceSets.toolSearchSmoke.runtimeClasspath)
     mainClass.set('com.setaccio.lab.smoke.ToolSearchMatrixBaselineRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('toolSearchMatrixVerify', ToolSearchMatrixOfflineTask) {
+    description = 'Verifies a saved Tool Search matrix without calling a model provider.'
+    dependsOn tasks.named('toolSearchSmokeClasses')
+    classpath.from(sourceSets.toolSearchSmoke.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.smoke.ToolSearchMatrixOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('toolSearchMatrixReanalyze', ToolSearchMatrixOfflineTask) {
+    description = 'Regenerates and verifies a saved Tool Search matrix summary without calling a model provider.'
+    dependsOn tasks.named('toolSearchSmokeClasses')
+    classpath.from(sourceSets.toolSearchSmoke.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.smoke.ToolSearchMatrixOfflineRunner')
+    mode.set('reanalyze')
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

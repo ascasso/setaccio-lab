@@ -58,6 +58,13 @@ public final class EvidenceIntegrity {
         }
     }
 
+    public static String sha256(byte[] bytes) {
+        if (bytes == null) {
+            throw new IllegalArgumentException("bytes must not be null");
+        }
+        return HexFormat.of().formatHex(sha256Digest().digest(bytes));
+    }
+
     private static Path normalizedRoot(Path runDirectory) {
         if (runDirectory == null) {
             throw new IllegalArgumentException("runDirectory must not be null");

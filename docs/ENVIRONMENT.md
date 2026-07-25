@@ -303,7 +303,12 @@ build/tool-search-matrix/YYYY-MM-DD-post-fix-baseline/
 └── SUMMARY.md
 ```
 
-The manifest records the Git commit, Spring AI version, Issue #20/#21 context, models, cases, canonical prompts/expectations, tool names, run settings, execution/index metadata, Ollama base URL, no-pull strategy, expectation fingerprint, raw filename, and raw SHA-256.
+New runs use the shared v1 evidence manifest. It records run identity, Git
+commit and dirty state, Spring Boot and Spring AI versions, execution engine,
+Issue #20/#21 context, models, cases, canonical prompts/expectations, tool
+names, run settings, execution/index metadata, Ollama base URL, no-pull
+strategy, expectation fingerprint, and relative descriptors with sizes and
+SHA-256 digests for both the raw JSON and `SUMMARY.md`.
 
 Every Tool Search row is checked independently against its raw linked response. Non-empty raw discoveries must exactly match normalized tool names in order; empty raw responses must normalize empty. Missing, duplicate, malformed, orphaned, or mismatched traces invalidate the baseline.
 
@@ -319,6 +324,35 @@ Failed canonical contracts are assigned exactly one primary category, in this pr
 A successful abstention with zero discovery is not a failure. The deterministic `fixture-tool-failure` response is expected fixture data rather than an automatic execution failure. Any failed row outside the six categories invalidates analysis instead of being placed in an `other` bucket.
 
 `SUMMARY.md` compares the post-fix pass counts with both the originally recorded and corrected July 12 counts. It always highlights two confounders: the July 12 request used the wrong deterministic marker, and Issue #20 changes normalization of object-shaped Tool Search responses. Issue #21 is recorded as adjacent chat correctness work, not as a direct tool-scoring cause.
+
+### Offline verification and reanalysis
+
+Saved matrix evidence can be verified without starting Spring or contacting a
+model provider:
+
+```bash
+./gradlew toolSearchMatrixVerify \
+  --run-dir=build/tool-search-matrix/2026-07-13-post-fix-baseline
+```
+
+Verification checks the manifest contract, locked protocol metadata, raw
+SHA-256, expected 60-row structure and trace integrity, deterministic summary,
+and absence of missing, extra, empty, modified, path-escaping, or symbolic-link
+artifacts.
+
+To regenerate only `SUMMARY.md` from an intact saved raw result:
+
+```bash
+./gradlew toolSearchMatrixReanalyze \
+  --run-dir=build/tool-search-matrix/2026-07-13-post-fix-baseline
+```
+
+Reanalysis verifies the immutable manifest and raw JSON before replacing the
+summary atomically, then verifies the complete directory again. It refuses to
+regenerate from missing, modified, malformed, or protocol-drifted raw evidence.
+Both commands read the shared v1 manifest and the earlier unversioned Tool
+Search manifest, which is treated as legacy v0. They are standalone opt-in
+tasks and are not attached to `test`, `check`, `build`, or default CI.
 
 ## Local Fixture Evaluation Benchmark
 

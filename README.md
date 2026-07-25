@@ -26,9 +26,10 @@ undeclared, path-escaping, or symbolic-link artifacts without starting Spring
 or contacting a model provider.
 
 The lifecycle deliberately keeps suite result payloads separate and reserves
-BLAKE3 for benchmark input identity. Existing Tool Search and vision writers do
-not use the shared manifest yet; Tool Search adoption and saved-run reanalysis
-are the next implementation slice.
+BLAKE3 for benchmark input identity. The locked Tool Search matrix now writes
+this v1 manifest around its unchanged raw comparison JSON and deterministic
+Markdown summary. Vision, chat, and evaluation writers have not adopted the
+shared manifest yet.
 
 ### Local Vision Benchmark
 
@@ -66,7 +67,13 @@ Tool Search comparison is disabled by default and currently supports the in-memo
 
 An explicitly opt-in `toolSearchSmoke` Gradle task validates the live Tool Search response wrapper and raw-to-normalized trace linkage against one already-installed Ollama model. It is not connected to `test`, `check`, or `build`, enforces Ollama's `never` pull strategy, and treats model behavior categories as diagnostic output rather than merge gates. See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#opt-in-tool-search-smoke-automation) for invocation and case-selection details.
 
-The separate `toolSearchMatrixBaseline` task reproduces the locked July 12 three-model/five-case protocol from canonical Java cases and writes a raw trace, manifest, and Markdown comparison under a new dated `build/tool-search-matrix/` directory. It verifies every raw-to-normalized discovery linkage and classifies contract failures into six explicit diagnostic categories. Its report compares both the originally recorded and corrected July 12 counts, with the request-construction correction called out as a confounder.
+The separate `toolSearchMatrixBaseline` task reproduces the locked July 12 three-model/five-case protocol from canonical Java cases and writes a raw trace, shared v1 evidence manifest, and Markdown comparison under a new dated `build/tool-search-matrix/` directory. It verifies every raw-to-normalized discovery linkage and classifies contract failures into six explicit diagnostic categories. Its report compares both the originally recorded and corrected July 12 counts, with the request-construction correction called out as a confounder.
+
+Saved matrix directories can be checked with `toolSearchMatrixVerify` or have
+only their deterministic `SUMMARY.md` regenerated with
+`toolSearchMatrixReanalyze`. Both commands are offline, accept current v1
+manifests and the earlier unversioned legacy-v0 manifest, and never start Spring
+or contact Ollama.
 
 ### Local Fixture Evaluation Benchmark
 
