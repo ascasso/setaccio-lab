@@ -182,9 +182,90 @@ made public, strip and recheck EXIF/GPS metadata and obtain explicit user
 approval for that file. Review state does not itself authorize tracking.
 
 See [the local vision corpus contract](vision-corpus/README.md) for the exact
-fields, six target case categories, and public-artifact boundary. This slice
-does not add the matrix command; the future dedicated vision task will consume
-this exact layout.
+fields, six target case categories, and public-artifact boundary.
+
+### Opt-in sequential vision matrix
+
+The dedicated vision matrix is not attached to `test`, `check`, `build`, or
+CI. Before running it:
+
+1. Replace every placeholder in the ignored `cases.json`.
+2. Set `sensitiveContentReviewed` to `true` only after reviewing that exact
+   image.
+3. Confirm MIME types and BLAKE3 digests match the exact local bytes.
+4. Confirm every selected model tag is already installed with `ollama list`.
+5. Decide one token policy for the entire run.
+
+Run the offline suite first:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixTest
+```
+
+Then invoke the live matrix explicitly, replacing the example model and output
+name as needed:
+
+```bash
+./gradlew :setaccio-lab:visionMatrix \
+  --corpus-dir=local/vision-corpus \
+  --models=gemma4:e2b \
+  --max-tokens=none \
+  --output-dir=build/vision-matrix/2026-07-25-local
+```
+
+| Option | Required | Contract |
+| --- | --- | --- |
+| `--corpus-dir` | Yes | Must resolve to the fixed ignored `local/vision-corpus` directory inside the `setaccio-lab` module. |
+| `--models` | Yes | Comma-separated, unique, already-installed Ollama tags. No model is selected implicitly. |
+| `--max-tokens` | Yes | `none` or one integer from `1` through `32768`, locked for every row. |
+| `--output-dir` | Yes | A new direct child of `build/vision-matrix/` whose name contains a `YYYY-MM-DD` date. Existing directories are never reused. |
+
+The protocol is fixed at two repetitions, temperature `0.0`, effective seeds
+`42` and `43`, model-major/case-major/repetition order, strictly sequential
+execution, and `spring.ai.ollama.init.pull-model-strategy=never`. The runner
+validates the catalog, relative case-ID image paths, MIME bytes, BLAKE3 hashes,
+and sensitive-content review state before it starts Spring. It then queries
+Ollama's installed-model list with pulling disabled and fails before creating
+the output directory when any requested normalized tag is missing.
+
+Each successful run directory contains:
+
+- `vision-matrix-results.json`, with safe case IDs and input identities but no
+  local paths, original filenames, reference observations, expected concepts,
+  unsupported-detail notes, or raw provider exception messages;
+- `manifest.json`, using the shared evidence lifecycle and SHA-256 artifact
+  integrity;
+- `SUMMARY.md`, generated deterministically from the raw result.
+
+Verify a saved run without Spring, the private corpus, or Ollama:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixVerify \
+  --run-dir=build/vision-matrix/2026-07-25-local
+```
+
+Regenerate only `SUMMARY.md` from verified immutable raw evidence:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixReanalyze \
+  --run-dir=build/vision-matrix/2026-07-25-local
+```
+
+Offline verification rejects missing, tampered, empty, unexpected, unsafe, or
+protocol-drifted artifacts. Reanalysis refuses to change the summary when raw
+evidence or manifest settings fail validation.
+
+The complete run directory remains ignored and private by default. Raw model
+outputs may describe sensitive visible content even though corpus metadata and
+paths are omitted. Do not publish raw results without a separate content
+review; public closeout for private cases should use only safe case IDs and
+reviewed aggregate findings.
+
+The summary reports invocation success, structural completion, repetition
+readiness and exact-output diagnostics, token availability, median and observed
+range for successful latencies, and infrastructure failures in separate
+sections. Expected-observation and unsupported-detail judgments are marked
+`not performed`; human review remains the semantic authority.
 
 ## Local Chat Benchmark
 

@@ -26,10 +26,10 @@ undeclared, path-escaping, or symbolic-link artifacts without starting Spring
 or contacting a model provider.
 
 The lifecycle deliberately keeps suite result payloads separate and reserves
-BLAKE3 for benchmark input identity. The locked Tool Search matrix now writes
-this v1 manifest around its unchanged raw comparison JSON and deterministic
-Markdown summary. Vision, chat, and evaluation writers have not adopted the
-shared manifest yet.
+BLAKE3 for benchmark input identity. The locked Tool Search matrix and the
+dedicated sequential vision matrix write v1 manifests around their
+suite-specific raw JSON and deterministic Markdown summaries. The interactive
+vision, chat, and evaluation writers have not adopted the shared manifest yet.
 
 ### Local Vision Benchmark
 
@@ -74,8 +74,25 @@ before it may be tracked. See
 [`docs/vision-corpus/README.md`](docs/vision-corpus/README.md) for the fixed
 layout and review procedure.
 
-This contract is ready for the dedicated matrix reader in the next slice; it
-does not yet add a vision matrix task or run a model.
+The opt-in `visionMatrix` task consumes this exact contract. It validates the
+catalog and exact input bytes before starting Spring, then executes every
+explicit model, case, and repetition strictly sequentially with temperature
+`0.0`, effective seeds `42` and `43`, one predeclared token policy, and
+Ollama's pull strategy forced to `never`. It checks Ollama's installed-model
+list and fails before creating the run directory when a requested tag is
+missing. The task writes suite-specific raw JSON, a shared v1 evidence
+manifest, and `SUMMARY.md` under a required new dated `build/vision-matrix/`
+directory.
+
+Saved runs can be checked with `visionMatrixVerify` or have only their
+deterministic summary regenerated with `visionMatrixReanalyze`. Both paths are
+offline: they do not read the private corpus, start Spring, or contact Ollama.
+The analyzer keeps invocation, structural completion, repetition diagnostics,
+token availability, successful-invocation latency, and infrastructure failures
+separate. Expected-concept and unsupported-detail judgments remain explicitly
+unperformed until human review.
+
+No controlled live vision matrix has been run as part of this capability.
 
 ### Local Chat Benchmark
 
@@ -180,9 +197,13 @@ Offline tests for the isolated Tool Search smoke analyzer are also available exp
 
 ```bash
 ./gradlew :setaccio-lab:toolSearchSmokeTest
+./gradlew :setaccio-lab:visionMatrixTest
 ```
 
-The same isolated offline suite covers matrix protocol, trace-integrity, and failure-classification behavior. Live matrix execution is an explicit separate task documented in `docs/ENVIRONMENT.md` and is never part of the normal build lifecycle.
+The isolated offline suites cover matrix protocols, evidence integrity,
+deterministic reanalysis, and failure classification. Live matrix execution is
+an explicit separate task documented in `docs/ENVIRONMENT.md` and is never part
+of the normal build lifecycle.
 
 ## Build Versions
 

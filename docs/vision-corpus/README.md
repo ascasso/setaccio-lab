@@ -48,9 +48,9 @@ The catalog is vision-specific and has `corpusVersion` `1`. Every case records:
 
 Use the case ID as the copied image filename. Do not put an original filename,
 absolute path, person name, address, account identifier, or other sensitive
-detail in the catalog. The future matrix may use the local observation fields
-for human review, but public evidence must use only safe case IDs and
-public-safe aggregate findings.
+detail in the catalog. Human matrix review may use the local observation fields,
+but public evidence must use only safe case IDs and public-safe aggregate
+findings.
 
 The MIME type and BLAKE3 digest describe the exact bytes used by the matrix.
 Recalculate both whenever an image is resized, recompressed, stripped of
@@ -80,6 +80,10 @@ approved.
 ## Scope boundary
 
 This contract is not a generalized suite loader or prompt-management format.
-Slice 5 may add a dedicated vision matrix reader and validation for this exact
-layout. It must not search arbitrary directories, infer cases from filenames,
-or copy private metadata into public artifacts.
+The dedicated vision matrix reader validates this exact layout. It does not
+search arbitrary directories, infer cases from filenames, or copy private
+metadata into saved evidence. Raw model outputs may still describe sensitive
+visible content, so the ignored matrix run directory also remains private until
+separately reviewed. See
+[`docs/ENVIRONMENT.md`](../ENVIRONMENT.md#opt-in-sequential-vision-matrix) for
+the opt-in live, offline verification, and reanalysis commands.

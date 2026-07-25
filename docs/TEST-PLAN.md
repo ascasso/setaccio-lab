@@ -53,8 +53,33 @@
   or absolute paths in the catalog or public evidence.
 - Require sensitive-content and EXIF/GPS review plus explicit user approval
   before tracking any image or derivative.
-- Keep the future matrix reader specific to this exact corpus contract rather
-  than introducing generic YAML/JSON suite discovery.
+- Keep the dedicated matrix reader specific to this exact corpus contract
+  rather than introducing generic YAML/JSON suite discovery.
+- Maintain the implemented dedicated corpus reader with strict unknown-field,
+  case-ID, relative-path, MIME-byte, BLAKE3, non-empty-file, duplicate, symlink,
+  and sensitive-content-review validation.
+- Keep the opt-in matrix protocol fixed at sequential
+  model/case/repetition execution, two repetitions, temperature `0.0`, seeds
+  `42` and `43`, one explicit token policy, and Ollama pull strategy `never`.
+- Require explicit model tags, the fixed ignored corpus directory, and one new
+  dated output directory. Check the installed Ollama model list with pulling
+  disabled and fail before output allocation when a requested tag is missing;
+  never attach `visionMatrix` to `test`, `check`, `build`, or CI.
+- Keep raw vision evidence suite-specific and free of local paths, original
+  filenames, reference observations, expected concepts, and unsupported-detail
+  notes.
+- Write raw JSON, a shared v1 evidence manifest, and deterministic
+  `SUMMARY.md`; verify and reanalyze saved runs without Spring, corpus access,
+  Ollama, or another provider.
+- Keep invocation success, structural completion, human expected-observation
+  review, human unsupported-detail review, repetition diagnostics, token
+  availability, successful-invocation latency, and infrastructure failures as
+  separate dimensions.
+- With two repetitions, report median and observed latency range rather than
+  percentiles. Keep structural completion and exact-output matching explicitly
+  separate from semantic image understanding.
+- Reject tampered or missing raw evidence, manifest protocol drift, unexpected
+  artifacts, and summaries that differ from deterministic offline analysis.
 
 ## Chat Benchmark Phase
 

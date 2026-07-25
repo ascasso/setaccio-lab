@@ -144,11 +144,20 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   Personal images and filled metadata belong only under the ignored
   `setaccio-lab/local/vision-corpus/` directory; no local corpus content is
   tracked.
+- The opt-in `visionMatrix` task validates that fixed local corpus, then runs
+  explicit models/cases/repetitions sequentially with temperature `0.0`, seeds
+  `42`/`43`, one explicit token policy, and Ollama pull strategy `never`. It
+  writes suite-specific raw JSON, a shared v1 manifest, and deterministic
+  summary under a new dated `build/vision-matrix/` directory.
+- `visionMatrixVerify` and `visionMatrixReanalyze` inspect saved vision
+  evidence without starting Spring, reading the private corpus, or contacting
+  a provider. Human expected-observation and unsupported-detail judgments
+  remain separate from deterministic analysis.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
-- `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix uses the shared v1 manifest; standalone offline tasks also verify and reanalyze existing unversioned legacy-v0 matrix directories.
+- `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix and sequential vision matrix use the shared v1 manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
 - `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
 
@@ -244,12 +253,15 @@ Completed:
   checks, classified errors, and backward-compatible multipart handling.
 - Add the ignored local vision corpus layout and public-safe case metadata
   template without tracking personal source images.
+- Add the dedicated sequential vision matrix, strict corpus reader,
+  suite-specific evidence writer, offline analyzer, and saved-run
+  verify/reanalyze tasks.
 
 Pending:
 
-- Add the sequential vision matrix runner and dedicated reader for the fixed
-  local vision corpus contract, then add offline analysis and evidence
-  lifecycle support before any controlled live run.
+- Populate and approve the ignored local corpus, smoke-check explicitly
+  selected installed models, lock the live token policy and output name, then
+  run one controlled local vision matrix.
 - Run controlled, explicitly selected local model matrices against the expectation-aware tool case corpus before choosing another Tool Search index or provider path.
 - Add or refine AI-judged evaluation and Testcontainers planning docs before wiring either live path.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
@@ -351,6 +363,7 @@ MCP phase:
 ```bash
 ./gradlew :setaccio-core:test
 ./gradlew :setaccio-lab:test
+./gradlew :setaccio-lab:visionMatrixTest
 ./gradlew :setaccio-testcontainers:test
 ./gradlew :setaccio-core:build
 ./gradlew :setaccio-lab:build
