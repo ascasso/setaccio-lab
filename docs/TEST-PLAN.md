@@ -9,6 +9,17 @@
 - Add controller validation tests for missing files, missing model names, and malformed model lists.
 - Maintain the implemented deterministic Spring AI evaluator contract, and keep AI-judged evaluation and Testcontainers APIs under review before adding either live abstraction.
 
+## Shared Evidence Lifecycle
+
+- Keep the shared evidence primitives plain Java and independent of Spring application startup, model providers, and suite-specific result row types.
+- Require a positive versioned manifest envelope with suite and run identity, generation time, Git commit and dirty state, Spring Boot and Spring AI versions, execution engine, run settings, and relative artifact descriptors.
+- Allocate unique run directories atomically and refuse named-directory or manifest overwrites.
+- Use BLAKE3 for benchmark input identity and streaming SHA-256 for generated artifact integrity.
+- Reject absolute, parent-traversing, cross-platform absolute, or symbolic-link artifact paths.
+- Verify saved runs entirely offline and report missing, modified, empty, duplicate, undeclared, or unsafe artifacts clearly.
+- Keep manifest JSON free of hostnames, absolute paths, credentials, and raw private environment details.
+- Until a benchmark suite adopts the lifecycle, do not describe existing Tool Search, vision, chat, or evaluation output as using the shared manifest.
+
 ## Vision Benchmark Phase
 
 - Maintain service-level tests with a mocked `OllamaChatModel`.

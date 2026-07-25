@@ -15,6 +15,21 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 
 ## Current capabilities
 
+### Shared Evidence Lifecycle Foundation
+
+`setaccio-lab` includes plain Java primitives for reproducible benchmark
+artifacts. They allocate unique non-overwriting run directories, write and read
+a versioned manifest envelope, capture Git and framework provenance, describe
+artifacts with relative paths and SHA-256 integrity metadata, and verify saved
+runs offline. Verification rejects missing, modified, empty, duplicate,
+undeclared, path-escaping, or symbolic-link artifacts without starting Spring
+or contacting a model provider.
+
+The lifecycle deliberately keeps suite result payloads separate and reserves
+BLAKE3 for benchmark input identity. Existing Tool Search and vision writers do
+not use the shared manifest yet; Tool Search adoption and saved-run reanalysis
+are the next implementation slice.
+
 ### Local Vision Benchmark
 
 `POST /api/lab/vision` runs under the `local` profile. It:
