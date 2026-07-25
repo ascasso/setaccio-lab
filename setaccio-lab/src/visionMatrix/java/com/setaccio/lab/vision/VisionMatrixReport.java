@@ -28,7 +28,13 @@ final class VisionMatrixReport {
         out.append("- Prompt: `").append(result.promptId()).append("` version `")
                 .append(result.promptVersion()).append("` (`")
                 .append(result.promptSha256()).append("`)\n");
-        out.append("- Pull strategy: `").append(result.pullModelStrategy()).append("`\n\n");
+        out.append("- Pull strategy: `").append(result.pullModelStrategy()).append("`\n");
+        out.append("- Immutable model identities:\n");
+        result.modelIdentities().forEach(identity -> out.append("  - `")
+                .append(identity.requestedModel()).append("` resolved as `")
+                .append(identity.resolvedModel()).append("` with Ollama digest `")
+                .append(identity.digest()).append("`\n"));
+        out.append('\n');
 
         renderDeterministicOutcomes(out, result, analysis);
         renderHumanReviewBoundary(out);

@@ -63,8 +63,10 @@
   `42` and `43`, one explicit token policy, and Ollama pull strategy `never`.
 - Require explicit model tags, the fixed ignored corpus directory, and one new
   dated output directory. Check the installed Ollama model list with pulling
-  disabled and fail before output allocation when a requested tag is missing;
-  never attach `visionMatrix` to `test`, `check`, `build`, or CI.
+  disabled, record each normalized name and full immutable digest, reject
+  duplicate aliases for the same model bytes, and fail before output allocation
+  when a requested tag is missing or its identity is incomplete; never attach
+  `visionMatrix` to `test`, `check`, `build`, or CI.
 - Keep raw vision evidence suite-specific and free of local paths, original
   filenames, reference observations, expected concepts, and unsupported-detail
   notes.

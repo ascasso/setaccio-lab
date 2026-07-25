@@ -93,6 +93,18 @@ final class VisionMatrixTestFixtures {
                         "fixture output " + image.originalFilename() + " seed " + invocationSettings.seed()),
                 PROMPT,
                 FIXED_CLOCK)
-                .execute(corpus, settings);
+                .execute(corpus, settings, modelIdentities(models));
+    }
+
+    static List<VisionMatrixModelIdentity> modelIdentities(List<String> models) {
+        List<VisionMatrixModelIdentity> identities = new ArrayList<>();
+        for (int index = 0; index < models.size(); index++) {
+            String model = models.get(index);
+            identities.add(new VisionMatrixModelIdentity(
+                    model,
+                    VisionMatrixRunner.normalizeModelTag(model),
+                    "%064x".formatted(index + 1)));
+        }
+        return List.copyOf(identities);
     }
 }

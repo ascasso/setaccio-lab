@@ -10,6 +10,7 @@ public record VisionMatrixResult(
         Instant startedAt,
         Instant finishedAt,
         VisionMatrixRunSettings runSettings,
+        List<VisionMatrixModelIdentity> modelIdentities,
         String executionStrategy,
         String pullModelStrategy,
         String promptId,
@@ -20,6 +21,7 @@ public record VisionMatrixResult(
 ) {
 
     public VisionMatrixResult {
+        modelIdentities = modelIdentities == null ? List.of() : List.copyOf(modelIdentities);
         inputs = inputs == null ? List.of() : List.copyOf(inputs);
         rows = rows == null ? List.of() : List.copyOf(rows);
     }

@@ -41,7 +41,9 @@ class VisionMatrixEvidenceTest {
                 .doesNotContain("Private fixture observation")
                 .doesNotContain("fixture concept")
                 .doesNotContain("unsupported fixture detail")
-                .doesNotContain("images/");
+                .doesNotContain("images/")
+                .contains("\"modelIdentities\"")
+                .contains("\"digest\"");
 
         Path summary = fixture.runDirectory().resolve(VisionMatrixEvidence.SUMMARY_FILENAME);
         String expected = Files.readString(summary, StandardCharsets.UTF_8);
@@ -110,6 +112,7 @@ class VisionMatrixEvidenceTest {
                 .contains("## Token availability")
                 .contains("## Latency")
                 .contains("## Infrastructure failures")
+                .contains("Immutable model identities")
                 .contains("Not performed")
                 .contains("does not calculate percentiles");
     }

@@ -87,6 +87,10 @@ class VisionMatrixAnalyzerTest {
                 valid.startedAt(),
                 valid.finishedAt(),
                 valid.runSettings(),
+                List.of(new VisionMatrixModelIdentity(
+                        "model-b",
+                        "model-b:latest",
+                        valid.modelIdentities().getFirst().digest())),
                 valid.executionStrategy(),
                 valid.pullModelStrategy(),
                 valid.promptId(),
@@ -99,6 +103,7 @@ class VisionMatrixAnalyzerTest {
 
         assertThat(analysis.valid()).isFalse();
         assertThat(analysis.integrityFailures())
+                .anyMatch(failure -> failure.contains("model identity drifted"))
                 .anyMatch(failure -> failure.contains("order or identity"))
                 .anyMatch(failure -> failure.contains("invocation settings"));
     }

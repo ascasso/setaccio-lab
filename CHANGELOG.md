@@ -23,9 +23,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
   images or filled metadata.
 - Added an opt-in sequential vision matrix with strict fixed-corpus validation,
   explicit installed-model and token-policy inputs, locked temperature and
-  seeds, no-pull Ollama execution, suite-specific raw results, shared v1
-  evidence manifests, deterministic summaries, and standalone offline
-  verification and reanalysis.
+  seeds, no-pull Ollama execution, immutable resolved model digests,
+  suite-specific raw results, shared v1 evidence manifests, deterministic
+  summaries, and standalone offline verification and reanalysis.
 - Wired the local vision benchmark endpoint through a public Spring AI/Ollama service that hashes inputs with `setaccio-core`, returns one row per file/model pair, and writes raw JSON results under `build/lab-results/`.
 - Added public-safe lab server support for upload temp-file handling, MIME detection, Caffeine-backed result caches, and benchmark output configuration.
 - Added environment variable documentation for `SETACCIO_LAB_INPUT_DIR` and `SETACCIO_LAB_OUTPUT_DIR` to support local image comparison workflows.

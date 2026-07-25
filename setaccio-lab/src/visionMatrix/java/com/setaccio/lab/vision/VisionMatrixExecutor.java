@@ -44,12 +44,23 @@ final class VisionMatrixExecutor {
 
     VisionMatrixResult execute(
             LoadedVisionCorpus corpus,
-            VisionMatrixRunSettings settings) {
+            VisionMatrixRunSettings settings,
+            List<VisionMatrixModelIdentity> modelIdentities) {
         if (corpus == null || corpus.cases().isEmpty()) {
             throw new IllegalArgumentException("corpus must contain at least one case");
         }
         if (settings == null) {
             throw new IllegalArgumentException("settings must not be null");
+        }
+        if (modelIdentities == null
+                || modelIdentities.size() != settings.models().size()) {
+            throw new IllegalArgumentException("model identities must match the configured models");
+        }
+        for (int index = 0; index < settings.models().size(); index++) {
+            if (!settings.models().get(index).equals(modelIdentities.get(index).requestedModel())) {
+                throw new IllegalArgumentException(
+                        "model identities must preserve configured model order");
+            }
         }
 
         Instant startedAt = clock.instant();
@@ -93,6 +104,7 @@ final class VisionMatrixExecutor {
                 startedAt,
                 clock.instant(),
                 settings,
+                modelIdentities,
                 VisionMatrixProtocol.EXECUTION_STRATEGY,
                 VisionMatrixProtocol.PULL_MODEL_STRATEGY,
                 promptDefinition.id(),

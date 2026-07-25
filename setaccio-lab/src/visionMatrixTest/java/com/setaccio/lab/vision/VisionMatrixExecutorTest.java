@@ -35,7 +35,10 @@ class VisionMatrixExecutorTest {
                 VisionMatrixTestFixtures.PROMPT,
                 VisionMatrixTestFixtures.FIXED_CLOCK);
 
-        VisionMatrixResult result = executor.execute(corpus, settings);
+        VisionMatrixResult result = executor.execute(
+                corpus,
+                settings,
+                VisionMatrixTestFixtures.modelIdentities(settings.models()));
 
         assertThat(calls).containsExactly(
                 "vision-one/model-a/42",
@@ -78,7 +81,8 @@ class VisionMatrixExecutorTest {
 
         VisionMatrixResult result = executor.execute(
                 corpus,
-                VisionMatrixProtocol.settings(List.of("model-a"), 512));
+                VisionMatrixProtocol.settings(List.of("model-a"), 512),
+                VisionMatrixTestFixtures.modelIdentities(List.of("model-a")));
 
         assertThat(result.rows()).hasSize(2);
         assertThat(result.rows().getFirst().invocationSuccess()).isFalse();

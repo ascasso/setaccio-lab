@@ -194,6 +194,8 @@ CI. Before running it:
    image.
 3. Confirm MIME types and BLAKE3 digests match the exact local bytes.
 4. Confirm every selected model tag is already installed with `ollama list`.
+   The task records the full resolved Ollama digest and rejects duplicate tags
+   that resolve to the same model bytes.
 5. Decide one token policy for the entire run.
 
 Run the offline suite first:
@@ -225,8 +227,10 @@ The protocol is fixed at two repetitions, temperature `0.0`, effective seeds
 execution, and `spring.ai.ollama.init.pull-model-strategy=never`. The runner
 validates the catalog, relative case-ID image paths, MIME bytes, BLAKE3 hashes,
 and sensitive-content review state before it starts Spring. It then queries
-Ollama's installed-model list with pulling disabled and fails before creating
-the output directory when any requested normalized tag is missing.
+Ollama's installed-model list with pulling disabled, resolves each requested
+tag to its normalized installed name and full digest, rejects aliases that
+identify the same model bytes, and fails before creating the output directory
+when any requested tag is missing or lacks complete identity metadata.
 
 Each successful run directory contains:
 

@@ -30,9 +30,15 @@ final class VisionMatrixProtocol {
                 maxTokens);
     }
 
+    static String normalizeModelTag(String model) {
+        String normalized = model.trim();
+        return normalized.contains(":") ? normalized : normalized + ":latest";
+    }
+
     static Map<String, Object> manifestSettings(VisionMatrixResult result) {
         LinkedHashMap<String, Object> settings = new LinkedHashMap<>();
         settings.put("models", result.runSettings().models());
+        settings.put("modelIdentities", result.modelIdentities());
         settings.put("caseIds", result.inputs().stream().map(VisionMatrixInput::caseId).toList());
         settings.put("inputs", result.inputs());
         settings.put("runSettings", result.runSettings());

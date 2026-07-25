@@ -110,6 +110,7 @@ final class VisionMatrixAnalyzer {
                 || settings.baseSeed() != VisionMatrixProtocol.BASE_SEED) {
             failures.add("Raw vision matrix settings drifted from the locked protocol.");
         }
+        validateModelIdentities(settings, result.modelIdentities(), failures);
         validateInputs(result.inputs(), failures);
         if (settings != null) {
             int expectedRows = settings.models().size()
@@ -118,6 +119,42 @@ final class VisionMatrixAnalyzer {
             if (safe(result.rows()).size() != expectedRows) {
                 failures.add("Raw vision matrix expected " + expectedRows + " rows but found "
                         + safe(result.rows()).size() + ".");
+            }
+        }
+    }
+
+    private void validateModelIdentities(
+            VisionMatrixRunSettings settings,
+            List<VisionMatrixModelIdentity> identities,
+            List<String> failures) {
+        if (settings == null) {
+            return;
+        }
+        if (identities == null || identities.size() != settings.models().size()) {
+            failures.add("Raw vision matrix model identities do not match the configured models.");
+            return;
+        }
+        Set<String> resolvedModels = new HashSet<>();
+        Set<String> digests = new HashSet<>();
+        for (int index = 0; index < settings.models().size(); index++) {
+            String expectedModel = settings.models().get(index);
+            VisionMatrixModelIdentity identity = identities.get(index);
+            if (identity == null
+                    || !expectedModel.equals(identity.requestedModel())
+                    || !VisionMatrixProtocol.normalizeModelTag(expectedModel)
+                            .equals(identity.resolvedModel())
+                    || identity.digest() == null
+                    || !identity.digest().matches("[0-9a-f]{64}")) {
+                failures.add("Raw vision matrix model identity drifted for " + expectedModel + ".");
+                continue;
+            }
+            if (!resolvedModels.add(identity.resolvedModel())) {
+                failures.add("Raw vision matrix contains duplicate resolved model "
+                        + identity.resolvedModel() + ".");
+            }
+            if (!digests.add(identity.digest())) {
+                failures.add("Raw vision matrix contains duplicate model digest for "
+                        + expectedModel + ".");
             }
         }
     }

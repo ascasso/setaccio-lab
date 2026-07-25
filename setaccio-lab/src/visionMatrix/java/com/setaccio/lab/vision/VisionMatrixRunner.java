@@ -10,9 +10,12 @@ import com.setaccio.lab.service.VisionPromptDefinition;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.ai.ollama.api.OllamaApi;
 import org.springframework.boot.WebApplicationType;
@@ -66,7 +69,8 @@ public final class VisionMatrixRunner {
                     throw new IllegalStateException(
                             "Effective Ollama pull strategy is not never: " + pullStrategy);
                 }
-                requireInstalledModels(context.getBean(OllamaApi.class), settings.models());
+                List<VisionMatrixModelIdentity> modelIdentities =
+                        requireInstalledModels(context.getBean(OllamaApi.class), settings.models());
                 EvidenceRunDirectory.createNamed(
                         outputDirectory.getParent(),
                         outputDirectory.getFileName().toString());
@@ -74,7 +78,7 @@ public final class VisionMatrixRunner {
                 promptDefinition = context.getBean(VisionPromptDefinition.class);
                 VisionModelInvoker invoker = context.getBean(VisionModelInvoker.class);
                 result = new VisionMatrixExecutor(invoker::invoke, promptDefinition)
-                        .execute(corpus, settings);
+                        .execute(corpus, settings, modelIdentities);
             }
 
             VisionMatrixAnalyzer.MatrixAnalysis analysis =
@@ -131,30 +135,58 @@ public final class VisionMatrixRunner {
         }
     }
 
-    static void requireInstalledModels(
+    static List<VisionMatrixModelIdentity> requireInstalledModels(
             OllamaApi ollamaApi,
             List<String> requestedModels) {
         OllamaApi.ListModelResponse response = ollamaApi.listModels();
-        Set<String> installed = response == null || response.models() == null
-                ? Set.of()
-                : response.models().stream()
-                        .filter(java.util.Objects::nonNull)
-                        .map(OllamaApi.Model::name)
-                        .filter(java.util.Objects::nonNull)
-                        .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        Map<String, OllamaApi.Model> installed = new LinkedHashMap<>();
+        if (response != null && response.models() != null) {
+            for (OllamaApi.Model model : response.models()) {
+                if (model != null && model.name() != null) {
+                    installed.put(normalizeModelTag(model.name()), model);
+                }
+            }
+        }
         List<String> missing = requestedModels.stream()
                 .map(VisionMatrixRunner::normalizeModelTag)
-                .filter(model -> !installed.contains(model))
+                .filter(model -> !installed.containsKey(model))
                 .toList();
         if (!missing.isEmpty()) {
             throw new IllegalArgumentException(
                     "Requested Ollama models are not installed: " + missing);
         }
+        List<VisionMatrixModelIdentity> identities = requestedModels.stream()
+                .map(requestedModel -> {
+                    String resolvedModel = normalizeModelTag(requestedModel);
+                    OllamaApi.Model installedModel = installed.get(resolvedModel);
+                    try {
+                        return new VisionMatrixModelIdentity(
+                                requestedModel,
+                                resolvedModel,
+                                installedModel.digest());
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException(
+                                "Installed Ollama model identity is incomplete for "
+                                        + resolvedModel + ": " + e.getMessage(),
+                                e);
+                    }
+                })
+                .toList();
+        Set<String> digests = new HashSet<>();
+        List<String> duplicateDigests = identities.stream()
+                .filter(identity -> !digests.add(identity.digest()))
+                .map(VisionMatrixModelIdentity::requestedModel)
+                .toList();
+        if (!duplicateDigests.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Requested Ollama model tags resolve to duplicate model digests: "
+                            + duplicateDigests);
+        }
+        return identities;
     }
 
     static String normalizeModelTag(String model) {
-        String normalized = model.trim();
-        return normalized.contains(":") ? normalized : normalized + ":latest";
+        return VisionMatrixProtocol.normalizeModelTag(model);
     }
 
     static Path resolveCorpusDirectory(String value) {

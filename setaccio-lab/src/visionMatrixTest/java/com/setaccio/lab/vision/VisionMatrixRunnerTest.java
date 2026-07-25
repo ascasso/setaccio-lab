@@ -40,10 +40,20 @@ class VisionMatrixRunnerTest {
                 model("model-a:latest"),
                 model("model-b:tag"))));
 
-        VisionMatrixRunner.requireInstalledModels(
+        List<VisionMatrixModelIdentity> identities = VisionMatrixRunner.requireInstalledModels(
                 ollamaApi,
                 List.of("model-a", "model-b:tag"));
 
+        assertThat(identities)
+                .extracting(
+                        VisionMatrixModelIdentity::requestedModel,
+                        VisionMatrixModelIdentity::resolvedModel,
+                        VisionMatrixModelIdentity::digest)
+                .containsExactly(
+                        org.assertj.core.groups.Tuple.tuple(
+                                "model-a", "model-a:latest", digest(1)),
+                        org.assertj.core.groups.Tuple.tuple(
+                                "model-b:tag", "model-b:tag", digest(2)));
         assertThatThrownBy(() -> VisionMatrixRunner.requireInstalledModels(
                 ollamaApi,
                 List.of("model-a", "missing:tag")))
@@ -51,6 +61,36 @@ class VisionMatrixRunnerTest {
                 .hasMessageContaining("missing:tag");
         Mockito.verify(ollamaApi, Mockito.times(2)).listModels();
         Mockito.verifyNoMoreInteractions(ollamaApi);
+    }
+
+    @Test
+    void rejectsMissingDigestsAndAliasesForTheSameInstalledModel() {
+        OllamaApi missingDigestApi = Mockito.mock(OllamaApi.class);
+        Mockito.when(missingDigestApi.listModels()).thenReturn(new OllamaApi.ListModelResponse(
+                List.of(new OllamaApi.Model(
+                        "model-a:latest",
+                        null,
+                        null,
+                        0L,
+                        null,
+                        null))));
+
+        assertThatThrownBy(() -> VisionMatrixRunner.requireInstalledModels(
+                missingDigestApi,
+                List.of("model-a")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("identity is incomplete");
+
+        OllamaApi duplicateApi = Mockito.mock(OllamaApi.class);
+        Mockito.when(duplicateApi.listModels()).thenReturn(new OllamaApi.ListModelResponse(List.of(
+                new OllamaApi.Model("model-a:latest", null, null, 0L, digest(1), null),
+                new OllamaApi.Model("alias:tag", null, null, 0L, digest(1), null))));
+
+        assertThatThrownBy(() -> VisionMatrixRunner.requireInstalledModels(
+                duplicateApi,
+                List.of("model-a", "alias:tag")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("duplicate model digests");
     }
 
     @Test
@@ -69,12 +109,17 @@ class VisionMatrixRunnerTest {
     }
 
     private OllamaApi.Model model(String name) {
+        int digestIndex = name.startsWith("model-a") ? 1 : 2;
         return new OllamaApi.Model(
                 name,
                 null,
                 null,
                 0L,
-                null,
+                digest(digestIndex),
                 null);
+    }
+
+    private String digest(int value) {
+        return "%064x".formatted(value);
     }
 }
