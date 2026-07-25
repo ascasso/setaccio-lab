@@ -94,10 +94,13 @@ token availability, successful-invocation latency, and infrastructure failures
 separate. Expected-concept and unsupported-detail judgments remain explicitly
 unperformed until human review.
 
-A one-case, six-row local smoke check has verified the selected three-model
-cohort, sequential protocol, immutable model identities, and offline evidence
-path. It remains diagnostic evidence from a dirty development baseline, not
-the final multi-case controlled matrix.
+A clean-baseline controlled local matrix completed across three models, four
+reviewed private cases, and two repetitions: 24 sequential rows at temperature
+`0.0`, seeds `42`/`43`, and no explicit token limit. All 24 invocations
+succeeded, all 24 outputs contained the required prompt sections, token
+metadata was available throughout, and the ignored evidence verified offline.
+Human semantic and unsupported-detail review remains a separate closeout step;
+these automated outcomes do not identify an aggregate winner.
 
 ### Local Chat Benchmark
 
