@@ -85,6 +85,9 @@
   unsupported-detail judgments separately per model/case, label them as human
   review rather than automated scores, include repetition/token/latency and
   infrastructure observations, and do not declare an aggregate winner.
+  Pre-register the review criteria before reading candidate raw responses; use
+  [`docs/VISION-HUMAN-REVIEW.md`](VISION-HUMAN-REVIEW.md) for the current
+  public-safe rubric.
 - Reject tampered or missing raw evidence, manifest protocol drift, unexpected
   artifacts, and summaries that differ from deterministic offline analysis.
 - Verify that every row and manifest retain the explicitly selected prompt ID,
