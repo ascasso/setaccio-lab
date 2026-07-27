@@ -98,6 +98,12 @@ requires matching model digests and order, input identities, settings, row
 order, and execution engine; it permits only prompt identity and code baseline
 to differ. The deterministic Markdown report is written to standard output and
 does not assess image semantics or copy private corpus metadata.
+The offline `visionHumanReviewPrepare` task builds on that comparison gate and
+the ignored local corpus to produce one private, non-overwriting Markdown
+worksheet under `build/vision-human-review/`. It groups baseline and candidate
+responses by model and case, includes both repetitions only when they differ,
+and leaves all semantic judgments and the final prompt decision to the human
+reviewer.
 The analyzer keeps invocation, structural completion, repetition diagnostics,
 token availability, successful-invocation latency, and infrastructure failures
 separate from semantic review.

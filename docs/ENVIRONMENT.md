@@ -274,15 +274,42 @@ and execution engine. Prompt identity and code baseline may differ. The report
 covers invocation, structural, repetition, token, latency, and infrastructure
 deltas only; semantic judgments remain human review.
 
+Prepare one private human-review worksheet after the paired evidence
+directories and fixed local corpus are present:
+
+```bash
+./gradlew :setaccio-lab:visionHumanReviewPrepare \
+  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
+  --corpus-dir=local/vision-corpus
+```
+
+The task verifies both runs, applies the same deterministic comparability gate,
+and validates that the current private corpus cases still match the saved MIME
+and BLAKE3 input identities. It then writes:
+
+```text
+build/vision-human-review/
+└── <baseline-run>--vs--<candidate-run>/
+    └── HUMAN-REVIEW.md
+```
+
+The worksheet contains private reference metadata, local image links, and raw
+model responses grouped by model and case. Successful repetitions that match
+exactly are shown once; differing or failed repetitions are shown separately.
+The task does not start Spring, contact Ollama, select evidence automatically,
+score semantics, or make the prompt decision. It refuses to overwrite an
+existing worksheet so partially completed human notes remain protected.
+
 Offline verification rejects missing, tampered, empty, unexpected, unsafe, or
 protocol-drifted artifacts. Reanalysis refuses to change the summary when raw
 evidence or manifest settings fail validation.
 
-The complete run directory remains ignored and private by default. Raw model
-outputs may describe sensitive visible content even though corpus metadata and
-paths are omitted. Do not publish raw results without a separate content
-review; public closeout for private cases should use only safe case IDs and
-reviewed aggregate findings.
+The complete run directory and generated human-review worksheet remain ignored
+and private by default. Raw model outputs may describe sensitive visible
+content even though corpus metadata and paths are omitted. Do not publish raw
+results without a separate content review; public closeout for private cases
+should use only safe case IDs and reviewed aggregate findings.
 
 The summary reports invocation success, structural completion, repetition
 readiness and exact-output diagnostics, token availability, median and observed

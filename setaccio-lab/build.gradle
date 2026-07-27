@@ -7,6 +7,7 @@ plugins {
 import com.setaccio.gradle.ToolSearchSmokeTask
 import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 import com.setaccio.gradle.ToolSearchMatrixOfflineTask
+import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
 import com.setaccio.gradle.VisionMatrixComparisonTask
 import com.setaccio.gradle.VisionMatrixTask
@@ -168,6 +169,17 @@ tasks.register('visionMatrixCompare', VisionMatrixComparisonTask) {
     dependsOn tasks.named('visionMatrixClasses')
     classpath.from(sourceSets.visionMatrix.runtimeClasspath)
     mainClass.set('com.setaccio.lab.vision.VisionMatrixComparisonRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('visionHumanReviewPrepare', VisionHumanReviewPrepareTask) {
+    dependsOn tasks.named('visionMatrixClasses')
+    classpath.from(sourceSets.visionMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.vision.VisionHumanReviewPrepareRunner')
+    workingDirectory.set(layout.projectDirectory)
+    reviewRoot.set(layout.buildDirectory.dir('vision-human-review'))
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

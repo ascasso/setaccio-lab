@@ -11,6 +11,10 @@ substituted for, or represented as, completed human review.
 
 ## Scope and inputs
 
+- Use `visionHumanReviewPrepare` to verify the explicitly selected baseline and
+  candidate runs, check deterministic comparability and corpus input identity,
+  and generate the ignored private `HUMAN-REVIEW.md` worksheet. The task
+  organizes evidence only; it does not perform any judgment in this rubric.
 - Review each model and approved case against the immutable baseline and the
   verified candidate evidence.
 - Use the private human-authored reference metadata only in the ignored local
@@ -42,6 +46,10 @@ Record the following human-review judgments for both prompt versions:
    once and record the match. When they differ, review both and record the
    difference as a consistency finding rather than selecting a preferred
    response.
+
+The generated worksheet is intentionally non-overwriting. Complete it only in
+its ignored `build/vision-human-review/` location, and do not move it into
+tracked documentation because it contains private metadata and raw responses.
 
 ## Public closeout
 

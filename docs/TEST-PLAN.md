@@ -98,6 +98,11 @@
   policy, row order, execution engine, and all other non-prompt settings
   match. Test valid comparisons plus input/model/settings mismatch and tampered
   evidence rejection; keep semantic judgments out of the deterministic report.
+- Prepare human review only after that offline comparison gate passes. Validate
+  the private corpus against saved MIME/BLAKE3 identities, group both prompt
+  versions by model/case, collapse exact successful repetitions, retain
+  differing repetitions, write only under ignored `build/vision-human-review/`,
+  refuse overwrite, and leave every semantic field blank for a human.
 
 ## Chat Benchmark Phase
 

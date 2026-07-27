@@ -162,6 +162,12 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   writes a deterministic Markdown report to standard output. It requires all
   non-prompt protocol settings, ordered full model digests, and input
   identities to match; only prompt identity and code baseline may differ.
+- `visionHumanReviewPrepare` accepts one explicit baseline, candidate, and
+  ignored local corpus, verifies the saved evidence and deterministic
+  comparability, validates corpus input identities, and writes one private,
+  non-overwriting Markdown worksheet under ignored
+  `build/vision-human-review/`. It organizes paired evidence but does not make
+  semantic judgments or a prompt decision.
 - A controlled local vision matrix completed from clean commit `11e2fa7`
   across three installed model families, four reviewed private cases, and two
   repetitions. All 24 invocations and required-section checks passed, the

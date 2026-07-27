@@ -9,6 +9,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `visionHumanReviewPrepare`, an offline-only task that verifies and
+  compares two saved vision runs, validates their inputs against the ignored
+  private corpus, and writes one non-overwriting private Markdown worksheet
+  under ignored `build/vision-human-review/` output. The worksheet presents
+  paired raw responses and the pre-registered human rubric without automated
+  semantic scoring.
 - Added `visionMatrixCompare`, an offline-only comparison task for two verified
   saved vision runs. It rejects non-prompt protocol or identity drift and
   reports deterministic invocation, structural, repetition, token, latency,
