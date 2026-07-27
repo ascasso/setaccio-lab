@@ -167,6 +167,11 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   repetitions. All 24 invocations and required-section checks passed, the
   ignored v1 evidence verified offline, and Slice 7 human review is recorded
   separately in public-safe aggregate documentation without ranking models.
+- A paired clean Prompt v2 local matrix completed from commit `6b5b970` with
+  the same three-model, four-case, two-repetition protocol. All 24 invocations
+  and required-section checks passed; ignored evidence verified offline and
+  compared against the immutable v1 run. Semantic and unsupported-detail
+  assessment remains a separate human-review slice.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
