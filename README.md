@@ -91,6 +91,11 @@ Saved runs can be checked with `visionMatrixVerify` or have only their
 deterministic summary regenerated with `visionMatrixReanalyze`. Both paths are
 offline: they do not read the private corpus, start Spring, or contact Ollama.
 They select the saved supported prompt version from immutable raw evidence.
+Two verified saved runs can also be compared with `visionMatrixCompare`. It
+requires matching model digests and order, input identities, settings, row
+order, and execution engine; it permits only prompt identity and code baseline
+to differ. The deterministic Markdown report is written to standard output and
+does not assess image semantics or copy private corpus metadata.
 The analyzer keeps invocation, structural completion, repetition diagnostics,
 token availability, successful-invocation latency, and infrastructure failures
 separate from semantic review.

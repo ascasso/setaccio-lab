@@ -257,6 +257,22 @@ Regenerate only `SUMMARY.md` from verified immutable raw evidence:
   --run-dir=build/vision-matrix/2026-07-25-local
 ```
 
+Compare two already-verified saved runs without Spring, corpus access, Ollama,
+or a remote provider:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixCompare \
+  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2
+```
+
+The comparison verifies both inputs before rendering deterministic Markdown to
+standard output. It requires the same ordered full model digests, case IDs and
+BLAKE3 identities, repetitions/seeds, temperature, token policy, row order,
+and execution engine. Prompt identity and code baseline may differ. The report
+covers invocation, structural, repetition, token, latency, and infrastructure
+deltas only; semantic judgments remain human review.
+
 Offline verification rejects missing, tampered, empty, unexpected, unsafe, or
 protocol-drifted artifacts. Reanalysis refuses to change the summary when raw
 evidence or manifest settings fail validation.

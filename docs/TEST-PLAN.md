@@ -90,6 +90,11 @@
 - Verify that every row and manifest retain the explicitly selected prompt ID,
   version, and digest, and that offline verification/reanalysis selects either
   supported saved prompt version without starting Spring or a provider.
+- Compare two verified saved runs offline only when their ordered model
+  identities/digests, input identities, repetitions/seeds, temperature, token
+  policy, row order, execution engine, and all other non-prompt settings
+  match. Test valid comparisons plus input/model/settings mismatch and tampered
+  evidence rejection; keep semantic judgments out of the deterministic report.
 
 ## Chat Benchmark Phase
 

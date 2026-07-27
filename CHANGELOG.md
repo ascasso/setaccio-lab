@@ -9,6 +9,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `visionMatrixCompare`, an offline-only comparison task for two verified
+  saved vision runs. It rejects non-prompt protocol or identity drift and
+  reports deterministic invocation, structural, repetition, token, latency,
+  and infrastructure deltas without semantic scoring.
 - Added explicit tracked prompt-version selection to the opt-in vision matrix;
   every row and manifest retain the selected prompt identity, while offline
   verification and reanalysis select either supported saved prompt version.
