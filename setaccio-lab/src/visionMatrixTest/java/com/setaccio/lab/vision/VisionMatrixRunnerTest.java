@@ -20,6 +20,18 @@ class VisionMatrixRunnerTest {
     }
 
     @Test
+    void usageRequiresAnExplicitPromptVersion() {
+        assertThatThrownBy(() -> VisionMatrixRunner.main(new String[] {
+                "--corpus-dir", "local/vision-corpus",
+                "--models", "model-a",
+                "--max-tokens", "none",
+                "--output-dir", "build/vision-matrix/2026-07-26-fixture"
+        }))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("--prompt-version");
+    }
+
+    @Test
     void rejectsAmbiguousOrUnsafeProtocolOptions() {
         assertThatThrownBy(() -> VisionMatrixRunner.parseModels("model-a,model-a"))
                 .isInstanceOf(IllegalArgumentException.class)

@@ -2,6 +2,7 @@ package com.setaccio.lab.service;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,6 +14,7 @@ public final class VisionPromptCatalog {
 
     public static final String VERSION_2 = "2";
     public static final String VERSION_2_RESOURCE_PATH = "prompts/vision/image-analysis-v2.md";
+    private static final Set<String> SUPPORTED_VERSIONS = Set.of(VisionPromptDefinition.VERSION, VERSION_2);
 
     private final Map<String, VisionPromptDefinition> prompts;
 
@@ -31,5 +33,9 @@ public final class VisionPromptCatalog {
                             + String.join(", ", prompts.keySet().stream().sorted().toList()));
         }
         return prompt;
+    }
+
+    public static boolean supports(String version) {
+        return version != null && SUPPORTED_VERSIONS.contains(version);
     }
 }

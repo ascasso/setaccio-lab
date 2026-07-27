@@ -6,6 +6,7 @@ import com.setaccio.core.service.ApacheCommonsBlake3HashingServiceImpl;
 import com.setaccio.lab.LabApplication;
 import com.setaccio.lab.evidence.EvidenceRunDirectory;
 import com.setaccio.lab.service.VisionModelInvoker;
+import com.setaccio.lab.service.VisionPromptCatalog;
 import com.setaccio.lab.service.VisionPromptDefinition;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,6 +51,7 @@ public final class VisionMatrixRunner {
         System.out.println("  Temperature: 0.0");
         System.out.println("  Token policy: "
                 + (settings.maxTokens() == null ? "no explicit limit" : settings.maxTokens()));
+        System.out.println("  Prompt version: " + parsed.promptVersion());
         System.out.println("  Execution: sequential");
         System.out.println("  Output: " + outputDirectory);
         System.out.println("  Ollama pull strategy: never");
@@ -69,15 +71,18 @@ public final class VisionMatrixRunner {
                     throw new IllegalStateException(
                             "Effective Ollama pull strategy is not never: " + pullStrategy);
                 }
+                objectMapper = context.getBean(ObjectMapper.class);
+                promptDefinition = context.getBean(VisionPromptCatalog.class).require(parsed.promptVersion());
                 List<VisionMatrixModelIdentity> modelIdentities =
                         requireInstalledModels(context.getBean(OllamaApi.class), settings.models());
                 EvidenceRunDirectory.createNamed(
                         outputDirectory.getParent(),
                         outputDirectory.getFileName().toString());
-                objectMapper = context.getBean(ObjectMapper.class);
-                promptDefinition = context.getBean(VisionPromptDefinition.class);
                 VisionModelInvoker invoker = context.getBean(VisionModelInvoker.class);
-                result = new VisionMatrixExecutor(invoker::invoke, promptDefinition)
+                result = new VisionMatrixExecutor(
+                                (image, invocationSettings) -> invoker.invoke(
+                                        image, invocationSettings, promptDefinition),
+                                promptDefinition)
                         .execute(corpus, settings, modelIdentities);
             }
 
@@ -222,11 +227,12 @@ public final class VisionMatrixRunner {
             String corpusDirectory,
             String models,
             String maxTokens,
-            String outputDirectory
+            String outputDirectory,
+            String promptVersion
     ) {
 
         private static Arguments parse(String[] args) {
-            if (args == null || args.length != 8) {
+            if (args == null || args.length != 10) {
                 throw usage();
             }
             List<String> values = new ArrayList<>(List.of(args));
@@ -234,7 +240,8 @@ public final class VisionMatrixRunner {
                     value(values, "--corpus-dir"),
                     value(values, "--models"),
                     value(values, "--max-tokens"),
-                    value(values, "--output-dir"));
+                    value(values, "--output-dir"),
+                    value(values, "--prompt-version"));
         }
 
         private static String value(List<String> args, String option) {
@@ -248,7 +255,8 @@ public final class VisionMatrixRunner {
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
                     "Expected --corpus-dir <local/vision-corpus> --models <tags> "
-                            + "--max-tokens <none|1..32768> --output-dir <dated-build-directory>");
+                            + "--max-tokens <none|1..32768> --output-dir <dated-build-directory> "
+                            + "--prompt-version <supported-version>");
         }
     }
 }

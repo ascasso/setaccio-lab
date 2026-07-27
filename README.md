@@ -77,18 +77,20 @@ layout and review procedure.
 The opt-in `visionMatrix` task consumes this exact contract. It validates the
 catalog and exact input bytes before starting Spring, then executes every
 explicit model, case, and repetition strictly sequentially with temperature
-`0.0`, effective seeds `42` and `43`, one predeclared token policy, and
-Ollama's pull strategy forced to `never`. It checks Ollama's installed-model
-list, resolves each requested tag to its full immutable Ollama digest, rejects
-duplicate aliases for the same installed model, and fails before creating the
-run directory when a requested tag is missing or its identity is incomplete.
-The task writes the resolved model identities into suite-specific raw JSON, the
-shared v1 evidence manifest, and `SUMMARY.md` under a required new dated
+`0.0`, effective seeds `42` and `43`, one predeclared token policy, one
+explicit tracked prompt version, and Ollama's pull strategy forced to `never`.
+It checks Ollama's installed-model list, resolves each requested tag to its
+full immutable Ollama digest, rejects duplicate aliases for the same installed
+model, and fails before creating the run directory when a requested tag is
+missing or its identity is incomplete. The task writes the selected prompt and
+resolved model identities into suite-specific raw JSON, the shared v1 evidence
+manifest, and `SUMMARY.md` under a required new dated
 `build/vision-matrix/` directory.
 
 Saved runs can be checked with `visionMatrixVerify` or have only their
 deterministic summary regenerated with `visionMatrixReanalyze`. Both paths are
 offline: they do not read the private corpus, start Spring, or contact Ollama.
+They select the saved supported prompt version from immutable raw evidence.
 The analyzer keeps invocation, structural completion, repetition diagnostics,
 token availability, successful-invocation latency, and infrastructure failures
 separate from semantic review.

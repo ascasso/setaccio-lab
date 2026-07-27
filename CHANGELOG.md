@@ -9,6 +9,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added explicit tracked prompt-version selection to the opt-in vision matrix;
+  every row and manifest retain the selected prompt identity, while offline
+  verification and reanalysis select either supported saved prompt version.
 - Added a shared benchmark evidence lifecycle foundation with versioned manifests, unique non-overwriting run directories, Git and framework provenance, relative artifact descriptors, streaming SHA-256 integrity metadata, and strict offline saved-run verification.
 - Migrated the locked Tool Search matrix to the shared v1 evidence manifest and
   added standalone offline verification and deterministic summary reanalysis

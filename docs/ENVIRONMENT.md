@@ -212,7 +212,8 @@ name as needed:
   --corpus-dir=local/vision-corpus \
   --models=gemma4:e2b \
   --max-tokens=none \
-  --output-dir=build/vision-matrix/2026-07-25-local
+  --output-dir=build/vision-matrix/2026-07-26-local \
+  --prompt-version=2
 ```
 
 | Option | Required | Contract |
@@ -221,6 +222,7 @@ name as needed:
 | `--models` | Yes | Comma-separated, unique, already-installed Ollama tags. No model is selected implicitly. |
 | `--max-tokens` | Yes | `none` or one integer from `1` through `32768`, locked for every row. |
 | `--output-dir` | Yes | A new direct child of `build/vision-matrix/` whose name contains a `YYYY-MM-DD` date. Existing directories are never reused. |
+| `--prompt-version` | Yes | A supported tracked prompt version, currently `1` or `2`; it is recorded in every row and the evidence manifest. |
 
 The protocol is fixed at two repetitions, temperature `0.0`, effective seeds
 `42` and `43`, model-major/case-major/repetition order, strictly sequential

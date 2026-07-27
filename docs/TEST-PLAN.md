@@ -60,7 +60,8 @@
   and sensitive-content-review validation.
 - Keep the opt-in matrix protocol fixed at sequential
   model/case/repetition execution, two repetitions, temperature `0.0`, seeds
-  `42` and `43`, one explicit token policy, and Ollama pull strategy `never`.
+  `42` and `43`, one explicit token policy, one explicit tracked prompt
+  version, and Ollama pull strategy `never`.
 - Require explicit model tags, the fixed ignored corpus directory, and one new
   dated output directory. Check the installed Ollama model list with pulling
   disabled, record each normalized name and full immutable digest, reject
@@ -86,6 +87,9 @@
   infrastructure observations, and do not declare an aggregate winner.
 - Reject tampered or missing raw evidence, manifest protocol drift, unexpected
   artifacts, and summaries that differ from deterministic offline analysis.
+- Verify that every row and manifest retain the explicitly selected prompt ID,
+  version, and digest, and that offline verification/reanalysis selects either
+  supported saved prompt version without starting Spring or a provider.
 
 ## Chat Benchmark Phase
 

@@ -60,15 +60,24 @@ final class VisionMatrixTestFixtures {
             String mimeType,
             long latency,
             String output) {
-        List<VisionStructuralCheck> checks = PROMPT.requiredSections().stream()
+        return successfulInvocation(PROMPT, settings, mimeType, latency, output);
+    }
+
+    static VisionInvocationResult successfulInvocation(
+            VisionPromptDefinition prompt,
+            VisionInvocationSettings settings,
+            String mimeType,
+            long latency,
+            String output) {
+        List<VisionStructuralCheck> checks = prompt.requiredSections().stream()
                 .map(section -> new VisionStructuralCheck(section, true))
                 .toList();
         return new VisionInvocationResult(
                 settings,
                 mimeType,
-                PROMPT.id(),
-                PROMPT.version(),
-                PROMPT.sha256(),
+                prompt.id(),
+                prompt.version(),
+                prompt.sha256(),
                 latency,
                 11,
                 7,
@@ -84,14 +93,22 @@ final class VisionMatrixTestFixtures {
             LoadedVisionCorpus corpus,
             List<String> models,
             Integer maxTokens) {
+        return successfulMatrix(corpus, models, maxTokens, PROMPT);
+    }
+
+    static VisionMatrixResult successfulMatrix(
+            LoadedVisionCorpus corpus,
+            List<String> models,
+            Integer maxTokens,
+            VisionPromptDefinition prompt) {
         VisionMatrixRunSettings settings = VisionMatrixProtocol.settings(models, maxTokens);
         return new VisionMatrixExecutor(
-                (image, invocationSettings) -> successfulInvocation(
+                (image, invocationSettings) -> successfulInvocation(prompt,
                         invocationSettings,
                         image.contentType(),
                         invocationSettings.seed() == 42 ? 10 : 20,
                         "fixture output " + image.originalFilename() + " seed " + invocationSettings.seed()),
-                PROMPT,
+                prompt,
                 FIXED_CLOCK)
                 .execute(corpus, settings, modelIdentities(models));
     }

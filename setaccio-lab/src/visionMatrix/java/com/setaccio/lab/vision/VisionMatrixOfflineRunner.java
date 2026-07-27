@@ -1,6 +1,7 @@
 package com.setaccio.lab.vision;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.setaccio.lab.service.VisionPromptCatalog;
 import com.setaccio.lab.service.VisionPromptDefinition;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -14,9 +15,10 @@ public final class VisionMatrixOfflineRunner {
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
         Path runDirectory = resolveRunDirectory(parsed.runDirectory());
+        VisionPromptDefinition promptDefinition = promptDefinitionFor(runDirectory);
         VisionMatrixEvidence evidence = new VisionMatrixEvidence(
                 JsonMapper.builder().findAndAddModules().build(),
-                new VisionPromptDefinition());
+                promptDefinition);
         VisionMatrixEvidence.OfflineResult result = parsed.mode() == Mode.VERIFY
                 ? evidence.verify(runDirectory)
                 : evidence.reanalyze(runDirectory);
@@ -44,6 +46,19 @@ public final class VisionMatrixOfflineRunner {
             throw new IllegalArgumentException("Run directory does not exist or is unsafe.");
         }
         return runDirectory;
+    }
+
+    static VisionPromptDefinition promptDefinitionFor(Path runDirectory) {
+        try {
+            String promptVersion = JsonMapper.builder().findAndAddModules().build()
+                    .readTree(runDirectory.resolve(VisionMatrixProtocol.RAW_FILENAME).toFile())
+                    .path("promptVersion")
+                    .asText(null);
+            return new VisionPromptCatalog(new VisionPromptDefinition()).require(promptVersion);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(
+                    "Saved vision evidence does not declare a supported prompt version", e);
+        }
     }
 
     private enum Mode {

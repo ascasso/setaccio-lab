@@ -146,14 +146,16 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   tracked.
 - The opt-in `visionMatrix` task validates that fixed local corpus, then runs
   explicit models/cases/repetitions sequentially with temperature `0.0`, seeds
-  `42`/`43`, one explicit token policy, and Ollama pull strategy `never`. It
-  resolves full immutable Ollama model digests, writes suite-specific raw JSON,
-  a shared v1 manifest, and deterministic summary under a new dated
+  `42`/`43`, one explicit token policy, one explicit tracked prompt version,
+  and Ollama pull strategy `never`. It resolves full immutable Ollama model
+  digests, writes suite-specific raw JSON, a shared v1 manifest, and
+  deterministic summary under a new dated
   `build/vision-matrix/` directory.
 - `visionMatrixVerify` and `visionMatrixReanalyze` inspect saved vision
   evidence without starting Spring, reading the private corpus, or contacting
-  a provider. Human expected-observation and unsupported-detail judgments
-  remain separate from deterministic analysis.
+  a provider, selecting the saved supported prompt version from raw evidence.
+  Human expected-observation and unsupported-detail judgments remain separate
+  from deterministic analysis.
 - A controlled local vision matrix completed from clean commit `11e2fa7`
   across three installed model families, four reviewed private cases, and two
   repetitions. All 24 invocations and required-section checks passed, the
