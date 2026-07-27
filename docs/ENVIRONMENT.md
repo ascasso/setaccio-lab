@@ -275,21 +275,35 @@ covers invocation, structural, repetition, token, latency, and infrastructure
 deltas only; semantic judgments remain human review.
 
 Prepare one private human-review worksheet after the paired evidence
-directories and fixed local corpus are present:
+directories and fixed local corpus are present. First list the available
+ignored runs from the repository root:
+
+```bash
+find setaccio-lab/build/vision-matrix \
+  -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null
+```
+
+If this prints nothing, restore or explicitly regenerate the evidence before
+continuing. Otherwise, choose the two directory names from the output and
+replace the uppercase names below:
 
 ```bash
 ./gradlew :setaccio-lab:visionHumanReviewPrepare \
-  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
-  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
+  --baseline-run-dir=build/vision-matrix/BASELINE_DIRECTORY_NAME \
+  --candidate-run-dir=build/vision-matrix/CANDIDATE_DIRECTORY_NAME \
   --corpus-dir=local/vision-corpus
 ```
+
+Do not run the task without these options. Run paths are explicit by design;
+the task never guesses from timestamps or automatically selects the latest
+evidence. See `docs/VISION-HUMAN-REVIEW.md` for the short review workflow.
 
 The task verifies both runs, applies the same deterministic comparability gate,
 and validates that the current private corpus cases still match the saved MIME
 and BLAKE3 input identities. It then writes:
 
 ```text
-build/vision-human-review/
+setaccio-lab/build/vision-human-review/
 └── <baseline-run>--vs--<candidate-run>/
     └── HUMAN-REVIEW.md
 ```

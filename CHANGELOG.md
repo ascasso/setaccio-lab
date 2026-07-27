@@ -90,5 +90,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Clarified the required `visionHumanReviewPrepare` options with a short
+  list/choose/run workflow, and made a bare task invocation report all required
+  options plus the review-guide pointer in one error.
 - Parse Spring AI `ToolSearchResponse.toolReferences` entries when recording discovered tool names, so valid Tool Search runs are not marked as discovery failures.
 - Record null or result-less Ollama chat responses as failed benchmark rows instead of successful rows without model output.

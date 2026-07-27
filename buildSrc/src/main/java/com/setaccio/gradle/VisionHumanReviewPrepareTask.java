@@ -72,9 +72,10 @@ public abstract class VisionHumanReviewPrepareTask extends DefaultTask {
 
     @TaskAction
     public void prepareReview() {
-        String baseline = requireOption(getBaselineRunDir(), "--baseline-run-dir");
-        String candidate = requireOption(getCandidateRunDir(), "--candidate-run-dir");
-        String corpus = requireOption(getCorpusDir(), "--corpus-dir");
+        requireOptions();
+        String baseline = getBaselineRunDir().get().trim();
+        String candidate = getCandidateRunDir().get().trim();
+        String corpus = getCorpusDir().get().trim();
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());
             spec.getMainClass().set(getMainClass());
@@ -88,11 +89,22 @@ public abstract class VisionHumanReviewPrepareTask extends DefaultTask {
         });
     }
 
-    private String requireOption(Property<String> property, String option) {
-        String value = property.getOrNull();
-        if (value == null || value.isBlank()) {
-            throw new GradleException(getName() + " requires " + option + "=<value>");
+    private void requireOptions() {
+        if (isMissing(getBaselineRunDir())
+                || isMissing(getCandidateRunDir())
+                || isMissing(getCorpusDir())) {
+            throw new GradleException("""
+                    visionHumanReviewPrepare requires three explicit options:
+                      --baseline-run-dir=build/vision-matrix/BASELINE_DIRECTORY_NAME
+                      --candidate-run-dir=build/vision-matrix/CANDIDATE_DIRECTORY_NAME
+                      --corpus-dir=local/vision-corpus
+                    See docs/VISION-HUMAN-REVIEW.md for the three-step preparation workflow.
+                    """.strip());
         }
-        return value.trim();
+    }
+
+    private static boolean isMissing(Property<String> property) {
+        String value = property.getOrNull();
+        return value == null || value.isBlank();
     }
 }

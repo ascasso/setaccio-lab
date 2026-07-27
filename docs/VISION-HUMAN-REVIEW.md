@@ -1,4 +1,4 @@
-# Vision Prompt Human-Review Rubric
+# Vision Prompt Human-Review Guide
 
 This rubric governs human review of an offline-verified paired vision-prompt
 comparison. It is fixed before the candidate raw responses are read. It is not
@@ -8,6 +8,87 @@ verifier.
 This rubric is intended to be executed by a human. Any agent-produced pass
 against it must be labeled explicitly as agent-assisted review and must not be
 substituted for, or represented as, completed human review.
+
+## Prepare the worksheet
+
+Run these steps from the repository root. The bare command
+`./gradlew visionHumanReviewPrepare` is not sufficient because the task will
+not guess which private evidence should be compared.
+
+1. List the saved local vision runs:
+
+   ```bash
+   find setaccio-lab/build/vision-matrix \
+     -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null
+   ```
+
+   If this prints nothing, stop: the ignored evidence is not present in this
+   checkout and there is nothing available for human review. Restore the two
+   saved runs or regenerate them explicitly before continuing.
+
+2. Choose the baseline and candidate directory names from that output, then
+   replace `BASELINE_DIRECTORY_NAME` and `CANDIDATE_DIRECTORY_NAME` below:
+
+   ```bash
+   ./gradlew :setaccio-lab:visionHumanReviewPrepare \
+     --baseline-run-dir=build/vision-matrix/BASELINE_DIRECTORY_NAME \
+     --candidate-run-dir=build/vision-matrix/CANDIDATE_DIRECTORY_NAME \
+     --corpus-dir=local/vision-corpus
+   ```
+
+   The `find` output starts with `setaccio-lab/`, but the two Gradle option
+   values intentionally start with `build/` because the task runs from the
+   `setaccio-lab` module directory.
+
+3. Open the path printed by the successful task. It will be:
+
+   ```text
+   setaccio-lab/build/vision-human-review/
+   └── <baseline>--vs--<candidate>/
+       └── HUMAN-REVIEW.md
+   ```
+
+   Open that Markdown file in your editor and use its preview if you want the
+   private source images displayed beside the reference information.
+
+## Perform the review
+
+The worksheet is already organized in model/case order. Work from top to
+bottom; do not use the earlier agent-assisted findings as your answer.
+
+1. For the first model/case section, inspect the private image and read its
+   reference observation, expected concepts, unsupported details, and
+   limitations before judging either response.
+2. Read the baseline response. Under **Human judgment for baseline**, select
+   one primary-concept result: `retained`, `partially retained`, or `not
+   retained`.
+3. In the same baseline block, record any unsupported specificity. Use one of
+   `location`, `identity`, `event`, `time`, or `other`, and state whether the
+   response `avoided`, marked `unknown`, or `claimed` that detail.
+4. Read the candidate response and complete the same fields under **Human
+   judgment for candidate**.
+5. Mark **Excessive unknown** only when `unknown` replaced a primary concept
+   that is genuinely visible in the image. Do not mark it merely because the
+   response correctly refused an unsupported exact detail.
+6. If the worksheet shows one shared response, record that the repetitions
+   matched. If it shows separate repetitions, read both and describe the
+   consistency difference; do not choose a preferred repetition.
+7. Complete the **Pair-level human comparison** questions: concept retention,
+   unsupported-specificity reduction, excessive `unknown`, repetition change,
+   and any concise human notes.
+8. Repeat steps 1–7 for every model/case section.
+9. At **Final human decision**, select exactly one outcome:
+
+   - **Adopt** when the candidate reduces the targeted unsupported specificity
+     while retaining useful visible concepts without a material regression.
+   - **Revise** when the candidate is directionally useful but has a bounded
+     failure pattern that another prompt change should address.
+   - **Reject** when it provides no meaningful improvement or introduces a
+     material loss of useful visible information.
+
+10. Write a short evidence-backed rationale and one next bounded hypothesis.
+    This completes the private human worksheet; it does not itself change the
+    interactive default prompt.
 
 ## Scope and inputs
 
@@ -25,7 +106,7 @@ substituted for, or represented as, completed human review.
   repeat matching, tokens, latency, and infrastructure failures) distinct from
   the human judgments below.
 
-## Per model and case
+## Judgment definitions
 
 Record the following human-review judgments for both prompt versions:
 
@@ -47,13 +128,22 @@ Record the following human-review judgments for both prompt versions:
    difference as a consistency finding rather than selecting a preferred
    response.
 
-The generated worksheet is intentionally non-overwriting. Complete it only in
-its ignored `build/vision-human-review/` location, and do not move it into
-tracked documentation because it contains private metadata and raw responses.
+The generated worksheet is intentionally non-overwriting. Save your edits only
+in its ignored `setaccio-lab/build/vision-human-review/` location, and do not
+move it into tracked documentation because it contains private metadata and raw
+responses.
 
 ## Public closeout
 
-Publish only safe aggregate counts and qualitative findings by dimension. Label
-each semantic statement as human review, do not name an aggregate model winner,
-and do not change the interactive default prompt unless the complete evidence
-supports a separate explicit decision.
+After completing every worksheet section:
+
+1. Summarize only safe aggregate counts and qualitative patterns by review
+   dimension.
+2. Label every semantic statement as **human review**.
+3. Do not publish source images, raw responses, reference observations,
+   expected concepts, unsupported-detail notes, filenames, or local paths.
+4. Do not name an aggregate model winner.
+5. Record the adopt/revise/reject decision separately in public documentation
+   only after checking that the wording contains no private case detail.
+6. Do not change the interactive default prompt unless that is supported by the
+   complete evidence and made as a separate explicit implementation decision.
