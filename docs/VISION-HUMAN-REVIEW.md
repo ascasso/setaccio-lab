@@ -5,6 +5,10 @@ comparison. It is fixed before the candidate raw responses are read. It is not
 an automated score, a model ranking, or a replacement for the saved-run
 verifier.
 
+This rubric is intended to be executed by a human. Any agent-produced pass
+against it must be labeled explicitly as agent-assisted review and must not be
+substituted for, or represented as, completed human review.
+
 ## Scope and inputs
 
 - Review each model and approved case against the immutable baseline and the
