@@ -9,6 +9,24 @@ This rubric is intended to be executed by a human. Any agent-produced pass
 against it must be labeled explicitly as agent-assisted review and must not be
 substituted for, or represented as, completed human review.
 
+## Before you start
+
+- Keep source images, raw responses, reference observations, expected concepts,
+  unsupported-detail notes, filenames, and local paths private.
+- Edit only the ignored worksheet under
+  `setaccio-lab/build/vision-human-review/`; do not move it into tracked
+  documentation.
+- The current Prompt v1/v2 pair contains 3 models × 4 cases, so the worksheet
+  has 12 model/case sections followed by one final decision.
+- The preparation task verifies both saved runs, checks deterministic
+  comparability and corpus input identity, and writes the private worksheet. It
+  does not start Spring, contact Ollama, select runs automatically, score
+  semantics, or make the prompt decision.
+- The task will not overwrite an existing worksheet. If the target worksheet
+  already exists, open it and continue there instead of re-running the task.
+
+Do not use earlier agent-assisted findings as your answers.
+
 ## Prepare the worksheet
 
 Run these steps from the repository root. The bare command
@@ -44,90 +62,120 @@ not guess which private evidence should be compared.
      setaccio-lab/build/vision-human-review/2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/HUMAN-REVIEW.md
    ```
 
-   Use your editor's Markdown preview if you want the private source images
-   displayed beside the reference information.
+   On other systems, open the same path or the path printed by the successful
+   task. Use your editor's Markdown preview if you want the private source
+   images displayed beside the reference information.
 
 ## Perform the review
 
 The worksheet is already organized in model/case order. Work from top to
-bottom; do not use the earlier agent-assisted findings as your answer.
+bottom. For every model/case section, complete this sequence:
 
-1. For the first model/case section, inspect the private image and read its
+1. Under **Private case reference**, inspect the private image and read the
    reference observation, expected concepts, unsupported details, and
-   limitations before judging either response.
-2. Read the baseline response. Under **Human judgment for baseline**, select
-   one primary-concept result: `retained`, `partially retained`, or `not
-   retained`.
-3. In the same baseline block, record any unsupported specificity. Use one of
-   `location`, `identity`, `event`, `time`, or `other`, and state whether the
-   response `avoided`, marked `unknown`, or `claimed` that detail.
-4. Read the candidate response and complete the same fields under **Human
-   judgment for candidate**.
-5. Mark **Excessive unknown** only when `unknown` replaced a primary concept
-   that is genuinely visible in the image. Do not mark it merely because the
-   response correctly refused an unsupported exact detail.
-6. If the worksheet shows one shared response, record that the repetitions
-   matched. If it shows separate repetitions, read both and describe the
-   consistency difference; do not choose a preferred repetition.
-7. Complete the **Pair-level human comparison** questions: concept retention,
-   unsupported-specificity reduction, excessive `unknown`, repetition change,
-   and any concise human notes.
-8. Repeat steps 1–7 for every model/case section.
-9. At **Final human decision**, select exactly one outcome:
+   limitations before reading either response.
+2. Read the baseline response: use the shared response when repetitions match,
+   or read both repetitions when they differ. Complete **Human judgment for
+   baseline** using the formats below.
+3. Read the candidate response the same way and complete **Human judgment for
+   candidate** independently. Do not copy the baseline marks without
+   re-checking the candidate.
+4. Complete **Pair-level human comparison** using the preferred vocabulary
+   below, then add at most one concise human-notes sentence.
+5. Repeat steps 1–4 for all 12 current model/case sections before making the
+   final decision.
 
-   - **Adopt** when the candidate reduces the targeted unsupported specificity
-     while retaining useful visible concepts without a material regression.
-   - **Revise** when the candidate is directionally useful but has a bounded
-     failure pattern that another prompt change should address.
-   - **Reject** when it provides no meaningful improvement or introduces a
-     material loss of useful visible information.
+## Fill the judgment fields
 
-10. Write a short evidence-backed rationale and one next bounded hypothesis.
-    This completes the private human worksheet; it does not itself change the
-    interactive default prompt.
+### Primary-concept retention
 
-## Scope and inputs
+Select exactly one result for each prompt:
 
-- Use `visionHumanReviewPrepare` to verify the explicitly selected baseline and
-  candidate runs, check deterministic comparability and corpus input identity,
-  and generate the ignored private `HUMAN-REVIEW.md` worksheet. The task
-  organizes evidence only; it does not perform any judgment in this rubric.
-- Review each model and approved case against the immutable baseline and the
-  verified candidate evidence.
-- Use the private human-authored reference metadata only in the ignored local
-  corpus. Do not copy source images, reference observations, expected concepts,
-  unsupported-detail notes, paths, filenames, or raw response text into public
-  documentation.
-- Keep deterministic evidence (invocation success, structural completion,
-  repeat matching, tokens, latency, and infrastructure failures) distinct from
-  the human judgments below.
+- `retained`
+- `partially retained`
+- `not retained`
 
-## Judgment definitions
+Measure only against the case's approved expected concepts. A response may add
+a useful visible detail without turning an unsupported detail into a fact.
 
-Record the following human-review judgments for both prompt versions:
+### Unsupported specificity
 
-1. **Primary-concept retention:** `retained`, `partially retained`, or `not
-   retained`, measured against the case's approved expected concepts. A useful
-   visible detail may be present without turning an unsupported detail into a
-   fact.
-2. **Unsupported specificity:** classify each asserted or implied unsupported
-   detail as location, identity, event, time, or other. Record whether the
-   response avoids it, explicitly marks it `unknown`, or makes the unsupported
-   claim. `other` is reserved for a material limitation or quality assertion
-   not covered by the four prompt-target categories.
-3. **Excessive `unknown`:** mark this when `unknown` replaces a
-   human-confirmed primary visible concept. With only four private cases, do
-   not invent a percentage threshold or aggregate recall score; publish only
-   the count of affected model/case judgments and a qualitative explanation.
-4. **Repetitions:** when repetitions match exactly, review the shared result
-   once and record the match. When they differ, review both and record the
-   difference as a consistency finding rather than selecting a preferred
-   response.
+Use one line for each material unsupported detail from the private reference or
+response, or write `none`. Use this format:
 
-The generated worksheet is intentionally non-overwriting. Save your edits only
-in its ignored `setaccio-lab/build/vision-human-review/` location, and do not
-move it into tracked documentation because it contains private metadata and raw
-responses.
+```text
+category: disposition — brief note
+```
+
+Choose one category: `location`, `identity`, `event`, `time`, or `other`.
+Choose one disposition:
+
+- `avoided` — the response neither asserts nor implies the unsupported detail
+- `unknown` — the response explicitly marks the detail unknown or unsupported
+- `claimed` — the response asserts or clearly implies the unsupported detail
+
+Use `other` only for a material limitation or quality assertion outside the
+four prompt-target categories. For example:
+
+```text
+location: claimed — names a specific city not supported by the image
+identity: unknown — correctly refuses to identify the person
+time: avoided — does not assert a date or time
+```
+
+This example is illustrative and does not describe a private case.
+
+### Excessive `unknown`
+
+Mark `yes` only when `unknown` replaces a primary concept genuinely visible in
+the image, and name the suppressed visible concept. Do not mark it merely
+because the response correctly refuses an unsupported exact location,
+identity, event, or time. With only four private cases, do not invent a
+percentage threshold or aggregate recall score.
+
+### Repetition finding
+
+- When the worksheet shows one shared successful response, record that the
+  repetitions matched.
+- When it shows separate repetitions, read both and describe the consistency
+  difference.
+- Do not choose a preferred repetition.
+
+### Pair-level comparison
+
+Keep answers comparable across all sections:
+
+| Question | Preferred values |
+|---|---|
+| Did the candidate retain the primary expected concepts? | `better`, `same`, or `worse` |
+| Did the candidate reduce unsupported specificity? | `reduced`, `same`, or `increased` |
+| Did `unknown` suppress useful visible detail? | `no`, or `yes` plus the concept |
+| Did repetition consistency change materially? | `same` or `changed` |
+| Human notes | one sentence maximum |
+
+Keep deterministic evidence—invocation success, structural completion, repeat
+matching, tokens, latency, and infrastructure failures—distinct from these
+human judgments.
+
+## Make the final human decision
+
+Complete **Final human decision** only after every model/case section. Select
+exactly one outcome:
+
+- **Adopt** when the candidate reduces targeted unsupported specificity while
+  retaining useful visible concepts without a material regression.
+- **Revise** when the candidate is directionally useful but has a bounded
+  failure pattern that another prompt change should address.
+- **Reject** when the candidate provides no meaningful improvement or
+  introduces a material loss of useful visible information.
+
+Write an evidence-backed rationale and one next bounded hypothesis. Because the
+worksheet is private, the rationale may identify the affected case sections
+needed to audit the decision. The public closeout must use only scrubbed
+aggregate counts and qualitative patterns.
+
+Completing the worksheet does not itself change the interactive default prompt.
+That remains a separate explicit implementation decision.
 
 ## Public closeout
 
