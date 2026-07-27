@@ -95,8 +95,8 @@ public abstract class VisionHumanReviewPrepareTask extends DefaultTask {
                 || isMissing(getCorpusDir())) {
             throw new GradleException("""
                     visionHumanReviewPrepare requires three explicit options:
-                      --baseline-run-dir=build/vision-matrix/BASELINE_DIRECTORY_NAME
-                      --candidate-run-dir=build/vision-matrix/CANDIDATE_DIRECTORY_NAME
+                      --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case
+                      --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
                       --corpus-dir=local/vision-corpus
                     See docs/VISION-HUMAN-REVIEW.md for the three-step preparation workflow.
                     """.strip());

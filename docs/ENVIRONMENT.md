@@ -264,7 +264,7 @@ or a remote provider:
 ```bash
 ./gradlew :setaccio-lab:visionMatrixCompare \
   --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
-  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2
+  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
 ```
 
 The comparison verifies both inputs before rendering deterministic Markdown to
@@ -274,29 +274,28 @@ and execution engine. Prompt identity and code baseline may differ. The report
 covers invocation, structural, repetition, token, latency, and infrastructure
 deltas only; semantic judgments remain human review.
 
-Prepare one private human-review worksheet after the paired evidence
-directories and fixed local corpus are present. First list the available
-ignored runs from the repository root:
+Prepare the private human-review worksheet for the current Prompt v1/v2 pair
+only after confirming that these exact ignored runs are present:
 
 ```bash
-find setaccio-lab/build/vision-matrix \
-  -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null
+ls -d \
+  setaccio-lab/build/vision-matrix/2026-07-25-controlled-four-case \
+  setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
 ```
 
-If this prints nothing, restore or explicitly regenerate the evidence before
-continuing. Otherwise, choose the two directory names from the output and
-replace the uppercase names below:
+If either exact directory is missing, stop and restore the saved evidence.
+Otherwise, run this command without changing the paths:
 
 ```bash
 ./gradlew :setaccio-lab:visionHumanReviewPrepare \
-  --baseline-run-dir=build/vision-matrix/BASELINE_DIRECTORY_NAME \
-  --candidate-run-dir=build/vision-matrix/CANDIDATE_DIRECTORY_NAME \
+  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
   --corpus-dir=local/vision-corpus
 ```
 
-Do not run the task without these options. Run paths are explicit by design;
-the task never guesses from timestamps or automatically selects the latest
-evidence. See `docs/VISION-HUMAN-REVIEW.md` for the short review workflow.
+Do not run the task without these options. The task never guesses from
+timestamps or automatically selects evidence. See
+`docs/VISION-HUMAN-REVIEW.md` for the complete review workflow.
 
 The task verifies both runs, applies the same deterministic comparability gate,
 and validates that the current private corpus cases still match the saved MIME
@@ -304,7 +303,7 @@ and BLAKE3 input identities. It then writes:
 
 ```text
 setaccio-lab/build/vision-human-review/
-└── <baseline-run>--vs--<candidate-run>/
+└── 2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/
     └── HUMAN-REVIEW.md
 ```
 

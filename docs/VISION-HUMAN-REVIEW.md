@@ -15,41 +15,37 @@ Run these steps from the repository root. The bare command
 `./gradlew visionHumanReviewPrepare` is not sufficient because the task will
 not guess which private evidence should be compared.
 
-1. List the saved local vision runs:
+1. Confirm that the exact saved baseline and candidate runs are present:
 
    ```bash
-   find setaccio-lab/build/vision-matrix \
-     -mindepth 1 -maxdepth 1 -type d -print 2>/dev/null
+   ls -d \
+     setaccio-lab/build/vision-matrix/2026-07-25-controlled-four-case \
+     setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
    ```
 
-   If this prints nothing, stop: the ignored evidence is not present in this
-   checkout and there is nothing available for human review. Restore the two
-   saved runs or regenerate them explicitly before continuing.
+   The command must print both directories. If either directory reports
+   `No such file or directory`, stop: the ignored evidence required for this
+   review is not present in this checkout. Restore those exact saved runs
+   before continuing.
 
-2. Choose the baseline and candidate directory names from that output, then
-   replace `BASELINE_DIRECTORY_NAME` and `CANDIDATE_DIRECTORY_NAME` below:
+2. Run this command exactly as written:
 
    ```bash
    ./gradlew :setaccio-lab:visionHumanReviewPrepare \
-     --baseline-run-dir=build/vision-matrix/BASELINE_DIRECTORY_NAME \
-     --candidate-run-dir=build/vision-matrix/CANDIDATE_DIRECTORY_NAME \
+     --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
+     --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
      --corpus-dir=local/vision-corpus
    ```
 
-   The `find` output starts with `setaccio-lab/`, but the two Gradle option
-   values intentionally start with `build/` because the task runs from the
-   `setaccio-lab` module directory.
+3. On macOS, open the generated worksheet with this exact command:
 
-3. Open the path printed by the successful task. It will be:
-
-   ```text
-   setaccio-lab/build/vision-human-review/
-   └── <baseline>--vs--<candidate>/
-       └── HUMAN-REVIEW.md
+   ```bash
+   open \
+     setaccio-lab/build/vision-human-review/2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/HUMAN-REVIEW.md
    ```
 
-   Open that Markdown file in your editor and use its preview if you want the
-   private source images displayed beside the reference information.
+   Use your editor's Markdown preview if you want the private source images
+   displayed beside the reference information.
 
 ## Perform the review
 
