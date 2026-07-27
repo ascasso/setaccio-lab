@@ -41,6 +41,7 @@ public final class VisionMatrixRunner {
                 offlineObjectMapper,
                 new ApacheCommonsBlake3HashingServiceImpl())
                 .read(corpusDirectory);
+        corpus = selectCases(corpus, parsed.caseIds());
 
         System.out.println("Starting sequential vision matrix");
         System.out.println("  Models: " + settings.models());
@@ -140,6 +141,37 @@ public final class VisionMatrixRunner {
         }
     }
 
+    static LoadedVisionCorpus selectCases(LoadedVisionCorpus corpus, String value) {
+        if (corpus == null || corpus.cases().isEmpty()) {
+            throw new IllegalArgumentException("Corpus must contain at least one approved case.");
+        }
+        if (value == null) {
+            return corpus;
+        }
+        List<String> requested = List.of(value.split(",", -1)).stream()
+                .map(String::trim)
+                .toList();
+        if (requested.isEmpty() || requested.stream().anyMatch(String::isBlank)) {
+            throw new IllegalArgumentException("case-ids must not contain blank entries.");
+        }
+        if (new LinkedHashSet<>(requested).size() != requested.size()) {
+            throw new IllegalArgumentException("case-ids must not contain duplicates.");
+        }
+        Map<String, LoadedVisionCorpus.LoadedVisionCase> available = corpus.cases().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        loadedCase -> loadedCase.metadata().caseId(),
+                        loadedCase -> loadedCase,
+                        (first, ignored) -> first,
+                        LinkedHashMap::new));
+        List<String> missing = requested.stream().filter(caseId -> !available.containsKey(caseId)).toList();
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Requested case IDs are not in the approved corpus: " + missing);
+        }
+        return new LoadedVisionCorpus(
+                corpus.corpusVersion(),
+                requested.stream().map(available::get).toList());
+    }
+
     static List<VisionMatrixModelIdentity> requireInstalledModels(
             OllamaApi ollamaApi,
             List<String> requestedModels) {
@@ -228,11 +260,12 @@ public final class VisionMatrixRunner {
             String models,
             String maxTokens,
             String outputDirectory,
-            String promptVersion
+            String promptVersion,
+            String caseIds
     ) {
 
         private static Arguments parse(String[] args) {
-            if (args == null || args.length != 10) {
+            if (args == null || (args.length != 10 && args.length != 12)) {
                 throw usage();
             }
             List<String> values = new ArrayList<>(List.of(args));
@@ -241,7 +274,8 @@ public final class VisionMatrixRunner {
                     value(values, "--models"),
                     value(values, "--max-tokens"),
                     value(values, "--output-dir"),
-                    value(values, "--prompt-version"));
+                    value(values, "--prompt-version"),
+                    optionalValue(values, "--case-ids"));
         }
 
         private static String value(List<String> args, String option) {
@@ -252,11 +286,22 @@ public final class VisionMatrixRunner {
             return args.get(index + 1);
         }
 
+        private static String optionalValue(List<String> args, String option) {
+            int index = args.indexOf(option);
+            if (index < 0) {
+                return null;
+            }
+            if (index == args.size() - 1 || args.get(index + 1).isBlank()) {
+                throw usage();
+            }
+            return args.get(index + 1);
+        }
+
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
                     "Expected --corpus-dir <local/vision-corpus> --models <tags> "
                             + "--max-tokens <none|1..32768> --output-dir <dated-build-directory> "
-                            + "--prompt-version <supported-version>");
+                            + "--prompt-version <supported-version> [--case-ids <case-id,...>]");
         }
     }
 }

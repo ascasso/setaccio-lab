@@ -223,6 +223,7 @@ name as needed:
 | `--max-tokens` | Yes | `none` or one integer from `1` through `32768`, locked for every row. |
 | `--output-dir` | Yes | A new direct child of `build/vision-matrix/` whose name contains a `YYYY-MM-DD` date. Existing directories are never reused. |
 | `--prompt-version` | Yes | A supported tracked prompt version, currently `1` or `2`; it is recorded in every row and the evidence manifest. |
+| `--case-ids` | No | Comma-separated, unique approved case IDs for a controlled subset, preserved in the supplied order. Omit it to run the full approved corpus. |
 
 The protocol is fixed at two repetitions, temperature `0.0`, effective seeds
 `42` and `43`, model-major/case-major/repetition order, strictly sequential

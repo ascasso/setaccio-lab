@@ -79,6 +79,8 @@ catalog and exact input bytes before starting Spring, then executes every
 explicit model, case, and repetition strictly sequentially with temperature
 `0.0`, effective seeds `42` and `43`, one predeclared token policy, one
 explicit tracked prompt version, and Ollama's pull strategy forced to `never`.
+For a controlled smoke or diagnostic subset, callers may supply explicit
+approved `--case-ids`; omitting that option retains the full approved corpus.
 It checks Ollama's installed-model list, resolves each requested tag to its
 full immutable Ollama digest, rejects duplicate aliases for the same installed
 model, and fails before creating the run directory when a requested tag is

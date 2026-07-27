@@ -22,6 +22,7 @@ public abstract class VisionMatrixTask extends DefaultTask {
     private String maxTokens;
     private String outputDir;
     private String promptVersion;
+    private String caseIds;
 
     @Inject
     public VisionMatrixTask(ExecOperations execOperations) {
@@ -94,6 +95,17 @@ public abstract class VisionMatrixTask extends DefaultTask {
         this.promptVersion = promptVersion;
     }
 
+    @Input
+    @Optional
+    public String getCaseIds() {
+        return caseIds;
+    }
+
+    @Option(option = "case-ids", description = "Optional comma-separated approved case IDs for a controlled subset.")
+    public void setCaseIds(String caseIds) {
+        this.caseIds = caseIds;
+    }
+
     @TaskAction
     public void runMatrix() {
         requireOption(corpusDir, "--corpus-dir");
@@ -111,6 +123,9 @@ public abstract class VisionMatrixTask extends DefaultTask {
         args.addAll(List.of("--max-tokens", maxTokens.trim()));
         args.addAll(List.of("--output-dir", outputDir.trim()));
         args.addAll(List.of("--prompt-version", promptVersion.trim()));
+        if (caseIds != null && !caseIds.isBlank()) {
+            args.addAll(List.of("--case-ids", caseIds.trim()));
+        }
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());
             spec.getMainClass().set(getMainClass());

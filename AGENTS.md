@@ -147,7 +147,9 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - The opt-in `visionMatrix` task validates that fixed local corpus, then runs
   explicit models/cases/repetitions sequentially with temperature `0.0`, seeds
   `42`/`43`, one explicit token policy, one explicit tracked prompt version,
-  and Ollama pull strategy `never`. It resolves full immutable Ollama model
+  and Ollama pull strategy `never`. It may accept an explicit, ordered approved
+  case-ID subset for controlled diagnostics; when omitted, it runs the full
+  approved corpus. It resolves full immutable Ollama model
   digests, writes suite-specific raw JSON, a shared v1 manifest, and
   deterministic summary under a new dated
   `build/vision-matrix/` directory.
