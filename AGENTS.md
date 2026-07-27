@@ -424,6 +424,23 @@ The lab app uses port `8082`.
 
 Do not stage, commit, or push unless explicitly asked. Leave changes unstaged by default, then report the modified files, tests run, and what would be committed if requested.
 
+Standing closeout instruction for workflow-guidance corrections:
+
+- When the user asks to correct, simplify, or make a repository workflow guide
+  copy/paste-ready in a way similar to the vision human-review instructions,
+  treat that request as authorization to complete and commit the bounded
+  correction.
+- Complete the whole change before committing: align any related task error or
+  operator-facing behavior, active instructions, environment documentation,
+  changelog, dated log, and risk-matched verification that are affected. Do not
+  leave part of the same correction unstaged or undocumented.
+- Use one focused commit when implementation, tests, and documentation form one
+  inseparable change. Split commits into logical chunks when independently
+  useful changes, such as repository-policy guidance and functional workflow
+  behavior, can be reviewed or reverted separately.
+- This standing instruction does not authorize a push. Push only when the user
+  explicitly requests it.
+
 Before committing in a future session:
 
 - Run the relevant Gradle build.
