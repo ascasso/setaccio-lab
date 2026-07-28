@@ -9,6 +9,10 @@ This rubric is intended to be executed by a human. Any agent-produced pass
 against it must be labeled explicitly as agent-assisted review and must not be
 substituted for, or represented as, completed human review.
 
+For the same workflow as a compact top-to-bottom checklist, use the committed
+[`VISION-HUMAN-REVIEW-OPERATOR.md`](VISION-HUMAN-REVIEW-OPERATOR.md) companion.
+This document remains authoritative if the two ever disagree on policy.
+
 ## Before you start
 
 - Keep source images, raw responses, reference observations, expected concepts,
