@@ -187,7 +187,14 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   actual human review.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
-- The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
+- The deterministic fixture evaluation endpoint is wired at `POST
+  /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
+  calling a model provider and remains distinct from future AI-judged
+  evaluation. The planning-only gate recommends a first host-Ollama
+  `FactCheckingEvaluator` matrix over balanced public fixtures with an explicit
+  installed judge model, full digest, versioned prompt, two repetitions, and
+  offline-verifiable evidence; `RelevancyEvaluator` waits for a real retrieval
+  flow.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - A clean controlled Tool Search refresh completed from commit `08f1cb5` across
   the locked three-model, five-case, two-repetition paired protocol. Offline
@@ -229,7 +236,10 @@ Relevant upgrade concerns for this repo:
 - For Google GenAI chat config, follow Spring AI's `spring.ai.google.genai.api-key`, Vertex AI properties, and `spring.ai.google.genai.chat.*` properties. `GEMINI_API_KEY` is only a repo-supported alias for local Gemini Developer API setup.
 - Do not use `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` for Spring AI Google GenAI chat tests; those are OAuth client credentials, not GenAI API-key credentials.
 - Google GenAI tests should account for Gemini Developer API versus Vertex AI mode, multimodal input, response MIME type, Google Search grounding, server-side tool metadata, safety settings, cached content, thought signatures, and model-specific thinking option compatibility.
-- The deterministic evaluation benchmark already uses Spring AI's `Evaluator` and `EvaluationRequest`; re-check the exact Spring AI 2.0 APIs before adding `RelevancyEvaluator`, `FactCheckingEvaluator`, or AI-judged execution.
+- The deterministic evaluation benchmark already uses Spring AI's `Evaluator`
+  and `EvaluationRequest`. The Slice 7 planning gate checked the Spring AI
+  `2.0.0` `RelevancyEvaluator` and `FactCheckingEvaluator` contracts; re-check
+  them if framework versions change before implementation.
 - For container-backed tests, track Spring AI's `spring-ai-spring-boot-testcontainers` support and service connections, but keep Docker/Testcontainers opt-in.
 - Keep Testcontainers dependencies isolated in `setaccio-testcontainers`; do not add them to `setaccio-lab`.
 - Direct Spring AI 2.0 tool-calling and regex Tool Search comparison are implemented. Keep new advisor/index work bounded, expectation-aware, and offline-tested before expanding it.
@@ -297,14 +307,20 @@ Completed:
 - Populate and approve a bounded ignored corpus, smoke-check the selected
   installed model cohort, lock the no-limit token policy, and complete one
   clean-baseline controlled local vision matrix with offline verification.
+- Complete the local AI-judged evaluation and Testcontainers compatibility
+  planning gate without adding a live judge, container runtime task, or new
+  dependency.
+- Complete the controlled local Tool Search refresh with offline verification
+  and a bounded conclusion that does not select another index or provider.
 
 Pending:
 
-- Test the bounded prompt hypothesis that explicitly requires `unknown` for
-  exact location, identity, event, and time when the image does not support
-  those details; keep the same corpus, model cohort, and evidence protocol.
-- Run controlled, explicitly selected local model matrices against the expectation-aware tool case corpus before choosing another Tool Search index or provider path.
-- Add or refine AI-judged evaluation and Testcontainers planning docs before wiring either live path.
+- Complete the transferred actual human Prompt v1/v2 review, record one
+  adopt/revise/reject decision, and keep Prompt v1 as the operational default
+  until that human gate is satisfied.
+- Implement the planned local fact-checking matrix only after separate
+  authorization; keep the live judge explicit, local, no-pull, and outside the
+  default lifecycle.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 
@@ -380,10 +396,15 @@ Provider/model-type phase:
 
 Evaluation/Testcontainers phase:
 
-- Relevancy evaluator tests for context-grounded responses.
-- Fact-checking evaluator tests for claim-versus-context behavior.
-- Configurable judge/evaluator provider and model selection.
-- Optional Spring AI Testcontainers service connections for local model services and vector stores.
+- First future slice: opt-in host-Ollama fact-checking over balanced tracked
+  claim/context fixtures, with a versioned prompt, explicit installed judge and
+  full digest, two seeded repetitions, failure classification, and offline
+  evidence verification.
+- Later retrieval slice: relevancy evaluation only when a real retrieval flow
+  supplies preserved context.
+- Separate optional container slice: typed Ollama service connection and model
+  provisioning isolated in `setaccio-testcontainers`, never in the normal
+  build lifecycle.
 
 Tool-calling phase:
 

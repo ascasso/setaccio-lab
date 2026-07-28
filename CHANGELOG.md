@@ -9,6 +9,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added a committed vision human-review operator companion with the exact
+  preparation, worksheet-entry, decision, and public-closeout sequence while
+  retaining `docs/VISION-HUMAN-REVIEW.md` as the canonical policy source.
+- Added the planning-only local AI-judged evaluation gate: a bounded future
+  host-Ollama fact-checking matrix contract, reproducibility and failure
+  criteria, and a separately deferred Testcontainers service-connection path
+  that preserves the module boundary and offline default lifecycle.
 - Added `visionHumanReviewPrepare`, an offline-only task that verifies and
   compares two saved vision runs, validates their inputs against the ignored
   private corpus, and writes one non-overwriting private Markdown worksheet

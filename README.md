@@ -167,6 +167,9 @@ or contact Ollama.
 - writes structured `*-evaluation.json` results to the same output directory.
 
 This establishes the result-row contract for later AI-judged evaluation. It does not claim to measure model quality; live evaluator models remain a separate opt-in phase.
+The planning gate for that future phase recommends one bounded host-Ollama
+fact-checking matrix before any retrieval evaluator or container runtime work;
+see [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 
 All benchmarks are local-first and offline-safe by default:
 
