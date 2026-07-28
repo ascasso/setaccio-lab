@@ -90,6 +90,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Reject vision-matrix comparisons and human-review worksheet preparation when
+  saved runs have different Spring Boot or Spring AI versions, preventing
+  framework-induced behavior from being attributed to prompt changes.
 - Clarified the required `visionHumanReviewPrepare` options with a short
   workflow containing the exact current baseline, candidate, command, and
   worksheet paths, and made a bare task invocation report all required options

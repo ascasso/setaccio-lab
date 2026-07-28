@@ -270,9 +270,10 @@ or a remote provider:
 The comparison verifies both inputs before rendering deterministic Markdown to
 standard output. It requires the same ordered full model digests, case IDs and
 BLAKE3 identities, repetitions/seeds, temperature, token policy, row order,
-and execution engine. Prompt identity and code baseline may differ. The report
-covers invocation, structural, repetition, token, latency, and infrastructure
-deltas only; semantic judgments remain human review.
+execution engine, and Spring Boot and Spring AI versions. Prompt identity and
+code baseline may differ. The report covers invocation, structural, repetition,
+token, latency, and infrastructure deltas only; semantic judgments remain human
+review.
 
 Prepare the private human-review worksheet for the current Prompt v1/v2 pair
 only after confirming that these exact ignored runs are present:

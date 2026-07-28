@@ -95,9 +95,10 @@
   supported saved prompt version without starting Spring or a provider.
 - Compare two verified saved runs offline only when their ordered model
   identities/digests, input identities, repetitions/seeds, temperature, token
-  policy, row order, execution engine, and all other non-prompt settings
-  match. Test valid comparisons plus input/model/settings mismatch and tampered
-  evidence rejection; keep semantic judgments out of the deterministic report.
+  policy, row order, execution engine, Spring Boot and Spring AI versions, and
+  all other non-prompt settings match. Test valid comparisons plus
+  input/model/settings/framework mismatch and tampered evidence rejection; keep
+  semantic judgments out of the deterministic report.
 - Prepare human review only after that offline comparison gate passes. Validate
   the private corpus against saved MIME/BLAKE3 identities, group both prompt
   versions by model/case, collapse exact successful repetitions, retain

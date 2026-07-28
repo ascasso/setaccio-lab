@@ -159,9 +159,10 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   Human expected-observation and unsupported-detail judgments remain separate
   from deterministic analysis.
 - `visionMatrixCompare` compares two already-verified saved runs offline and
-  writes a deterministic Markdown report to standard output. It requires all
-  non-prompt protocol settings, ordered full model digests, and input
-  identities to match; only prompt identity and code baseline may differ.
+  writes a deterministic Markdown report to standard output. It requires
+  Spring Boot and Spring AI versions, all non-prompt protocol settings, ordered
+  full model digests, and input identities to match; only prompt identity and
+  code baseline may differ.
 - `visionHumanReviewPrepare` accepts one explicit baseline, candidate, and
   ignored local corpus, verifies the saved evidence and deterministic
   comparability, validates corpus input identities, and writes one private,

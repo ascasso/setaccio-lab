@@ -3,6 +3,9 @@ package com.setaccio.lab.vision;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.setaccio.lab.evidence.EvidenceFrameworkVersions;
+import com.setaccio.lab.evidence.EvidenceManifest;
+import com.setaccio.lab.evidence.EvidenceManifestStore;
 import com.setaccio.lab.service.VisionPromptCatalog;
 import com.setaccio.lab.service.VisionPromptDefinition;
 import java.nio.charset.StandardCharsets;
@@ -70,6 +73,31 @@ class VisionMatrixComparisonTest {
     }
 
     @Test
+    void rejectsMismatchedFrameworkVersionsBeforeRenderingAComparison() throws Exception {
+        Run baseline = writeRun("2026-07-26-framework-baseline", VisionMatrixTestFixtures.PROMPT, List.of("vision-one"));
+        VisionPromptDefinition version2 = new VisionPromptCatalog(new VisionPromptDefinition()).require("2");
+        Run differentSpringBoot = writeRun(
+                "2026-07-26-spring-boot-candidate", version2, List.of("vision-one"));
+        Run differentSpringAi = writeRun(
+                "2026-07-26-spring-ai-candidate", version2, List.of("vision-one"));
+        EvidenceFrameworkVersions baselineVersions = readManifest(baseline).frameworkVersions();
+        rewriteFrameworkVersions(
+                differentSpringBoot,
+                new EvidenceFrameworkVersions("different-spring-boot", baselineVersions.springAi()));
+        rewriteFrameworkVersions(
+                differentSpringAi,
+                new EvidenceFrameworkVersions(baselineVersions.springBoot(), "different-spring-ai"));
+        VisionMatrixComparison comparison = new VisionMatrixComparison(VisionMatrixTestFixtures.OBJECT_MAPPER);
+
+        assertThatThrownBy(() -> comparison.compare(baseline.directory(), differentSpringBoot.directory()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Spring Boot or Spring AI framework versions differ");
+        assertThatThrownBy(() -> comparison.compare(baseline.directory(), differentSpringAi.directory()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Spring Boot or Spring AI framework versions differ");
+    }
+
+    @Test
     void rejectsTamperedEvidenceBeforeRenderingAComparison() throws Exception {
         Run baseline = writeRun("2026-07-26-tampered-baseline", VisionMatrixTestFixtures.PROMPT, List.of("vision-one"));
         VisionPromptDefinition version2 = new VisionPromptCatalog(new VisionPromptDefinition()).require("2");
@@ -105,6 +133,26 @@ class VisionMatrixComparisonTest {
         new VisionMatrixEvidence(VisionMatrixTestFixtures.OBJECT_MAPPER, prompt)
                 .write(directory, result, analysis);
         return new Run(directory, directory.resolve(VisionMatrixProtocol.RAW_FILENAME));
+    }
+
+    private EvidenceManifest readManifest(Run run) {
+        return new EvidenceManifestStore(VisionMatrixTestFixtures.OBJECT_MAPPER).read(run.directory());
+    }
+
+    private void rewriteFrameworkVersions(Run run, EvidenceFrameworkVersions frameworkVersions) throws Exception {
+        EvidenceManifest manifest = readManifest(run);
+        EvidenceManifest replacement = new EvidenceManifest(
+                manifest.manifestVersion(),
+                manifest.suite(),
+                manifest.runId(),
+                manifest.generatedAt(),
+                manifest.codeBaseline(),
+                frameworkVersions,
+                manifest.executionEngine(),
+                manifest.settings(),
+                manifest.artifacts());
+        VisionMatrixTestFixtures.OBJECT_MAPPER.writerWithDefaultPrettyPrinter()
+                .writeValue(run.directory().resolve(EvidenceManifestStore.MANIFEST_FILENAME).toFile(), replacement);
     }
 
     private record Run(Path directory, Path rawJson) {}

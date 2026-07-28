@@ -72,6 +72,9 @@ final class VisionMatrixComparison {
         if (!baseline.manifest().executionEngine().equals(candidate.manifest().executionEngine())) {
             failures.add("execution engine differs");
         }
+        if (!baseline.manifest().frameworkVersions().equals(candidate.manifest().frameworkVersions())) {
+            failures.add("Spring Boot or Spring AI framework versions differ");
+        }
         if (!nonPromptSettings(baseline.manifest()).equals(nonPromptSettings(candidate.manifest()))) {
             failures.add("locked protocol settings differ outside prompt identity");
         }
