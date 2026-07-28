@@ -107,6 +107,20 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
+## Planned Local AI Judge (Not Implemented)
+
+There is no supported judge environment variable, live judge endpoint, or
+judge Gradle task yet. `OLLAMA_MODEL` remains the application chat/vision
+default and must not silently select an evaluator model.
+
+The accepted future contract requires an explicit `--judge-model` naming an
+already-installed local Ollama model, resolves its full digest, locks
+temperature/seeds/token policy, and keeps pull strategy `never`. The first
+slice is a host-Ollama `FactCheckingEvaluator` matrix; `RelevancyEvaluator` and
+container provisioning remain separate later work. See
+[the local AI-judged evaluation plan](LOCAL-AI-EVALUATION-PLAN.md) for the
+proposed command boundary and acceptance criteria.
+
 ## Local Vision Benchmark
 
 The vision benchmark is available only through the `local` profile and requires
@@ -296,7 +310,9 @@ Otherwise, run this command without changing the paths:
 
 Do not run the task without these options. The task never guesses from
 timestamps or automatically selects evidence. See
-`docs/VISION-HUMAN-REVIEW.md` for the complete review workflow.
+`docs/VISION-HUMAN-REVIEW.md` for the canonical policy and rubric, or
+`docs/VISION-HUMAN-REVIEW-OPERATOR.md` for the committed top-to-bottom operator
+checklist.
 
 The task verifies both runs, applies the same deterministic comparability gate,
 and validates that the current private corpus cases still match the saved MIME

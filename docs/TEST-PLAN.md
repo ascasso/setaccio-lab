@@ -7,7 +7,9 @@
 - Add known BLAKE3 test vectors for empty input, strings, byte arrays, and streams.
 - Keep `setaccio-lab` context smoke tests on the `test` profile with no live Ollama or Anthropic calls.
 - Add controller validation tests for missing files, missing model names, and malformed model lists.
-- Maintain the implemented deterministic Spring AI evaluator contract, and keep AI-judged evaluation and Testcontainers APIs under review before adding either live abstraction.
+- Maintain the implemented deterministic Spring AI evaluator contract. Follow
+  the accepted local fact-checking and Testcontainers planning gate before
+  adding either live path.
 
 ## Shared Evidence Lifecycle
 
@@ -87,7 +89,9 @@
   infrastructure observations, and do not declare an aggregate winner.
   Pre-register the review criteria before reading candidate raw responses; use
   [`docs/VISION-HUMAN-REVIEW.md`](VISION-HUMAN-REVIEW.md) for the current
-  public-safe rubric.
+  public-safe rubric and
+  [`docs/VISION-HUMAN-REVIEW-OPERATOR.md`](VISION-HUMAN-REVIEW-OPERATOR.md) for
+  the committed execution checklist.
 - Reject tampered or missing raw evidence, manifest protocol drift, unexpected
   artifacts, and summaries that differ from deterministic offline analysis.
 - Verify that every row and manifest retain the explicitly selected prompt ID,
@@ -128,9 +132,24 @@
 - Use Spring AI's `Evaluator` contract for deterministic fixture rows before adding AI-judged evaluation.
 - Track each evaluation input as user text, optional context/data, model response, evaluator provider/model, pass/fail result, score, raw evaluator explanation, and evaluator metadata.
 - Keep public fixtures deterministic and make the evaluator implementation and required terms explicit in result metadata.
-- Use `RelevancyEvaluator` for RAG/context relevance checks when retrieval benchmarks are added.
-- Use `FactCheckingEvaluator` for claim-versus-context checks when factuality benchmarks are added.
-- Keep evaluator models configurable and separate from the model being tested; the judge model may be different from the generation model.
+- Implement `FactCheckingEvaluator` first, if live AI judging is authorized,
+  against a balanced public claim/context fixture cohort and an explicitly
+  selected already-installed host-Ollama judge. Follow
+  [`docs/LOCAL-AI-EVALUATION-PLAN.md`](LOCAL-AI-EVALUATION-PLAN.md).
+- Defer `RelevancyEvaluator` until a real retrieval flow can supply and preserve
+  retrieved documents; ordinary fixture context is not a RAG benchmark.
+- Keep judge and fixture-expectation results separate. A valid `yes` / `no`
+  verdict is not automatically an expectation match or a general factuality
+  score.
+- Because Spring AI `2.0.0`'s fact-checking response does not retain raw judge
+  text or usage metadata, capture the dedicated judge model response through a
+  narrow request-scoped recording boundary before evaluator normalization.
+  Do not duplicate the evaluator implementation to obtain that evidence.
+- Require prompt ID/version/digest, full judge-model digest, complete generation
+  settings, two seeded repetitions, balanced supported/unsupported fixtures,
+  explicit execution order, and shared-manifest offline verification.
+- Keep evaluator models configurable and separate from the model being tested;
+  record and flag identical full digests if a later benchmark self-evaluates.
 - Keep deterministic fixture-based assertions for default tests. AI-judged evaluator tests must be opt-in unless backed by mocks or recorded fixtures.
 - If custom evaluator prompts are added, keep prompt templates public-safe and test the required placeholders.
 
@@ -166,8 +185,13 @@
 ## Testcontainers
 
 - Keep Docker/Testcontainers dependencies isolated in `setaccio-testcontainers`; `setaccio-lab` must not require them.
-- Consider Spring AI's `spring-ai-spring-boot-testcontainers` module when adding container-backed integration tests.
-- Prefer Spring Boot service connections where they simplify wiring local model services or vector stores.
+- Keep the existing Spring AI `spring-ai-spring-boot-testcontainers` support in
+  test scope. Its Ollama service-connection factory does not itself add the
+  typed Testcontainers Ollama module.
+- Add a typed `OllamaContainer` dependency only in `setaccio-testcontainers`
+  and only when a separately authorized container-specific slice needs it.
+- Prefer Spring Boot `@ServiceConnection` wiring and verify that the resulting
+  Ollama connection details override ordinary connection properties.
 - Use `OllamaContainer` only for explicit integration tests; do not make Docker or model pulls required for normal builds.
 - Relevant future service connections include Ollama, local/vector stores such as Chroma, Milvus, Qdrant, Typesense, Weaviate, and infrastructure such as OpenSearch or LocalStack when those test surfaces are added.
 - Keep Testcontainers tests behind a dedicated Gradle task, profile, or property so local unit tests and CI remain fast and offline by default.

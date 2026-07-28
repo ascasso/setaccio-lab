@@ -15,4 +15,12 @@ This module exists so Docker and Testcontainers support can evolve without becom
 
 This module is a skeleton. It declares Spring AI's Testcontainers support dependency but does not start any containers by default.
 
-Future work should add a dedicated integration-test task before adding Docker-backed tests.
+Spring AI `2.0.0` supplies the Ollama service-connection factory and brings in
+Spring Boot's Testcontainers service-connection support. The separate typed
+Testcontainers Ollama module is intentionally not present.
+
+Future work should add a dedicated integration-test task before adding
+Docker-backed tests. It must keep explicit model provisioning out of the normal
+test/build lifecycle and must not move any Testcontainers dependency into
+`setaccio-lab`. The planning gate and acceptance criteria are recorded in
+[`docs/LOCAL-AI-EVALUATION-PLAN.md`](../docs/LOCAL-AI-EVALUATION-PLAN.md).
