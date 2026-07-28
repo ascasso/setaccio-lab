@@ -6,6 +6,7 @@ import com.setaccio.core.service.ApacheCommonsBlake3HashingServiceImpl;
 import com.setaccio.lab.LabApplication;
 import com.setaccio.lab.evidence.EvidenceRunDirectory;
 import com.setaccio.lab.service.VisionModelInvoker;
+import com.setaccio.lab.service.VisionPromptCatalog;
 import com.setaccio.lab.service.VisionPromptDefinition;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,6 +41,7 @@ public final class VisionMatrixRunner {
                 offlineObjectMapper,
                 new ApacheCommonsBlake3HashingServiceImpl())
                 .read(corpusDirectory);
+        corpus = selectCases(corpus, parsed.caseIds());
 
         System.out.println("Starting sequential vision matrix");
         System.out.println("  Models: " + settings.models());
@@ -50,6 +52,7 @@ public final class VisionMatrixRunner {
         System.out.println("  Temperature: 0.0");
         System.out.println("  Token policy: "
                 + (settings.maxTokens() == null ? "no explicit limit" : settings.maxTokens()));
+        System.out.println("  Prompt version: " + parsed.promptVersion());
         System.out.println("  Execution: sequential");
         System.out.println("  Output: " + outputDirectory);
         System.out.println("  Ollama pull strategy: never");
@@ -69,15 +72,18 @@ public final class VisionMatrixRunner {
                     throw new IllegalStateException(
                             "Effective Ollama pull strategy is not never: " + pullStrategy);
                 }
+                objectMapper = context.getBean(ObjectMapper.class);
+                promptDefinition = context.getBean(VisionPromptCatalog.class).require(parsed.promptVersion());
                 List<VisionMatrixModelIdentity> modelIdentities =
                         requireInstalledModels(context.getBean(OllamaApi.class), settings.models());
                 EvidenceRunDirectory.createNamed(
                         outputDirectory.getParent(),
                         outputDirectory.getFileName().toString());
-                objectMapper = context.getBean(ObjectMapper.class);
-                promptDefinition = context.getBean(VisionPromptDefinition.class);
                 VisionModelInvoker invoker = context.getBean(VisionModelInvoker.class);
-                result = new VisionMatrixExecutor(invoker::invoke, promptDefinition)
+                result = new VisionMatrixExecutor(
+                                (image, invocationSettings) -> invoker.invoke(
+                                        image, invocationSettings, promptDefinition),
+                                promptDefinition)
                         .execute(corpus, settings, modelIdentities);
             }
 
@@ -133,6 +139,37 @@ public final class VisionMatrixRunner {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Token policy must be none or an integer.", e);
         }
+    }
+
+    static LoadedVisionCorpus selectCases(LoadedVisionCorpus corpus, String value) {
+        if (corpus == null || corpus.cases().isEmpty()) {
+            throw new IllegalArgumentException("Corpus must contain at least one approved case.");
+        }
+        if (value == null) {
+            return corpus;
+        }
+        List<String> requested = List.of(value.split(",", -1)).stream()
+                .map(String::trim)
+                .toList();
+        if (requested.isEmpty() || requested.stream().anyMatch(String::isBlank)) {
+            throw new IllegalArgumentException("case-ids must not contain blank entries.");
+        }
+        if (new LinkedHashSet<>(requested).size() != requested.size()) {
+            throw new IllegalArgumentException("case-ids must not contain duplicates.");
+        }
+        Map<String, LoadedVisionCorpus.LoadedVisionCase> available = corpus.cases().stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        loadedCase -> loadedCase.metadata().caseId(),
+                        loadedCase -> loadedCase,
+                        (first, ignored) -> first,
+                        LinkedHashMap::new));
+        List<String> missing = requested.stream().filter(caseId -> !available.containsKey(caseId)).toList();
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Requested case IDs are not in the approved corpus: " + missing);
+        }
+        return new LoadedVisionCorpus(
+                corpus.corpusVersion(),
+                requested.stream().map(available::get).toList());
     }
 
     static List<VisionMatrixModelIdentity> requireInstalledModels(
@@ -222,11 +259,13 @@ public final class VisionMatrixRunner {
             String corpusDirectory,
             String models,
             String maxTokens,
-            String outputDirectory
+            String outputDirectory,
+            String promptVersion,
+            String caseIds
     ) {
 
         private static Arguments parse(String[] args) {
-            if (args == null || args.length != 8) {
+            if (args == null || (args.length != 10 && args.length != 12)) {
                 throw usage();
             }
             List<String> values = new ArrayList<>(List.of(args));
@@ -234,7 +273,9 @@ public final class VisionMatrixRunner {
                     value(values, "--corpus-dir"),
                     value(values, "--models"),
                     value(values, "--max-tokens"),
-                    value(values, "--output-dir"));
+                    value(values, "--output-dir"),
+                    value(values, "--prompt-version"),
+                    optionalValue(values, "--case-ids"));
         }
 
         private static String value(List<String> args, String option) {
@@ -245,10 +286,22 @@ public final class VisionMatrixRunner {
             return args.get(index + 1);
         }
 
+        private static String optionalValue(List<String> args, String option) {
+            int index = args.indexOf(option);
+            if (index < 0) {
+                return null;
+            }
+            if (index == args.size() - 1 || args.get(index + 1).isBlank()) {
+                throw usage();
+            }
+            return args.get(index + 1);
+        }
+
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
                     "Expected --corpus-dir <local/vision-corpus> --models <tags> "
-                            + "--max-tokens <none|1..32768> --output-dir <dated-build-directory>");
+                            + "--max-tokens <none|1..32768> --output-dir <dated-build-directory> "
+                            + "--prompt-version <supported-version> [--case-ids <case-id,...>]");
         }
     }
 }

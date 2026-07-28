@@ -1,6 +1,7 @@
 package com.setaccio.lab.vision;
 
 import com.setaccio.lab.service.VisionPromptDefinition;
+import com.setaccio.lab.service.VisionPromptCatalog;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -52,7 +53,7 @@ final class VisionMatrixProtocol {
 
     static void requirePrompt(VisionPromptDefinition promptDefinition) {
         if (!VisionPromptDefinition.ID.equals(promptDefinition.id())
-                || !VisionPromptDefinition.VERSION.equals(promptDefinition.version())) {
+                || !VisionPromptCatalog.supports(promptDefinition.version())) {
             throw new IllegalStateException("Vision prompt identity drifted from the locked contract");
         }
     }

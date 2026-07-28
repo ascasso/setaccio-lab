@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.setaccio.lab.evidence.EvidenceManifest;
 import com.setaccio.lab.evidence.EvidenceManifestStore;
+import com.setaccio.lab.service.VisionPromptCatalog;
+import com.setaccio.lab.service.VisionPromptDefinition;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -117,7 +119,27 @@ class VisionMatrixEvidenceTest {
                 .contains("does not calculate percentiles");
     }
 
+    @Test
+    void offlineRunnerSelectsTheTrackedPromptForVersionOneAndVersionTwoEvidence() throws Exception {
+        Fixture version1 = writeFixture("2026-07-26-v1");
+        VisionPromptDefinition version2 = new VisionPromptCatalog(new VisionPromptDefinition()).require("2");
+        Fixture version2Fixture = writeFixture("2026-07-26-v2", version2);
+
+        assertThat(VisionMatrixOfflineRunner.promptDefinitionFor(version1.runDirectory()).version())
+                .isEqualTo("1");
+        VisionPromptDefinition selectedVersion2 = VisionMatrixOfflineRunner.promptDefinitionFor(
+                version2Fixture.runDirectory());
+        assertThat(selectedVersion2.version()).isEqualTo("2");
+        assertThat(selectedVersion2.sha256()).isEqualTo(version2.sha256());
+        assertThat(new VisionMatrixEvidence(VisionMatrixTestFixtures.OBJECT_MAPPER, selectedVersion2)
+                .reanalyze(version2Fixture.runDirectory()).valid()).isTrue();
+    }
+
     private Fixture writeFixture(String runId) throws Exception {
+        return writeFixture(runId, VisionMatrixTestFixtures.PROMPT);
+    }
+
+    private Fixture writeFixture(String runId, VisionPromptDefinition prompt) throws Exception {
         Path corpusDirectory = temporaryDirectory.resolve(runId + "-corpus");
         LoadedVisionCorpus corpus = VisionMatrixTestFixtures.writeAndLoadCorpus(
                 corpusDirectory,
@@ -125,11 +147,13 @@ class VisionMatrixEvidenceTest {
         VisionMatrixResult result = VisionMatrixTestFixtures.successfulMatrix(
                 corpus,
                 List.of("model-a", "model-b"),
-                null);
+                null,
+                prompt);
         VisionMatrixAnalyzer.MatrixAnalysis analysis =
-                new VisionMatrixAnalyzer(VisionMatrixTestFixtures.PROMPT).analyze(result);
+                new VisionMatrixAnalyzer(prompt).analyze(result);
         Path runDirectory = Files.createDirectory(temporaryDirectory.resolve(runId));
-        evidence.write(runDirectory, result, analysis);
+        new VisionMatrixEvidence(VisionMatrixTestFixtures.OBJECT_MAPPER, prompt)
+                .write(runDirectory, result, analysis);
         return new Fixture(
                 runDirectory,
                 runDirectory.resolve(VisionMatrixProtocol.RAW_FILENAME));

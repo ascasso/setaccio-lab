@@ -7,7 +7,9 @@ plugins {
 import com.setaccio.gradle.ToolSearchSmokeTask
 import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 import com.setaccio.gradle.ToolSearchMatrixOfflineTask
+import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
+import com.setaccio.gradle.VisionMatrixComparisonTask
 import com.setaccio.gradle.VisionMatrixTask
 
 description = 'Setaccio Lab'
@@ -157,6 +159,27 @@ tasks.register('visionMatrixReanalyze', VisionMatrixOfflineTask) {
     classpath.from(sourceSets.visionMatrix.runtimeClasspath)
     mainClass.set('com.setaccio.lab.vision.VisionMatrixOfflineRunner')
     mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('visionMatrixCompare', VisionMatrixComparisonTask) {
+    description = 'Compares two verified saved vision matrices without starting Spring or calling a model provider.'
+    dependsOn tasks.named('visionMatrixClasses')
+    classpath.from(sourceSets.visionMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.vision.VisionMatrixComparisonRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('visionHumanReviewPrepare', VisionHumanReviewPrepareTask) {
+    dependsOn tasks.named('visionMatrixClasses')
+    classpath.from(sourceSets.visionMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.vision.VisionHumanReviewPrepareRunner')
+    workingDirectory.set(layout.projectDirectory)
+    reviewRoot.set(layout.buildDirectory.dir('vision-human-review'))
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

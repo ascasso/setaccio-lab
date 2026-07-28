@@ -6,10 +6,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.nio.file.Path;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.ai.ollama.api.OllamaApi;
 import org.mockito.Mockito;
 
 class VisionMatrixRunnerTest {
+
+    @TempDir
+    Path temporaryDirectory;
 
     @Test
     void parsesExplicitModelsAndTokenPolicy() {
@@ -17,6 +21,18 @@ class VisionMatrixRunnerTest {
                 .containsExactly("gemma4:e2b", "qwen3.5:latest");
         assertThat(VisionMatrixRunner.parseMaxTokens("none")).isNull();
         assertThat(VisionMatrixRunner.parseMaxTokens("1024")).isEqualTo(1024);
+    }
+
+    @Test
+    void usageRequiresAnExplicitPromptVersion() {
+        assertThatThrownBy(() -> VisionMatrixRunner.main(new String[] {
+                "--corpus-dir", "local/vision-corpus",
+                "--models", "model-a",
+                "--max-tokens", "none",
+                "--output-dir", "build/vision-matrix/2026-07-26-fixture"
+        }))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("--prompt-version");
     }
 
     @Test
@@ -106,6 +122,24 @@ class VisionMatrixRunnerTest {
         assertThatThrownBy(() -> VisionMatrixRunner.resolveNewOutputDirectory(
                 "build/other/2026-07-25-fixture"))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void selectsAnExplicitOrderedCaseSubsetAndRejectsAmbiguousSelections() throws Exception {
+        LoadedVisionCorpus corpus = VisionMatrixTestFixtures.writeAndLoadCorpus(
+                temporaryDirectory.resolve("corpus"), List.of("vision-one", "vision-two"));
+
+        LoadedVisionCorpus selected = VisionMatrixRunner.selectCases(corpus, "vision-two");
+
+        assertThat(selected.cases())
+                .extracting(loadedCase -> loadedCase.metadata().caseId())
+                .containsExactly("vision-two");
+        assertThatThrownBy(() -> VisionMatrixRunner.selectCases(corpus, "vision-one,vision-one"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("duplicates");
+        assertThatThrownBy(() -> VisionMatrixRunner.selectCases(corpus, "missing-case"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("not in the approved corpus");
     }
 
     private OllamaApi.Model model(String name) {

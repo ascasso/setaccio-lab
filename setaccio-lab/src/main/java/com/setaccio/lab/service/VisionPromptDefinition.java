@@ -13,12 +13,20 @@ public final class VisionPromptDefinition {
     public static final String VERSION = "1";
     public static final String RESOURCE_PATH = "prompts/vision/image-analysis-v1.md";
 
+    private final String id;
+    private final String version;
     private final String text;
     private final String sha256;
     private final List<String> requiredSections;
 
     public VisionPromptDefinition() {
-        byte[] bytes = loadPromptBytes();
+        this(ID, VERSION, RESOURCE_PATH);
+    }
+
+    VisionPromptDefinition(String id, String version, String resourcePath) {
+        this.id = id;
+        this.version = version;
+        byte[] bytes = loadPromptBytes(resourcePath);
         text = new String(bytes, StandardCharsets.UTF_8);
         sha256 = EvidenceIntegrity.sha256(bytes);
         requiredSections = text.lines()
@@ -32,11 +40,11 @@ public final class VisionPromptDefinition {
     }
 
     public String id() {
-        return ID;
+        return id;
     }
 
     public String version() {
-        return VERSION;
+        return version;
     }
 
     public String text() {
@@ -51,11 +59,11 @@ public final class VisionPromptDefinition {
         return requiredSections;
     }
 
-    private static byte[] loadPromptBytes() {
-        try (var input = new ClassPathResource(RESOURCE_PATH).getInputStream()) {
+    private static byte[] loadPromptBytes(String resourcePath) {
+        try (var input = new ClassPathResource(resourcePath).getInputStream()) {
             return input.readAllBytes();
         } catch (Exception e) {
-            throw new IllegalStateException("Failed to load tracked vision prompt " + RESOURCE_PATH, e);
+            throw new IllegalStateException("Failed to load tracked vision prompt " + resourcePath, e);
         }
     }
 }

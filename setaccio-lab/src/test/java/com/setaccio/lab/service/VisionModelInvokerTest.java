@@ -89,6 +89,30 @@ class VisionModelInvokerTest {
     }
 
     @Test
+    void invokesAnExplicitlySelectedPromptWithoutChangingTheDefaultPrompt() throws Exception {
+        VisionPromptDefinition version1 = new VisionPromptDefinition();
+        VisionPromptDefinition version2 = new VisionPromptCatalog(version1).require("2");
+        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        when(ollamaChatModel.call(any(Prompt.class))).thenAnswer(invocation -> {
+            Prompt prompt = invocation.getArgument(0);
+            assertThat(prompt.getInstructions())
+                    .singleElement()
+                    .isInstanceOfSatisfying(UserMessage.class, message ->
+                            assertThat(message.getText()).isEqualTo(version2.text()));
+            return response(completeOutput(version2), null, null);
+        });
+
+        var result = invoker(ollamaChatModel, version1).invoke(
+                image(), VisionInvocationSettings.modelDefaults("vision:model"), version2);
+
+        assertThat(result.promptVersion()).isEqualTo("2");
+        assertThat(result.promptSha256()).isEqualTo(version2.sha256());
+        assertThat(result.structuralChecks())
+                .extracting(check -> check.section())
+                .containsExactlyElementsOf(version2.requiredSections());
+    }
+
+    @Test
     void classifiesUnavailableEmptyAndProviderFailures() throws Exception {
         VisionPromptDefinition promptDefinition = new VisionPromptDefinition();
         VisionInvocationSettings settings = VisionInvocationSettings.modelDefaults("vision:model");

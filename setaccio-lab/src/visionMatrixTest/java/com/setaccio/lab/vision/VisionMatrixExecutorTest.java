@@ -3,6 +3,8 @@ package com.setaccio.lab.vision;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.setaccio.lab.model.VisionInvocationSettings;
+import com.setaccio.lab.service.VisionPromptCatalog;
+import com.setaccio.lab.service.VisionPromptDefinition;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -92,5 +94,28 @@ class VisionMatrixExecutorTest {
                 .extracting(VisionMatrixRow::invocationSettings)
                 .extracting(VisionInvocationSettings::maxTokens)
                 .containsOnly(512);
+    }
+
+    @Test
+    void recordsTheExplicitVersionTwoPromptInEveryMatrixRow() throws Exception {
+        LoadedVisionCorpus corpus = VisionMatrixTestFixtures.writeAndLoadCorpus(
+                temporaryDirectory.resolve("version-two"),
+                List.of("vision-one"));
+        VisionPromptDefinition version2 = new VisionPromptCatalog(new VisionPromptDefinition()).require("2");
+        VisionMatrixRunSettings settings = VisionMatrixProtocol.settings(List.of("model-a"), null);
+        VisionMatrixResult result = new VisionMatrixExecutor(
+                (image, invocationSettings) -> VisionMatrixTestFixtures.successfulInvocation(
+                        version2, invocationSettings, image.contentType(), 1, "version two output"),
+                version2,
+                VisionMatrixTestFixtures.FIXED_CLOCK)
+                .execute(corpus, settings, VisionMatrixTestFixtures.modelIdentities(settings.models()));
+
+        assertThat(result.promptVersion()).isEqualTo("2");
+        assertThat(result.rows())
+                .allSatisfy(row -> {
+                    assertThat(row.promptVersion()).isEqualTo("2");
+                    assertThat(row.promptSha256()).isEqualTo(version2.sha256());
+                });
+        assertThat(new VisionMatrixAnalyzer(version2).analyze(result).valid()).isTrue();
     }
 }

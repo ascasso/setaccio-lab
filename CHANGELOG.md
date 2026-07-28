@@ -9,6 +9,21 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `visionHumanReviewPrepare`, an offline-only task that verifies and
+  compares two saved vision runs, validates their inputs against the ignored
+  private corpus, and writes one non-overwriting private Markdown worksheet
+  under ignored `build/vision-human-review/` output. The worksheet presents
+  paired raw responses and the pre-registered human rubric without automated
+  semantic scoring.
+- Added `visionMatrixCompare`, an offline-only comparison task for two verified
+  saved vision runs. It rejects non-prompt protocol or identity drift and
+  reports deterministic invocation, structural, repetition, token, latency,
+  and infrastructure deltas without semantic scoring.
+- Added explicit tracked prompt-version selection to the opt-in vision matrix;
+  every row and manifest retain the selected prompt identity, while offline
+  verification and reanalysis select either supported saved prompt version.
+- Added optional explicit approved case-ID selection to the opt-in vision
+  matrix for controlled subsets, retaining full-corpus execution when omitted.
 - Added a shared benchmark evidence lifecycle foundation with versioned manifests, unique non-overwriting run directories, Git and framework provenance, relative artifact descriptors, streaming SHA-256 integrity metadata, and strict offline saved-run verification.
 - Migrated the locked Tool Search matrix to the shared v1 evidence manifest and
   added standalone offline verification and deterministic summary reanalysis
@@ -75,5 +90,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Reject vision-matrix comparisons and human-review worksheet preparation when
+  saved runs have different Spring Boot or Spring AI versions, preventing
+  framework-induced behavior from being attributed to prompt changes.
+- Clarified the required `visionHumanReviewPrepare` options with a short
+  workflow containing the exact current baseline, candidate, command, and
+  worksheet paths, and made a bare task invocation report all required options
+  plus the review-guide pointer in one error. Consolidated field-entry formats,
+  comparison vocabulary, and final-decision guidance into that canonical guide.
 - Parse Spring AI `ToolSearchResponse.toolReferences` entries when recording discovered tool names, so valid Tool Search runs are not marked as discovery failures.
 - Record null or result-less Ollama chat responses as failed benchmark rows instead of successful rows without model output.

@@ -21,6 +21,8 @@ public abstract class VisionMatrixTask extends DefaultTask {
     private String models;
     private String maxTokens;
     private String outputDir;
+    private String promptVersion;
+    private String caseIds;
 
     @Inject
     public VisionMatrixTask(ExecOperations execOperations) {
@@ -82,12 +84,35 @@ public abstract class VisionMatrixTask extends DefaultTask {
         this.outputDir = outputDir;
     }
 
+    @Input
+    @Optional
+    public String getPromptVersion() {
+        return promptVersion;
+    }
+
+    @Option(option = "prompt-version", description = "Required tracked vision prompt version.")
+    public void setPromptVersion(String promptVersion) {
+        this.promptVersion = promptVersion;
+    }
+
+    @Input
+    @Optional
+    public String getCaseIds() {
+        return caseIds;
+    }
+
+    @Option(option = "case-ids", description = "Optional comma-separated approved case IDs for a controlled subset.")
+    public void setCaseIds(String caseIds) {
+        this.caseIds = caseIds;
+    }
+
     @TaskAction
     public void runMatrix() {
         requireOption(corpusDir, "--corpus-dir");
         requireOption(models, "--models");
         requireOption(maxTokens, "--max-tokens");
         requireOption(outputDir, "--output-dir");
+        requireOption(promptVersion, "--prompt-version");
         if (!outputDir.matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
             throw new GradleException("visionMatrix output directory must contain a YYYY-MM-DD date");
         }
@@ -97,6 +122,10 @@ public abstract class VisionMatrixTask extends DefaultTask {
         args.addAll(List.of("--models", models.trim()));
         args.addAll(List.of("--max-tokens", maxTokens.trim()));
         args.addAll(List.of("--output-dir", outputDir.trim()));
+        args.addAll(List.of("--prompt-version", promptVersion.trim()));
+        if (caseIds != null && !caseIds.isBlank()) {
+            args.addAll(List.of("--case-ids", caseIds.trim()));
+        }
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());
             spec.getMainClass().set(getMainClass());

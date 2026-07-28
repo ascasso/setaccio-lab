@@ -41,10 +41,20 @@ public final class VisionModelInvoker {
     }
 
     public VisionInvocationResult invoke(UploadedImage image, VisionInvocationSettings settings) {
+        return invoke(image, settings, promptDefinition);
+    }
+
+    public VisionInvocationResult invoke(
+            UploadedImage image,
+            VisionInvocationSettings settings,
+            VisionPromptDefinition selectedPromptDefinition) {
+        if (selectedPromptDefinition == null) {
+            throw new IllegalArgumentException("Vision prompt definition must not be null");
+        }
         long started = System.nanoTime();
         String mimeType = image == null ? null : image.contentType();
         if (image == null || image.path() == null || !Files.isRegularFile(image.path())) {
-            return failed(settings, mimeType, started, VisionErrorCategory.INVALID_INPUT,
+            return failed(settings, selectedPromptDefinition, mimeType, started, VisionErrorCategory.INVALID_INPUT,
                     "Vision input is missing or is not a regular file");
         }
 
@@ -53,14 +63,14 @@ public final class VisionModelInvoker {
         try {
             OllamaChatModel ollamaChatModel = ollamaChatModelProvider.getIfAvailable();
             if (ollamaChatModel == null) {
-                return failed(settings, mimeType, started, VisionErrorCategory.MODEL_UNAVAILABLE,
+                return failed(settings, selectedPromptDefinition, mimeType, started, VisionErrorCategory.MODEL_UNAVAILABLE,
                         "Ollama chat model is not available");
             }
             Media media = new Media(
                     detectedMimeType,
                     new FileSystemResource(image.path()));
             UserMessage userMessage = UserMessage.builder()
-                    .text(promptDefinition.text())
+                    .text(selectedPromptDefinition.text())
                     .media(media)
                     .build();
             OllamaChatOptions.Builder options = OllamaChatOptions.builder()
@@ -80,20 +90,20 @@ public final class VisionModelInvoker {
                     || response.getResult().getOutput() == null
                     || response.getResult().getOutput().getText() == null
                     || response.getResult().getOutput().getText().isBlank()) {
-                return failed(settings, mimeType, started, VisionErrorCategory.EMPTY_RESPONSE,
+                return failed(settings, selectedPromptDefinition, mimeType, started, VisionErrorCategory.EMPTY_RESPONSE,
                         "Ollama returned no vision result");
             }
 
             String text = response.getResult().getOutput().getText();
             Usage usage = response.getMetadata() == null ? null : response.getMetadata().getUsage();
             List<VisionStructuralCheck> checks =
-                    structureEvaluator.evaluate(text, promptDefinition.requiredSections());
+                    structureEvaluator.evaluate(text, selectedPromptDefinition.requiredSections());
             return new VisionInvocationResult(
                     settings,
                     mimeType,
-                    promptDefinition.id(),
-                    promptDefinition.version(),
-                    promptDefinition.sha256(),
+                    selectedPromptDefinition.id(),
+                    selectedPromptDefinition.version(),
+                    selectedPromptDefinition.sha256(),
                     elapsedMillis(started),
                     usage == null ? null : usage.getPromptTokens(),
                     usage == null ? null : usage.getCompletionTokens(),
@@ -105,12 +115,19 @@ public final class VisionModelInvoker {
                     null);
         } catch (Exception e) {
             logger.warn("Vision invocation failed for model={}: {}", settings.model(), e.getClass().getSimpleName());
-            return failed(settings, mimeType, started, VisionErrorCategory.PROVIDER_FAILURE, safeMessage(e));
+            return failed(
+                    settings,
+                    selectedPromptDefinition,
+                    mimeType,
+                    started,
+                    VisionErrorCategory.PROVIDER_FAILURE,
+                    safeMessage(e));
         }
     }
 
     private VisionInvocationResult failed(
             VisionInvocationSettings settings,
+            VisionPromptDefinition selectedPromptDefinition,
             String mimeType,
             long started,
             VisionErrorCategory category,
@@ -118,9 +135,9 @@ public final class VisionModelInvoker {
         return new VisionInvocationResult(
                 settings,
                 mimeType,
-                promptDefinition.id(),
-                promptDefinition.version(),
-                promptDefinition.sha256(),
+                selectedPromptDefinition.id(),
+                selectedPromptDefinition.version(),
+                selectedPromptDefinition.sha256(),
                 elapsedMillis(started),
                 null,
                 null,

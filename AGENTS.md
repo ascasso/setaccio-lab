@@ -146,23 +146,55 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   tracked.
 - The opt-in `visionMatrix` task validates that fixed local corpus, then runs
   explicit models/cases/repetitions sequentially with temperature `0.0`, seeds
-  `42`/`43`, one explicit token policy, and Ollama pull strategy `never`. It
-  resolves full immutable Ollama model digests, writes suite-specific raw JSON,
-  a shared v1 manifest, and deterministic summary under a new dated
+  `42`/`43`, one explicit token policy, one explicit tracked prompt version,
+  and Ollama pull strategy `never`. It may accept an explicit, ordered approved
+  case-ID subset for controlled diagnostics; when omitted, it runs the full
+  approved corpus. It resolves full immutable Ollama model
+  digests, writes suite-specific raw JSON, a shared v1 manifest, and
+  deterministic summary under a new dated
   `build/vision-matrix/` directory.
 - `visionMatrixVerify` and `visionMatrixReanalyze` inspect saved vision
   evidence without starting Spring, reading the private corpus, or contacting
-  a provider. Human expected-observation and unsupported-detail judgments
-  remain separate from deterministic analysis.
+  a provider, selecting the saved supported prompt version from raw evidence.
+  Human expected-observation and unsupported-detail judgments remain separate
+  from deterministic analysis.
+- `visionMatrixCompare` compares two already-verified saved runs offline and
+  writes a deterministic Markdown report to standard output. It requires
+  Spring Boot and Spring AI versions, all non-prompt protocol settings, ordered
+  full model digests, and input identities to match; only prompt identity and
+  code baseline may differ.
+- `visionHumanReviewPrepare` accepts one explicit baseline, candidate, and
+  ignored local corpus, verifies the saved evidence and deterministic
+  comparability, validates corpus input identities, and writes one private,
+  non-overwriting Markdown worksheet under ignored
+  `build/vision-human-review/`. It organizes paired evidence but does not make
+  semantic judgments or a prompt decision.
 - A controlled local vision matrix completed from clean commit `11e2fa7`
   across three installed model families, four reviewed private cases, and two
   repetitions. All 24 invocations and required-section checks passed, the
   ignored v1 evidence verified offline, and Slice 7 human review is recorded
   separately in public-safe aggregate documentation without ranking models.
+- A paired clean Prompt v2 local matrix completed from commit `6b5b970` with
+  the same three-model, four-case, two-repetition protocol. All 24 invocations
+  and required-section checks passed; ignored evidence verified offline and
+  compared against the immutable v1 run. Agent-assisted review against the
+  committed rubric found primary concepts retained in 11 of 12 model/case
+  judgments and partially retained in one, with no total loss. It also found
+  that version 2 reduced some unsupported exact specificity but not uniformly,
+  while generic context and low-quality overconfidence persisted. These
+  semantic findings have not been human-confirmed. Version 1 remains the
+  operational interactive default while the adopt/revise/reject decision awaits
+  actual human review.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
+- A clean controlled Tool Search refresh completed from commit `08f1cb5` across
+  the locked three-model, five-case, two-repetition paired protocol. Offline
+  verification and reanalysis passed with no trace-integrity failure; standard
+  mode passed all 30 rows while regex Tool Search passed 12 of 30. Discovery
+  behavior remains the bounded diagnostic surface, and no alternate index or
+  provider is selected from this result alone.
 - `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix and sequential vision matrix use the shared v1 manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
 - `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
@@ -392,6 +424,23 @@ The lab app uses port `8082`.
 ## Git Workflow
 
 Do not stage, commit, or push unless explicitly asked. Leave changes unstaged by default, then report the modified files, tests run, and what would be committed if requested.
+
+Standing closeout instruction for workflow-guidance corrections:
+
+- When the user asks to correct, simplify, or make a repository workflow guide
+  copy/paste-ready in a way similar to the vision human-review instructions,
+  treat that request as authorization to complete and commit the bounded
+  correction.
+- Complete the whole change before committing: align any related task error or
+  operator-facing behavior, active instructions, environment documentation,
+  changelog, dated log, and risk-matched verification that are affected. Do not
+  leave part of the same correction unstaged or undocumented.
+- Use one focused commit when implementation, tests, and documentation form one
+  inseparable change. Split commits into logical chunks when independently
+  useful changes, such as repository-policy guidance and functional workflow
+  behavior, can be reviewed or reverted separately.
+- This standing instruction does not authorize a push. Push only when the user
+  explicitly requests it.
 
 Before committing in a future session:
 

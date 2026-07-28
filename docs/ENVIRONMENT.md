@@ -212,7 +212,8 @@ name as needed:
   --corpus-dir=local/vision-corpus \
   --models=gemma4:e2b \
   --max-tokens=none \
-  --output-dir=build/vision-matrix/2026-07-25-local
+  --output-dir=build/vision-matrix/2026-07-26-local \
+  --prompt-version=2
 ```
 
 | Option | Required | Contract |
@@ -221,6 +222,8 @@ name as needed:
 | `--models` | Yes | Comma-separated, unique, already-installed Ollama tags. No model is selected implicitly. |
 | `--max-tokens` | Yes | `none` or one integer from `1` through `32768`, locked for every row. |
 | `--output-dir` | Yes | A new direct child of `build/vision-matrix/` whose name contains a `YYYY-MM-DD` date. Existing directories are never reused. |
+| `--prompt-version` | Yes | A supported tracked prompt version, currently `1` or `2`; it is recorded in every row and the evidence manifest. |
+| `--case-ids` | No | Comma-separated, unique approved case IDs for a controlled subset, preserved in the supplied order. Omit it to run the full approved corpus. |
 
 The protocol is fixed at two repetitions, temperature `0.0`, effective seeds
 `42` and `43`, model-major/case-major/repetition order, strictly sequential
@@ -255,15 +258,72 @@ Regenerate only `SUMMARY.md` from verified immutable raw evidence:
   --run-dir=build/vision-matrix/2026-07-25-local
 ```
 
+Compare two already-verified saved runs without Spring, corpus access, Ollama,
+or a remote provider:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixCompare \
+  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+```
+
+The comparison verifies both inputs before rendering deterministic Markdown to
+standard output. It requires the same ordered full model digests, case IDs and
+BLAKE3 identities, repetitions/seeds, temperature, token policy, row order,
+execution engine, and Spring Boot and Spring AI versions. Prompt identity and
+code baseline may differ. The report covers invocation, structural, repetition,
+token, latency, and infrastructure deltas only; semantic judgments remain human
+review.
+
+Prepare the private human-review worksheet for the current Prompt v1/v2 pair
+only after confirming that these exact ignored runs are present:
+
+```bash
+ls -d \
+  setaccio-lab/build/vision-matrix/2026-07-25-controlled-four-case \
+  setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+```
+
+If either exact directory is missing, stop and restore the saved evidence.
+Otherwise, run this command without changing the paths:
+
+```bash
+./gradlew :setaccio-lab:visionHumanReviewPrepare \
+  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
+  --corpus-dir=local/vision-corpus
+```
+
+Do not run the task without these options. The task never guesses from
+timestamps or automatically selects evidence. See
+`docs/VISION-HUMAN-REVIEW.md` for the complete review workflow.
+
+The task verifies both runs, applies the same deterministic comparability gate,
+and validates that the current private corpus cases still match the saved MIME
+and BLAKE3 input identities. It then writes:
+
+```text
+setaccio-lab/build/vision-human-review/
+└── 2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/
+    └── HUMAN-REVIEW.md
+```
+
+The worksheet contains private reference metadata, local image links, and raw
+model responses grouped by model and case. Successful repetitions that match
+exactly are shown once; differing or failed repetitions are shown separately.
+The task does not start Spring, contact Ollama, select evidence automatically,
+score semantics, or make the prompt decision. It refuses to overwrite an
+existing worksheet so partially completed human notes remain protected.
+
 Offline verification rejects missing, tampered, empty, unexpected, unsafe, or
 protocol-drifted artifacts. Reanalysis refuses to change the summary when raw
 evidence or manifest settings fail validation.
 
-The complete run directory remains ignored and private by default. Raw model
-outputs may describe sensitive visible content even though corpus metadata and
-paths are omitted. Do not publish raw results without a separate content
-review; public closeout for private cases should use only safe case IDs and
-reviewed aggregate findings.
+The complete run directory and generated human-review worksheet remain ignored
+and private by default. Raw model outputs may describe sensitive visible
+content even though corpus metadata and paths are omitted. Do not publish raw
+results without a separate content review; public closeout for private cases
+should use only safe case IDs and reviewed aggregate findings.
 
 The summary reports invocation success, structural completion, repetition
 readiness and exact-output diagnostics, token availability, median and observed

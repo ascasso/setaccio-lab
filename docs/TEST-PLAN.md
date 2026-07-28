@@ -60,7 +60,8 @@
   and sensitive-content-review validation.
 - Keep the opt-in matrix protocol fixed at sequential
   model/case/repetition execution, two repetitions, temperature `0.0`, seeds
-  `42` and `43`, one explicit token policy, and Ollama pull strategy `never`.
+  `42` and `43`, one explicit token policy, one explicit tracked prompt
+  version, and Ollama pull strategy `never`.
 - Require explicit model tags, the fixed ignored corpus directory, and one new
   dated output directory. Check the installed Ollama model list with pulling
   disabled, record each normalized name and full immutable digest, reject
@@ -84,8 +85,25 @@
   unsupported-detail judgments separately per model/case, label them as human
   review rather than automated scores, include repetition/token/latency and
   infrastructure observations, and do not declare an aggregate winner.
+  Pre-register the review criteria before reading candidate raw responses; use
+  [`docs/VISION-HUMAN-REVIEW.md`](VISION-HUMAN-REVIEW.md) for the current
+  public-safe rubric.
 - Reject tampered or missing raw evidence, manifest protocol drift, unexpected
   artifacts, and summaries that differ from deterministic offline analysis.
+- Verify that every row and manifest retain the explicitly selected prompt ID,
+  version, and digest, and that offline verification/reanalysis selects either
+  supported saved prompt version without starting Spring or a provider.
+- Compare two verified saved runs offline only when their ordered model
+  identities/digests, input identities, repetitions/seeds, temperature, token
+  policy, row order, execution engine, Spring Boot and Spring AI versions, and
+  all other non-prompt settings match. Test valid comparisons plus
+  input/model/settings/framework mismatch and tampered evidence rejection; keep
+  semantic judgments out of the deterministic report.
+- Prepare human review only after that offline comparison gate passes. Validate
+  the private corpus against saved MIME/BLAKE3 identities, group both prompt
+  versions by model/case, collapse exact successful repetitions, retain
+  differing repetitions, write only under ignored `build/vision-human-review/`,
+  refuse overwrite, and leave every semantic field blank for a human.
 
 ## Chat Benchmark Phase
 
