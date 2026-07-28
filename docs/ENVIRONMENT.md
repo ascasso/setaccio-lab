@@ -107,6 +107,233 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
+## Local Vision Benchmark
+
+The vision benchmark is available only through the `local` profile and requires
+explicit uploaded files and model names. Models must already be installed in
+the configured Ollama instance; the application keeps model pulling disabled.
+
+```bash
+./gradlew :setaccio-lab:bootRun --args='--spring.profiles.active=local'
+```
+
+The existing multipart request remains valid:
+
+```bash
+curl -sS http://localhost:8082/api/lab/vision \
+  -F files=@/path/to/image.jpg \
+  -F models=gemma4:e2b
+```
+
+Optional generation settings may be supplied for reproducible calls:
+
+```bash
+curl -sS http://localhost:8082/api/lab/vision \
+  -F files=@/path/to/image.jpg \
+  -F models=gemma4:e2b \
+  -F temperature=0.0 \
+  -F seed=42 \
+  -F maxTokens=1024
+```
+
+| Field | Required | Notes |
+| --- | --- | --- |
+| `files` | Yes | One or more JPEG, PNG, GIF, or WebP uploads. Request-scoped temporary copies are deleted after the response. |
+| `models` | Yes | Comma-separated, already-installed Ollama model tags. |
+| `temperature` | No | Value from `0.0` through `2.0`. When omitted, the configured model default remains in effect. |
+| `seed` | No | Non-negative Ollama generation seed. When omitted, the configured model default remains in effect. |
+| `maxTokens` | No | Optional Ollama `num_predict` limit from `1` through `32768`. |
+
+Every row records the tracked `vision-image-analysis` prompt ID, version `1`,
+its calculated SHA-256 digest, detected MIME type, BLAKE3 input hash, requested
+generation settings, token usage when Spring AI exposes it, latency, output,
+and classified failure information. Seven deterministic checks report whether
+the required Markdown sections are present. `success` reports invocation
+success independently from `structureComplete`; neither field is a semantic
+image-quality judgment.
+
+The endpoint continues to write `*-vision.json` under
+`SETACCIO_LAB_OUTPUT_DIR`, which defaults to `build/lab-results/`. Vision output
+uses the neutral host value `local`. No new environment variable is required.
+
+### Local vision corpus
+
+The controlled vision matrix uses the fixed ignored directory
+`setaccio-lab/local/vision-corpus/`. It is separate from the interactive
+endpoint's optional `SETACCIO_LAB_INPUT_DIR`; setting that environment variable
+does not populate or select matrix cases.
+
+Create a local catalog from the tracked public-safe template:
+
+```bash
+mkdir -p setaccio-lab/local/vision-corpus/images
+cp setaccio-lab/src/main/resources/vision-corpus/cases.template.json \
+  setaccio-lab/local/vision-corpus/cases.json
+```
+
+Replace the template placeholders locally and copy each selected input under
+its stable case-ID-based filename. The local catalog and images are ignored as
+one directory and must not be force-added. Do not record original filenames or
+absolute paths.
+
+The template starts every privacy-review field as false. Review sensitive
+visible content before using a case. Before any exact image or derivative is
+made public, strip and recheck EXIF/GPS metadata and obtain explicit user
+approval for that file. Review state does not itself authorize tracking.
+
+See [the local vision corpus contract](vision-corpus/README.md) for the exact
+fields, six target case categories, and public-artifact boundary.
+
+### Opt-in sequential vision matrix
+
+The dedicated vision matrix is not attached to `test`, `check`, `build`, or
+CI. Before running it:
+
+1. Replace every placeholder in the ignored `cases.json`.
+2. Set `sensitiveContentReviewed` to `true` only after reviewing that exact
+   image.
+3. Confirm MIME types and BLAKE3 digests match the exact local bytes.
+4. Confirm every selected model tag is already installed with `ollama list`.
+   The task records the full resolved Ollama digest and rejects duplicate tags
+   that resolve to the same model bytes.
+5. Decide one token policy for the entire run.
+
+Run the offline suite first:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixTest
+```
+
+Then invoke the live matrix explicitly, replacing the example model and output
+name as needed:
+
+```bash
+./gradlew :setaccio-lab:visionMatrix \
+  --corpus-dir=local/vision-corpus \
+  --models=gemma4:e2b \
+  --max-tokens=none \
+  --output-dir=build/vision-matrix/2026-07-26-local \
+  --prompt-version=2
+```
+
+| Option | Required | Contract |
+| --- | --- | --- |
+| `--corpus-dir` | Yes | Must resolve to the fixed ignored `local/vision-corpus` directory inside the `setaccio-lab` module. |
+| `--models` | Yes | Comma-separated, unique, already-installed Ollama tags. No model is selected implicitly. |
+| `--max-tokens` | Yes | `none` or one integer from `1` through `32768`, locked for every row. |
+| `--output-dir` | Yes | A new direct child of `build/vision-matrix/` whose name contains a `YYYY-MM-DD` date. Existing directories are never reused. |
+| `--prompt-version` | Yes | A supported tracked prompt version, currently `1` or `2`; it is recorded in every row and the evidence manifest. |
+| `--case-ids` | No | Comma-separated, unique approved case IDs for a controlled subset, preserved in the supplied order. Omit it to run the full approved corpus. |
+
+The protocol is fixed at two repetitions, temperature `0.0`, effective seeds
+`42` and `43`, model-major/case-major/repetition order, strictly sequential
+execution, and `spring.ai.ollama.init.pull-model-strategy=never`. The runner
+validates the catalog, relative case-ID image paths, MIME bytes, BLAKE3 hashes,
+and sensitive-content review state before it starts Spring. It then queries
+Ollama's installed-model list with pulling disabled, resolves each requested
+tag to its normalized installed name and full digest, rejects aliases that
+identify the same model bytes, and fails before creating the output directory
+when any requested tag is missing or lacks complete identity metadata.
+
+Each successful run directory contains:
+
+- `vision-matrix-results.json`, with safe case IDs and input identities but no
+  local paths, original filenames, reference observations, expected concepts,
+  unsupported-detail notes, or raw provider exception messages;
+- `manifest.json`, using the shared evidence lifecycle and SHA-256 artifact
+  integrity;
+- `SUMMARY.md`, generated deterministically from the raw result.
+
+Verify a saved run without Spring, the private corpus, or Ollama:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixVerify \
+  --run-dir=build/vision-matrix/2026-07-25-local
+```
+
+Regenerate only `SUMMARY.md` from verified immutable raw evidence:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixReanalyze \
+  --run-dir=build/vision-matrix/2026-07-25-local
+```
+
+Compare two already-verified saved runs without Spring, corpus access, Ollama,
+or a remote provider:
+
+```bash
+./gradlew :setaccio-lab:visionMatrixCompare \
+  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+```
+
+The comparison verifies both inputs before rendering deterministic Markdown to
+standard output. It requires the same ordered full model digests, case IDs and
+BLAKE3 identities, repetitions/seeds, temperature, token policy, row order,
+execution engine, and Spring Boot and Spring AI versions. Prompt identity and
+code baseline may differ. The report covers invocation, structural, repetition,
+token, latency, and infrastructure deltas only; semantic judgments remain human
+review.
+
+Prepare the private human-review worksheet for the current Prompt v1/v2 pair
+only after confirming that these exact ignored runs are present:
+
+```bash
+ls -d \
+  setaccio-lab/build/vision-matrix/2026-07-25-controlled-four-case \
+  setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+```
+
+If either exact directory is missing, stop and restore the saved evidence.
+Otherwise, run this command without changing the paths:
+
+```bash
+./gradlew :setaccio-lab:visionHumanReviewPrepare \
+  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
+  --corpus-dir=local/vision-corpus
+```
+
+Do not run the task without these options. The task never guesses from
+timestamps or automatically selects evidence. See
+`docs/VISION-HUMAN-REVIEW.md` for the complete review workflow.
+
+The task verifies both runs, applies the same deterministic comparability gate,
+and validates that the current private corpus cases still match the saved MIME
+and BLAKE3 input identities. It then writes:
+
+```text
+setaccio-lab/build/vision-human-review/
+└── 2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/
+    └── HUMAN-REVIEW.md
+```
+
+The worksheet contains private reference metadata, local image links, and raw
+model responses grouped by model and case. Successful repetitions that match
+exactly are shown once; differing or failed repetitions are shown separately.
+The task does not start Spring, contact Ollama, select evidence automatically,
+score semantics, or make the prompt decision. It refuses to overwrite an
+existing worksheet so partially completed human notes remain protected.
+
+Offline verification rejects missing, tampered, empty, unexpected, unsafe, or
+protocol-drifted artifacts. Reanalysis refuses to change the summary when raw
+evidence or manifest settings fail validation.
+
+The complete run directory and generated human-review worksheet remain ignored
+and private by default. Raw model outputs may describe sensitive visible
+content even though corpus metadata and paths are omitted. Do not publish raw
+results without a separate content review; public closeout for private cases
+should use only safe case IDs and reviewed aggregate findings.
+
+The summary reports invocation success, structural completion, repetition
+readiness and exact-output diagnostics, token availability, median and observed
+range for successful latencies, and infrastructure failures in separate
+sections. Its expected-observation and unsupported-detail fields remain
+`not performed` because the deterministic analyzer never invents semantic
+labels. Slice 7 human review is recorded separately in the dated public log
+and aggregate documentation; it does not rewrite raw evidence or copy private
+reference metadata into the saved run.
+
 ## Local Chat Benchmark
 
 The simple chat benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.
@@ -303,7 +530,12 @@ build/tool-search-matrix/YYYY-MM-DD-post-fix-baseline/
 └── SUMMARY.md
 ```
 
-The manifest records the Git commit, Spring AI version, Issue #20/#21 context, models, cases, canonical prompts/expectations, tool names, run settings, execution/index metadata, Ollama base URL, no-pull strategy, expectation fingerprint, raw filename, and raw SHA-256.
+New runs use the shared v1 evidence manifest. It records run identity, Git
+commit and dirty state, Spring Boot and Spring AI versions, execution engine,
+Issue #20/#21 context, models, cases, canonical prompts/expectations, tool
+names, run settings, execution/index metadata, Ollama base URL, no-pull
+strategy, expectation fingerprint, and relative descriptors with sizes and
+SHA-256 digests for both the raw JSON and `SUMMARY.md`.
 
 Every Tool Search row is checked independently against its raw linked response. Non-empty raw discoveries must exactly match normalized tool names in order; empty raw responses must normalize empty. Missing, duplicate, malformed, orphaned, or mismatched traces invalidate the baseline.
 
@@ -319,6 +551,35 @@ Failed canonical contracts are assigned exactly one primary category, in this pr
 A successful abstention with zero discovery is not a failure. The deterministic `fixture-tool-failure` response is expected fixture data rather than an automatic execution failure. Any failed row outside the six categories invalidates analysis instead of being placed in an `other` bucket.
 
 `SUMMARY.md` compares the post-fix pass counts with both the originally recorded and corrected July 12 counts. It always highlights two confounders: the July 12 request used the wrong deterministic marker, and Issue #20 changes normalization of object-shaped Tool Search responses. Issue #21 is recorded as adjacent chat correctness work, not as a direct tool-scoring cause.
+
+### Offline verification and reanalysis
+
+Saved matrix evidence can be verified without starting Spring or contacting a
+model provider:
+
+```bash
+./gradlew toolSearchMatrixVerify \
+  --run-dir=build/tool-search-matrix/2026-07-13-post-fix-baseline
+```
+
+Verification checks the manifest contract, locked protocol metadata, raw
+SHA-256, expected 60-row structure and trace integrity, deterministic summary,
+and absence of missing, extra, empty, modified, path-escaping, or symbolic-link
+artifacts.
+
+To regenerate only `SUMMARY.md` from an intact saved raw result:
+
+```bash
+./gradlew toolSearchMatrixReanalyze \
+  --run-dir=build/tool-search-matrix/2026-07-13-post-fix-baseline
+```
+
+Reanalysis verifies the immutable manifest and raw JSON before replacing the
+summary atomically, then verifies the complete directory again. It refuses to
+regenerate from missing, modified, malformed, or protocol-drifted raw evidence.
+Both commands read the shared v1 manifest and the earlier unversioned Tool
+Search manifest, which is treated as legacy v0. They are standalone opt-in
+tasks and are not attached to `test`, `check`, `build`, or default CI.
 
 ## Local Fixture Evaluation Benchmark
 

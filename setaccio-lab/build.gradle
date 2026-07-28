@@ -6,6 +6,11 @@ plugins {
 
 import com.setaccio.gradle.ToolSearchSmokeTask
 import com.setaccio.gradle.ToolSearchMatrixBaselineTask
+import com.setaccio.gradle.ToolSearchMatrixOfflineTask
+import com.setaccio.gradle.VisionHumanReviewPrepareTask
+import com.setaccio.gradle.VisionMatrixOfflineTask
+import com.setaccio.gradle.VisionMatrixComparisonTask
+import com.setaccio.gradle.VisionMatrixTask
 
 description = 'Setaccio Lab'
 
@@ -56,6 +61,16 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.toolSearchSmoke.output
         runtimeClasspath += output + compileClasspath
     }
+    visionMatrix {
+        java.srcDir 'src/visionMatrix/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    visionMatrixTest {
+        java.srcDir 'src/visionMatrixTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.visionMatrix.output
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
 configurations {
@@ -63,6 +78,10 @@ configurations {
     toolSearchSmokeRuntimeOnly.extendsFrom runtimeOnly
     toolSearchSmokeTestImplementation.extendsFrom testImplementation, toolSearchSmokeImplementation
     toolSearchSmokeTestRuntimeOnly.extendsFrom testRuntimeOnly, toolSearchSmokeRuntimeOnly
+    visionMatrixImplementation.extendsFrom implementation
+    visionMatrixRuntimeOnly.extendsFrom runtimeOnly
+    visionMatrixTestImplementation.extendsFrom testImplementation, visionMatrixImplementation
+    visionMatrixTestRuntimeOnly.extendsFrom testRuntimeOnly, visionMatrixRuntimeOnly
 }
 
 tasks.register('toolSearchSmoke', ToolSearchSmokeTask) {
@@ -83,11 +102,94 @@ tasks.register('toolSearchMatrixBaseline', ToolSearchMatrixBaselineTask) {
     }.map { it.executablePath.asFile.absolutePath })
 }
 
+tasks.register('toolSearchMatrixVerify', ToolSearchMatrixOfflineTask) {
+    description = 'Verifies a saved Tool Search matrix without calling a model provider.'
+    dependsOn tasks.named('toolSearchSmokeClasses')
+    classpath.from(sourceSets.toolSearchSmoke.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.smoke.ToolSearchMatrixOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('toolSearchMatrixReanalyze', ToolSearchMatrixOfflineTask) {
+    description = 'Regenerates and verifies a saved Tool Search matrix summary without calling a model provider.'
+    dependsOn tasks.named('toolSearchSmokeClasses')
+    classpath.from(sourceSets.toolSearchSmoke.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.smoke.ToolSearchMatrixOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
 tasks.register('toolSearchSmokeTest', Test) {
     description = 'Runs offline tests for the opt-in Tool Search smoke analyzer.'
     group = 'verification'
     testClassesDirs = sourceSets.toolSearchSmokeTest.output.classesDirs
     classpath = sourceSets.toolSearchSmokeTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.register('visionMatrix', VisionMatrixTask) {
+    dependsOn tasks.named('visionMatrixClasses')
+    classpath.from(sourceSets.visionMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.vision.VisionMatrixRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('visionMatrixVerify', VisionMatrixOfflineTask) {
+    description = 'Verifies a saved vision matrix without starting Spring or calling a model provider.'
+    dependsOn tasks.named('visionMatrixClasses')
+    classpath.from(sourceSets.visionMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.vision.VisionMatrixOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('visionMatrixReanalyze', VisionMatrixOfflineTask) {
+    description = 'Regenerates and verifies a saved vision matrix summary without starting Spring or calling a model provider.'
+    dependsOn tasks.named('visionMatrixClasses')
+    classpath.from(sourceSets.visionMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.vision.VisionMatrixOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('visionMatrixCompare', VisionMatrixComparisonTask) {
+    description = 'Compares two verified saved vision matrices without starting Spring or calling a model provider.'
+    dependsOn tasks.named('visionMatrixClasses')
+    classpath.from(sourceSets.visionMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.vision.VisionMatrixComparisonRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('visionHumanReviewPrepare', VisionHumanReviewPrepareTask) {
+    dependsOn tasks.named('visionMatrixClasses')
+    classpath.from(sourceSets.visionMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.vision.VisionHumanReviewPrepareRunner')
+    workingDirectory.set(layout.projectDirectory)
+    reviewRoot.set(layout.buildDirectory.dir('vision-human-review'))
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('visionMatrixTest', Test) {
+    description = 'Runs offline tests for the opt-in sequential vision matrix.'
+    group = 'verification'
+    testClassesDirs = sourceSets.visionMatrixTest.output.classesDirs
+    classpath = sourceSets.visionMatrixTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('test')
 }

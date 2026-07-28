@@ -30,6 +30,10 @@ build/
 
 # Generated local artifacts
 outputs/
+plan/
+
+# Private local vision corpus
+/setaccio-lab/local/vision-corpus/
 
 # macOS
 .DS_Store

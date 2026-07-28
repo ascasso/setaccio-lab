@@ -4,6 +4,11 @@ This file is the repo-local guide for Codex, Claude Code, and other AI agents wo
 
 Do not stage, commit, or push unless explicitly asked.
 
+Read and follow the repository's `.gitignore` before creating, inspecting, or
+including files. Treat its rules as authoritative for generated outputs,
+local-only configuration, credentials, and other files that must remain
+untracked; do not bypass or weaken those rules without explicit instruction.
+
 ## Agent Hard Stops
 
 - Never copy private Setaccio product code, docs, deployment details, issue history, roadmap text, API modules, database code, or UI code into this repo.
@@ -126,18 +131,71 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-07-11)
+## Current State Snapshot (as of 2026-07-25)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
 - Root Gradle build with Java 25.
 - `setaccio-core` is a plain Java BLAKE3 utility library.
 - `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.0`.
-- The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses local Ollama through Spring AI, hashes inputs through `setaccio-core`, returns structured rows, and writes JSON under `build/lab-results/`.
+- The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses a tracked versioned public-safe prompt through a reusable direct Spring AI invocation boundary, supports optional temperature/seed/token settings, hashes inputs through `setaccio-core`, records prompt/MIME/token/structural/error metadata, returns a neutral `local` host value, and writes JSON under `build/lab-results/`.
+- The local vision corpus contract uses a tracked versioned public-safe template
+  with six stable non-sensitive case IDs and explicit privacy review fields.
+  Personal images and filled metadata belong only under the ignored
+  `setaccio-lab/local/vision-corpus/` directory; no local corpus content is
+  tracked.
+- The opt-in `visionMatrix` task validates that fixed local corpus, then runs
+  explicit models/cases/repetitions sequentially with temperature `0.0`, seeds
+  `42`/`43`, one explicit token policy, one explicit tracked prompt version,
+  and Ollama pull strategy `never`. It may accept an explicit, ordered approved
+  case-ID subset for controlled diagnostics; when omitted, it runs the full
+  approved corpus. It resolves full immutable Ollama model
+  digests, writes suite-specific raw JSON, a shared v1 manifest, and
+  deterministic summary under a new dated
+  `build/vision-matrix/` directory.
+- `visionMatrixVerify` and `visionMatrixReanalyze` inspect saved vision
+  evidence without starting Spring, reading the private corpus, or contacting
+  a provider, selecting the saved supported prompt version from raw evidence.
+  Human expected-observation and unsupported-detail judgments remain separate
+  from deterministic analysis.
+- `visionMatrixCompare` compares two already-verified saved runs offline and
+  writes a deterministic Markdown report to standard output. It requires
+  Spring Boot and Spring AI versions, all non-prompt protocol settings, ordered
+  full model digests, and input identities to match; only prompt identity and
+  code baseline may differ.
+- `visionHumanReviewPrepare` accepts one explicit baseline, candidate, and
+  ignored local corpus, verifies the saved evidence and deterministic
+  comparability, validates corpus input identities, and writes one private,
+  non-overwriting Markdown worksheet under ignored
+  `build/vision-human-review/`. It organizes paired evidence but does not make
+  semantic judgments or a prompt decision.
+- A controlled local vision matrix completed from clean commit `11e2fa7`
+  across three installed model families, four reviewed private cases, and two
+  repetitions. All 24 invocations and required-section checks passed, the
+  ignored v1 evidence verified offline, and Slice 7 human review is recorded
+  separately in public-safe aggregate documentation without ranking models.
+- A paired clean Prompt v2 local matrix completed from commit `6b5b970` with
+  the same three-model, four-case, two-repetition protocol. All 24 invocations
+  and required-section checks passed; ignored evidence verified offline and
+  compared against the immutable v1 run. Agent-assisted review against the
+  committed rubric found primary concepts retained in 11 of 12 model/case
+  judgments and partially retained in one, with no total loss. It also found
+  that version 2 reduced some unsupported exact specificity but not uniformly,
+  while generic context and low-quality overconfidence persisted. These
+  semantic findings have not been human-confirmed. Version 1 remains the
+  operational interactive default while the adopt/revise/reject decision awaits
+  actual human review.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without calling a model provider and remains distinct from future AI-judged evaluation.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
+- A clean controlled Tool Search refresh completed from commit `08f1cb5` across
+  the locked three-model, five-case, two-repetition paired protocol. Offline
+  verification and reanalysis passed with no trace-integrity failure; standard
+  mode passed all 30 rows while regex Tool Search passed 12 of 30. Discovery
+  behavior remains the bounded diagnostic surface, and no alternate index or
+  provider is selected from this result alone.
+- `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix and sequential vision matrix use the shared v1 manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
 - `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
 
@@ -224,10 +282,27 @@ Completed:
 - Make Tool Search comparisons paired and sequential, alternate advisor order across repetitions, and record deterministic generation settings.
 - Document local Ollama setup and provider environment variables.
 - Add offline tests for the current core, vision, chat, tool, Tool Search, and deterministic evaluator behavior.
+- Add the shared benchmark evidence lifecycle foundation and offline integrity tests.
+- Apply the shared evidence lifecycle to the locked Tool Search matrix and add
+  standalone offline saved-run verification and deterministic summary
+  regeneration with legacy-v0 compatibility.
+- Add the reproducible vision invocation contract with a tracked prompt and
+  digest, explicit Ollama options, usage metadata, deterministic section
+  checks, classified errors, and backward-compatible multipart handling.
+- Add the ignored local vision corpus layout and public-safe case metadata
+  template without tracking personal source images.
+- Add the dedicated sequential vision matrix, strict corpus reader,
+  suite-specific evidence writer, offline analyzer, and saved-run
+  verify/reanalyze tasks.
+- Populate and approve a bounded ignored corpus, smoke-check the selected
+  installed model cohort, lock the no-limit token policy, and complete one
+  clean-baseline controlled local vision matrix with offline verification.
 
 Pending:
 
-- Add public sample prompts and ignored sample image folders.
+- Test the bounded prompt hypothesis that explicitly requires `unknown` for
+  exact location, identity, event, and time when the image does not support
+  those details; keep the same corpus, model cohort, and evidence protocol.
 - Run controlled, explicitly selected local model matrices against the expectation-aware tool case corpus before choosing another Tool Search index or provider path.
 - Add or refine AI-judged evaluation and Testcontainers planning docs before wiring either live path.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
@@ -260,12 +335,14 @@ Maintain tests that prove:
 
 ### Vision Benchmark Tests
 
-When benchmark execution is added:
-
-- Mock `OllamaChatModel` or use a small adapter boundary so service tests do not require a live model.
-- Verify model names are passed through per request.
+- Mock `OllamaChatModel` through the reusable vision invocation boundary so
+  service tests do not require a live model.
+- Verify prompt ID/version/digest and explicit model, temperature, seed, and
+  optional token-limit settings.
 - Verify uploaded files are copied to temporary files and cleaned up.
-- Verify result rows include model, input name, input hash, latency, output text, success flag, and error details.
+- Verify result rows include model settings, prompt metadata, detected MIME
+  type, input name/hash, latency, token metadata, output text, structural
+  checks, success flag, and classified error details.
 - Verify failed model calls produce failed rows rather than crashing the whole benchmark run.
 - Verify result JSON writing uses ignored build output directories.
 
@@ -327,6 +404,7 @@ MCP phase:
 ```bash
 ./gradlew :setaccio-core:test
 ./gradlew :setaccio-lab:test
+./gradlew :setaccio-lab:visionMatrixTest
 ./gradlew :setaccio-testcontainers:test
 ./gradlew :setaccio-core:build
 ./gradlew :setaccio-lab:build
@@ -346,6 +424,23 @@ The lab app uses port `8082`.
 ## Git Workflow
 
 Do not stage, commit, or push unless explicitly asked. Leave changes unstaged by default, then report the modified files, tests run, and what would be committed if requested.
+
+Standing closeout instruction for workflow-guidance corrections:
+
+- When the user asks to correct, simplify, or make a repository workflow guide
+  copy/paste-ready in a way similar to the vision human-review instructions,
+  treat that request as authorization to complete and commit the bounded
+  correction.
+- Complete the whole change before committing: align any related task error or
+  operator-facing behavior, active instructions, environment documentation,
+  changelog, dated log, and risk-matched verification that are affected. Do not
+  leave part of the same correction unstaged or undocumented.
+- Use one focused commit when implementation, tests, and documentation form one
+  inseparable change. Split commits into logical chunks when independently
+  useful changes, such as repository-policy guidance and functional workflow
+  behavior, can be reviewed or reverted separately.
+- This standing instruction does not authorize a push. Push only when the user
+  explicitly requests it.
 
 Before committing in a future session:
 

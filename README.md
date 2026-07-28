@@ -15,15 +15,113 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 
 ## Current capabilities
 
+### Shared Evidence Lifecycle Foundation
+
+`setaccio-lab` includes plain Java primitives for reproducible benchmark
+artifacts. They allocate unique non-overwriting run directories, write and read
+a versioned manifest envelope, capture Git and framework provenance, describe
+artifacts with relative paths and SHA-256 integrity metadata, and verify saved
+runs offline. Verification rejects missing, modified, empty, duplicate,
+undeclared, path-escaping, or symbolic-link artifacts without starting Spring
+or contacting a model provider.
+
+The lifecycle deliberately keeps suite result payloads separate and reserves
+BLAKE3 for benchmark input identity. The locked Tool Search matrix and the
+dedicated sequential vision matrix write v1 manifests around their
+suite-specific raw JSON and deterministic Markdown summaries. The interactive
+vision, chat, and evaluation writers have not adopted the shared manifest yet.
+
 ### Local Vision Benchmark
 
 `POST /api/lab/vision` runs under the `local` profile. It:
 
 - accepts uploaded images through multipart `files`,
 - runs each image against one or more local Ollama models through Spring AI,
+- uses the tracked `vision-image-analysis` prompt version 1 and records its
+  SHA-256 identity on every row,
+- accepts optional temperature, seed, and token-limit settings without changing
+  the existing multipart contract when they are omitted,
 - hashes inputs with the BLAKE3 utilities in `setaccio-core`,
-- returns structured rows with model, input hash, latency, output, and error details,
+- returns structured rows with detected MIME type, model settings, input hash,
+  token usage when available, deterministic required-section checks, latency,
+  output, and classified error details,
 - writes raw JSON results to `build/lab-results/` by default, configurable with `SETACCIO_LAB_OUTPUT_DIR`.
+
+The direct Spring AI vision call lives behind a reusable invocation component,
+while the interactive endpoint retains concurrent file/model coordination.
+Invocation success and required-section completion are recorded separately;
+format compliance is not treated as proof that a model understood an image.
+Vision results use the neutral host value `local` rather than exposing the
+machine hostname.
+
+### Local Vision Corpus Contract
+
+The tracked
+[`cases.template.json`](setaccio-lab/src/main/resources/vision-corpus/cases.template.json)
+defines a versioned, vision-specific metadata shape for the controlled local
+corpus. It provides six stable, non-sensitive case IDs covering a single
+subject, complex scene, text-heavy image, low-quality image, ambiguous image,
+and file-organization image. Each local case records its relative case-ID-based
+image name, detected MIME type, BLAKE3 digest, human reference observation,
+expected concepts, unsupported details, deliberate limitations, and explicit
+privacy-review state.
+
+Personal images and filled case metadata belong only under the explicitly
+ignored `setaccio-lab/local/vision-corpus/` directory. The repository contains
+no selected source images or private observations, and an image or derivative
+requires sensitive-content and EXIF/GPS review plus explicit user approval
+before it may be tracked. See
+[`docs/vision-corpus/README.md`](docs/vision-corpus/README.md) for the fixed
+layout and review procedure.
+
+The opt-in `visionMatrix` task consumes this exact contract. It validates the
+catalog and exact input bytes before starting Spring, then executes every
+explicit model, case, and repetition strictly sequentially with temperature
+`0.0`, effective seeds `42` and `43`, one predeclared token policy, one
+explicit tracked prompt version, and Ollama's pull strategy forced to `never`.
+For a controlled smoke or diagnostic subset, callers may supply explicit
+approved `--case-ids`; omitting that option retains the full approved corpus.
+It checks Ollama's installed-model list, resolves each requested tag to its
+full immutable Ollama digest, rejects duplicate aliases for the same installed
+model, and fails before creating the run directory when a requested tag is
+missing or its identity is incomplete. The task writes the selected prompt and
+resolved model identities into suite-specific raw JSON, the shared v1 evidence
+manifest, and `SUMMARY.md` under a required new dated
+`build/vision-matrix/` directory.
+
+Saved runs can be checked with `visionMatrixVerify` or have only their
+deterministic summary regenerated with `visionMatrixReanalyze`. Both paths are
+offline: they do not read the private corpus, start Spring, or contact Ollama.
+They select the saved supported prompt version from immutable raw evidence.
+Two verified saved runs can also be compared with `visionMatrixCompare`. It
+requires matching Spring Boot and Spring AI versions, model digests and order,
+input identities, settings, row order, and execution engine; it permits only
+prompt identity and code baseline to differ. The deterministic Markdown report
+is written to standard output and does not assess image semantics or copy
+private corpus metadata.
+The offline `visionHumanReviewPrepare` task builds on that comparison gate and
+the ignored local corpus to produce one private, non-overwriting Markdown
+worksheet under `build/vision-human-review/`. It groups baseline and candidate
+responses by model and case, includes both repetitions only when they differ,
+and leaves all semantic judgments and the final prompt decision to the human
+reviewer.
+The analyzer keeps invocation, structural completion, repetition diagnostics,
+token availability, successful-invocation latency, and infrastructure failures
+separate from semantic review.
+
+A clean-baseline controlled local matrix completed across three models, four
+reviewed private cases, and two repetitions: 24 sequential rows at temperature
+`0.0`, seeds `42`/`43`, and no explicit token limit. All 24 invocations
+succeeded, all 24 outputs contained the required prompt sections, token
+metadata was available throughout, and the ignored evidence verified offline.
+Human review is now complete as a separately labeled assessment of expected
+concepts, unsupported detail, repetition consistency, token metadata, and
+latency. The review found reliable core-scene coverage but recurring
+unsupported geographic, event, and time specificity, plus overconfident image
+quality claims on the intentionally limited case. These observations are
+diagnostic rather than an aggregate model ranking; see the
+[2026-07-25 Slice 7 log](docs/logs/2026-07-25.md#slice-7-human-analysis-and-public-closeout)
+for the bounded findings and next hypothesis.
 
 ### Local Chat Benchmark
 
@@ -51,7 +149,13 @@ Tool Search comparison is disabled by default and currently supports the in-memo
 
 An explicitly opt-in `toolSearchSmoke` Gradle task validates the live Tool Search response wrapper and raw-to-normalized trace linkage against one already-installed Ollama model. It is not connected to `test`, `check`, or `build`, enforces Ollama's `never` pull strategy, and treats model behavior categories as diagnostic output rather than merge gates. See [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#opt-in-tool-search-smoke-automation) for invocation and case-selection details.
 
-The separate `toolSearchMatrixBaseline` task reproduces the locked July 12 three-model/five-case protocol from canonical Java cases and writes a raw trace, manifest, and Markdown comparison under a new dated `build/tool-search-matrix/` directory. It verifies every raw-to-normalized discovery linkage and classifies contract failures into six explicit diagnostic categories. Its report compares both the originally recorded and corrected July 12 counts, with the request-construction correction called out as a confounder.
+The separate `toolSearchMatrixBaseline` task reproduces the locked July 12 three-model/five-case protocol from canonical Java cases and writes a raw trace, shared v1 evidence manifest, and Markdown comparison under a new dated `build/tool-search-matrix/` directory. It verifies every raw-to-normalized discovery linkage and classifies contract failures into six explicit diagnostic categories. Its report compares both the originally recorded and corrected July 12 counts, with the request-construction correction called out as a confounder.
+
+Saved matrix directories can be checked with `toolSearchMatrixVerify` or have
+only their deterministic `SUMMARY.md` regenerated with
+`toolSearchMatrixReanalyze`. Both commands are offline, accept current v1
+manifests and the earlier unversioned legacy-v0 manifest, and never start Spring
+or contact Ollama.
 
 ### Local Fixture Evaluation Benchmark
 
@@ -122,9 +226,13 @@ Offline tests for the isolated Tool Search smoke analyzer are also available exp
 
 ```bash
 ./gradlew :setaccio-lab:toolSearchSmokeTest
+./gradlew :setaccio-lab:visionMatrixTest
 ```
 
-The same isolated offline suite covers matrix protocol, trace-integrity, and failure-classification behavior. Live matrix execution is an explicit separate task documented in `docs/ENVIRONMENT.md` and is never part of the normal build lifecycle.
+The isolated offline suites cover matrix protocols, evidence integrity,
+deterministic reanalysis, and failure classification. Live matrix execution is
+an explicit separate task documented in `docs/ENVIRONMENT.md` and is never part
+of the normal build lifecycle.
 
 ## Build Versions
 
