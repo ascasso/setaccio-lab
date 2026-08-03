@@ -73,6 +73,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Closed the unavailable Prompt v1/v2 comparative human-review prerequisite
+  through a documented evidence-loss waiver after the ignored saved-run
+  directories could not be restored. No human adopt/revise/reject judgment is
+  claimed: Prompt v1 remains the operational default, Prompt v2 remains
+  experimental and unadopted, and any future decision requires new paired
+  controlled evidence plus actual human review.
 - Added `gradle/libs.versions.toml` for shared Gradle dependency versions and updated the module build scripts to use version catalog aliases.
 - Moved repository declaration into Gradle dependency resolution management and made module test dependencies explicit.
 - Let Spring Boot/Spring AI dependency management provide the `jackson-datatype-jsr310` version, moved `bcprov-jdk18on` to the Gradle version catalog, restricted the optional Testcontainers harness dependency on `setaccio-lab` to test scope, and enabled Gradle repository-mode enforcement.

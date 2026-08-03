@@ -131,7 +131,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-07-25)
+## Current State Snapshot (as of 2026-08-02)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -182,9 +182,13 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   judgments and partially retained in one, with no total loss. It also found
   that version 2 reduced some unsupported exact specificity but not uniformly,
   while generic context and low-quality overconfidence persisted. These
-  semantic findings have not been human-confirmed. Version 1 remains the
-  operational interactive default while the adopt/revise/reject decision awaits
-  actual human review.
+  semantic findings have not been human-confirmed. The ignored v1/v2 saved-run
+  directories later became unavailable, so the project owner closed that review
+  prerequisite through a documented evidence-loss waiver rather than recreate
+  or replace the original evidence. No human adopt/revise/reject judgment is
+  claimed. Version 1 remains the operational interactive default, version 2
+  remains experimental and unadopted, and any future decision requires new
+  paired controlled evidence plus actual human review.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST
@@ -312,12 +316,15 @@ Completed:
   dependency.
 - Complete the controlled local Tool Search refresh with offline verification
   and a bounded conclusion that does not select another index or provider.
+- Close the unavailable Prompt v1/v2 review prerequisite through a documented
+  evidence-loss waiver without converting agent-assisted findings into a human
+  decision, changing the Prompt v1 default, or recreating evidence under the
+  original run names.
 
 Pending:
 
-- Complete the transferred actual human Prompt v1/v2 review, record one
-  adopt/revise/reject decision, and keep Prompt v1 as the operational default
-  until that human gate is satisfied.
+- If Prompt v2 is reconsidered later, create a separately authorized paired
+  controlled protocol with new preserved evidence and actual human review.
 - Implement the planned local fact-checking matrix only after separate
   authorization; keep the live judge explicit, local, no-pull, and outside the
   default lifecycle.

@@ -14,6 +14,20 @@ It must be executed by a human. Any agent-produced pass must be labeled
 **agent-assisted review** and must not be represented as completed human
 review.
 
+## Current cycle status
+
+As of 2026-08-02, the ignored saved-run directories for this Prompt v1/v2 pair
+are unavailable. The project owner closed that review prerequisite through a
+documented evidence-loss waiver without recreating or replacing the runs. No
+actual-human comparative judgment or `adopt` / `revise` / `reject` decision is
+claimed. Prompt v1 remains the operational interactive default, and Prompt v2
+remains experimental and unadopted.
+
+Use the historical commands below only if both exact saved runs are restored.
+Any future Prompt v2 decision based on replacement evidence requires a
+separately authorized paired protocol, new run names, preserved evidence, and
+actual human review.
+
 ## Before you start
 
 **Privacy (read once):**
@@ -24,7 +38,7 @@ review.
   `setaccio-lab/build/vision-human-review/`.
 - Do not move the worksheet into tracked documentation.
 
-**Workload for the current locked pair (Prompt v1 vs v2):**
+**Workload for the documented locked pair (Prompt v1 vs v2):**
 
 - 3 models × 4 cases = **12** pair sections
 - Each section: private image → baseline judgment → candidate judgment → pair
