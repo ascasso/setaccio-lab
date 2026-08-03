@@ -194,11 +194,14 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
   calling a model provider and remains distinct from future AI-judged
-  evaluation. The planning-only gate recommends a first host-Ollama
-  `FactCheckingEvaluator` matrix over balanced public fixtures with an explicit
-  installed judge model, full digest, versioned prompt, two repetitions, and
-  offline-verifiable evidence; `RelevancyEvaluator` waits for a real retrieval
-  flow.
+  evaluation. The first AI-judged contract slice is implemented offline: one
+  versioned fact-check prompt, three repository-authored document pairs with
+  balanced supported/unsupported claims, and an actual-human confirmation
+  record bound to the exact fixture-catalog digest. No live judge boundary,
+  runner, evidence lifecycle, or provider call exists yet. The later matrix
+  still requires an explicit installed judge model, full digest, two
+  repetitions, and offline-verifiable evidence; `RelevancyEvaluator` waits for
+  a real retrieval flow.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - A clean controlled Tool Search refresh completed from commit `08f1cb5` across
   the locked three-model, five-case, two-repetition paired protocol. Offline
@@ -320,14 +323,18 @@ Completed:
   evidence-loss waiver without converting agent-assisted findings into a human
   decision, changing the Prompt v1 default, or recreating evidence under the
   original run names.
+- Add the versioned local fact-check prompt, balanced six-fixture catalog, and
+  exact-digest actual-human confirmation record with deterministic offline
+  contract tests and no live model behavior.
 
 Pending:
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- Implement the planned local fact-checking matrix only after separate
-  authorization; keep the live judge explicit, local, no-pull, and outside the
-  default lifecycle.
+- Implement the dedicated judge invocation boundary, offline evidence
+  lifecycle, and opt-in local fact-checking runner in later authorized slices;
+  keep the live judge explicit, local, no-pull, and outside the default
+  lifecycle.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 

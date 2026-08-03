@@ -632,6 +632,13 @@ curl -sS http://localhost:8082/api/lab/evaluations \
 
 Each row records the user text, fixture context, response text, evaluator provider/model, deterministic pass/fail verdict, score, feedback, and evaluator metadata. The current evaluator is `fixture` / `term-containment-v1`; it verifies documented required terms and is not an AI quality judgment. No new environment variables or credentials are required.
 
+The separate first-stage AI-judged contract is also offline-only. It tracks
+prompt `local-fact-check` version `1`, a balanced six-fixture claim/document
+catalog, and an actual-human confirmation record tied to the exact catalog
+digest. It does not add a command, environment variable, live judge, or runner.
+Later slices must keep any `FactCheckingEvaluator` execution explicit,
+loopback-only, no-pull, and outside the default lifecycle.
+
 ## Tool Search Advisor
 
 Spring AI's Tool Search Tool support is available on the `setaccio-lab` classpath through `spring-ai-starter-tool-search-advisor`, but it is disabled by default. Keep it off for normal local runs, default tests, and the current vision benchmark path.

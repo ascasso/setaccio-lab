@@ -9,6 +9,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the first offline local fact-checking contract: a versioned
+  exact-placeholder prompt, a balanced six-fixture repository-authored catalog,
+  and an actual-human confirmation record bound to the exact catalog digest.
+  Deterministic tests lock all identities and reject pending, incomplete, or
+  digest-mismatched review records without invoking a model provider.
 - Added a committed vision human-review operator companion with the exact
   preparation, worksheet-entry, decision, and public-closeout sequence while
   retaining `docs/VISION-HUMAN-REVIEW.md` as the canonical policy source.

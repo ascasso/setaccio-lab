@@ -1,9 +1,12 @@
 # Local AI-Judged Evaluation Plan
 
-Status: planning only. Reviewed against the Spring AI `2.0.0` and Spring Boot
-`4.1.0` baseline on 2026-07-27.
+Status: Slice A1 implemented and actual-human fixture confirmation recorded on
+2026-08-02. Live invocation, evidence, runner, and controlled-run slices remain
+pending. The framework plan was reviewed against Spring AI `2.0.0` and Spring
+Boot `4.1.0` on 2026-07-27.
 
-This plan defines one bounded future slice. It does not add a live judge,
+This plan defines one bounded local fact-checking cycle. Slice A1 adds only a
+tracked offline prompt/fixture/review contract. It does not add a live judge,
 change the deterministic evaluation endpoint, start Docker, pull a model, or
 add a dependency.
 
@@ -23,6 +26,24 @@ add a dependency.
   connection support and an `OllamaConnectionDetails` factory for a typed
   Testcontainers `OllamaContainer`. The current module classpath does not
   include the separate `testcontainers-ollama` module.
+
+## Implemented Slice A1 Contract
+
+- Prompt `local-fact-check`, version `1`, uses exact `{document}` and `{claim}`
+  placeholders and has raw-byte SHA-256
+  `e75e0ddd9bef80eecf27e1b668cef954a5eddb5a74b5e4c19db97710c3d39470`.
+- Catalog `local-fact-check-fixtures`, version `1`, contains three original
+  repository-authored document pairs and exactly three supported plus three
+  unsupported claims. Its raw-byte SHA-256 is
+  `077d63fe5af596454127babf809075ebc61857cb5e1694c4fae1e58c0d844dac`.
+- On 2026-08-02, the project owner confirmed that all six expected verdicts are
+  correct. The tracked review record binds that date, the catalog
+  identity/digest, and all six fixture IDs;
+  its raw-byte SHA-256 is
+  `55a5c452dd58a6dddf9d9012cdfb68e50a127226fd49abfaa30597d5e8310161`.
+- Offline tests lock prompt/catalog/review identity and reject pending,
+  incomplete, or digest-mismatched review records. No live model or provider
+  is involved.
 
 The upstream API review confirmed:
 
