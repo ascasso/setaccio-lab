@@ -123,6 +123,15 @@ diagnostic rather than an aggregate model ranking; see the
 [2026-07-25 Slice 7 log](docs/logs/2026-07-25.md#slice-7-human-analysis-and-public-closeout)
 for the bounded findings and next hypothesis.
 
+The later Prompt v1/v2 comparative human-review prerequisite was closed on
+2026-08-02 through an explicit evidence-loss waiver after its ignored saved-run
+directories became unavailable. No actual-human adopt/revise/reject judgment
+is claimed, and earlier Prompt v2 semantic observations remain labeled
+agent-assisted. Prompt v1 remains the operational interactive default; Prompt
+v2 remains experimental and unadopted. Any future Prompt v2 decision requires
+new paired controlled evidence and actual human review rather than recreating
+artifacts under the original run names.
+
 ### Local Chat Benchmark
 
 `POST /api/lab/chat` runs under the `local` profile. It:

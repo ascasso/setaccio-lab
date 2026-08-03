@@ -289,8 +289,16 @@ code baseline may differ. The report covers invocation, structural, repetition,
 token, latency, and infrastructure deltas only; semantic judgments remain human
 review.
 
-Prepare the private human-review worksheet for the current Prompt v1/v2 pair
-only after confirming that these exact ignored runs are present:
+The ignored saved-run directories for the documented Prompt v1/v2 pair became
+unavailable before actual-human comparative review. On 2026-08-02, the project
+owner closed that prerequisite through an evidence-loss waiver without making
+an `adopt` / `revise` / `reject` judgment. Prompt v1 remains the operational
+interactive default, and Prompt v2 remains experimental and unadopted. Any
+future decision based on replacement evidence requires a separately authorized
+paired protocol, new run names, preserved evidence, and actual human review.
+
+The historical preparation procedure remains below in case both exact ignored
+runs are restored. Confirm that they are present before continuing:
 
 ```bash
 ls -d \
@@ -298,8 +306,9 @@ ls -d \
   setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
 ```
 
-If either exact directory is missing, stop and restore the saved evidence.
-Otherwise, run this command without changing the paths:
+If either exact directory is missing, stop. Do not recreate or replace evidence
+under these historical names. If both exact directories are restored, run this
+command without changing the paths:
 
 ```bash
 ./gradlew :setaccio-lab:visionHumanReviewPrepare \
