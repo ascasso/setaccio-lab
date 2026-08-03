@@ -108,6 +108,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Added an exception rule `!gradle/wrapper/gradle-wrapper.jar` to `.gitignore` and restored `gradle-wrapper.jar` so Gradle wrapper execution (`./gradlew`) remains tracked and functional across branch switches.
 - Reject vision-matrix comparisons and human-review worksheet preparation when
   saved runs have different Spring Boot or Spring AI versions, preventing
   framework-induced behavior from being attributed to prompt changes.
