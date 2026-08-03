@@ -132,6 +132,15 @@
 - Use Spring AI's `Evaluator` contract for deterministic fixture rows before adding AI-judged evaluation.
 - Track each evaluation input as user text, optional context/data, model response, evaluator provider/model, pass/fail result, score, raw evaluator explanation, and evaluator metadata.
 - Keep public fixtures deterministic and make the evaluator implementation and required terms explicit in result metadata.
+- Lock the dedicated fact-check prompt ID, version, raw-byte SHA-256, and exact
+  single `{document}` / `{claim}` placeholders.
+- Lock the fact-check catalog ID, version, raw-byte SHA-256, ordered stable IDs,
+  three pair structure, and three-supported/three-unsupported balance. Require
+  non-blank repository-authored document and claim text.
+- Require the tracked actual-human confirmation record to match the exact
+  catalog ID, version, SHA-256, confirmation date, and all six fixture IDs in
+  catalog order. Reject pending, incomplete, or digest-mismatched records in
+  offline tests before a future runner can consume them.
 - Implement `FactCheckingEvaluator` first, if live AI judging is authorized,
   against a balanced public claim/context fixture cohort and an explicitly
   selected already-installed host-Ollama judge. Follow

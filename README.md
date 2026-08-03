@@ -175,10 +175,20 @@ or contact Ollama.
 - accepts an optional `fixtureIds` list to select the public fixture cases,
 - writes structured `*-evaluation.json` results to the same output directory.
 
-This establishes the result-row contract for later AI-judged evaluation. It does not claim to measure model quality; live evaluator models remain a separate opt-in phase.
-The planning gate for that future phase recommends one bounded host-Ollama
-fact-checking matrix before any retrieval evaluator or container runtime work;
-see [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
+This establishes the result-row contract for later AI-judged evaluation. It
+does not claim to measure model quality; live evaluator models remain a
+separate opt-in phase.
+
+The first offline fact-checking contract is now tracked separately from that
+endpoint. It contains prompt `local-fact-check` version `1` with exact
+`{document}` and `{claim}` placeholders, a versioned six-fixture catalog made
+from three repository-authored document pairs, and an actual-human confirmation
+record tied to the exact catalog SHA-256. The fixtures are balanced at three
+supported and three unsupported claims. Default tests lock all three artifact
+digests and reject a pending, incomplete, or catalog-mismatched review record.
+This slice adds no `FactCheckingEvaluator` invocation, live judge, runner,
+credential, or provider call. See
+[the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 
 All benchmarks are local-first and offline-safe by default:
 

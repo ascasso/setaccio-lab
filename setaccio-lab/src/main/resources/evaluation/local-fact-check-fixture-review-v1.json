@@ -1,0 +1,17 @@
+{
+  "reviewId": "local-fact-check-fixture-review",
+  "reviewVersion": "1",
+  "status": "confirmed",
+  "catalogId": "local-fact-check-fixtures",
+  "catalogVersion": "1",
+  "catalogSha256": "077d63fe5af596454127babf809075ebc61857cb5e1694c4fae1e58c0d844dac",
+  "confirmedOn": "2026-08-02",
+  "confirmedFixtureIds": [
+    "harbor-library-supported",
+    "harbor-library-unsupported",
+    "riverbend-garden-supported",
+    "riverbend-garden-unsupported",
+    "repair-workshop-supported",
+    "repair-workshop-unsupported"
+  ]
+}
