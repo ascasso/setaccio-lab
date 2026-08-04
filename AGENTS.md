@@ -2,7 +2,8 @@
 
 This file is the repo-local guide for Codex, Claude Code, and other AI agents working in this repository. Follow it unless the user gives a direct conflicting instruction or a higher-priority system rule applies. When in doubt, preserve the public/private boundary, do less, and ask.
 
-Do not stage, commit, or push unless explicitly asked.
+Commit every completed, in-scope change after appropriate verification. Do not
+push unless the user explicitly asks.
 
 Read and follow the repository's `.gitignore` before creating, inspecting, or
 including files. Treat its rules as authoritative for generated outputs,
@@ -17,7 +18,8 @@ untracked; do not bypass or weaken those rules without explicit instruction.
 - Never add credentials, tokens, API keys, or private endpoint details to tracked files.
 - Never add Docker or Testcontainers dependencies to `setaccio-lab`; keep them in `setaccio-testcontainers`.
 - Never make `setaccio-lab` depend on `setaccio-testcontainers`.
-- Never stage, commit, or push without explicit user instruction.
+- Never push without explicit user instruction. Commit every completed,
+  in-scope change after appropriate verification.
 
 ## Repository Purpose
 
@@ -472,7 +474,9 @@ The lab app uses port `8082`.
 
 ## Git Workflow
 
-Do not stage, commit, or push unless explicitly asked. Leave changes unstaged by default, then report the modified files, tests run, and what would be committed if requested.
+Commit every completed, in-scope change after appropriate verification. Keep
+unrelated user changes unstaged and uncommitted. Do not push unless the user
+explicitly asks; report the modified files and tests run with each commit.
 
 Standing closeout instruction for workflow-guidance corrections:
 

@@ -92,6 +92,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Updated repository agent workflow guidance to commit completed in-scope work
+  after appropriate verification, while keeping pushes explicitly user
+  authorized and unrelated user changes out of commits.
+
 - Closed the unavailable Prompt v1/v2 comparative human-review prerequisite
   through a documented evidence-loss waiver after the ignored saved-run
   directories could not be restored. No human adopt/revise/reject judgment is
