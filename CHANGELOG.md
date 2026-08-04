@@ -9,6 +9,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Closed the first local fact-check cycle with a bounded offline interpretation
+  of the immutable A5 evidence. Supported agreement was not measurable; two
+  unsupported rows were evaluable and both agreed, one fixture had two valid
+  consistent verdicts, and five repetition comparisons were incomplete. All
+  ten empty responses reached the explicit `64`-token output limit, registering
+  a later separately designed output-budget compatibility hypothesis without
+  claiming causation, statistical reliability, general factuality, or judge
+  ranking. Testcontainers, release, and tag work remain deferred.
 - Completed the first controlled local fact-check run from clean commit
   `5d41362` with explicit `gemma4:e2b` identity, full immutable digest, `64`
   output tokens, `PT2M`, and the locked twelve-row one-attempt schedule. All

@@ -178,10 +178,11 @@ offline. One controlled Slice A5 run completed from clean commit `5d41362`
 with explicit `gemma4:e2b`, its full installed digest, `64` output tokens,
 `PT2M`, and twelve one-attempt rows. Its ignored evidence passed verification
 and byte-identical reanalysis. It is not a reusable default or an invitation to
-rerun the same protocol; bounded interpretation remains Slice A6.
-`RelevancyEvaluator` and container provisioning remain separate later work. See
+rerun the same protocol. Slice A6 completed the bounded offline interpretation
+without changing the evidence. `RelevancyEvaluator` remains later work, and
+container provisioning is deferred for this fact-check cycle. See
 [the local AI-judged evaluation plan](LOCAL-AI-EVALUATION-PLAN.md) for the
-command boundary and acceptance criteria.
+command boundary, results, and closeout decisions.
 
 ## Local Vision Benchmark
 
@@ -707,6 +708,16 @@ and explicit host-Ollama runner are implemented. The runner has no judge
 environment variable, validates a loopback endpoint and immutable installed
 model identity before output allocation, forces no-pull sequential execution,
 and remains outside the default lifecycle.
+
+The completed A5 run produced twelve one-attempt rows with complete usage and
+no infrastructure failure, but ten responses were empty and only two produced
+valid matching `no` verdicts. A6 interpreted that immutable evidence without a
+provider call or row replacement. All empty responses reached the explicit
+`64`-token output limit, which registers only a later, separately authorized
+output-budget compatibility hypothesis; it does not establish causation.
+Testcontainers is deferred for this cycle because container provisioning would
+not answer that verdict-yield question. No additional environment variable,
+Docker setup, rerun, release, or tag is required by the A6 closeout.
 
 ## Tool Search Advisor
 

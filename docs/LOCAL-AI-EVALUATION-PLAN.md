@@ -1,18 +1,18 @@
 # Local AI-Judged Evaluation Plan
 
-Status: Slices A1 through A5 implemented. Actual-human fixture confirmation was
+Status: Slices A1 through A6 completed. Actual-human fixture confirmation was
 recorded on 2026-08-02; the dedicated recording judge boundary and offline
 evidence lifecycle plus the opt-in host-Ollama runner were added on 2026-08-03.
-The controlled local run completed on 2026-08-03; bounded interpretation
-remains Slice A6. The framework contract was re-checked against Spring AI
-`2.0.0` and Spring Boot `4.1.0` during A2 implementation.
+The controlled local run and bounded interpretation completed on 2026-08-03.
+The framework contract was re-checked against Spring AI `2.0.0` and Spring
+Boot `4.1.0` during A2 implementation.
 
-This plan defines one bounded local fact-checking cycle. Slices A1 through A5
-add a tracked offline prompt/fixture/review contract, a mockable recording
-judge boundary, offline-verifiable evidence, and one explicit host-Ollama
-runner plus one controlled execution. They do not change the deterministic
-evaluation endpoint, start Docker, pull a model, attach live execution to a
-default lifecycle, or add a dependency.
+This plan records one completed bounded local fact-checking cycle. Slices A1
+through A6 added a tracked offline prompt/fixture/review contract, a mockable
+recording judge boundary, offline-verifiable evidence, one explicit
+host-Ollama runner, one controlled execution, and a bounded interpretation.
+They did not change the deterministic evaluation endpoint, start Docker, pull
+a model, attach live execution to a default lifecycle, or add a dependency.
 
 ## Current Baseline
 
@@ -179,30 +179,48 @@ The upstream API review confirmed:
   support explicit model, temperature, seed, and token settings, and the pull
   strategy can remain `never`.
 
-## Next Slice: A6 Bounded Interpretation
+## Completed Slice A6 Bounded Interpretation
 
-A6 should interpret only the preserved A5 evidence and answer the bounded
-questions already registered below. It must not rerun or replace A5 rows,
-treat two repetitions as a statistical reliability estimate, infer an order
-effect, claim general factuality, rank judges, or use the local judge as a
-substitute for human review. Any changed token/thinking setting or alternate
-judge would be a new separately designed hypothesis, not a correction to A5.
+A6 analyzed only the preserved A5 evidence. It made no model call, did not
+rerun or replace a row, and left the ignored raw evidence unchanged.
 
-`RelevancyEvaluator` should remain deferred until the lab has a real retrieval
-flow and saved retrieved documents. Treating ordinary fixture context as RAG
-evidence would create the appearance of retrieval evaluation without testing
-retrieval.
+- Supported agreement is not measurable from this run: none of the six
+  planned supported rows produced a valid normalized verdict; all six were
+  empty.
+- Two of the six planned unsupported rows produced valid `no` verdicts and
+  both agreed with the human-confirmed expectation. The other four were empty,
+  so this is two agreements among two evaluable unsupported rows, not a
+  general unsupported-claim accuracy rate.
+- One of six fixtures had two valid, consistent verdicts. Five repetition
+  comparisons were incomplete and there were no observed disagreements. Two
+  repetitions do not establish statistical reliability.
+- The only valid normalized outputs were two `no` verdicts; there were no
+  valid `yes` verdicts. Because ten rows had no verdict, this does not establish
+  an always-`no` or other label tendency.
+- Ten responses were empty and none were malformed. All ten empty responses
+  recorded `64` completion tokens, equal to the explicit output-token limit;
+  both valid responses recorded two completion tokens. This is a descriptive
+  association, not proof that the limit or model reasoning behavior caused the
+  empty output.
+- All twelve provider invocations completed in one attempt with complete usage
+  metadata. There were no model-unavailable, timeout, provider, or other
+  infrastructure failures. Median latency was `1073.5 ms`, with an observed
+  range of `442–6545 ms`.
 
-Containerizing Ollama would test environment provisioning and service
-connection wiring, not the fact-checking hypothesis. It should therefore be a
-separate later slice, justified only after the host-Ollama contract is useful.
+The contract merits one later, separately authorized and pre-registered
+output-budget compatibility hypothesis: test whether a larger explicit
+positive output-token limit increases exact `yes`/`no` verdict yield for the
+same immutable judge digest while keeping the prompt, fixtures, row order,
+temperature, seeds, one-attempt policy, and no-pull behavior fixed. That would
+be a new experiment with a new evidence directory, not a retry or correction
+of A5. A6 does not authorize or execute it.
 
-The controlled run must remain cost-free and local in the same sense as the
-other lab matrices: no provider credential, paid API, public network request,
-or automatic model download; an already-installed model served by local
-Ollama; and ignored local evidence only. The runner should require a loopback
-Ollama endpoint for this first slice and record only the neutral category
-`local`, never the URL or host name.
+Testcontainers disposition for this cycle: **defer**. Host-Ollama execution,
+provenance, and offline verification worked; containerization would test model
+provisioning and service-connection wiring, not the observed verdict-yield
+question. No container code or dependency is added. `RelevancyEvaluator`
+also remains deferred until a real retrieval flow preserves retrieved
+documents. Release and tag decisions remain deferred.
 
 ## Future Evaluation Contract
 

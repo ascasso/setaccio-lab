@@ -222,7 +222,17 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   unsupported rows returned valid matching `no` verdicts; there were no valid
   mismatches. The ignored evidence verified and reanalyzed byte-for-byte
   offline. No selective retry, replacement row, model pull, or raw-output
-  publication occurred; bounded interpretation remains Slice A6.
+  publication occurred.
+- Slice A6 closed the cycle by interpreting only that immutable evidence.
+  Supported agreement was not measurable because all six supported rows were
+  empty; two of six planned unsupported rows were evaluable and both agreed,
+  while the other four were empty. One fixture had two valid consistent
+  verdicts and five repetition comparisons were incomplete. All ten empty
+  responses reached the explicit `64`-token output limit, while both valid
+  responses used two completion tokens. This registers a later separately
+  designed output-budget compatibility hypothesis without claiming causation,
+  statistical reliability, general factuality, verdict-label tendency, or a
+  judge ranking. No A5 row was rerun or replaced.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - A clean controlled Tool Search refresh completed from commit `08f1cb5` across
   the locked three-model, five-case, two-repetition paired protocol. Offline
@@ -232,7 +242,10 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   provider is selected from this result alone.
 - `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix and sequential vision matrix use the shared v1 manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
-- `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
+- `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
+  fact-check container path because provisioning would not answer the observed
+  verdict-yield question; any later container work must remain a separate,
+  explicitly justified opt-in slice.
 
 ## Versioning Policy
 
@@ -363,15 +376,21 @@ Completed:
   preserved attempts, immutable judge/contract/code identities, offline
   verification and byte-identical reanalysis, and aggregate-only public-safe
   closeout.
+- Complete the bounded Slice A6 interpretation without treating two
+  repetitions as statistical reliability, claiming an order effect or general
+  factuality, ranking judges, or rerunning/replacing A5 rows; record the narrow
+  follow-up hypothesis and defer Testcontainers for this cycle.
 
 Pending:
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- Complete the bounded Slice A6 interpretation without treating the two
-  repetitions as statistical reliability, claiming an order effect or general
-  factuality, ranking judges, or rerunning/replacing A5 rows.
-- Keep container-backed work isolated in `setaccio-testcontainers`.
+- If separately authorized, design a new output-budget compatibility
+  experiment that changes only the explicit positive token limit and writes a
+  new evidence directory; do not treat it as a retry or correction of A5.
+- Keep any later container-backed work isolated in `setaccio-testcontainers`
+  and justify it with a provisioning or service-connection question distinct
+  from the completed host-Ollama fact-check cycle.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 
 ## Test Direction
@@ -459,15 +478,16 @@ Provider/model-type phase:
 
 Evaluation/Testcontainers phase:
 
-- Use the implemented opt-in host-Ollama fact-check runner for the separately
-  authorized controlled run over the balanced tracked claim/context fixtures;
-  preserve the explicit installed judge/full digest, two seeded repetitions,
-  failure classification, and offline evidence verification.
+- If separately authorized, test the registered output-budget compatibility
+  hypothesis as a new run while preserving the immutable judge digest,
+  prompt, fixtures, row order, temperature, seeds, one-attempt policy, no-pull
+  behavior, failure classification, and offline evidence verification.
 - Later retrieval slice: relevancy evaluation only when a real retrieval flow
   supplies preserved context.
-- Separate optional container slice: typed Ollama service connection and model
-  provisioning isolated in `setaccio-testcontainers`, never in the normal
-  build lifecycle.
+- Testcontainers is deferred for the completed fact-check cycle. A later
+  optional typed Ollama service-connection/model-provisioning slice must be
+  independently justified, isolated in `setaccio-testcontainers`, and never
+  enter the normal build lifecycle.
 
 Tool-calling phase:
 

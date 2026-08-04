@@ -245,8 +245,19 @@ attempt records completed with usage metadata and no infrastructure failure.
 The bounded result contained ten empty responses plus two valid matching `no`
 verdicts; there were no valid mismatches. The ignored evidence verified and
 reanalyzed byte-for-byte offline without a retry, replacement row, model pull,
-or raw-output publication. Slice A6 remains the separate bounded
-interpretation step. See
+or raw-output publication.
+
+Slice A6 closed the cycle by interpreting only that immutable evidence. No
+supported row was evaluable; two of six planned unsupported rows were
+evaluable and both agreed, while the other ten rows across both labels were
+empty. One fixture had two consistent valid verdicts and five repetition
+comparisons were incomplete, so the run does not establish reliability,
+general factuality, or a verdict-label tendency. All empty responses ended at
+the explicit `64`-token output limit, while both valid responses used two
+completion tokens; that association registers a later, separately designed
+output-budget compatibility hypothesis without claiming causation. The
+Testcontainers outcome is `defer`, because provisioning would not answer the
+observed verdict-yield question. No A5 row was rerun or replaced. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 
 All benchmarks are local-first and offline-safe by default:
