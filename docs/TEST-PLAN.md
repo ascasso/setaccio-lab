@@ -1,5 +1,10 @@
 # Test Plan
 
+The tracked [deferred-work index](DEFERRED-WORK.md) defines the start gates for
+future providers, retrieval, Testcontainers, model types, and MCP work. A
+future item does not enter default tests or CI merely because it appears in a
+plan or environment table.
+
 ## Near Term
 
 - Keep `setaccio-core` Spring-free with a dependency check that fails if Spring Framework or Spring Boot appears on the core runtime classpath.

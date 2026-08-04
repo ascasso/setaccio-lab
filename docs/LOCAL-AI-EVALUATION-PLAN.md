@@ -224,6 +224,11 @@ documents. Release and tag decisions remain deferred.
 
 ## Future Evaluation Contract
 
+The completed August closeout and every intentionally deferred follow-up are
+indexed in [DEFERRED-WORK.md](DEFERRED-WORK.md). The historical contract detail
+below does not authorize a new experiment, provider, container, release, or
+tag.
+
 ### Rubric and fixtures
 
 - Track one public prompt such as `local-fact-check-v1` with ID, version, exact

@@ -259,6 +259,9 @@ output-budget compatibility hypothesis without claiming causation. The
 Testcontainers outcome is `defer`, because provisioning would not answer the
 observed verdict-yield question. No A5 row was rerun or replaced. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
+All intentionally deferred follow-up work, its start gates, and its
+non-authorization boundaries are indexed in
+[the deferred-work guide](docs/DEFERRED-WORK.md).
 
 All benchmarks are local-first and offline-safe by default:
 

@@ -9,6 +9,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `docs/DEFERRED-WORK.md` as the public-safe canonical index for work
+  intentionally outside the completed August cycle. It records the Prompt v2,
+  output-budget, Testcontainers, retrieval, release/tag, September chat, and
+  October Anthropic gates; links the environment and test-plan boundaries; and
+  makes clear that future variables or roadmap entries do not authorize live
+  execution, credentials, Docker, a release, or a tag.
 - Closed the first local fact-check cycle with a bounded offline interpretation
   of the immutable A5 evidence. Supported agreement was not measurable; two
   unsupported rows were evaluable and both agreed, one fixture had two valid

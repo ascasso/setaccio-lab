@@ -183,6 +183,8 @@ without changing the evidence. `RelevancyEvaluator` remains later work, and
 container provisioning is deferred for this fact-check cycle. See
 [the local AI-judged evaluation plan](LOCAL-AI-EVALUATION-PLAN.md) for the
 command boundary, results, and closeout decisions.
+The complete deferred-work index, including future provider and model-type
+boundaries, is [DEFERRED-WORK.md](DEFERRED-WORK.md).
 
 ## Local Vision Benchmark
 
@@ -753,7 +755,7 @@ Before any provider-backed test is added, introduce explicit switches so CI and 
 | `SETACCIO_LAB_OUTPUT_DIR` | Optional output directory. Defaults should stay under `build/lab-results/`. |
 | `SETACCIO_LAB_EVALUATOR_PROVIDER` | Optional judge/evaluator provider for AI-judged tests. |
 | `SETACCIO_LAB_EVALUATOR_MODELS` | Optional comma-separated judge/evaluator model names. |
-| `SETACCIO_LAB_TESTCONTAINERS_ENABLED` | Must be `true` before any Testcontainers-backed AI integration test runs. |
+| `SETACCIO_LAB_TESTCONTAINERS_ENABLED` | Reserved for a future explicit Testcontainers runner; no current task consumes it. |
 
 ## Provider Variables
 
@@ -789,9 +791,11 @@ Spring AI includes model-evaluation support and Testcontainers service-connectio
 | Area | Variables |
 | --- | --- |
 | AI-judged evaluation | `SETACCIO_LAB_EVALUATOR_PROVIDER`, `SETACCIO_LAB_EVALUATOR_MODELS` |
-| Testcontainers-backed integrations | `SETACCIO_LAB_TESTCONTAINERS_ENABLED` |
+| Testcontainers-backed integrations | `SETACCIO_LAB_TESTCONTAINERS_ENABLED` (reserved; no current runner) |
 
-Do not require Docker, Testcontainers, or live evaluator models for default builds.
+Do not require Docker, Testcontainers, or live evaluator models for default
+builds. The current Testcontainers decision is `defer`; see
+[DEFERRED-WORK.md](DEFERRED-WORK.md) before proposing a container slice.
 
 ## Ollama Setup
 

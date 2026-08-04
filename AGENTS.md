@@ -383,6 +383,11 @@ Completed:
 
 Pending:
 
+The tracked [deferred-work index](docs/DEFERRED-WORK.md) is the canonical
+public-safe list of deferred scope, start gates, and non-authorization
+boundaries. Keep it aligned with this section, the environment guide, test
+plan, changelog, and dated log when the status of a deferred item changes.
+
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
 - If separately authorized, design a new output-budget compatibility

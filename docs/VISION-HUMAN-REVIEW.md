@@ -28,6 +28,9 @@ was completed. Any future Prompt v2 decision based on replacement evidence
 requires a separately authorized paired protocol, new run names, preserved
 evidence, and actual human review.
 
+The current status and start gate for that deferred decision are also indexed
+in [DEFERRED-WORK.md](DEFERRED-WORK.md).
+
 ## Before you start
 
 - Keep source images, raw responses, reference observations, expected concepts,
