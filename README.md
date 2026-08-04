@@ -236,8 +236,17 @@ twelve rows sequentially with one attempt per row and pull strategy `never`:
 
 The task is not connected to `test`, `check`, `build`, application startup, or
 CI. It has no judge environment default, never records the endpoint, never
-pulls a model, and does not contact a remote provider. A controlled Slice A5
-run remains separately authorized. See
+pulls a model, and does not contact a remote provider.
+
+Slice A5 completed one clean-baseline run from commit `5d41362` with explicit
+judge `gemma4:e2b`, its full installed digest, `64` output tokens, timeout
+`PT2M`, and the locked twelve-row schedule. All 12 provider invocations and
+attempt records completed with usage metadata and no infrastructure failure.
+The bounded result contained ten empty responses plus two valid matching `no`
+verdicts; there were no valid mismatches. The ignored evidence verified and
+reanalyzed byte-for-byte offline without a retry, replacement row, model pull,
+or raw-output publication. Slice A6 remains the separate bounded
+interpretation step. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 
 All benchmarks are local-first and offline-safe by default:

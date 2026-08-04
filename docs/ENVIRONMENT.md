@@ -174,9 +174,12 @@ offline inspection:
 ```
 
 The verify/reanalyze tasks have no model or endpoint options and remain fully
-offline. The controlled local run and its interpretation are a separate Slice
-A5 action. `RelevancyEvaluator` and container provisioning remain separate
-later work. See
+offline. One controlled Slice A5 run completed from clean commit `5d41362`
+with explicit `gemma4:e2b`, its full installed digest, `64` output tokens,
+`PT2M`, and twelve one-attempt rows. Its ignored evidence passed verification
+and byte-identical reanalysis. It is not a reusable default or an invitation to
+rerun the same protocol; bounded interpretation remains Slice A6.
+`RelevancyEvaluator` and container provisioning remain separate later work. See
 [the local AI-judged evaluation plan](LOCAL-AI-EVALUATION-PLAN.md) for the
 command boundary and acceptance criteria.
 

@@ -213,6 +213,16 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   and fresh dated output before allocation, then executes twelve sequential
   one-attempt/no-pull rows. It is not attached to the default lifecycle;
   `RelevancyEvaluator` waits for a real retrieval flow.
+- One clean-baseline controlled fact-check run completed from commit `5d41362`
+  with explicit judge `gemma4:e2b`, full digest
+  `7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`,
+  token limit `64`, timeout `PT2M`, and the locked twelve-row schedule. All 12
+  one-attempt invocations completed with full usage metadata and no model,
+  timeout, or provider failure. Ten rows had empty judge output and two
+  unsupported rows returned valid matching `no` verdicts; there were no valid
+  mismatches. The ignored evidence verified and reanalyzed byte-for-byte
+  offline. No selective retry, replacement row, model pull, or raw-output
+  publication occurred; bounded interpretation remains Slice A6.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - A clean controlled Tool Search refresh completed from commit `08f1cb5` across
   the locked three-model, five-case, two-repetition paired protocol. Offline
@@ -349,13 +359,18 @@ Completed:
   option, loopback, installed-model/digest, and output checks; locked
   sequential one-attempt execution; provider-free tests; and no default
   lifecycle attachment.
+- Complete one clean-baseline controlled local fact-check run with twelve
+  preserved attempts, immutable judge/contract/code identities, offline
+  verification and byte-identical reanalysis, and aggregate-only public-safe
+  closeout.
 
 Pending:
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- Perform the controlled local fact-check run in a later authorized slice;
-  keep the judge explicit, local, no-pull, and outside the default lifecycle.
+- Complete the bounded Slice A6 interpretation without treating the two
+  repetitions as statistical reliability, claiming an order effect or general
+  factuality, ranking judges, or rerunning/replacing A5 rows.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 

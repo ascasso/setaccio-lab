@@ -9,6 +9,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Completed the first controlled local fact-check run from clean commit
+  `5d41362` with explicit `gemma4:e2b` identity, full immutable digest, `64`
+  output tokens, `PT2M`, and the locked twelve-row one-attempt schedule. All
+  provider invocations completed with usage metadata and no infrastructure
+  failure; ten rows had empty output and two produced valid matching `no`
+  verdicts. Ignored evidence verified and reanalyzed byte-for-byte offline
+  without selective retry, replacement, model pull, or raw-output publication.
 - Added the opt-in `localEvaluation` host-Ollama runner with explicit loopback
   URL, installed judge tag, token limit, timeout, and fresh dated output
   inputs. Preflight locks the confirmed prompt/fixture/review contract and
