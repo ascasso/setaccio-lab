@@ -9,6 +9,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the offline local fact-check evidence lifecycle: a locked twelve-row
+  counterbalanced schedule, BLAKE3 document/claim identities, full judge and
+  contract provenance, suite-specific raw JSON, shared v1 manifest, and
+  deterministic summary. Standalone `localEvaluationVerify` and
+  `localEvaluationReanalyze` tasks validate or regenerate saved evidence
+  without starting Spring or contacting Ollama; offline tests cover protocol,
+  outcome, integrity, path-safety, public-safety, and summary-drift failures.
 - Added the dedicated local fact-check recording judge boundary around Spring
   AI's unchanged `FactCheckingEvaluator`. It requires complete explicit Ollama
   settings, a loopback endpoint, pull strategy `never`, connect/read timeout,

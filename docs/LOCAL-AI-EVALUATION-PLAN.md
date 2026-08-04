@@ -1,15 +1,16 @@
 # Local AI-Judged Evaluation Plan
 
-Status: Slices A1 and A2 implemented. Actual-human fixture confirmation was
-recorded on 2026-08-02, and the dedicated recording judge boundary was added on
-2026-08-03. Evidence, an opt-in runner, and a controlled live run remain
-pending. The framework contract was re-checked against Spring AI `2.0.0` and
-Spring Boot `4.1.0` during A2 implementation.
+Status: Slices A1 through A3 implemented. Actual-human fixture confirmation was
+recorded on 2026-08-02; the dedicated recording judge boundary and offline
+evidence lifecycle were added on 2026-08-03. An opt-in runner and controlled
+live run remain pending. The framework contract was re-checked against Spring
+AI `2.0.0` and Spring Boot `4.1.0` during A2 implementation.
 
-This plan defines one bounded local fact-checking cycle. Slices A1 and A2 add a
-tracked offline prompt/fixture/review contract and a mockable recording judge
-boundary. They do not add a live runner, change the deterministic evaluation
-endpoint, start Docker, pull a model, or add a dependency.
+This plan defines one bounded local fact-checking cycle. Slices A1 through A3
+add a tracked offline prompt/fixture/review contract, a mockable recording
+judge boundary, and offline-verifiable evidence. They do not add a live runner,
+change the deterministic evaluation endpoint, start Docker, pull a model, or
+add a dependency.
 
 ## Current Baseline
 
@@ -73,8 +74,35 @@ endpoint, start Docker, pull a model, or add a dependency.
   verdicts, expectation mismatch, empty/malformed output, metadata and usage,
   absent usage, unavailable model, timeout, provider failure, explicit timeout
   propagation, and one-attempt enforcement without contacting Ollama.
-- No Spring bean selects or starts this judge. A3 must add offline evidence
-  lifecycle support, and A4 must add the separately authorized opt-in runner.
+- No Spring bean selects or starts this judge. A4 must add the separately
+  authorized opt-in runner.
+
+## Implemented Slice A3 Evidence Lifecycle
+
+- `LocalEvaluationProtocol` locks protocol version `1`, twelve sequential rows,
+  temperature `0.0`, seeds `42` and `43`, positive explicit token/timeout
+  values, exactly one attempt, and pull strategy `never`. Supported then
+  unsupported order within each pair is reversed for repetition two; because
+  seed and repetition change too, the report makes no order-effect claim.
+- Saved rows retain fixture/pair IDs, BLAKE3 document and claim identities,
+  expected verdict, requested and normalized installed judge identity with a
+  full digest, raw response, response metadata, usage when available, latency,
+  attempt count, Spring evaluator boolean, normalized verdict, expectation
+  agreement, and diagnostic category without copying fixture text.
+- The evidence writer produces `local-evaluation-results.json`, the shared v1
+  `manifest.json` with SHA-256 artifact descriptors plus Git/framework
+  provenance, and a deterministic `SUMMARY.md` under a caller-provided fresh
+  run directory.
+- `localEvaluationVerify` and `localEvaluationReanalyze` are standalone offline
+  tasks. They do not start Spring or contact Ollama, and they are not attached
+  to `test`, `check`, `build`, application startup, or CI.
+- Offline tests reject raw/summary tampering, missing or extra artifacts,
+  unsafe paths, manifest/contract/model drift, wrong schedule or row count,
+  invalid attempts, unclassified or incoherent outcomes, partial usage, unsafe
+  metadata, and summary drift. Reanalysis replaces only a regenerable summary
+  after immutable raw evidence and its manifest descriptor pass inspection.
+- No live `localEvaluation` task, endpoint, environment variable, model
+  inventory lookup, output-directory allocator, or provider call exists yet.
 
 The upstream API review confirmed:
 
@@ -106,7 +134,7 @@ The upstream API review confirmed:
 Implement a host-Ollama fact-checking matrix first. Do not combine that slice
 with RAG, `RelevancyEvaluator`, or Testcontainers.
 
-The remaining live-run slices should:
+The remaining A4 and A5 live-run slices should:
 
 1. Add one explicitly invoked `:setaccio-lab:localEvaluation` task that calls
    an already-running local Ollama service.

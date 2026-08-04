@@ -107,11 +107,11 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
-## Local AI Judge Boundary (No Runner)
+## Local AI Judge Evidence (No Live Runner)
 
 There is no supported judge environment variable, live judge endpoint, or
-judge Gradle task yet. `OLLAMA_MODEL` remains the application chat/vision
-default and must not silently select an evaluator model.
+live `localEvaluation` Gradle task yet. `OLLAMA_MODEL` remains the application
+chat/vision default and must not silently select an evaluator model.
 
 The implemented recording boundary requires a caller to provide an explicit
 judge model, temperature, seed, token limit, timeout, and exactly-one-attempt
@@ -120,9 +120,34 @@ URL, applies connect/read timeout, keeps pull strategy `never`, and disables
 Spring AI retries. It does not read `OLLAMA_MODEL` or create a Spring bean, so
 application startup and default tests cannot silently invoke it.
 
-Later slices must resolve the requested already-installed model to its full
-digest and add offline evidence before exposing an explicit opt-in runner.
-`RelevancyEvaluator` and container provisioning remain separate later work. See
+The offline evidence layer now locks the twelve-row protocol, BLAKE3
+document/claim identities, prompt/catalog/human-review digests, full judge
+identity, generation settings, raw outcomes, response metadata, available
+usage, latency, attempts, and classified diagnostics. A saved run directory is
+a direct child of ignored `build/evaluation-matrix/` and contains exactly
+`local-evaluation-results.json`, shared v1 `manifest.json`, and deterministic
+`SUMMARY.md`.
+
+Verify saved evidence without starting Spring or contacting Ollama:
+
+```bash
+./gradlew :setaccio-lab:localEvaluationVerify \
+  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+Regenerate only `SUMMARY.md` after the immutable raw result and manifest pass
+offline inspection:
+
+```bash
+./gradlew :setaccio-lab:localEvaluationReanalyze \
+  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+These tasks have no model or endpoint options and are not attached to the
+default lifecycle. A later slice must resolve the requested already-installed
+model to its full digest and add explicit preflight/output allocation before
+exposing a live opt-in runner. `RelevancyEvaluator` and container provisioning
+remain separate later work. See
 [the local AI-judged evaluation plan](LOCAL-AI-EVALUATION-PLAN.md) for the
 proposed command boundary and acceptance criteria.
 
@@ -645,9 +670,11 @@ options, raw result, response metadata, token usage when available, latency,
 attempt count, normalized verdict, expectation agreement, and classified
 failures around Spring AI's unchanged `FactCheckingEvaluator`.
 
-It still adds no command, environment variable, live invocation, evidence
-writer, or runner. Later slices must keep execution explicit, loopback-only,
-no-pull, and outside the default lifecycle.
+Its suite-specific offline evidence writer and standalone verify/reanalyze
+tasks are implemented, but no live command, judge environment variable, model
+lookup, output allocation, or provider invocation exists. Later slices must
+keep execution explicit, loopback-only, no-pull, and outside the default
+lifecycle.
 
 ## Tool Search Advisor
 

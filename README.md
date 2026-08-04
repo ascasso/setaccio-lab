@@ -198,8 +198,29 @@ raw output, response metadata, token usage when available, latency, attempt
 count, and failure/diagnostic category separate. Empty or malformed output is
 not coerced to `no`.
 
-There is still no judge endpoint, Gradle runner, environment variable, evidence
-writer, credential, or live provider call. See
+Slice A3 adds the offline evidence lifecycle before any live runner. It locks
+the exact twelve-row order, stores BLAKE3 document/claim identities instead of
+duplicating fixture text, binds the prompt/catalog/human-review and immutable
+judge identities, and writes suite-specific raw JSON, a shared v1 manifest,
+and deterministic `SUMMARY.md` under ignored `build/evaluation-matrix/`
+directories. The summary keeps supported and unsupported agreement,
+repetition consistency, verdict tendency, formatting outcomes, token
+availability, latency, attempts, and infrastructure failures separate and
+does not claim an order effect.
+
+Saved evidence can be checked or have only its deterministic summary
+regenerated with the standalone offline tasks:
+
+```bash
+./gradlew :setaccio-lab:localEvaluationVerify \
+  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+./gradlew :setaccio-lab:localEvaluationReanalyze \
+  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+There is still no live `localEvaluation` task, judge endpoint, judge
+environment variable, credential, model discovery, model pull, or provider
+call. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 
 All benchmarks are local-first and offline-safe by default:

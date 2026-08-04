@@ -165,6 +165,15 @@
 - Require prompt ID/version/digest, full judge-model digest, complete generation
   settings, two seeded repetitions, balanced supported/unsupported fixtures,
   explicit execution order, and shared-manifest offline verification.
+- Keep `localEvaluationTest` provider-free. Require exact counterbalanced row
+  order, BLAKE3 document/claim identities, separate evaluator/verdict/agreement
+  signals, exhaustive diagnostic coherence, usage/latency/attempt validation,
+  and public-safe metadata/error persistence.
+- Require `localEvaluationVerify` and `localEvaluationReanalyze` to remain
+  standalone and offline. Reject raw/summary tampering, missing or extra
+  artifacts, unsafe paths, prompt/catalog/review/model drift, row order/count
+  drift, invalid attempts, unclassified failures, and deterministic summary
+  drift without starting Spring or contacting Ollama.
 - Keep evaluator models configurable and separate from the model being tested;
   record and flag identical full digests if a later benchmark self-evaluates.
 - Keep deterministic fixture-based assertions for default tests. AI-judged evaluator tests must be opt-in unless backed by mocks or recorded fixtures.

@@ -194,20 +194,20 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
   calling a model provider and remains distinct from future AI-judged
-  evaluation. The first two AI-judged contract slices are implemented offline:
-  one
-  versioned fact-check prompt, three repository-authored document pairs with
+  evaluation. The first three AI-judged contract slices are implemented
+  offline: one versioned fact-check prompt, three repository-authored document pairs with
   balanced supported/unsupported claims, and an actual-human confirmation
   record bound to the exact fixture-catalog digest. A dedicated plain Java
   recording judge boundary now wraps Spring AI's unchanged
   `FactCheckingEvaluator`: it requires complete explicit Ollama settings and a
   loopback endpoint, forces no-pull/one-attempt behavior, and records raw
   response, metadata, available usage, latency, normalized verdict,
-  expectation agreement, and classified failures. No live runner, evidence
-  lifecycle, or provider call exists yet. The later matrix still requires an
-  explicit installed judge model, full digest, two repetitions, and
-  offline-verifiable evidence; `RelevancyEvaluator` waits for a real retrieval
-  flow.
+  expectation agreement, and classified failures. A suite-specific offline
+  lifecycle now locks the counterbalanced twelve-row schedule, BLAKE3
+  document/claim identities, prompt/catalog/review/model identity, shared v1
+  manifest, deterministic summary, and standalone verify/reanalyze tasks. No
+  live runner, model lookup, output allocation, or provider call exists yet;
+  `RelevancyEvaluator` waits for a real retrieval flow.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - A clean controlled Tool Search refresh completed from commit `08f1cb5` across
   the locked three-model, five-case, two-repetition paired protocol. Offline
@@ -336,14 +336,18 @@ Completed:
   options, loopback/no-pull/one-attempt policy, raw-response and usage capture,
   strict verdict normalization, classified failures, and provider-free mocked
   tests.
+- Add the suite-specific offline fact-check evidence lifecycle with a locked
+  twelve-row schedule, BLAKE3 document/claim identities, shared v1 manifest,
+  deterministic summary, strict offline verification/reanalysis, and no live
+  model behavior.
 
 Pending:
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- Implement the offline fact-check evidence lifecycle and opt-in local runner in
-  later authorized slices; keep the live judge explicit, local, no-pull, and
-  outside the default lifecycle.
+- Implement the opt-in local fact-check runner and controlled run in later
+  authorized slices; keep the live judge explicit, local, no-pull, and outside
+  the default lifecycle.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 
@@ -448,6 +452,7 @@ MCP phase:
 ```bash
 ./gradlew :setaccio-core:test
 ./gradlew :setaccio-lab:test
+./gradlew :setaccio-lab:localEvaluationTest
 ./gradlew :setaccio-lab:visionMatrixTest
 ./gradlew :setaccio-testcontainers:test
 ./gradlew :setaccio-core:build
