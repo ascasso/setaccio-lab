@@ -179,15 +179,27 @@ This establishes the result-row contract for later AI-judged evaluation. It
 does not claim to measure model quality; live evaluator models remain a
 separate opt-in phase.
 
-The first offline fact-checking contract is now tracked separately from that
-endpoint. It contains prompt `local-fact-check` version `1` with exact
+The AI-judged fact-checking work remains separate from that endpoint. Slice A1
+contains prompt `local-fact-check` version `1` with exact
 `{document}` and `{claim}` placeholders, a versioned six-fixture catalog made
 from three repository-authored document pairs, and an actual-human confirmation
 record tied to the exact catalog SHA-256. The fixtures are balanced at three
 supported and three unsupported claims. Default tests lock all three artifact
 digests and reject a pending, incomplete, or catalog-mismatched review record.
-This slice adds no `FactCheckingEvaluator` invocation, live judge, runner,
-credential, or provider call. See
+
+Slice A2 adds a plain Java, request-scoped recording boundary around Spring
+AI's unchanged `FactCheckingEvaluator`. A caller must supply an explicit judge
+model, temperature, seed, token limit, timeout, and exactly-one-attempt policy.
+The dedicated Ollama factory accepts only an explicit loopback URL, forces pull
+strategy `never`, disables Spring AI retries, and never inherits
+`OLLAMA_MODEL`. Each boundary result keeps provider invocation success, Spring's
+supported-claim boolean, exact `yes` / `no` verdict, expected-label agreement,
+raw output, response metadata, token usage when available, latency, attempt
+count, and failure/diagnostic category separate. Empty or malformed output is
+not coerced to `no`.
+
+There is still no judge endpoint, Gradle runner, environment variable, evidence
+writer, credential, or live provider call. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 
 All benchmarks are local-first and offline-safe by default:

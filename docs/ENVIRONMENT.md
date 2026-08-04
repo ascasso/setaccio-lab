@@ -107,17 +107,22 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
-## Planned Local AI Judge (Not Implemented)
+## Local AI Judge Boundary (No Runner)
 
 There is no supported judge environment variable, live judge endpoint, or
 judge Gradle task yet. `OLLAMA_MODEL` remains the application chat/vision
 default and must not silently select an evaluator model.
 
-The accepted future contract requires an explicit `--judge-model` naming an
-already-installed local Ollama model, resolves its full digest, locks
-temperature/seeds/token policy, and keeps pull strategy `never`. The first
-slice is a host-Ollama `FactCheckingEvaluator` matrix; `RelevancyEvaluator` and
-container provisioning remain separate later work. See
+The implemented recording boundary requires a caller to provide an explicit
+judge model, temperature, seed, token limit, timeout, and exactly-one-attempt
+policy. Its dedicated Ollama factory also requires an explicit loopback base
+URL, applies connect/read timeout, keeps pull strategy `never`, and disables
+Spring AI retries. It does not read `OLLAMA_MODEL` or create a Spring bean, so
+application startup and default tests cannot silently invoke it.
+
+Later slices must resolve the requested already-installed model to its full
+digest and add offline evidence before exposing an explicit opt-in runner.
+`RelevancyEvaluator` and container provisioning remain separate later work. See
 [the local AI-judged evaluation plan](LOCAL-AI-EVALUATION-PLAN.md) for the
 proposed command boundary and acceptance criteria.
 
@@ -632,12 +637,17 @@ curl -sS http://localhost:8082/api/lab/evaluations \
 
 Each row records the user text, fixture context, response text, evaluator provider/model, deterministic pass/fail verdict, score, feedback, and evaluator metadata. The current evaluator is `fixture` / `term-containment-v1`; it verifies documented required terms and is not an AI quality judgment. No new environment variables or credentials are required.
 
-The separate first-stage AI-judged contract is also offline-only. It tracks
-prompt `local-fact-check` version `1`, a balanced six-fixture claim/document
+The separate AI-judged contract remains offline-only in the default lifecycle.
+It tracks prompt `local-fact-check` version `1`, a balanced six-fixture claim/document
 catalog, and an actual-human confirmation record tied to the exact catalog
-digest. It does not add a command, environment variable, live judge, or runner.
-Later slices must keep any `FactCheckingEvaluator` execution explicit,
-loopback-only, no-pull, and outside the default lifecycle.
+digest. Its request-scoped recording boundary captures the explicit judge
+options, raw result, response metadata, token usage when available, latency,
+attempt count, normalized verdict, expectation agreement, and classified
+failures around Spring AI's unchanged `FactCheckingEvaluator`.
+
+It still adds no command, environment variable, live invocation, evidence
+writer, or runner. Later slices must keep execution explicit, loopback-only,
+no-pull, and outside the default lifecycle.
 
 ## Tool Search Advisor
 

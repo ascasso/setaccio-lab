@@ -131,7 +131,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-02)
+## Current State Snapshot (as of 2026-08-03)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -194,14 +194,20 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
   calling a model provider and remains distinct from future AI-judged
-  evaluation. The first AI-judged contract slice is implemented offline: one
+  evaluation. The first two AI-judged contract slices are implemented offline:
+  one
   versioned fact-check prompt, three repository-authored document pairs with
   balanced supported/unsupported claims, and an actual-human confirmation
-  record bound to the exact fixture-catalog digest. No live judge boundary,
-  runner, evidence lifecycle, or provider call exists yet. The later matrix
-  still requires an explicit installed judge model, full digest, two
-  repetitions, and offline-verifiable evidence; `RelevancyEvaluator` waits for
-  a real retrieval flow.
+  record bound to the exact fixture-catalog digest. A dedicated plain Java
+  recording judge boundary now wraps Spring AI's unchanged
+  `FactCheckingEvaluator`: it requires complete explicit Ollama settings and a
+  loopback endpoint, forces no-pull/one-attempt behavior, and records raw
+  response, metadata, available usage, latency, normalized verdict,
+  expectation agreement, and classified failures. No live runner, evidence
+  lifecycle, or provider call exists yet. The later matrix still requires an
+  explicit installed judge model, full digest, two repetitions, and
+  offline-verifiable evidence; `RelevancyEvaluator` waits for a real retrieval
+  flow.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - A clean controlled Tool Search refresh completed from commit `08f1cb5` across
   the locked three-model, five-case, two-repetition paired protocol. Offline
@@ -326,15 +332,18 @@ Completed:
 - Add the versioned local fact-check prompt, balanced six-fixture catalog, and
   exact-digest actual-human confirmation record with deterministic offline
   contract tests and no live model behavior.
+- Add the dedicated fact-check recording judge boundary with explicit Ollama
+  options, loopback/no-pull/one-attempt policy, raw-response and usage capture,
+  strict verdict normalization, classified failures, and provider-free mocked
+  tests.
 
 Pending:
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- Implement the dedicated judge invocation boundary, offline evidence
-  lifecycle, and opt-in local fact-checking runner in later authorized slices;
-  keep the live judge explicit, local, no-pull, and outside the default
-  lifecycle.
+- Implement the offline fact-check evidence lifecycle and opt-in local runner in
+  later authorized slices; keep the live judge explicit, local, no-pull, and
+  outside the default lifecycle.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 

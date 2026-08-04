@@ -1,14 +1,15 @@
 # Local AI-Judged Evaluation Plan
 
-Status: Slice A1 implemented and actual-human fixture confirmation recorded on
-2026-08-02. Live invocation, evidence, runner, and controlled-run slices remain
-pending. The framework plan was reviewed against Spring AI `2.0.0` and Spring
-Boot `4.1.0` on 2026-07-27.
+Status: Slices A1 and A2 implemented. Actual-human fixture confirmation was
+recorded on 2026-08-02, and the dedicated recording judge boundary was added on
+2026-08-03. Evidence, an opt-in runner, and a controlled live run remain
+pending. The framework contract was re-checked against Spring AI `2.0.0` and
+Spring Boot `4.1.0` during A2 implementation.
 
-This plan defines one bounded local fact-checking cycle. Slice A1 adds only a
-tracked offline prompt/fixture/review contract. It does not add a live judge,
-change the deterministic evaluation endpoint, start Docker, pull a model, or
-add a dependency.
+This plan defines one bounded local fact-checking cycle. Slices A1 and A2 add a
+tracked offline prompt/fixture/review contract and a mockable recording judge
+boundary. They do not add a live runner, change the deterministic evaluation
+endpoint, start Docker, pull a model, or add a dependency.
 
 ## Current Baseline
 
@@ -18,6 +19,11 @@ add a dependency.
   feedback, metadata, invocation success, and errors, but its `passed` field
   currently means the deterministic evaluator's verdict. A live slice must not
   reuse that field as if it meant agreement with a known expected result.
+- The A2 boundary builds Spring AI's unchanged `FactCheckingEvaluator` around a
+  request-scoped recording `ChatModel`. Its dedicated Ollama factory requires
+  an explicit loopback URL and complete generation settings, forces pull
+  strategy `never`, applies connect/read timeout, and configures one attempt
+  with no hidden Spring AI retry.
 - `setaccio-testcontainers` already declares
   `spring-ai-spring-boot-testcontainers` in test scope. It has no
   `OllamaContainer`, Docker task, or model-provisioning path, and normal tests
@@ -45,6 +51,31 @@ add a dependency.
   incomplete, or digest-mismatched review records. No live model or provider
   is involved.
 
+## Implemented Slice A2 Boundary
+
+- `LocalFactCheckJudgeSettings` requires an explicit model, temperature, seed,
+  positive token limit, positive timeout, and exactly one attempt. It has no
+  application or environment-derived defaults.
+- `LocalFactCheckJudgeModelFactory` constructs a dedicated Ollama chat model
+  from an explicit loopback base URL, propagates the full generation options,
+  uses pull strategy `never`, applies the same timeout to connection/read
+  handling, and disables Spring AI retries.
+- `LocalFactCheckJudgeBoundary` creates a fresh recording model for each
+  fixture, passes its `ChatClient.Builder` plus the tracked prompt to Spring
+  AI's unmodified `FactCheckingEvaluator`, and captures the response before the
+  evaluator reduces it to a boolean.
+- The result separates provider invocation success, Spring evaluator boolean,
+  normalized judge verdict, human-confirmed expectation agreement, raw output,
+  effective response metadata, token usage when available, latency, attempt
+  count, and diagnostic category. Only trimmed case-insensitive exact `yes` and
+  `no` become verdicts; empty and malformed output remain separate failures.
+- Mocked default-lifecycle tests cover both locked repetition seeds, valid
+  verdicts, expectation mismatch, empty/malformed output, metadata and usage,
+  absent usage, unavailable model, timeout, provider failure, explicit timeout
+  propagation, and one-attempt enforcement without contacting Ollama.
+- No Spring bean selects or starts this judge. A3 must add offline evidence
+  lifecycle support, and A4 must add the separately authorized opt-in runner.
+
 The upstream API review confirmed:
 
 - Spring AI's [`Evaluator` contract and evaluation request model](https://docs.spring.io/spring-ai/reference/api/testing.html)
@@ -59,10 +90,9 @@ The upstream API review confirmed:
 - The pinned implementation normalizes only exact `yes` as a passing verdict
   and returns empty feedback/metadata. It does not expose the raw judge text or
   token usage, and it makes a valid `no` indistinguishable from malformed text
-  through `EvaluationResponse` alone. The future slice therefore needs a
+  through `EvaluationResponse` alone. A2 addresses that limitation with a
   narrow request-scoped recording boundary around the dedicated judge model;
-  it should not fork or copy Spring AI's evaluator implementation merely to
-  obtain evidence.
+  it does not fork or copy Spring AI's evaluator implementation.
 - Spring AI `2.0.0` documents an
   [`OllamaContainer` service connection](https://docs.spring.io/spring-ai/reference/api/testcontainers.html),
   while Spring Boot documents that
@@ -76,7 +106,7 @@ The upstream API review confirmed:
 Implement a host-Ollama fact-checking matrix first. Do not combine that slice
 with RAG, `RelevancyEvaluator`, or Testcontainers.
 
-The first live slice should:
+The remaining live-run slices should:
 
 1. Add one explicitly invoked `:setaccio-lab:localEvaluation` task that calls
    an already-running local Ollama service.
@@ -86,11 +116,9 @@ The first live slice should:
 3. Resolve the requested installed model to its normalized name and full
    immutable Ollama digest before allocating output. Keep
    `spring.ai.ollama.init.pull-model-strategy=never`.
-4. Build a dedicated judge `OllamaChatModel` / `ChatClient.Builder` with the
-   complete locked options rather than partially overriding the application's
-   generation model. Wrap that model per invocation so the evidence row can
-   retain the raw response and usage metadata before `FactCheckingEvaluator`
-   reduces it to a boolean result.
+4. Use the implemented dedicated judge factory and recording boundary rather
+   than partially overriding the application's generation model. Do not add a
+   second normalization path in the runner or evidence layer.
 5. Run only `FactCheckingEvaluator` against a small tracked, public-safe,
    balanced claim/context fixture cohort.
 

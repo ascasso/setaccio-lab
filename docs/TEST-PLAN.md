@@ -141,9 +141,9 @@
   catalog ID, version, SHA-256, confirmation date, and all six fixture IDs in
   catalog order. Reject pending, incomplete, or digest-mismatched records in
   offline tests before a future runner can consume them.
-- Implement `FactCheckingEvaluator` first, if live AI judging is authorized,
-  against a balanced public claim/context fixture cohort and an explicitly
-  selected already-installed host-Ollama judge. Follow
+- Maintain the implemented `FactCheckingEvaluator` recording boundary against
+  the balanced public claim/context fixture cohort and an explicitly selected
+  host-Ollama judge. Keep live execution separately authorized. Follow
   [`docs/LOCAL-AI-EVALUATION-PLAN.md`](LOCAL-AI-EVALUATION-PLAN.md).
 - Defer `RelevancyEvaluator` until a real retrieval flow can supply and preserve
   retrieved documents; ordinary fixture context is not a RAG benchmark.
@@ -154,6 +154,14 @@
   text or usage metadata, capture the dedicated judge model response through a
   narrow request-scoped recording boundary before evaluator normalization.
   Do not duplicate the evaluator implementation to obtain that evidence.
+- Require the dedicated boundary to propagate explicit model, temperature,
+  seed, token limit, timeout, and exactly-one-attempt policy on every call.
+  Keep pull strategy `never`, reject non-loopback endpoints, and never inherit
+  the judge from `OLLAMA_MODEL` or another application default.
+- Keep mocked coverage for exact `yes` / `no` verdicts, empty and malformed
+  output, expectation mismatch, unavailable model, timeout, provider failure,
+  response metadata, available/absent token usage, latency, attempt count, both
+  repetition seeds, timeout propagation, and hidden-retry prevention.
 - Require prompt ID/version/digest, full judge-model digest, complete generation
   settings, two seeded repetitions, balanced supported/unsupported fixtures,
   explicit execution order, and shared-manifest offline verification.

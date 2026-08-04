@@ -9,6 +9,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the dedicated local fact-check recording judge boundary around Spring
+  AI's unchanged `FactCheckingEvaluator`. It requires complete explicit Ollama
+  settings, a loopback endpoint, pull strategy `never`, connect/read timeout,
+  and exactly one attempt; records raw output, response metadata, available
+  usage, latency, and classified failures before evaluator normalization; and
+  keeps provider success, judge verdict, Spring's boolean, and expected-label
+  agreement separate in provider-free default tests.
 - Added the first offline local fact-checking contract: a versioned
   exact-placeholder prompt, a balanced six-fixture repository-authored catalog,
   and an actual-human confirmation record bound to the exact catalog digest.
