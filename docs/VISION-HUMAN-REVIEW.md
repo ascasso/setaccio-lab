@@ -9,6 +9,28 @@ This rubric is intended to be executed by a human. Any agent-produced pass
 against it must be labeled explicitly as agent-assisted review and must not be
 substituted for, or represented as, completed human review.
 
+For the same workflow as a compact top-to-bottom checklist, use the committed
+[`VISION-HUMAN-REVIEW-OPERATOR.md`](VISION-HUMAN-REVIEW-OPERATOR.md) companion.
+This document remains authoritative if the two ever disagree on policy.
+
+## Current cycle status
+
+As of 2026-08-02, the ignored saved-run directories for the documented Prompt
+v1/v2 pair are unavailable. The project owner elected to close that review
+prerequisite through an evidence-loss waiver without recreating or replacing
+the runs. No actual-human comparative judgment or `adopt` / `revise` / `reject`
+decision is claimed. Prompt v1 remains the operational interactive default,
+and Prompt v2 remains experimental and unadopted.
+
+The workflow below remains the canonical procedure if the exact historical
+runs are restored. It must not be used to imply that the unavailable review
+was completed. Any future Prompt v2 decision based on replacement evidence
+requires a separately authorized paired protocol, new run names, preserved
+evidence, and actual human review.
+
+The current status and start gate for that deferred decision are also indexed
+in [DEFERRED-WORK.md](DEFERRED-WORK.md).
+
 ## Before you start
 
 - Keep source images, raw responses, reference observations, expected concepts,
@@ -16,7 +38,7 @@ substituted for, or represented as, completed human review.
 - Edit only the ignored worksheet under
   `setaccio-lab/build/vision-human-review/`; do not move it into tracked
   documentation.
-- The current Prompt v1/v2 pair contains 3 models × 4 cases, so the worksheet
+- The documented Prompt v1/v2 pair contains 3 models × 4 cases, so the worksheet
   has 12 model/case sections followed by one final decision.
 - The preparation task verifies both saved runs, checks deterministic
   comparability and corpus input identity, and writes the private worksheet. It

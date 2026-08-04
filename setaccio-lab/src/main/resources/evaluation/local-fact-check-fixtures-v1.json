@@ -1,0 +1,48 @@
+{
+  "catalogId": "local-fact-check-fixtures",
+  "catalogVersion": "1",
+  "fixtures": [
+    {
+      "id": "harbor-library-supported",
+      "pairId": "harbor-library-hours",
+      "document": "The Harbor Library opens at 9:00 a.m. Tuesday through Saturday and closes at 5:00 p.m. on those days. The library is closed Sunday and Monday.",
+      "claim": "The Harbor Library opens at 9:00 a.m. on Saturday.",
+      "expectedVerdict": "supported"
+    },
+    {
+      "id": "harbor-library-unsupported",
+      "pairId": "harbor-library-hours",
+      "document": "The Harbor Library opens at 9:00 a.m. Tuesday through Saturday and closes at 5:00 p.m. on those days. The library is closed Sunday and Monday.",
+      "claim": "The Harbor Library is open on Monday.",
+      "expectedVerdict": "unsupported"
+    },
+    {
+      "id": "riverbend-garden-supported",
+      "pairId": "riverbend-garden-trails",
+      "document": "Riverbend Garden has three marked trails. Cedar Loop is 1.2 km, Meadow Path is 0.8 km, and Ridge Walk is 2.5 km. Bicycles are permitted only on Ridge Walk.",
+      "claim": "Ridge Walk is 2.5 km long.",
+      "expectedVerdict": "supported"
+    },
+    {
+      "id": "riverbend-garden-unsupported",
+      "pairId": "riverbend-garden-trails",
+      "document": "Riverbend Garden has three marked trails. Cedar Loop is 1.2 km, Meadow Path is 0.8 km, and Ridge Walk is 2.5 km. Bicycles are permitted only on Ridge Walk.",
+      "claim": "Bicycles are permitted on Cedar Loop.",
+      "expectedVerdict": "unsupported"
+    },
+    {
+      "id": "repair-workshop-supported",
+      "pairId": "repair-workshop-items",
+      "document": "The community repair workshop accepts lamps, toasters, and fans. It does not accept televisions or microwave ovens. Every drop-off requires an appointment.",
+      "claim": "Fans are among the items the workshop accepts.",
+      "expectedVerdict": "supported"
+    },
+    {
+      "id": "repair-workshop-unsupported",
+      "pairId": "repair-workshop-items",
+      "document": "The community repair workshop accepts lamps, toasters, and fans. It does not accept televisions or microwave ovens. Every drop-off requires an appointment.",
+      "claim": "The workshop accepts televisions.",
+      "expectedVerdict": "unsupported"
+    }
+  ]
+}

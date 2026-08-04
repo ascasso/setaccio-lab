@@ -107,6 +107,85 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
+## Opt-in Local AI Judge Runner and Evidence
+
+There is no supported judge environment variable or judge endpoint.
+`OLLAMA_MODEL` remains the application chat/vision default and never selects
+the evaluator model. The only live fact-check entry point is the explicitly
+invoked `localEvaluation` Gradle task.
+
+The implemented recording boundary requires a caller to provide an explicit
+judge model, temperature, seed, token limit, timeout, and exactly-one-attempt
+policy. Its dedicated Ollama factory also requires an explicit loopback base
+URL, applies connect/read timeout, keeps pull strategy `never`, and disables
+Spring AI retries. It does not read `OLLAMA_MODEL` or create a Spring bean, so
+application startup and default tests cannot silently invoke it.
+
+The offline evidence layer now locks the twelve-row protocol, BLAKE3
+document/claim identities, prompt/catalog/human-review digests, full judge
+identity, generation settings, raw outcomes, response metadata, available
+usage, latency, attempts, and classified diagnostics. A saved run directory is
+a direct child of ignored `build/evaluation-matrix/` and contains exactly
+`local-evaluation-results.json`, shared v1 `manifest.json`, and deterministic
+`SUMMARY.md`.
+
+Run the locked matrix only against an already-running loopback Ollama service
+and replace the example tag/output name deliberately:
+
+```bash
+./gradlew :setaccio-lab:localEvaluation \
+  --ollama-base-url=http://localhost:11434 \
+  --judge-model=YOUR_INSTALLED_TAG \
+  --max-tokens=64 \
+  --timeout=PT30S \
+  --output-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+| Option | Required | Contract |
+| --- | --- | --- |
+| `--ollama-base-url` | Yes | Explicit loopback HTTP(S) URL. It is validated but never saved. |
+| `--judge-model` | Yes | One already-installed Ollama tag. No environment or application default is used. |
+| `--max-tokens` | Yes | Positive integer from `1` through `32768`. |
+| `--timeout` | Yes | Positive ISO-8601 duration, such as `PT30S`, no greater than `PT10M`. |
+| `--output-dir` | Yes | One nonexistent dated child of `build/evaluation-matrix/`. |
+
+Before creating the output directory, preflight validates the loopback
+boundary, locked prompt/catalog/review digests and confirmation, option bounds,
+fresh path, installed normalized model name, and full immutable model digest.
+The task never pulls a model and executes exactly twelve rows sequentially,
+with temperature `0.0`, seeds `42`/`43`, and exactly one attempt per row. It is
+not attached to `test`, `check`, `build`, application startup, or CI. A dirty
+worktree is preserved in the manifest and labeled `diagnostic/non-final` in
+the deterministic summary.
+
+Verify saved evidence without starting Spring or contacting Ollama:
+
+```bash
+./gradlew :setaccio-lab:localEvaluationVerify \
+  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+Regenerate only `SUMMARY.md` after the immutable raw result and manifest pass
+offline inspection:
+
+```bash
+./gradlew :setaccio-lab:localEvaluationReanalyze \
+  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+The verify/reanalyze tasks have no model or endpoint options and remain fully
+offline. One controlled Slice A5 run completed from clean commit `5d41362`
+with explicit `gemma4:e2b`, its full installed digest, `64` output tokens,
+`PT2M`, and twelve one-attempt rows. Its ignored evidence passed verification
+and byte-identical reanalysis. It is not a reusable default or an invitation to
+rerun the same protocol. Slice A6 completed the bounded offline interpretation
+without changing the evidence. `RelevancyEvaluator` remains later work, and
+container provisioning is deferred for this fact-check cycle. See
+[the local AI-judged evaluation plan](LOCAL-AI-EVALUATION-PLAN.md) for the
+command boundary, results, and closeout decisions.
+The complete deferred-work index, including future provider and model-type
+boundaries, is [DEFERRED-WORK.md](DEFERRED-WORK.md).
+
 ## Local Vision Benchmark
 
 The vision benchmark is available only through the `local` profile and requires
@@ -275,8 +354,16 @@ code baseline may differ. The report covers invocation, structural, repetition,
 token, latency, and infrastructure deltas only; semantic judgments remain human
 review.
 
-Prepare the private human-review worksheet for the current Prompt v1/v2 pair
-only after confirming that these exact ignored runs are present:
+The ignored saved-run directories for the documented Prompt v1/v2 pair became
+unavailable before actual-human comparative review. On 2026-08-02, the project
+owner closed that prerequisite through an evidence-loss waiver without making
+an `adopt` / `revise` / `reject` judgment. Prompt v1 remains the operational
+interactive default, and Prompt v2 remains experimental and unadopted. Any
+future decision based on replacement evidence requires a separately authorized
+paired protocol, new run names, preserved evidence, and actual human review.
+
+The historical preparation procedure remains below in case both exact ignored
+runs are restored. Confirm that they are present before continuing:
 
 ```bash
 ls -d \
@@ -284,8 +371,9 @@ ls -d \
   setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
 ```
 
-If either exact directory is missing, stop and restore the saved evidence.
-Otherwise, run this command without changing the paths:
+If either exact directory is missing, stop. Do not recreate or replace evidence
+under these historical names. If both exact directories are restored, run this
+command without changing the paths:
 
 ```bash
 ./gradlew :setaccio-lab:visionHumanReviewPrepare \
@@ -296,7 +384,9 @@ Otherwise, run this command without changing the paths:
 
 Do not run the task without these options. The task never guesses from
 timestamps or automatically selects evidence. See
-`docs/VISION-HUMAN-REVIEW.md` for the complete review workflow.
+`docs/VISION-HUMAN-REVIEW.md` for the canonical policy and rubric, or
+`docs/VISION-HUMAN-REVIEW-OPERATOR.md` for the committed top-to-bottom operator
+checklist.
 
 The task verifies both runs, applies the same deterministic comparability gate,
 and validates that the current private corpus cases still match the saved MIME
@@ -607,6 +697,30 @@ curl -sS http://localhost:8082/api/lab/evaluations \
 
 Each row records the user text, fixture context, response text, evaluator provider/model, deterministic pass/fail verdict, score, feedback, and evaluator metadata. The current evaluator is `fixture` / `term-containment-v1`; it verifies documented required terms and is not an AI quality judgment. No new environment variables or credentials are required.
 
+The separate AI-judged contract remains offline-only in the default lifecycle.
+It tracks prompt `local-fact-check` version `1`, a balanced six-fixture claim/document
+catalog, and an actual-human confirmation record tied to the exact catalog
+digest. Its request-scoped recording boundary captures the explicit judge
+options, raw result, response metadata, token usage when available, latency,
+attempt count, normalized verdict, expectation agreement, and classified
+failures around Spring AI's unchanged `FactCheckingEvaluator`.
+
+Its suite-specific evidence writer, standalone offline verify/reanalyze tasks,
+and explicit host-Ollama runner are implemented. The runner has no judge
+environment variable, validates a loopback endpoint and immutable installed
+model identity before output allocation, forces no-pull sequential execution,
+and remains outside the default lifecycle.
+
+The completed A5 run produced twelve one-attempt rows with complete usage and
+no infrastructure failure, but ten responses were empty and only two produced
+valid matching `no` verdicts. A6 interpreted that immutable evidence without a
+provider call or row replacement. All empty responses reached the explicit
+`64`-token output limit, which registers only a later, separately authorized
+output-budget compatibility hypothesis; it does not establish causation.
+Testcontainers is deferred for this cycle because container provisioning would
+not answer that verdict-yield question. No additional environment variable,
+Docker setup, rerun, release, or tag is required by the A6 closeout.
+
 ## Tool Search Advisor
 
 Spring AI's Tool Search Tool support is available on the `setaccio-lab` classpath through `spring-ai-starter-tool-search-advisor`, but it is disabled by default. Keep it off for normal local runs, default tests, and the current vision benchmark path.
@@ -641,7 +755,7 @@ Before any provider-backed test is added, introduce explicit switches so CI and 
 | `SETACCIO_LAB_OUTPUT_DIR` | Optional output directory. Defaults should stay under `build/lab-results/`. |
 | `SETACCIO_LAB_EVALUATOR_PROVIDER` | Optional judge/evaluator provider for AI-judged tests. |
 | `SETACCIO_LAB_EVALUATOR_MODELS` | Optional comma-separated judge/evaluator model names. |
-| `SETACCIO_LAB_TESTCONTAINERS_ENABLED` | Must be `true` before any Testcontainers-backed AI integration test runs. |
+| `SETACCIO_LAB_TESTCONTAINERS_ENABLED` | Reserved for a future explicit Testcontainers runner; no current task consumes it. |
 
 ## Provider Variables
 
@@ -677,9 +791,11 @@ Spring AI includes model-evaluation support and Testcontainers service-connectio
 | Area | Variables |
 | --- | --- |
 | AI-judged evaluation | `SETACCIO_LAB_EVALUATOR_PROVIDER`, `SETACCIO_LAB_EVALUATOR_MODELS` |
-| Testcontainers-backed integrations | `SETACCIO_LAB_TESTCONTAINERS_ENABLED` |
+| Testcontainers-backed integrations | `SETACCIO_LAB_TESTCONTAINERS_ENABLED` (reserved; no current runner) |
 
-Do not require Docker, Testcontainers, or live evaluator models for default builds.
+Do not require Docker, Testcontainers, or live evaluator models for default
+builds. The current Testcontainers decision is `defer`; see
+[DEFERRED-WORK.md](DEFERRED-WORK.md) before proposing a container slice.
 
 ## Ollama Setup
 

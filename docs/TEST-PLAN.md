@@ -1,5 +1,10 @@
 # Test Plan
 
+The tracked [deferred-work index](DEFERRED-WORK.md) defines the start gates for
+future providers, retrieval, Testcontainers, model types, and MCP work. A
+future item does not enter default tests or CI merely because it appears in a
+plan or environment table.
+
 ## Near Term
 
 - Keep `setaccio-core` Spring-free with a dependency check that fails if Spring Framework or Spring Boot appears on the core runtime classpath.
@@ -7,7 +12,9 @@
 - Add known BLAKE3 test vectors for empty input, strings, byte arrays, and streams.
 - Keep `setaccio-lab` context smoke tests on the `test` profile with no live Ollama or Anthropic calls.
 - Add controller validation tests for missing files, missing model names, and malformed model lists.
-- Maintain the implemented deterministic Spring AI evaluator contract, and keep AI-judged evaluation and Testcontainers APIs under review before adding either live abstraction.
+- Maintain the implemented deterministic Spring AI evaluator contract. Follow
+  the accepted local fact-checking and Testcontainers planning gate before
+  adding either live path.
 
 ## Shared Evidence Lifecycle
 
@@ -87,7 +94,9 @@
   infrastructure observations, and do not declare an aggregate winner.
   Pre-register the review criteria before reading candidate raw responses; use
   [`docs/VISION-HUMAN-REVIEW.md`](VISION-HUMAN-REVIEW.md) for the current
-  public-safe rubric.
+  public-safe rubric and
+  [`docs/VISION-HUMAN-REVIEW-OPERATOR.md`](VISION-HUMAN-REVIEW-OPERATOR.md) for
+  the committed execution checklist.
 - Reject tampered or missing raw evidence, manifest protocol drift, unexpected
   artifacts, and summaries that differ from deterministic offline analysis.
 - Verify that every row and manifest retain the explicitly selected prompt ID,
@@ -128,9 +137,60 @@
 - Use Spring AI's `Evaluator` contract for deterministic fixture rows before adding AI-judged evaluation.
 - Track each evaluation input as user text, optional context/data, model response, evaluator provider/model, pass/fail result, score, raw evaluator explanation, and evaluator metadata.
 - Keep public fixtures deterministic and make the evaluator implementation and required terms explicit in result metadata.
-- Use `RelevancyEvaluator` for RAG/context relevance checks when retrieval benchmarks are added.
-- Use `FactCheckingEvaluator` for claim-versus-context checks when factuality benchmarks are added.
-- Keep evaluator models configurable and separate from the model being tested; the judge model may be different from the generation model.
+- Lock the dedicated fact-check prompt ID, version, raw-byte SHA-256, and exact
+  single `{document}` / `{claim}` placeholders.
+- Lock the fact-check catalog ID, version, raw-byte SHA-256, ordered stable IDs,
+  three pair structure, and three-supported/three-unsupported balance. Require
+  non-blank repository-authored document and claim text.
+- Require the tracked actual-human confirmation record to match the exact
+  catalog ID, version, SHA-256, confirmation date, and all six fixture IDs in
+  catalog order. Reject pending, incomplete, or digest-mismatched records in
+  offline tests before a future runner can consume them.
+- Maintain the implemented `FactCheckingEvaluator` recording boundary against
+  the balanced public claim/context fixture cohort and an explicitly selected
+  host-Ollama judge. Keep live execution separately authorized. Follow
+  [`docs/LOCAL-AI-EVALUATION-PLAN.md`](LOCAL-AI-EVALUATION-PLAN.md).
+- Defer `RelevancyEvaluator` until a real retrieval flow can supply and preserve
+  retrieved documents; ordinary fixture context is not a RAG benchmark.
+- Keep judge and fixture-expectation results separate. A valid `yes` / `no`
+  verdict is not automatically an expectation match or a general factuality
+  score.
+- Because Spring AI `2.0.0`'s fact-checking response does not retain raw judge
+  text or usage metadata, capture the dedicated judge model response through a
+  narrow request-scoped recording boundary before evaluator normalization.
+  Do not duplicate the evaluator implementation to obtain that evidence.
+- Require the dedicated boundary to propagate explicit model, temperature,
+  seed, token limit, timeout, and exactly-one-attempt policy on every call.
+  Keep pull strategy `never`, reject non-loopback endpoints, and never inherit
+  the judge from `OLLAMA_MODEL` or another application default.
+- Keep mocked coverage for exact `yes` / `no` verdicts, empty and malformed
+  output, expectation mismatch, unavailable model, timeout, provider failure,
+  response metadata, available/absent token usage, latency, attempt count, both
+  repetition seeds, timeout propagation, and hidden-retry prevention.
+- Require prompt ID/version/digest, full judge-model digest, complete generation
+  settings, two seeded repetitions, balanced supported/unsupported fixtures,
+  explicit execution order, and shared-manifest offline verification.
+- Keep `localEvaluationTest` provider-free. Require exact counterbalanced row
+  order, BLAKE3 document/claim identities, separate evaluator/verdict/agreement
+  signals, exhaustive diagnostic coherence, usage/latency/attempt validation,
+  and public-safe metadata/error persistence.
+- Require `localEvaluationVerify` and `localEvaluationReanalyze` to remain
+  standalone and offline. Reject raw/summary tampering, missing or extra
+  artifacts, unsafe paths, prompt/catalog/review/model drift, row order/count
+  drift, invalid attempts, unclassified failures, and deterministic summary
+  drift without starting Spring or contacting Ollama.
+- Keep the `localEvaluation` runner opt-in and outside `test`, `check`, `build`,
+  application startup, and CI. Provider-free tests must reject every missing
+  option, unknown/duplicate options, non-loopback or structured endpoints,
+  invalid token/timeout bounds, unsafe/reused output paths, absent/unconfirmed
+  or digest-drifted contracts, missing models, incomplete digests, and
+  mismatched resolved names before output allocation.
+- Test the executor with a fake judge session: exactly twelve calls in locked
+  sequential order, seeds `42`/`43`, one attempt per row, no replacement call,
+  and retention of classified failed attempts. Never start Ollama in these
+  tests.
+- Keep evaluator models configurable and separate from the model being tested;
+  record and flag identical full digests if a later benchmark self-evaluates.
 - Keep deterministic fixture-based assertions for default tests. AI-judged evaluator tests must be opt-in unless backed by mocks or recorded fixtures.
 - If custom evaluator prompts are added, keep prompt templates public-safe and test the required placeholders.
 
@@ -166,8 +226,13 @@
 ## Testcontainers
 
 - Keep Docker/Testcontainers dependencies isolated in `setaccio-testcontainers`; `setaccio-lab` must not require them.
-- Consider Spring AI's `spring-ai-spring-boot-testcontainers` module when adding container-backed integration tests.
-- Prefer Spring Boot service connections where they simplify wiring local model services or vector stores.
+- Keep the existing Spring AI `spring-ai-spring-boot-testcontainers` support in
+  test scope. Its Ollama service-connection factory does not itself add the
+  typed Testcontainers Ollama module.
+- Add a typed `OllamaContainer` dependency only in `setaccio-testcontainers`
+  and only when a separately authorized container-specific slice needs it.
+- Prefer Spring Boot `@ServiceConnection` wiring and verify that the resulting
+  Ollama connection details override ordinary connection properties.
 - Use `OllamaContainer` only for explicit integration tests; do not make Docker or model pulls required for normal builds.
 - Relevant future service connections include Ollama, local/vector stores such as Chroma, Milvus, Qdrant, Typesense, Weaviate, and infrastructure such as OpenSearch or LocalStack when those test surfaces are added.
 - Keep Testcontainers tests behind a dedicated Gradle task, profile, or property so local unit tests and CI remain fast and offline by default.

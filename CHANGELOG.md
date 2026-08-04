@@ -9,6 +9,61 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `docs/DEFERRED-WORK.md` as the public-safe canonical index for work
+  intentionally outside the completed August cycle. It records the Prompt v2,
+  output-budget, Testcontainers, retrieval, release/tag, September chat, and
+  October Anthropic gates; links the environment and test-plan boundaries; and
+  makes clear that future variables or roadmap entries do not authorize live
+  execution, credentials, Docker, a release, or a tag.
+- Closed the first local fact-check cycle with a bounded offline interpretation
+  of the immutable A5 evidence. Supported agreement was not measurable; two
+  unsupported rows were evaluable and both agreed, one fixture had two valid
+  consistent verdicts, and five repetition comparisons were incomplete. All
+  ten empty responses reached the explicit `64`-token output limit, registering
+  a later separately designed output-budget compatibility hypothesis without
+  claiming causation, statistical reliability, general factuality, or judge
+  ranking. Testcontainers, release, and tag work remain deferred.
+- Completed the first controlled local fact-check run from clean commit
+  `5d41362` with explicit `gemma4:e2b` identity, full immutable digest, `64`
+  output tokens, `PT2M`, and the locked twelve-row one-attempt schedule. All
+  provider invocations completed with usage metadata and no infrastructure
+  failure; ten rows had empty output and two produced valid matching `no`
+  verdicts. Ignored evidence verified and reanalyzed byte-for-byte offline
+  without selective retry, replacement, model pull, or raw-output publication.
+- Added the opt-in `localEvaluation` host-Ollama runner with explicit loopback
+  URL, installed judge tag, token limit, timeout, and fresh dated output
+  inputs. Preflight locks the confirmed prompt/fixture/review contract and
+  resolves a full immutable model digest before output allocation; execution
+  remains twelve sequential one-attempt, no-pull rows outside every default
+  lifecycle. Provider-free tests cover all option, preflight, model identity,
+  allocation, call-order, and failed-row behavior, and dirty Git provenance is
+  labeled diagnostic/non-final in the deterministic summary.
+- Added the offline local fact-check evidence lifecycle: a locked twelve-row
+  counterbalanced schedule, BLAKE3 document/claim identities, full judge and
+  contract provenance, suite-specific raw JSON, shared v1 manifest, and
+  deterministic summary. Standalone `localEvaluationVerify` and
+  `localEvaluationReanalyze` tasks validate or regenerate saved evidence
+  without starting Spring or contacting Ollama; offline tests cover protocol,
+  outcome, integrity, path-safety, public-safety, and summary-drift failures.
+- Added the dedicated local fact-check recording judge boundary around Spring
+  AI's unchanged `FactCheckingEvaluator`. It requires complete explicit Ollama
+  settings, a loopback endpoint, pull strategy `never`, connect/read timeout,
+  and exactly one attempt; records raw output, response metadata, available
+  usage, latency, and classified failures before evaluator normalization; and
+  keeps provider success, judge verdict, Spring's boolean, and expected-label
+  agreement separate in provider-free default tests.
+- Added the first offline local fact-checking contract: a versioned
+  exact-placeholder prompt, a balanced six-fixture repository-authored catalog,
+  and an actual-human confirmation record bound to the exact catalog digest.
+  Deterministic tests lock all identities and reject pending, incomplete, or
+  digest-mismatched review records without invoking a model provider.
+- Added a committed vision human-review operator companion with the exact
+  preparation, worksheet-entry, decision, and public-closeout sequence while
+  retaining `docs/VISION-HUMAN-REVIEW.md` as the canonical policy source.
+- Added the planning-only local AI-judged evaluation gate: a bounded future
+  host-Ollama fact-checking matrix contract, reproducibility and failure
+  criteria, and a separately deferred Testcontainers service-connection path
+  that preserves the module boundary and offline default lifecycle.
 - Added `visionHumanReviewPrepare`, an offline-only task that verifies and
   compares two saved vision runs, validates their inputs against the ignored
   private corpus, and writes one non-overwriting private Markdown worksheet
@@ -66,6 +121,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Updated repository agent workflow guidance to commit completed in-scope work
+  after appropriate verification, while keeping pushes explicitly user
+  authorized and unrelated user changes out of commits.
+
+- Closed the unavailable Prompt v1/v2 comparative human-review prerequisite
+  through a documented evidence-loss waiver after the ignored saved-run
+  directories could not be restored. No human adopt/revise/reject judgment is
+  claimed: Prompt v1 remains the operational default, Prompt v2 remains
+  experimental and unadopted, and any future decision requires new paired
+  controlled evidence plus actual human review.
 - Added `gradle/libs.versions.toml` for shared Gradle dependency versions and updated the module build scripts to use version catalog aliases.
 - Moved repository declaration into Gradle dependency resolution management and made module test dependencies explicit.
 - Let Spring Boot/Spring AI dependency management provide the `jackson-datatype-jsr310` version, moved `bcprov-jdk18on` to the Gradle version catalog, restricted the optional Testcontainers harness dependency on `setaccio-lab` to test scope, and enabled Gradle repository-mode enforcement.
@@ -90,6 +155,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Added an exception rule `!gradle/wrapper/gradle-wrapper.jar` to `.gitignore` and restored `gradle-wrapper.jar` so Gradle wrapper execution (`./gradlew`) remains tracked and functional across branch switches.
 - Reject vision-matrix comparisons and human-review worksheet preparation when
   saved runs have different Spring Boot or Spring AI versions, preventing
   framework-induced behavior from being attributed to prompt changes.

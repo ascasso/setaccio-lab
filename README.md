@@ -123,6 +123,15 @@ diagnostic rather than an aggregate model ranking; see the
 [2026-07-25 Slice 7 log](docs/logs/2026-07-25.md#slice-7-human-analysis-and-public-closeout)
 for the bounded findings and next hypothesis.
 
+The later Prompt v1/v2 comparative human-review prerequisite was closed on
+2026-08-02 through an explicit evidence-loss waiver after its ignored saved-run
+directories became unavailable. No actual-human adopt/revise/reject judgment
+is claimed, and earlier Prompt v2 semantic observations remain labeled
+agent-assisted. Prompt v1 remains the operational interactive default; Prompt
+v2 remains experimental and unadopted. Any future Prompt v2 decision requires
+new paired controlled evidence and actual human review rather than recreating
+artifacts under the original run names.
+
 ### Local Chat Benchmark
 
 `POST /api/lab/chat` runs under the `local` profile. It:
@@ -166,7 +175,93 @@ or contact Ollama.
 - accepts an optional `fixtureIds` list to select the public fixture cases,
 - writes structured `*-evaluation.json` results to the same output directory.
 
-This establishes the result-row contract for later AI-judged evaluation. It does not claim to measure model quality; live evaluator models remain a separate opt-in phase.
+This establishes the result-row contract for later AI-judged evaluation. It
+does not claim to measure model quality; live evaluator models remain a
+separate opt-in phase.
+
+The AI-judged fact-checking work remains separate from that endpoint. Slice A1
+contains prompt `local-fact-check` version `1` with exact
+`{document}` and `{claim}` placeholders, a versioned six-fixture catalog made
+from three repository-authored document pairs, and an actual-human confirmation
+record tied to the exact catalog SHA-256. The fixtures are balanced at three
+supported and three unsupported claims. Default tests lock all three artifact
+digests and reject a pending, incomplete, or catalog-mismatched review record.
+
+Slice A2 adds a plain Java, request-scoped recording boundary around Spring
+AI's unchanged `FactCheckingEvaluator`. A caller must supply an explicit judge
+model, temperature, seed, token limit, timeout, and exactly-one-attempt policy.
+The dedicated Ollama factory accepts only an explicit loopback URL, forces pull
+strategy `never`, disables Spring AI retries, and never inherits
+`OLLAMA_MODEL`. Each boundary result keeps provider invocation success, Spring's
+supported-claim boolean, exact `yes` / `no` verdict, expected-label agreement,
+raw output, response metadata, token usage when available, latency, attempt
+count, and failure/diagnostic category separate. Empty or malformed output is
+not coerced to `no`.
+
+Slice A3 adds the offline evidence lifecycle before any live runner. It locks
+the exact twelve-row order, stores BLAKE3 document/claim identities instead of
+duplicating fixture text, binds the prompt/catalog/human-review and immutable
+judge identities, and writes suite-specific raw JSON, a shared v1 manifest,
+and deterministic `SUMMARY.md` under ignored `build/evaluation-matrix/`
+directories. The summary keeps supported and unsupported agreement,
+repetition consistency, verdict tendency, formatting outcomes, token
+availability, latency, attempts, and infrastructure failures separate and
+does not claim an order effect.
+
+Saved evidence can be checked or have only its deterministic summary
+regenerated with the standalone offline tasks:
+
+```bash
+./gradlew :setaccio-lab:localEvaluationVerify \
+  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+./gradlew :setaccio-lab:localEvaluationReanalyze \
+  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+Slice A4 adds one explicitly invoked host-Ollama runner. It requires a
+loopback URL, an already-installed judge tag, a positive token limit, an
+ISO-8601 timeout, and a new dated output directory. Preflight validates the
+tracked human-confirmed contract and resolves the tag to a full immutable
+Ollama digest before allocating output. The runner then executes the locked
+twelve rows sequentially with one attempt per row and pull strategy `never`:
+
+```bash
+./gradlew :setaccio-lab:localEvaluation \
+  --ollama-base-url=http://localhost:11434 \
+  --judge-model=YOUR_INSTALLED_TAG \
+  --max-tokens=64 \
+  --timeout=PT30S \
+  --output-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+The task is not connected to `test`, `check`, `build`, application startup, or
+CI. It has no judge environment default, never records the endpoint, never
+pulls a model, and does not contact a remote provider.
+
+Slice A5 completed one clean-baseline run from commit `5d41362` with explicit
+judge `gemma4:e2b`, its full installed digest, `64` output tokens, timeout
+`PT2M`, and the locked twelve-row schedule. All 12 provider invocations and
+attempt records completed with usage metadata and no infrastructure failure.
+The bounded result contained ten empty responses plus two valid matching `no`
+verdicts; there were no valid mismatches. The ignored evidence verified and
+reanalyzed byte-for-byte offline without a retry, replacement row, model pull,
+or raw-output publication.
+
+Slice A6 closed the cycle by interpreting only that immutable evidence. No
+supported row was evaluable; two of six planned unsupported rows were
+evaluable and both agreed, while the other ten rows across both labels were
+empty. One fixture had two consistent valid verdicts and five repetition
+comparisons were incomplete, so the run does not establish reliability,
+general factuality, or a verdict-label tendency. All empty responses ended at
+the explicit `64`-token output limit, while both valid responses used two
+completion tokens; that association registers a later, separately designed
+output-budget compatibility hypothesis without claiming causation. The
+Testcontainers outcome is `defer`, because provisioning would not answer the
+observed verdict-yield question. No A5 row was rerun or replaced. See
+[the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
+All intentionally deferred follow-up work, its start gates, and its
+non-authorization boundaries are indexed in
+[the deferred-work guide](docs/DEFERRED-WORK.md).
 
 All benchmarks are local-first and offline-safe by default:
 
