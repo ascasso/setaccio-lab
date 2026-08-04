@@ -1,16 +1,17 @@
 # Local AI-Judged Evaluation Plan
 
-Status: Slices A1 through A3 implemented. Actual-human fixture confirmation was
+Status: Slices A1 through A4 implemented. Actual-human fixture confirmation was
 recorded on 2026-08-02; the dedicated recording judge boundary and offline
-evidence lifecycle were added on 2026-08-03. An opt-in runner and controlled
-live run remain pending. The framework contract was re-checked against Spring
-AI `2.0.0` and Spring Boot `4.1.0` during A2 implementation.
+evidence lifecycle plus the opt-in host-Ollama runner were added on 2026-08-03.
+The controlled live run remains pending. The framework contract was re-checked
+against Spring AI `2.0.0` and Spring Boot `4.1.0` during A2 implementation.
 
-This plan defines one bounded local fact-checking cycle. Slices A1 through A3
+This plan defines one bounded local fact-checking cycle. Slices A1 through A4
 add a tracked offline prompt/fixture/review contract, a mockable recording
-judge boundary, and offline-verifiable evidence. They do not add a live runner,
-change the deterministic evaluation endpoint, start Docker, pull a model, or
-add a dependency.
+judge boundary, offline-verifiable evidence, and one explicit host-Ollama
+runner. They do not change the deterministic evaluation endpoint, start
+Docker, pull a model, attach live execution to a default lifecycle, or add a
+dependency.
 
 ## Current Baseline
 
@@ -74,8 +75,8 @@ add a dependency.
   verdicts, expectation mismatch, empty/malformed output, metadata and usage,
   absent usage, unavailable model, timeout, provider failure, explicit timeout
   propagation, and one-attempt enforcement without contacting Ollama.
-- No Spring bean selects or starts this judge. A4 must add the separately
-  authorized opt-in runner.
+- No Spring bean selects or starts this judge. A4 supplies it only through the
+  separately invoked opt-in runner.
 
 ## Implemented Slice A3 Evidence Lifecycle
 
@@ -101,8 +102,29 @@ add a dependency.
   invalid attempts, unclassified or incoherent outcomes, partial usage, unsafe
   metadata, and summary drift. Reanalysis replaces only a regenerable summary
   after immutable raw evidence and its manifest descriptor pass inspection.
-- No live `localEvaluation` task, endpoint, environment variable, model
-  inventory lookup, output-directory allocator, or provider call exists yet.
+- No live task is attached to the default lifecycle; the A4 runner remains the
+  sole explicit judge entry point.
+
+## Implemented Slice A4 Host-Ollama Runner
+
+- `:setaccio-lab:localEvaluation` requires an explicit loopback URL, installed
+  judge tag, positive token limit, ISO-8601 timeout up to ten minutes, and a
+  new dated child of ignored `build/evaluation-matrix/`.
+- Preflight locks the A1 prompt/catalog/review digests and confirmed fixture
+  order, validates every option and output path, and resolves the requested
+  installed tag to its normalized name and full immutable Ollama digest before
+  allocating output.
+- The runner reuses the A2 factory/boundary and A3 protocol/evidence layer. It
+  makes exactly twelve sequential one-attempt calls, uses temperature `0.0`
+  and seeds `42`/`43`, forces pull strategy `never`, and preserves classified
+  failures as rows.
+- Provider-free tests cover all option/preflight failures and exact execution
+  order without Ollama. Gradle task help documents the local/no-pull boundary;
+  `test`, `check`, `build`, startup, and CI remain judge-free.
+- Git provenance is captured once before output allocation and execution, then
+  reused for the summary and manifest. A dirty worktree is
+  labeled `diagnostic/non-final` in `SUMMARY.md`, not treated silently as a
+  controlled baseline.
 
 The upstream API review confirmed:
 
@@ -131,14 +153,15 @@ The upstream API review confirmed:
 
 ## Recommendation
 
-Implement a host-Ollama fact-checking matrix first. Do not combine that slice
-with RAG, `RelevancyEvaluator`, or Testcontainers.
+Use the implemented host-Ollama fact-checking matrix first. Do not combine the
+controlled run with RAG, `RelevancyEvaluator`, or Testcontainers.
 
-The remaining A4 and A5 live-run slices should:
+The remaining A5 controlled-run slice should use the implemented runner to:
 
-1. Add one explicitly invoked `:setaccio-lab:localEvaluation` task that calls
-   an already-running local Ollama service.
-2. Require `--judge-model`, `--max-tokens`, and a new dated `--output-dir`.
+1. Call an already-running local Ollama service through the explicit
+   `:setaccio-lab:localEvaluation` task.
+2. Supply `--judge-model`, `--max-tokens`, `--timeout`, an explicit loopback
+   URL, and a new dated `--output-dir`.
    Do not inherit `OLLAMA_MODEL`, choose a default judge, treat a mutable tag as
    the model identity, or fall back to the application chat model silently.
 3. Resolve the requested installed model to its normalized name and full

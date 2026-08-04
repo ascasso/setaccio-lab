@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.evidence.EvidenceArtifact;
+import com.setaccio.lab.evidence.EvidenceCodeBaseline;
 import com.setaccio.lab.evidence.EvidenceIntegrity;
 import com.setaccio.lab.evidence.EvidenceManifest;
 import com.setaccio.lab.evidence.EvidenceManifestStore;
@@ -52,6 +53,20 @@ final class LocalEvaluationEvidence {
     }
 
     Path write(Path runDirectory, LocalEvaluationResult result) {
+        return write(
+                runDirectory,
+                result,
+                EvidenceProvenance.captureCodeBaseline(Path.of("")));
+    }
+
+    Path write(
+            Path runDirectory,
+            LocalEvaluationResult result,
+            EvidenceCodeBaseline codeBaseline
+    ) {
+        if (codeBaseline == null) {
+            throw new IllegalArgumentException("codeBaseline must not be null");
+        }
         LocalEvaluationAnalyzer.MatrixAnalysis analysis = analyzer.analyze(result);
         if (!analysis.valid()) {
             throw new IllegalArgumentException(
@@ -68,7 +83,12 @@ final class LocalEvaluationEvidence {
         }
 
         EvidenceArtifact rawArtifact = EvidenceIntegrity.describe(root, rawPath, RAW_ROLE);
-        String summary = report.render(result, analysis, rawArtifact.path(), rawArtifact.sha256());
+        String summary = report.render(
+                result,
+                analysis,
+                rawArtifact.path(),
+                rawArtifact.sha256(),
+                codeBaseline);
         Path summaryPath = root.resolve(SUMMARY_FILENAME);
         try {
             Files.writeString(
@@ -87,7 +107,7 @@ final class LocalEvaluationEvidence {
                 LocalEvaluationProtocol.SUITE,
                 root.getFileName().toString(),
                 Instant.now(),
-                EvidenceProvenance.captureCodeBaseline(Path.of("")),
+                codeBaseline,
                 EvidenceProvenance.detectFrameworkVersions(),
                 LocalEvaluationProtocol.EXECUTION_ENGINE,
                 LocalEvaluationProtocol.manifestSettings(result),
@@ -166,7 +186,8 @@ final class LocalEvaluationEvidence {
                             result,
                             analysis,
                             rawArtifact.path(),
-                            rawArtifact.sha256());
+                            rawArtifact.sha256(),
+                            manifest.codeBaseline());
                 }
             } catch (Exception exception) {
                 failures.add("Raw local evaluation could not be analyzed: "

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.setaccio.lab.evidence.EvidenceCodeBaseline;
 import com.setaccio.lab.evidence.EvidenceManifest;
 import com.setaccio.lab.evidence.EvidenceManifestStore;
 import java.nio.charset.StandardCharsets;
@@ -25,6 +26,22 @@ class LocalEvaluationEvidenceTest {
             LocalEvaluationTestFixtures.PROMPT,
             LocalEvaluationTestFixtures.CATALOG,
             LocalEvaluationTestFixtures.REVIEW);
+
+    @Test
+    void preservesThePreExecutionGitBaselineInManifestAndSummary() throws Exception {
+        Path runDirectory = Files.createDirectory(temporaryDirectory.resolve("2026-08-03-dirty-baseline"));
+        EvidenceCodeBaseline baseline = new EvidenceCodeBaseline("a".repeat(40), true);
+
+        evidence.write(runDirectory, LocalEvaluationTestFixtures.successfulResult(), baseline);
+
+        EvidenceManifest manifest = new EvidenceManifestStore(LocalEvaluationTestFixtures.OBJECT_MAPPER)
+                .read(runDirectory);
+        assertThat(manifest.codeBaseline()).isEqualTo(baseline);
+        assertThat(Files.readString(runDirectory.resolve(LocalEvaluationEvidence.SUMMARY_FILENAME)))
+                .contains("Git commit: `" + "a".repeat(40) + "`")
+                .contains("Evidence status: `diagnostic/non-final (dirty working tree)`");
+        assertThat(evidence.verify(runDirectory).valid()).isTrue();
+    }
 
     @Test
     void writesVerifiesAndDeterministicallyReanalyzesSharedVersionOneEvidence() throws Exception {

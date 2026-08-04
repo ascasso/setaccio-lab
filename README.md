@@ -218,9 +218,26 @@ regenerated with the standalone offline tasks:
   --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
 ```
 
-There is still no live `localEvaluation` task, judge endpoint, judge
-environment variable, credential, model discovery, model pull, or provider
-call. See
+Slice A4 adds one explicitly invoked host-Ollama runner. It requires a
+loopback URL, an already-installed judge tag, a positive token limit, an
+ISO-8601 timeout, and a new dated output directory. Preflight validates the
+tracked human-confirmed contract and resolves the tag to a full immutable
+Ollama digest before allocating output. The runner then executes the locked
+twelve rows sequentially with one attempt per row and pull strategy `never`:
+
+```bash
+./gradlew :setaccio-lab:localEvaluation \
+  --ollama-base-url=http://localhost:11434 \
+  --judge-model=YOUR_INSTALLED_TAG \
+  --max-tokens=64 \
+  --timeout=PT30S \
+  --output-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+The task is not connected to `test`, `check`, `build`, application startup, or
+CI. It has no judge environment default, never records the endpoint, never
+pulls a model, and does not contact a remote provider. A controlled Slice A5
+run remains separately authorized. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 
 All benchmarks are local-first and offline-safe by default:

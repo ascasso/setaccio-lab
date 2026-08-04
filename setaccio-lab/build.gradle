@@ -8,6 +8,7 @@ import com.setaccio.gradle.ToolSearchSmokeTask
 import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 import com.setaccio.gradle.ToolSearchMatrixOfflineTask
 import com.setaccio.gradle.LocalEvaluationOfflineTask
+import com.setaccio.gradle.LocalEvaluationTask
 import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
 import com.setaccio.gradle.VisionMatrixComparisonTask
@@ -105,6 +106,15 @@ tasks.register('localEvaluationVerify', LocalEvaluationOfflineTask) {
     classpath.from(sourceSets.localEvaluation.runtimeClasspath)
     mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationOfflineRunner')
     mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluation', LocalEvaluationTask) {
+    dependsOn tasks.named('localEvaluationClasses')
+    classpath.from(sourceSets.localEvaluation.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationRunner')
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

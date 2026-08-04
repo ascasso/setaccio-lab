@@ -9,6 +9,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the opt-in `localEvaluation` host-Ollama runner with explicit loopback
+  URL, installed judge tag, token limit, timeout, and fresh dated output
+  inputs. Preflight locks the confirmed prompt/fixture/review contract and
+  resolves a full immutable model digest before output allocation; execution
+  remains twelve sequential one-attempt, no-pull rows outside every default
+  lifecycle. Provider-free tests cover all option, preflight, model identity,
+  allocation, call-order, and failed-row behavior, and dirty Git provenance is
+  labeled diagnostic/non-final in the deterministic summary.
 - Added the offline local fact-check evidence lifecycle: a locked twelve-row
   counterbalanced schedule, BLAKE3 document/claim identities, full judge and
   contract provenance, suite-specific raw JSON, shared v1 manifest, and

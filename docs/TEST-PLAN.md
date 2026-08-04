@@ -174,6 +174,16 @@
   artifacts, unsafe paths, prompt/catalog/review/model drift, row order/count
   drift, invalid attempts, unclassified failures, and deterministic summary
   drift without starting Spring or contacting Ollama.
+- Keep the `localEvaluation` runner opt-in and outside `test`, `check`, `build`,
+  application startup, and CI. Provider-free tests must reject every missing
+  option, unknown/duplicate options, non-loopback or structured endpoints,
+  invalid token/timeout bounds, unsafe/reused output paths, absent/unconfirmed
+  or digest-drifted contracts, missing models, incomplete digests, and
+  mismatched resolved names before output allocation.
+- Test the executor with a fake judge session: exactly twelve calls in locked
+  sequential order, seeds `42`/`43`, one attempt per row, no replacement call,
+  and retention of classified failed attempts. Never start Ollama in these
+  tests.
 - Keep evaluator models configurable and separate from the model being tested;
   record and flag identical full digests if a later benchmark self-evaluates.
 - Keep deterministic fixture-based assertions for default tests. AI-judged evaluator tests must be opt-in unless backed by mocks or recorded fixtures.

@@ -107,11 +107,12 @@ The current Spring AI Ollama mapping is:
 
 `OLLAMA_API_BASE` is a project-supported alias for local developer environments. The Spring AI property itself is `spring.ai.ollama.base-url`.
 
-## Local AI Judge Evidence (No Live Runner)
+## Opt-in Local AI Judge Runner and Evidence
 
-There is no supported judge environment variable, live judge endpoint, or
-live `localEvaluation` Gradle task yet. `OLLAMA_MODEL` remains the application
-chat/vision default and must not silently select an evaluator model.
+There is no supported judge environment variable or judge endpoint.
+`OLLAMA_MODEL` remains the application chat/vision default and never selects
+the evaluator model. The only live fact-check entry point is the explicitly
+invoked `localEvaluation` Gradle task.
 
 The implemented recording boundary requires a caller to provide an explicit
 judge model, temperature, seed, token limit, timeout, and exactly-one-attempt
@@ -128,6 +129,35 @@ a direct child of ignored `build/evaluation-matrix/` and contains exactly
 `local-evaluation-results.json`, shared v1 `manifest.json`, and deterministic
 `SUMMARY.md`.
 
+Run the locked matrix only against an already-running loopback Ollama service
+and replace the example tag/output name deliberately:
+
+```bash
+./gradlew :setaccio-lab:localEvaluation \
+  --ollama-base-url=http://localhost:11434 \
+  --judge-model=YOUR_INSTALLED_TAG \
+  --max-tokens=64 \
+  --timeout=PT30S \
+  --output-dir=build/evaluation-matrix/YYYY-MM-DD-local
+```
+
+| Option | Required | Contract |
+| --- | --- | --- |
+| `--ollama-base-url` | Yes | Explicit loopback HTTP(S) URL. It is validated but never saved. |
+| `--judge-model` | Yes | One already-installed Ollama tag. No environment or application default is used. |
+| `--max-tokens` | Yes | Positive integer from `1` through `32768`. |
+| `--timeout` | Yes | Positive ISO-8601 duration, such as `PT30S`, no greater than `PT10M`. |
+| `--output-dir` | Yes | One nonexistent dated child of `build/evaluation-matrix/`. |
+
+Before creating the output directory, preflight validates the loopback
+boundary, locked prompt/catalog/review digests and confirmation, option bounds,
+fresh path, installed normalized model name, and full immutable model digest.
+The task never pulls a model and executes exactly twelve rows sequentially,
+with temperature `0.0`, seeds `42`/`43`, and exactly one attempt per row. It is
+not attached to `test`, `check`, `build`, application startup, or CI. A dirty
+worktree is preserved in the manifest and labeled `diagnostic/non-final` in
+the deterministic summary.
+
 Verify saved evidence without starting Spring or contacting Ollama:
 
 ```bash
@@ -143,13 +173,12 @@ offline inspection:
   --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
 ```
 
-These tasks have no model or endpoint options and are not attached to the
-default lifecycle. A later slice must resolve the requested already-installed
-model to its full digest and add explicit preflight/output allocation before
-exposing a live opt-in runner. `RelevancyEvaluator` and container provisioning
-remain separate later work. See
+The verify/reanalyze tasks have no model or endpoint options and remain fully
+offline. The controlled local run and its interpretation are a separate Slice
+A5 action. `RelevancyEvaluator` and container provisioning remain separate
+later work. See
 [the local AI-judged evaluation plan](LOCAL-AI-EVALUATION-PLAN.md) for the
-proposed command boundary and acceptance criteria.
+command boundary and acceptance criteria.
 
 ## Local Vision Benchmark
 
@@ -670,11 +699,11 @@ options, raw result, response metadata, token usage when available, latency,
 attempt count, normalized verdict, expectation agreement, and classified
 failures around Spring AI's unchanged `FactCheckingEvaluator`.
 
-Its suite-specific offline evidence writer and standalone verify/reanalyze
-tasks are implemented, but no live command, judge environment variable, model
-lookup, output allocation, or provider invocation exists. Later slices must
-keep execution explicit, loopback-only, no-pull, and outside the default
-lifecycle.
+Its suite-specific evidence writer, standalone offline verify/reanalyze tasks,
+and explicit host-Ollama runner are implemented. The runner has no judge
+environment variable, validates a loopback endpoint and immutable installed
+model identity before output allocation, forces no-pull sequential execution,
+and remains outside the default lifecycle.
 
 ## Tool Search Advisor
 

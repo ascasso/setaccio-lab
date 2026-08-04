@@ -10,6 +10,8 @@ public final class LocalFactCheckPromptDefinition {
 
     public static final String ID = "local-fact-check";
     public static final String VERSION = "1";
+    public static final String SHA256 =
+            "e75e0ddd9bef80eecf27e1b668cef954a5eddb5a74b5e4c19db97710c3d39470";
     public static final String RESOURCE_PATH = "prompts/evaluation/local-fact-check-v1.md";
     public static final String DOCUMENT_PLACEHOLDER = "{document}";
     public static final String CLAIM_PLACEHOLDER = "{claim}";

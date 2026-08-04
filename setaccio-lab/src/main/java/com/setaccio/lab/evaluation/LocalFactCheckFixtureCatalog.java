@@ -17,6 +17,8 @@ public final class LocalFactCheckFixtureCatalog {
 
     public static final String ID = "local-fact-check-fixtures";
     public static final String VERSION = "1";
+    public static final String SHA256 =
+            "077d63fe5af596454127babf809075ebc61857cb5e1694c4fae1e58c0d844dac";
     public static final String RESOURCE_PATH = "evaluation/local-fact-check-fixtures-v1.json";
     public static final int FIXTURE_COUNT = 6;
     public static final int PAIR_COUNT = 3;

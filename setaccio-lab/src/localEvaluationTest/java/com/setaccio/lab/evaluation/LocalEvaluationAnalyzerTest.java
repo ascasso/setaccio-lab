@@ -2,6 +2,7 @@ package com.setaccio.lab.evaluation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.setaccio.lab.evidence.EvidenceCodeBaseline;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,8 +79,10 @@ class LocalEvaluationAnalyzerTest {
                 result,
                 analysis,
                 LocalEvaluationProtocol.RAW_FILENAME,
-                "b".repeat(64));
+                "b".repeat(64),
+                new EvidenceCodeBaseline("a".repeat(40), true));
         assertThat(report)
+                .contains("Evidence status: `diagnostic/non-final (dirty working tree)`")
                 .contains("## Expected-verdict agreement")
                 .contains("## Repetition consistency")
                 .contains("Repetition disagreement: 1 fixture(s)")
@@ -93,6 +96,14 @@ class LocalEvaluationAnalyzerTest {
                 .contains("Timeout: 1")
                 .contains("Provider failure: 1")
                 .contains("does not isolate or claim an order effect");
+
+        String cleanReport = new LocalEvaluationReport().render(
+                result,
+                analysis,
+                LocalEvaluationProtocol.RAW_FILENAME,
+                "b".repeat(64),
+                new EvidenceCodeBaseline("a".repeat(40), false));
+        assertThat(cleanReport).contains("Evidence status: `clean-baseline candidate`");
     }
 
     @Test

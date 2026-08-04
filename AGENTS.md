@@ -207,8 +207,11 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   expectation agreement, and classified failures. A suite-specific offline
   lifecycle now locks the counterbalanced twelve-row schedule, BLAKE3
   document/claim identities, prompt/catalog/review/model identity, shared v1
-  manifest, deterministic summary, and standalone verify/reanalyze tasks. No
-  live runner, model lookup, output allocation, or provider call exists yet;
+  manifest, deterministic summary, and standalone verify/reanalyze tasks. One
+  explicitly invoked `localEvaluation` host-Ollama runner now validates a
+  loopback URL, locked contract, installed full model digest, option bounds,
+  and fresh dated output before allocation, then executes twelve sequential
+  one-attempt/no-pull rows. It is not attached to the default lifecycle;
   `RelevancyEvaluator` waits for a real retrieval flow.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - A clean controlled Tool Search refresh completed from commit `08f1cb5` across
@@ -342,14 +345,17 @@ Completed:
   twelve-row schedule, BLAKE3 document/claim identities, shared v1 manifest,
   deterministic summary, strict offline verification/reanalysis, and no live
   model behavior.
+- Add the explicit host-Ollama fact-check runner with pre-allocation contract,
+  option, loopback, installed-model/digest, and output checks; locked
+  sequential one-attempt execution; provider-free tests; and no default
+  lifecycle attachment.
 
 Pending:
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- Implement the opt-in local fact-check runner and controlled run in later
-  authorized slices; keep the live judge explicit, local, no-pull, and outside
-  the default lifecycle.
+- Perform the controlled local fact-check run in a later authorized slice;
+  keep the judge explicit, local, no-pull, and outside the default lifecycle.
 - Keep container-backed work isolated in `setaccio-testcontainers`.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 
@@ -406,6 +412,19 @@ Rules:
 - Store live outputs only under ignored build directories.
 - Keep AI-judged evaluator tests and Testcontainers-backed tests opt-in.
 
+### Local Fact-Check Evaluation Tests
+
+- Keep `localEvaluationTest`, `localEvaluationVerify`, and
+  `localEvaluationReanalyze` provider-free.
+- Cover every required runner option and preflight failure before output
+  allocation, including contract drift, non-loopback endpoints, model identity,
+  and reused output.
+- Prove the executor makes exactly twelve calls in locked sequential order,
+  uses one attempt per row, and retains classified failed rows without
+  selective retries or replacement.
+- Keep `localEvaluation` outside `test`, `check`, `build`, application startup,
+  and CI.
+
 ### Later Test Phases
 
 Text benchmark phase:
@@ -425,10 +444,10 @@ Provider/model-type phase:
 
 Evaluation/Testcontainers phase:
 
-- First future slice: opt-in host-Ollama fact-checking over balanced tracked
-  claim/context fixtures, with a versioned prompt, explicit installed judge and
-  full digest, two seeded repetitions, failure classification, and offline
-  evidence verification.
+- Use the implemented opt-in host-Ollama fact-check runner for the separately
+  authorized controlled run over the balanced tracked claim/context fixtures;
+  preserve the explicit installed judge/full digest, two seeded repetitions,
+  failure classification, and offline evidence verification.
 - Later retrieval slice: relevancy evaluation only when a real retrieval flow
   supplies preserved context.
 - Separate optional container slice: typed Ollama service connection and model

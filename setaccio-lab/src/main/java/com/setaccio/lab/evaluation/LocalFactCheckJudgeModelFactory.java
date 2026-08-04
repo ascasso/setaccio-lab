@@ -36,6 +36,15 @@ public final class LocalFactCheckJudgeModelFactory {
         return create(ollamaApiFactory.create(baseUrl, settings.timeout()), settings);
     }
 
+    public OllamaApi createApi(String baseUrl, Duration timeout) {
+        requireLoopbackBaseUrl(baseUrl);
+        Objects.requireNonNull(timeout, "timeout must not be null");
+        if (timeout.isZero() || timeout.isNegative()) {
+            throw new IllegalArgumentException("timeout must be positive");
+        }
+        return ollamaApiFactory.create(baseUrl, timeout);
+    }
+
     ChatModel create(OllamaApi ollamaApi, LocalFactCheckJudgeSettings settings) {
         Objects.requireNonNull(ollamaApi, "ollamaApi must not be null");
         Objects.requireNonNull(settings, "settings must not be null");
@@ -70,7 +79,7 @@ public final class LocalFactCheckJudgeModelFactory {
                 .build();
     }
 
-    private static void requireLoopbackBaseUrl(String baseUrl) {
+    public static void requireLoopbackBaseUrl(String baseUrl) {
         if (baseUrl == null || baseUrl.isBlank()) {
             throw new IllegalArgumentException("baseUrl must not be blank");
         }
@@ -85,8 +94,12 @@ public final class LocalFactCheckJudgeModelFactory {
         }
         String scheme = uri.getScheme();
         String host = uri.getHost();
+        String path = uri.getPath();
         if (scheme == null || host == null
                 || uri.getUserInfo() != null
+                || uri.getQuery() != null
+                || uri.getFragment() != null
+                || (path != null && !path.isEmpty() && !"/".equals(path))
                 || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))
                 || !isLoopbackHost(host)) {
             throw new IllegalArgumentException("baseUrl must be a loopback HTTP URL");
@@ -95,6 +108,9 @@ public final class LocalFactCheckJudgeModelFactory {
 
     private static boolean isLoopbackHost(String host) {
         String normalized = host.toLowerCase(Locale.ROOT);
+        if (normalized.startsWith("[") && normalized.endsWith("]")) {
+            normalized = normalized.substring(1, normalized.length() - 1);
+        }
         return normalized.equals("localhost")
                 || normalized.equals("::1")
                 || isIpv4Loopback(normalized);

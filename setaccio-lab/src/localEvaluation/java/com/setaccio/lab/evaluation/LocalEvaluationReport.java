@@ -1,5 +1,6 @@
 package com.setaccio.lab.evaluation;
 
+import com.setaccio.lab.evidence.EvidenceCodeBaseline;
 import java.util.Locale;
 
 final class LocalEvaluationReport {
@@ -8,7 +9,8 @@ final class LocalEvaluationReport {
             LocalEvaluationResult result,
             LocalEvaluationAnalyzer.MatrixAnalysis analysis,
             String rawFile,
-            String rawSha256
+            String rawSha256,
+            EvidenceCodeBaseline codeBaseline
     ) {
         StringBuilder out = new StringBuilder();
         LocalEvaluationRunSettings settings = result.runSettings();
@@ -17,6 +19,12 @@ final class LocalEvaluationReport {
         out.append("# Local Fact-Check Evaluation\n\n");
         out.append("- Raw result: `").append(rawFile).append("`\n");
         out.append("- Raw SHA-256: `").append(rawSha256).append("`\n");
+        out.append("- Git commit: `").append(codeBaseline.gitCommit()).append("`\n");
+        out.append("- Evidence status: `")
+                .append(codeBaseline.workingTreeDirty()
+                        ? "diagnostic/non-final (dirty working tree)"
+                        : "clean-baseline candidate")
+                .append("`\n");
         out.append("- Protocol version: `").append(result.protocolVersion()).append("`\n");
         out.append("- Protocol: 6 fixtures × 2 repetitions = 12 sequential rows.\n");
         out.append("- Judge: requested `").append(model.requestedModel())
