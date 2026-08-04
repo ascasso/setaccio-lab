@@ -2,7 +2,8 @@
 
 This file is the repo-local guide for Codex, Claude Code, and other AI agents working in this repository. Follow it unless the user gives a direct conflicting instruction or a higher-priority system rule applies. When in doubt, preserve the public/private boundary, do less, and ask.
 
-Do not stage, commit, or push unless explicitly asked.
+Commit every completed, in-scope change after appropriate verification. Do not
+push unless the user explicitly asks.
 
 Read and follow the repository's `.gitignore` before creating, inspecting, or
 including files. Treat its rules as authoritative for generated outputs,
@@ -17,7 +18,8 @@ untracked; do not bypass or weaken those rules without explicit instruction.
 - Never add credentials, tokens, API keys, or private endpoint details to tracked files.
 - Never add Docker or Testcontainers dependencies to `setaccio-lab`; keep them in `setaccio-testcontainers`.
 - Never make `setaccio-lab` depend on `setaccio-testcontainers`.
-- Never stage, commit, or push without explicit user instruction.
+- Never push without explicit user instruction. Commit every completed,
+  in-scope change after appropriate verification.
 
 ## Repository Purpose
 
@@ -131,7 +133,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-02)
+## Current State Snapshot (as of 2026-08-03)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -194,14 +196,43 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
   calling a model provider and remains distinct from future AI-judged
-  evaluation. The first AI-judged contract slice is implemented offline: one
-  versioned fact-check prompt, three repository-authored document pairs with
+  evaluation. The first three AI-judged contract slices are implemented
+  offline: one versioned fact-check prompt, three repository-authored document pairs with
   balanced supported/unsupported claims, and an actual-human confirmation
-  record bound to the exact fixture-catalog digest. No live judge boundary,
-  runner, evidence lifecycle, or provider call exists yet. The later matrix
-  still requires an explicit installed judge model, full digest, two
-  repetitions, and offline-verifiable evidence; `RelevancyEvaluator` waits for
-  a real retrieval flow.
+  record bound to the exact fixture-catalog digest. A dedicated plain Java
+  recording judge boundary now wraps Spring AI's unchanged
+  `FactCheckingEvaluator`: it requires complete explicit Ollama settings and a
+  loopback endpoint, forces no-pull/one-attempt behavior, and records raw
+  response, metadata, available usage, latency, normalized verdict,
+  expectation agreement, and classified failures. A suite-specific offline
+  lifecycle now locks the counterbalanced twelve-row schedule, BLAKE3
+  document/claim identities, prompt/catalog/review/model identity, shared v1
+  manifest, deterministic summary, and standalone verify/reanalyze tasks. One
+  explicitly invoked `localEvaluation` host-Ollama runner now validates a
+  loopback URL, locked contract, installed full model digest, option bounds,
+  and fresh dated output before allocation, then executes twelve sequential
+  one-attempt/no-pull rows. It is not attached to the default lifecycle;
+  `RelevancyEvaluator` waits for a real retrieval flow.
+- One clean-baseline controlled fact-check run completed from commit `5d41362`
+  with explicit judge `gemma4:e2b`, full digest
+  `7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`,
+  token limit `64`, timeout `PT2M`, and the locked twelve-row schedule. All 12
+  one-attempt invocations completed with full usage metadata and no model,
+  timeout, or provider failure. Ten rows had empty judge output and two
+  unsupported rows returned valid matching `no` verdicts; there were no valid
+  mismatches. The ignored evidence verified and reanalyzed byte-for-byte
+  offline. No selective retry, replacement row, model pull, or raw-output
+  publication occurred.
+- Slice A6 closed the cycle by interpreting only that immutable evidence.
+  Supported agreement was not measurable because all six supported rows were
+  empty; two of six planned unsupported rows were evaluable and both agreed,
+  while the other four were empty. One fixture had two valid consistent
+  verdicts and five repetition comparisons were incomplete. All ten empty
+  responses reached the explicit `64`-token output limit, while both valid
+  responses used two completion tokens. This registers a later separately
+  designed output-budget compatibility hypothesis without claiming causation,
+  statistical reliability, general factuality, verdict-label tendency, or a
+  judge ranking. No A5 row was rerun or replaced.
 - Public-safe tool cases cover arithmetic, fixed time, catalog lookup, multi-step execution, no-match behavior, abstention, and deterministic callback failure.
 - A clean controlled Tool Search refresh completed from commit `08f1cb5` across
   the locked three-model, five-case, two-repetition paired protocol. Offline
@@ -211,7 +242,10 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   provider is selected from this result alone.
 - `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix and sequential vision matrix use the shared v1 manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
-- `setaccio-testcontainers` remains an optional skeleton for future container-backed integration tests.
+- `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
+  fact-check container path because provisioning would not answer the observed
+  verdict-yield question; any later container work must remain a separate,
+  explicitly justified opt-in slice.
 
 ## Versioning Policy
 
@@ -326,16 +360,42 @@ Completed:
 - Add the versioned local fact-check prompt, balanced six-fixture catalog, and
   exact-digest actual-human confirmation record with deterministic offline
   contract tests and no live model behavior.
+- Add the dedicated fact-check recording judge boundary with explicit Ollama
+  options, loopback/no-pull/one-attempt policy, raw-response and usage capture,
+  strict verdict normalization, classified failures, and provider-free mocked
+  tests.
+- Add the suite-specific offline fact-check evidence lifecycle with a locked
+  twelve-row schedule, BLAKE3 document/claim identities, shared v1 manifest,
+  deterministic summary, strict offline verification/reanalysis, and no live
+  model behavior.
+- Add the explicit host-Ollama fact-check runner with pre-allocation contract,
+  option, loopback, installed-model/digest, and output checks; locked
+  sequential one-attempt execution; provider-free tests; and no default
+  lifecycle attachment.
+- Complete one clean-baseline controlled local fact-check run with twelve
+  preserved attempts, immutable judge/contract/code identities, offline
+  verification and byte-identical reanalysis, and aggregate-only public-safe
+  closeout.
+- Complete the bounded Slice A6 interpretation without treating two
+  repetitions as statistical reliability, claiming an order effect or general
+  factuality, ranking judges, or rerunning/replacing A5 rows; record the narrow
+  follow-up hypothesis and defer Testcontainers for this cycle.
 
 Pending:
 
+The tracked [deferred-work index](docs/DEFERRED-WORK.md) is the canonical
+public-safe list of deferred scope, start gates, and non-authorization
+boundaries. Keep it aligned with this section, the environment guide, test
+plan, changelog, and dated log when the status of a deferred item changes.
+
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- Implement the dedicated judge invocation boundary, offline evidence
-  lifecycle, and opt-in local fact-checking runner in later authorized slices;
-  keep the live judge explicit, local, no-pull, and outside the default
-  lifecycle.
-- Keep container-backed work isolated in `setaccio-testcontainers`.
+- If separately authorized, design a new output-budget compatibility
+  experiment that changes only the explicit positive token limit and writes a
+  new evidence directory; do not treat it as a retry or correction of A5.
+- Keep any later container-backed work isolated in `setaccio-testcontainers`
+  and justify it with a provisioning or service-connection question distinct
+  from the completed host-Ollama fact-check cycle.
 - Add tests before expanding into additional model types, providers, tools, or MCP.
 
 ## Test Direction
@@ -391,6 +451,19 @@ Rules:
 - Store live outputs only under ignored build directories.
 - Keep AI-judged evaluator tests and Testcontainers-backed tests opt-in.
 
+### Local Fact-Check Evaluation Tests
+
+- Keep `localEvaluationTest`, `localEvaluationVerify`, and
+  `localEvaluationReanalyze` provider-free.
+- Cover every required runner option and preflight failure before output
+  allocation, including contract drift, non-loopback endpoints, model identity,
+  and reused output.
+- Prove the executor makes exactly twelve calls in locked sequential order,
+  uses one attempt per row, and retains classified failed rows without
+  selective retries or replacement.
+- Keep `localEvaluation` outside `test`, `check`, `build`, application startup,
+  and CI.
+
 ### Later Test Phases
 
 Text benchmark phase:
@@ -410,15 +483,16 @@ Provider/model-type phase:
 
 Evaluation/Testcontainers phase:
 
-- First future slice: opt-in host-Ollama fact-checking over balanced tracked
-  claim/context fixtures, with a versioned prompt, explicit installed judge and
-  full digest, two seeded repetitions, failure classification, and offline
-  evidence verification.
+- If separately authorized, test the registered output-budget compatibility
+  hypothesis as a new run while preserving the immutable judge digest,
+  prompt, fixtures, row order, temperature, seeds, one-attempt policy, no-pull
+  behavior, failure classification, and offline evidence verification.
 - Later retrieval slice: relevancy evaluation only when a real retrieval flow
   supplies preserved context.
-- Separate optional container slice: typed Ollama service connection and model
-  provisioning isolated in `setaccio-testcontainers`, never in the normal
-  build lifecycle.
+- Testcontainers is deferred for the completed fact-check cycle. A later
+  optional typed Ollama service-connection/model-provisioning slice must be
+  independently justified, isolated in `setaccio-testcontainers`, and never
+  enter the normal build lifecycle.
 
 Tool-calling phase:
 
@@ -439,6 +513,7 @@ MCP phase:
 ```bash
 ./gradlew :setaccio-core:test
 ./gradlew :setaccio-lab:test
+./gradlew :setaccio-lab:localEvaluationTest
 ./gradlew :setaccio-lab:visionMatrixTest
 ./gradlew :setaccio-testcontainers:test
 ./gradlew :setaccio-core:build
@@ -458,7 +533,9 @@ The lab app uses port `8082`.
 
 ## Git Workflow
 
-Do not stage, commit, or push unless explicitly asked. Leave changes unstaged by default, then report the modified files, tests run, and what would be committed if requested.
+Commit every completed, in-scope change after appropriate verification. Keep
+unrelated user changes unstaged and uncommitted. Do not push unless the user
+explicitly asks; report the modified files and tests run with each commit.
 
 Standing closeout instruction for workflow-guidance corrections:
 

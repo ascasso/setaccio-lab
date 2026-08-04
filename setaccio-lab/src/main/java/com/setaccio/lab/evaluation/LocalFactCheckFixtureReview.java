@@ -17,6 +17,8 @@ public final class LocalFactCheckFixtureReview {
     public static final String ID = "local-fact-check-fixture-review";
     public static final String VERSION = "1";
     public static final String STATUS = "confirmed";
+    public static final String SHA256 =
+            "55a5c452dd58a6dddf9d9012cdfb68e50a127226fd49abfaa30597d5e8310161";
     public static final String RESOURCE_PATH = "evaluation/local-fact-check-fixture-review-v1.json";
 
     private final String catalogId;

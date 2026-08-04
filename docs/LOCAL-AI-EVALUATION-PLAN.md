@@ -1,14 +1,18 @@
 # Local AI-Judged Evaluation Plan
 
-Status: Slice A1 implemented and actual-human fixture confirmation recorded on
-2026-08-02. Live invocation, evidence, runner, and controlled-run slices remain
-pending. The framework plan was reviewed against Spring AI `2.0.0` and Spring
-Boot `4.1.0` on 2026-07-27.
+Status: Slices A1 through A6 completed. Actual-human fixture confirmation was
+recorded on 2026-08-02; the dedicated recording judge boundary and offline
+evidence lifecycle plus the opt-in host-Ollama runner were added on 2026-08-03.
+The controlled local run and bounded interpretation completed on 2026-08-03.
+The framework contract was re-checked against Spring AI `2.0.0` and Spring
+Boot `4.1.0` during A2 implementation.
 
-This plan defines one bounded local fact-checking cycle. Slice A1 adds only a
-tracked offline prompt/fixture/review contract. It does not add a live judge,
-change the deterministic evaluation endpoint, start Docker, pull a model, or
-add a dependency.
+This plan records one completed bounded local fact-checking cycle. Slices A1
+through A6 added a tracked offline prompt/fixture/review contract, a mockable
+recording judge boundary, offline-verifiable evidence, one explicit
+host-Ollama runner, one controlled execution, and a bounded interpretation.
+They did not change the deterministic evaluation endpoint, start Docker, pull
+a model, attach live execution to a default lifecycle, or add a dependency.
 
 ## Current Baseline
 
@@ -18,6 +22,11 @@ add a dependency.
   feedback, metadata, invocation success, and errors, but its `passed` field
   currently means the deterministic evaluator's verdict. A live slice must not
   reuse that field as if it meant agreement with a known expected result.
+- The A2 boundary builds Spring AI's unchanged `FactCheckingEvaluator` around a
+  request-scoped recording `ChatModel`. Its dedicated Ollama factory requires
+  an explicit loopback URL and complete generation settings, forces pull
+  strategy `never`, applies connect/read timeout, and configures one attempt
+  with no hidden Spring AI retry.
 - `setaccio-testcontainers` already declares
   `spring-ai-spring-boot-testcontainers` in test scope. It has no
   `OllamaContainer`, Docker task, or model-provisioning path, and normal tests
@@ -45,6 +54,106 @@ add a dependency.
   incomplete, or digest-mismatched review records. No live model or provider
   is involved.
 
+## Implemented Slice A2 Boundary
+
+- `LocalFactCheckJudgeSettings` requires an explicit model, temperature, seed,
+  positive token limit, positive timeout, and exactly one attempt. It has no
+  application or environment-derived defaults.
+- `LocalFactCheckJudgeModelFactory` constructs a dedicated Ollama chat model
+  from an explicit loopback base URL, propagates the full generation options,
+  uses pull strategy `never`, applies the same timeout to connection/read
+  handling, and disables Spring AI retries.
+- `LocalFactCheckJudgeBoundary` creates a fresh recording model for each
+  fixture, passes its `ChatClient.Builder` plus the tracked prompt to Spring
+  AI's unmodified `FactCheckingEvaluator`, and captures the response before the
+  evaluator reduces it to a boolean.
+- The result separates provider invocation success, Spring evaluator boolean,
+  normalized judge verdict, human-confirmed expectation agreement, raw output,
+  effective response metadata, token usage when available, latency, attempt
+  count, and diagnostic category. Only trimmed case-insensitive exact `yes` and
+  `no` become verdicts; empty and malformed output remain separate failures.
+- Mocked default-lifecycle tests cover both locked repetition seeds, valid
+  verdicts, expectation mismatch, empty/malformed output, metadata and usage,
+  absent usage, unavailable model, timeout, provider failure, explicit timeout
+  propagation, and one-attempt enforcement without contacting Ollama.
+- No Spring bean selects or starts this judge. A4 supplies it only through the
+  separately invoked opt-in runner.
+
+## Implemented Slice A3 Evidence Lifecycle
+
+- `LocalEvaluationProtocol` locks protocol version `1`, twelve sequential rows,
+  temperature `0.0`, seeds `42` and `43`, positive explicit token/timeout
+  values, exactly one attempt, and pull strategy `never`. Supported then
+  unsupported order within each pair is reversed for repetition two; because
+  seed and repetition change too, the report makes no order-effect claim.
+- Saved rows retain fixture/pair IDs, BLAKE3 document and claim identities,
+  expected verdict, requested and normalized installed judge identity with a
+  full digest, raw response, response metadata, usage when available, latency,
+  attempt count, Spring evaluator boolean, normalized verdict, expectation
+  agreement, and diagnostic category without copying fixture text.
+- The evidence writer produces `local-evaluation-results.json`, the shared v1
+  `manifest.json` with SHA-256 artifact descriptors plus Git/framework
+  provenance, and a deterministic `SUMMARY.md` under a caller-provided fresh
+  run directory.
+- `localEvaluationVerify` and `localEvaluationReanalyze` are standalone offline
+  tasks. They do not start Spring or contact Ollama, and they are not attached
+  to `test`, `check`, `build`, application startup, or CI.
+- Offline tests reject raw/summary tampering, missing or extra artifacts,
+  unsafe paths, manifest/contract/model drift, wrong schedule or row count,
+  invalid attempts, unclassified or incoherent outcomes, partial usage, unsafe
+  metadata, and summary drift. Reanalysis replaces only a regenerable summary
+  after immutable raw evidence and its manifest descriptor pass inspection.
+- No live task is attached to the default lifecycle; the A4 runner remains the
+  sole explicit judge entry point.
+
+## Implemented Slice A4 Host-Ollama Runner
+
+- `:setaccio-lab:localEvaluation` requires an explicit loopback URL, installed
+  judge tag, positive token limit, ISO-8601 timeout up to ten minutes, and a
+  new dated child of ignored `build/evaluation-matrix/`.
+- Preflight locks the A1 prompt/catalog/review digests and confirmed fixture
+  order, validates every option and output path, and resolves the requested
+  installed tag to its normalized name and full immutable Ollama digest before
+  allocating output.
+- The runner reuses the A2 factory/boundary and A3 protocol/evidence layer. It
+  makes exactly twelve sequential one-attempt calls, uses temperature `0.0`
+  and seeds `42`/`43`, forces pull strategy `never`, and preserves classified
+  failures as rows.
+- Provider-free tests cover all option/preflight failures and exact execution
+  order without Ollama. Gradle task help documents the local/no-pull boundary;
+  `test`, `check`, `build`, startup, and CI remain judge-free.
+- Git provenance is captured once before output allocation and execution, then
+  reused for the summary and manifest. A dirty worktree is
+  labeled `diagnostic/non-final` in `SUMMARY.md`, not treated silently as a
+  controlled baseline.
+
+## Completed Slice A5 Controlled Local Run
+
+- The single authorized run used clean commit
+  `5d41362cc73e0f95eaf740602ac8a5d47e80a830`, explicit installed judge
+  `gemma4:e2b`, full digest
+  `7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`,
+  token limit `64`, timeout `PT2M`, temperature `0.0`, seeds `42`/`43`, and
+  ignored output ID `2026-08-03-gemma4-e2b-a5`.
+- The protocol produced all twelve ordered rows and exactly twelve recorded
+  attempts. Every provider invocation completed and every row retained prompt,
+  completion, and total usage metadata; no model-unavailable, timeout, or
+  provider failure occurred.
+- Ten rows had empty raw judge output. Two unsupported rows produced valid
+  `no` verdicts that matched the human-confirmed expectations. There were no
+  valid expectation mismatches or malformed verdicts. The result contained two
+  normalized unsupported/`no` verdicts in total, one fixture with consistent
+  normalized verdicts, and five fixtures with incomplete two-repetition
+  comparison.
+- The shared manifest binds the clean Git baseline, Spring Boot `4.1.0`, Spring
+  AI `2.0.0`, prompt/catalog/review identities, judge identity, settings, and
+  artifact digests. Standalone verification passed; reanalysis reproduced the
+  same `SUMMARY.md` SHA-256
+  `6739810900203ef4f6aead1dc00e98a55de0b7e1db19fb0967d19e06e9e8f90e`.
+- No selective retry, replacement row, second protocol run, model pull, remote
+  provider, credential, Docker/Testcontainers runtime, or publication of raw
+  ignored evidence occurred.
+
 The upstream API review confirmed:
 
 - Spring AI's [`Evaluator` contract and evaluation request model](https://docs.spring.io/spring-ai/reference/api/testing.html)
@@ -59,10 +168,9 @@ The upstream API review confirmed:
 - The pinned implementation normalizes only exact `yes` as a passing verdict
   and returns empty feedback/metadata. It does not expose the raw judge text or
   token usage, and it makes a valid `no` indistinguishable from malformed text
-  through `EvaluationResponse` alone. The future slice therefore needs a
+  through `EvaluationResponse` alone. A2 addresses that limitation with a
   narrow request-scoped recording boundary around the dedicated judge model;
-  it should not fork or copy Spring AI's evaluator implementation merely to
-  obtain evidence.
+  it does not fork or copy Spring AI's evaluator implementation.
 - Spring AI `2.0.0` documents an
   [`OllamaContainer` service connection](https://docs.spring.io/spring-ai/reference/api/testcontainers.html),
   while Spring Boot documents that
@@ -71,46 +179,55 @@ The upstream API review confirmed:
   support explicit model, temperature, seed, and token settings, and the pull
   strategy can remain `never`.
 
-## Recommendation
+## Completed Slice A6 Bounded Interpretation
 
-Implement a host-Ollama fact-checking matrix first. Do not combine that slice
-with RAG, `RelevancyEvaluator`, or Testcontainers.
+A6 analyzed only the preserved A5 evidence. It made no model call, did not
+rerun or replace a row, and left the ignored raw evidence unchanged.
 
-The first live slice should:
+- Supported agreement is not measurable from this run: none of the six
+  planned supported rows produced a valid normalized verdict; all six were
+  empty.
+- Two of the six planned unsupported rows produced valid `no` verdicts and
+  both agreed with the human-confirmed expectation. The other four were empty,
+  so this is two agreements among two evaluable unsupported rows, not a
+  general unsupported-claim accuracy rate.
+- One of six fixtures had two valid, consistent verdicts. Five repetition
+  comparisons were incomplete and there were no observed disagreements. Two
+  repetitions do not establish statistical reliability.
+- The only valid normalized outputs were two `no` verdicts; there were no
+  valid `yes` verdicts. Because ten rows had no verdict, this does not establish
+  an always-`no` or other label tendency.
+- Ten responses were empty and none were malformed. All ten empty responses
+  recorded `64` completion tokens, equal to the explicit output-token limit;
+  both valid responses recorded two completion tokens. This is a descriptive
+  association, not proof that the limit or model reasoning behavior caused the
+  empty output.
+- All twelve provider invocations completed in one attempt with complete usage
+  metadata. There were no model-unavailable, timeout, provider, or other
+  infrastructure failures. Median latency was `1073.5 ms`, with an observed
+  range of `442–6545 ms`.
 
-1. Add one explicitly invoked `:setaccio-lab:localEvaluation` task that calls
-   an already-running local Ollama service.
-2. Require `--judge-model`, `--max-tokens`, and a new dated `--output-dir`.
-   Do not inherit `OLLAMA_MODEL`, choose a default judge, treat a mutable tag as
-   the model identity, or fall back to the application chat model silently.
-3. Resolve the requested installed model to its normalized name and full
-   immutable Ollama digest before allocating output. Keep
-   `spring.ai.ollama.init.pull-model-strategy=never`.
-4. Build a dedicated judge `OllamaChatModel` / `ChatClient.Builder` with the
-   complete locked options rather than partially overriding the application's
-   generation model. Wrap that model per invocation so the evidence row can
-   retain the raw response and usage metadata before `FactCheckingEvaluator`
-   reduces it to a boolean result.
-5. Run only `FactCheckingEvaluator` against a small tracked, public-safe,
-   balanced claim/context fixture cohort.
+The contract merits one later, separately authorized and pre-registered
+output-budget compatibility hypothesis: test whether a larger explicit
+positive output-token limit increases exact `yes`/`no` verdict yield for the
+same immutable judge digest while keeping the prompt, fixtures, row order,
+temperature, seeds, one-attempt policy, and no-pull behavior fixed. That would
+be a new experiment with a new evidence directory, not a retry or correction
+of A5. A6 does not authorize or execute it.
 
-`RelevancyEvaluator` should remain deferred until the lab has a real retrieval
-flow and saved retrieved documents. Treating ordinary fixture context as RAG
-evidence would create the appearance of retrieval evaluation without testing
-retrieval.
-
-Containerizing Ollama would test environment provisioning and service
-connection wiring, not the fact-checking hypothesis. It should therefore be a
-separate later slice, justified only after the host-Ollama contract is useful.
-
-The controlled run must remain cost-free and local in the same sense as the
-other lab matrices: no provider credential, paid API, public network request,
-or automatic model download; an already-installed model served by local
-Ollama; and ignored local evidence only. The runner should require a loopback
-Ollama endpoint for this first slice and record only the neutral category
-`local`, never the URL or host name.
+Testcontainers disposition for this cycle: **defer**. Host-Ollama execution,
+provenance, and offline verification worked; containerization would test model
+provisioning and service-connection wiring, not the observed verdict-yield
+question. No container code or dependency is added. `RelevancyEvaluator`
+also remains deferred until a real retrieval flow preserves retrieved
+documents. Release and tag decisions remain deferred.
 
 ## Future Evaluation Contract
+
+The completed August closeout and every intentionally deferred follow-up are
+indexed in [DEFERRED-WORK.md](DEFERRED-WORK.md). The historical contract detail
+below does not authorize a new experiment, provider, container, release, or
+tag.
 
 ### Rubric and fixtures
 
@@ -179,7 +296,7 @@ Model-behavior diagnostics, not infrastructure failures:
 - `repetition_inconsistent`: two valid repetitions disagree;
 - `label_skew`: the bounded cohort reveals an always-yes or always-no tendency.
 
-## Acceptance Criteria for the Future Live Slice
+## Acceptance Criteria for the Controlled Live Slice (Completed)
 
 - Default `test`, `check`, `build`, application startup, and CI make no judge
   call and need no running Ollama instance.

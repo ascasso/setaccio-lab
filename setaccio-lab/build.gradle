@@ -7,6 +7,8 @@ plugins {
 import com.setaccio.gradle.ToolSearchSmokeTask
 import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 import com.setaccio.gradle.ToolSearchMatrixOfflineTask
+import com.setaccio.gradle.LocalEvaluationOfflineTask
+import com.setaccio.gradle.LocalEvaluationTask
 import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
 import com.setaccio.gradle.VisionMatrixComparisonTask
@@ -71,6 +73,16 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.visionMatrix.output
         runtimeClasspath += output + compileClasspath
     }
+    localEvaluation {
+        java.srcDir 'src/localEvaluation/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    localEvaluationTest {
+        java.srcDir 'src/localEvaluationTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.localEvaluation.output
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
 configurations {
@@ -82,6 +94,50 @@ configurations {
     visionMatrixRuntimeOnly.extendsFrom runtimeOnly
     visionMatrixTestImplementation.extendsFrom testImplementation, visionMatrixImplementation
     visionMatrixTestRuntimeOnly.extendsFrom testRuntimeOnly, visionMatrixRuntimeOnly
+    localEvaluationImplementation.extendsFrom implementation
+    localEvaluationRuntimeOnly.extendsFrom runtimeOnly
+    localEvaluationTestImplementation.extendsFrom testImplementation, localEvaluationImplementation
+    localEvaluationTestRuntimeOnly.extendsFrom testRuntimeOnly, localEvaluationRuntimeOnly
+}
+
+tasks.register('localEvaluationVerify', LocalEvaluationOfflineTask) {
+    description = 'Verifies saved local fact-check evidence without starting Spring or calling a model provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    classpath.from(sourceSets.localEvaluation.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluation', LocalEvaluationTask) {
+    dependsOn tasks.named('localEvaluationClasses')
+    classpath.from(sourceSets.localEvaluation.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationReanalyze', LocalEvaluationOfflineTask) {
+    description = 'Regenerates and verifies a saved local fact-check summary without starting Spring or calling a model provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    classpath.from(sourceSets.localEvaluation.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationTest', Test) {
+    description = 'Runs offline tests for the local fact-check evidence lifecycle.'
+    group = 'verification'
+    testClassesDirs = sourceSets.localEvaluationTest.output.classesDirs
+    classpath = sourceSets.localEvaluationTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
 }
 
 tasks.register('toolSearchSmoke', ToolSearchSmokeTask) {

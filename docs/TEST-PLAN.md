@@ -1,5 +1,10 @@
 # Test Plan
 
+The tracked [deferred-work index](DEFERRED-WORK.md) defines the start gates for
+future providers, retrieval, Testcontainers, model types, and MCP work. A
+future item does not enter default tests or CI merely because it appears in a
+plan or environment table.
+
 ## Near Term
 
 - Keep `setaccio-core` Spring-free with a dependency check that fails if Spring Framework or Spring Boot appears on the core runtime classpath.
@@ -141,9 +146,9 @@
   catalog ID, version, SHA-256, confirmation date, and all six fixture IDs in
   catalog order. Reject pending, incomplete, or digest-mismatched records in
   offline tests before a future runner can consume them.
-- Implement `FactCheckingEvaluator` first, if live AI judging is authorized,
-  against a balanced public claim/context fixture cohort and an explicitly
-  selected already-installed host-Ollama judge. Follow
+- Maintain the implemented `FactCheckingEvaluator` recording boundary against
+  the balanced public claim/context fixture cohort and an explicitly selected
+  host-Ollama judge. Keep live execution separately authorized. Follow
   [`docs/LOCAL-AI-EVALUATION-PLAN.md`](LOCAL-AI-EVALUATION-PLAN.md).
 - Defer `RelevancyEvaluator` until a real retrieval flow can supply and preserve
   retrieved documents; ordinary fixture context is not a RAG benchmark.
@@ -154,9 +159,36 @@
   text or usage metadata, capture the dedicated judge model response through a
   narrow request-scoped recording boundary before evaluator normalization.
   Do not duplicate the evaluator implementation to obtain that evidence.
+- Require the dedicated boundary to propagate explicit model, temperature,
+  seed, token limit, timeout, and exactly-one-attempt policy on every call.
+  Keep pull strategy `never`, reject non-loopback endpoints, and never inherit
+  the judge from `OLLAMA_MODEL` or another application default.
+- Keep mocked coverage for exact `yes` / `no` verdicts, empty and malformed
+  output, expectation mismatch, unavailable model, timeout, provider failure,
+  response metadata, available/absent token usage, latency, attempt count, both
+  repetition seeds, timeout propagation, and hidden-retry prevention.
 - Require prompt ID/version/digest, full judge-model digest, complete generation
   settings, two seeded repetitions, balanced supported/unsupported fixtures,
   explicit execution order, and shared-manifest offline verification.
+- Keep `localEvaluationTest` provider-free. Require exact counterbalanced row
+  order, BLAKE3 document/claim identities, separate evaluator/verdict/agreement
+  signals, exhaustive diagnostic coherence, usage/latency/attempt validation,
+  and public-safe metadata/error persistence.
+- Require `localEvaluationVerify` and `localEvaluationReanalyze` to remain
+  standalone and offline. Reject raw/summary tampering, missing or extra
+  artifacts, unsafe paths, prompt/catalog/review/model drift, row order/count
+  drift, invalid attempts, unclassified failures, and deterministic summary
+  drift without starting Spring or contacting Ollama.
+- Keep the `localEvaluation` runner opt-in and outside `test`, `check`, `build`,
+  application startup, and CI. Provider-free tests must reject every missing
+  option, unknown/duplicate options, non-loopback or structured endpoints,
+  invalid token/timeout bounds, unsafe/reused output paths, absent/unconfirmed
+  or digest-drifted contracts, missing models, incomplete digests, and
+  mismatched resolved names before output allocation.
+- Test the executor with a fake judge session: exactly twelve calls in locked
+  sequential order, seeds `42`/`43`, one attempt per row, no replacement call,
+  and retention of classified failed attempts. Never start Ollama in these
+  tests.
 - Keep evaluator models configurable and separate from the model being tested;
   record and flag identical full digests if a later benchmark self-evaluates.
 - Keep deterministic fixture-based assertions for default tests. AI-judged evaluator tests must be opt-in unless backed by mocks or recorded fixtures.

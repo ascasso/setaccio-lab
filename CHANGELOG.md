@@ -9,6 +9,49 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added `docs/DEFERRED-WORK.md` as the public-safe canonical index for work
+  intentionally outside the completed August cycle. It records the Prompt v2,
+  output-budget, Testcontainers, retrieval, release/tag, September chat, and
+  October Anthropic gates; links the environment and test-plan boundaries; and
+  makes clear that future variables or roadmap entries do not authorize live
+  execution, credentials, Docker, a release, or a tag.
+- Closed the first local fact-check cycle with a bounded offline interpretation
+  of the immutable A5 evidence. Supported agreement was not measurable; two
+  unsupported rows were evaluable and both agreed, one fixture had two valid
+  consistent verdicts, and five repetition comparisons were incomplete. All
+  ten empty responses reached the explicit `64`-token output limit, registering
+  a later separately designed output-budget compatibility hypothesis without
+  claiming causation, statistical reliability, general factuality, or judge
+  ranking. Testcontainers, release, and tag work remain deferred.
+- Completed the first controlled local fact-check run from clean commit
+  `5d41362` with explicit `gemma4:e2b` identity, full immutable digest, `64`
+  output tokens, `PT2M`, and the locked twelve-row one-attempt schedule. All
+  provider invocations completed with usage metadata and no infrastructure
+  failure; ten rows had empty output and two produced valid matching `no`
+  verdicts. Ignored evidence verified and reanalyzed byte-for-byte offline
+  without selective retry, replacement, model pull, or raw-output publication.
+- Added the opt-in `localEvaluation` host-Ollama runner with explicit loopback
+  URL, installed judge tag, token limit, timeout, and fresh dated output
+  inputs. Preflight locks the confirmed prompt/fixture/review contract and
+  resolves a full immutable model digest before output allocation; execution
+  remains twelve sequential one-attempt, no-pull rows outside every default
+  lifecycle. Provider-free tests cover all option, preflight, model identity,
+  allocation, call-order, and failed-row behavior, and dirty Git provenance is
+  labeled diagnostic/non-final in the deterministic summary.
+- Added the offline local fact-check evidence lifecycle: a locked twelve-row
+  counterbalanced schedule, BLAKE3 document/claim identities, full judge and
+  contract provenance, suite-specific raw JSON, shared v1 manifest, and
+  deterministic summary. Standalone `localEvaluationVerify` and
+  `localEvaluationReanalyze` tasks validate or regenerate saved evidence
+  without starting Spring or contacting Ollama; offline tests cover protocol,
+  outcome, integrity, path-safety, public-safety, and summary-drift failures.
+- Added the dedicated local fact-check recording judge boundary around Spring
+  AI's unchanged `FactCheckingEvaluator`. It requires complete explicit Ollama
+  settings, a loopback endpoint, pull strategy `never`, connect/read timeout,
+  and exactly one attempt; records raw output, response metadata, available
+  usage, latency, and classified failures before evaluator normalization; and
+  keeps provider success, judge verdict, Spring's boolean, and expected-label
+  agreement separate in provider-free default tests.
 - Added the first offline local fact-checking contract: a versioned
   exact-placeholder prompt, a balanced six-fixture repository-authored catalog,
   and an actual-human confirmation record bound to the exact catalog digest.
@@ -77,6 +120,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 - Added `setaccio-testcontainers` as an optional skeleton module for future Docker/Testcontainers-backed integration tests.
 
 ### Changed
+
+- Updated repository agent workflow guidance to commit completed in-scope work
+  after appropriate verification, while keeping pushes explicitly user
+  authorized and unrelated user changes out of commits.
 
 - Closed the unavailable Prompt v1/v2 comparative human-review prerequisite
   through a documented evidence-loss waiver after the ignored saved-run
