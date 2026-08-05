@@ -25,6 +25,13 @@ runs offline. Verification rejects missing, modified, empty, duplicate,
 undeclared, path-escaping, or symbolic-link artifacts without starting Spring
 or contacting a model provider.
 
+Phase 2 Slice S1 added shared `EvidenceFiles` operations for non-overwriting
+artifact writes, saved-run path/layout checks, artifact size/SHA-256 checks,
+deterministic summary verification, and atomic offline summary replacement.
+Vision matrix, Tool Search matrix, and local evaluation now consume those file
+operations while retaining their existing raw-result schemas, analyzers,
+summaries, and failure taxonomies.
+
 The lifecycle deliberately keeps suite result payloads separate and reserves
 BLAKE3 for benchmark input identity. The locked Tool Search matrix and the
 dedicated sequential vision matrix write v1 manifests around their
@@ -260,10 +267,11 @@ Testcontainers outcome is `defer`, because provisioning would not answer the
 observed verdict-yield question. No A5 row was rerun or replaced. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 On 2026-08-04, the project owner selected chat as the Phase 2 reuse and later
-portability surface. Slice S1 is active; no dedicated chat-matrix task exists
-yet, and the existing interactive endpoint remains unchanged. The active Phase
-2 boundary, remaining deferred work, start gates, and non-authorization
-boundaries are indexed in [the deferred-work guide](docs/DEFERRED-WORK.md).
+portability surface. Slice S1 is complete and Slice S2 is next; no dedicated
+chat-matrix task exists yet, and the existing interactive endpoint remains
+unchanged. The active Phase 2 boundary, remaining deferred work, start gates,
+and non-authorization boundaries are indexed in
+[the deferred-work guide](docs/DEFERRED-WORK.md).
 
 All benchmarks are local-first and offline-safe by default:
 

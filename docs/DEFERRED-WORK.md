@@ -21,8 +21,10 @@ evidence remains ignored.
 
 On 2026-08-04, the project owner explicitly selected the existing public-safe
 chat surface for the Phase 2 reuse proof and later portability proof. Slice S1
-is active on `feature/chat-evidence-reuse`, based on `develop` commit
-`2b47c07`.
+completed on `feature/chat-evidence-reuse`, based on `develop` commit `2b47c07`.
+It extracted shared saved-evidence file operations across vision, Tool Search,
+and local evaluation without merging their suite-specific schemas or changing
+saved formats. Slice S2 is next.
 
 Phase 2 may extract only proven shared invocation/evidence contracts, add one
 minimal provider-neutral chat boundary with an Ollama adapter, and add one

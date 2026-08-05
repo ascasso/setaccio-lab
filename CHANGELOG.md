@@ -9,12 +9,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added plain-Java `EvidenceFiles` operations for non-overwriting saved-artifact
+  writes, directory/path validation, artifact size/SHA-256 checks, saved-run
+  layout inspection, deterministic summary verification, and atomic summary
+  replacement. Vision matrix, Tool Search matrix, and local evaluation now
+  share those operations without changing their saved formats or suite-specific
+  schemas.
 - Added `docs/DEFERRED-WORK.md` as the public-safe canonical index for work
-  intentionally outside the completed August cycle. It records the Prompt v2,
-  output-budget, Testcontainers, retrieval, release/tag, September chat, and
-  October Anthropic gates; links the environment and test-plan boundaries; and
-  makes clear that future variables or roadmap entries do not authorize live
-  execution, credentials, Docker, a release, or a tag.
+  intentionally outside the completed August cycle. It now records the active
+  Phase 2 chat boundary plus the Prompt v2, output-budget, Testcontainers,
+  retrieval, release/tag, and Phase 3 Anthropic gates; links the environment
+  and test-plan boundaries; and makes clear that roadmap entries do not
+  authorize live execution, credentials, Docker, a release, or a tag.
 - Closed the first local fact-check cycle with a bounded offline interpretation
   of the immutable A5 evidence. Supported agreement was not measurable; two
   unsupported rows were evaluable and both agreed, one fixture had two valid

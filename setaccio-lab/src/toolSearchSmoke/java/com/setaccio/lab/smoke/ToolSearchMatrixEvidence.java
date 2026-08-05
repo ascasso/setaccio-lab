@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.evidence.EvidenceArtifact;
+import com.setaccio.lab.evidence.EvidenceFiles;
 import com.setaccio.lab.evidence.EvidenceIntegrity;
 import com.setaccio.lab.evidence.EvidenceManifest;
 import com.setaccio.lab.evidence.EvidenceManifestStore;
@@ -13,13 +14,9 @@ import com.setaccio.lab.evidence.EvidenceVerifier;
 import com.setaccio.lab.model.ToolBenchmarkComparisonResult;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
 import com.setaccio.lab.model.ToolBenchmarkRunSettings;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -70,16 +67,7 @@ final class ToolSearchMatrixEvidence {
         EvidenceArtifact rawArtifact = EvidenceIntegrity.describe(runDirectory, rawJson, RAW_ROLE);
         String summary = report.render(analysis, rawArtifact.path(), rawArtifact.sha256());
         Path summaryPath = runDirectory.resolve(SUMMARY_FILENAME);
-        try {
-            Files.writeString(
-                    summaryPath,
-                    summary,
-                    StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE_NEW,
-                    StandardOpenOption.WRITE);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to write Tool Search matrix summary", e);
-        }
+        EvidenceFiles.writeNewText(summaryPath, summary, "Failed to write Tool Search matrix summary");
 
         EvidenceArtifact summaryArtifact = EvidenceIntegrity.describe(runDirectory, summaryPath, SUMMARY_ROLE);
         EvidenceManifest manifest = new EvidenceManifest(
@@ -339,75 +327,49 @@ final class ToolSearchMatrixEvidence {
             List<EvidenceArtifact> artifacts,
             String role,
             List<String> failures) {
-        List<EvidenceArtifact> matches = artifacts.stream()
-                .filter(artifact -> role.equals(artifact.role()))
-                .toList();
-        if (matches.size() != 1) {
-            failures.add("Version 1 manifest must declare exactly one " + role + " artifact.");
-            return null;
-        }
-        return matches.getFirst();
+        return EvidenceFiles.singleArtifact(
+                artifacts,
+                role,
+                failures,
+                "Version 1 manifest must declare exactly one " + role + " artifact.");
     }
 
     private static Path resolveArtifact(
             Path root,
             EvidenceArtifact artifact,
             List<String> failures) {
-        if (artifact == null) {
-            return null;
-        }
-        Path resolved = root.resolve(artifact.path()).normalize();
-        if (!resolved.startsWith(root)) {
-            failures.add("Raw artifact path escapes the evidence directory.");
-            return null;
-        }
-        return resolved;
+        return EvidenceFiles.resolveArtifact(
+                root,
+                artifact,
+                failures,
+                "Raw artifact path escapes the evidence directory.");
     }
 
     private static boolean verifyRawArtifact(
             Path rawPath,
             EvidenceArtifact artifact,
             List<String> failures) {
-        if (rawPath == null || artifact == null) {
-            return false;
-        }
-        if (Files.isSymbolicLink(rawPath)
-                || !Files.isRegularFile(rawPath, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Raw Tool Search artifact is missing or unsafe.");
-            return false;
-        }
-        try {
-            long size = Files.size(rawPath);
-            if (size == 0) {
-                failures.add("Raw Tool Search artifact is empty.");
-                return false;
-            }
-            if (artifact.sizeBytes() > 0 && size != artifact.sizeBytes()) {
-                failures.add("Raw Tool Search artifact size does not match its manifest.");
-            }
-            if (!EvidenceIntegrity.sha256(rawPath).equals(artifact.sha256())) {
-                failures.add("Raw Tool Search artifact SHA-256 does not match its manifest.");
-                return false;
-            }
-            return true;
-        } catch (Exception e) {
-            failures.add("Raw Tool Search artifact could not be verified.");
-            return false;
-        }
+        return EvidenceFiles.verifyArtifact(
+                rawPath,
+                artifact,
+                artifact != null && artifact.sizeBytes() > 0,
+                failures,
+                "Raw Tool Search artifact is missing or unsafe.",
+                "Raw Tool Search artifact is empty.",
+                "Raw Tool Search artifact size does not match its manifest.",
+                "Raw Tool Search artifact SHA-256 does not match its manifest.",
+                "Raw Tool Search artifact could not be verified.");
     }
 
     private static void validateRegeneratedSummaryDescriptor(
             EvidenceArtifact summaryArtifact,
             String expectedSummary,
             List<String> failures) {
-        if (expectedSummary == null) {
-            return;
-        }
-        byte[] bytes = expectedSummary.getBytes(StandardCharsets.UTF_8);
-        if (summaryArtifact.sizeBytes() != bytes.length
-                || !summaryArtifact.sha256().equals(EvidenceIntegrity.sha256(bytes))) {
-            failures.add("Regenerated Tool Search summary does not match the version 1 manifest.");
-        }
+        EvidenceFiles.validateTextDescriptor(
+                summaryArtifact,
+                expectedSummary,
+                failures,
+                "Regenerated Tool Search summary does not match the version 1 manifest.");
     }
 
     private static void validateInputLayout(
@@ -420,18 +382,13 @@ final class ToolSearchMatrixEvidence {
         if (rawArtifact != null) {
             allowed.add(rawArtifact.path());
         }
-        try (var paths = Files.walk(root)) {
-            paths.filter(path -> !path.equals(root)).forEach(path -> {
-                String relative = root.relativize(path).toString().replace('\\', '/');
-                if (Files.isSymbolicLink(path)) {
-                    failures.add("Unsafe symbolic link is present in saved Tool Search evidence: " + relative + ".");
-                } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS) && !allowed.contains(relative)) {
-                    failures.add("Unexpected artifact is present in saved Tool Search evidence: " + relative + ".");
-                }
-            });
-        } catch (Exception e) {
-            failures.add("Saved Tool Search evidence directory could not be inspected.");
-        }
+        EvidenceFiles.validateLayout(
+                root,
+                allowed,
+                failures,
+                "Unsafe symbolic link is present in saved Tool Search evidence: ",
+                "Unexpected artifact is present in saved Tool Search evidence: ",
+                "Saved Tool Search evidence directory could not be inspected.");
     }
 
     private static void verifyLegacyLayout(Inspection inspection, Set<String> failures) {
@@ -445,74 +402,31 @@ final class ToolSearchMatrixEvidence {
     }
 
     private static void verifySummary(Inspection inspection, Set<String> failures) {
-        if (inspection.summaryPath() == null || inspection.expectedSummary() == null) {
-            return;
-        }
-        Path summaryPath = inspection.summaryPath();
-        if (Files.isSymbolicLink(summaryPath)
-                || !Files.isRegularFile(summaryPath, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Tool Search summary is missing or unsafe.");
-            return;
-        }
-        try {
-            if (Files.size(summaryPath) == 0) {
-                failures.add("Tool Search summary is empty.");
-            } else if (!Files.readString(summaryPath, StandardCharsets.UTF_8)
-                    .equals(inspection.expectedSummary())) {
-                failures.add("Tool Search summary differs from deterministic offline reanalysis.");
-            }
-        } catch (Exception e) {
-            failures.add("Tool Search summary could not be verified.");
-        }
+        EvidenceFiles.verifyText(
+                inspection.summaryPath(),
+                inspection.expectedSummary(),
+                failures,
+                "Tool Search summary is missing or unsafe.",
+                "Tool Search summary is empty.",
+                "Tool Search summary differs from deterministic offline reanalysis.",
+                "Tool Search summary could not be verified.");
     }
 
     private static void writeSummaryAtomically(Path summaryPath, String summary) {
-        Path root = summaryPath.getParent();
-        Path temporary = null;
-        try {
-            if (Files.isSymbolicLink(summaryPath)) {
-                throw new IllegalArgumentException("Tool Search summary must not be a symbolic link");
-            }
-            temporary = Files.createTempFile(root, ".tool-search-summary-", ".tmp");
-            Files.writeString(
-                    temporary,
-                    summary,
-                    StandardCharsets.UTF_8,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.WRITE);
-            try {
-                Files.move(
-                        temporary,
-                        summaryPath,
-                        StandardCopyOption.ATOMIC_MOVE,
-                        StandardCopyOption.REPLACE_EXISTING);
-            } catch (AtomicMoveNotSupportedException ignored) {
-                Files.move(temporary, summaryPath, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to regenerate Tool Search matrix summary", e);
-        } finally {
-            if (temporary != null) {
-                try {
-                    Files.deleteIfExists(temporary);
-                } catch (Exception ignored) {
-                    // Preserve the primary failure.
-                }
-            }
-        }
+        EvidenceFiles.replaceTextAtomically(
+                summaryPath,
+                summary,
+                ".tool-search-summary-",
+                "Tool Search summary must not be a symbolic link",
+                "Failed to regenerate Tool Search matrix summary");
     }
 
     private static Path normalizedRunDirectory(Path runDirectory, List<String> failures) {
-        if (runDirectory == null) {
-            failures.add("Tool Search evidence directory must not be null.");
-            return null;
-        }
-        Path root = runDirectory.toAbsolutePath().normalize();
-        if (Files.isSymbolicLink(root) || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Tool Search evidence directory is missing or unsafe.");
-            return null;
-        }
-        return root;
+        return EvidenceFiles.inspectRunDirectory(
+                runDirectory,
+                failures,
+                "Tool Search evidence directory must not be null.",
+                "Tool Search evidence directory is missing or unsafe.");
     }
 
     private JsonNode readManifestNode(Path root, List<String> failures) {
@@ -540,8 +454,7 @@ final class ToolSearchMatrixEvidence {
     }
 
     private static String safeMessage(Exception exception) {
-        String message = exception.getMessage();
-        return message == null || message.isBlank() ? exception.getClass().getSimpleName() : message;
+        return EvidenceFiles.safeMessage(exception);
     }
 
     enum ManifestFormat {

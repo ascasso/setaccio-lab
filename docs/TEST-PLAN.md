@@ -25,6 +25,14 @@ does not place a live model call in default tests or CI.
 - Reject absolute, parent-traversing, cross-platform absolute, or symbolic-link artifact paths.
 - Verify saved runs entirely offline and report missing, modified, empty, duplicate, undeclared, or unsafe artifacts clearly.
 - Keep manifest JSON free of hostnames, absolute paths, credentials, and raw private environment details.
+- Keep shared saved-evidence file operations covered independently for
+  non-overwriting writes, safe directory/path handling, artifact size/SHA-256
+  checks, allowed-layout inspection, deterministic text verification, and
+  atomic replacement.
+- Reuse those file operations from vision, Tool Search, and local evaluation,
+  but retain suite-specific result rows, analyzers, summaries, failure
+  taxonomies, and identity/outcome schemas until compatible semantics are
+  demonstrated by real consumers.
 - Keep the locked Tool Search matrix on the shared v1 manifest while retaining
   legacy-v0 reads for existing unversioned matrix directories.
 - Do not describe vision, chat, or evaluation output as using the shared
