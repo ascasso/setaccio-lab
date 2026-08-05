@@ -133,7 +133,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-04)
+## Current State Snapshot (as of 2026-08-05)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -208,9 +208,22 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   and empty responses. The ignored evidence verified and reanalyzed offline,
   and the preserved Phase 1 evidence still verifies. Phase 2 is complete as a
   contract-reuse proof, without a quality, reliability, or model-ranking claim.
-  It does not authorize Anthropic credentials or remote calls,
+  At Phase 2 closeout it did not authorize Anthropic credentials or remote calls,
   default-lifecycle live execution, or migration of the existing chat endpoint
   without request/response parity tests.
+- Phase 3 completed one bounded architecture-portability proof through the
+  shared chat contract. A clean replacement Ollama baseline from commit
+  `215ea18` retained the same `gemma4:e2b` digest and six-row settings. The
+  Anthropic candidate from clean commit `3810a19` used the pinned hosted ID
+  `claude-haiku-4-5-20251001`, six sequential unseeded rows, temperature `0.0`,
+  `128` output tokens, `PT2M`, one attempt, and SDK retries disabled. All six
+  calls completed with non-empty output and full usage; observed usage-derived
+  cost was `$0.001870`, below the `$0.005376` worst-case estimate and `$3` task
+  ceiling. Ignored evidence verifies and reanalyzes offline. Common protocol
+  fields were architecture-compatible, while seed semantics and local-digest
+  versus hosted-ID reproducibility remain explicit limitations. No semantic,
+  performance, reliability, ranking, endpoint-migration, or further-provider
+  authorization is claimed.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
@@ -407,15 +420,18 @@ Completed:
   repetitions as statistical reliability, claiming an order effect or general
   factuality, ranking judges, or rerunning/replacing A5 rows; record the narrow
   follow-up hypothesis and defer Testcontainers for this cycle.
+- Complete one bounded Anthropic chat portability proof with a pinned hosted
+  model ID, explicit option handling, a current official-price estimate and
+  user-authorized USD ceiling, six sequential one-attempt calls, ignored
+  evidence, and standalone offline verification/reanalysis without changing
+  the interactive endpoint or making a quality/performance comparison.
 
-Pending:
+Pending and separately deferred:
 
-- Phase 3 remains a separately authorized portability candidate. Before any
-  remote call, re-check current framework/provider contracts, select one
-  explicit Anthropic model, document option support, confirm local-only
-  credentials, calculate the current worst-case cost, and obtain explicit
-  user authorization with a maximum USD budget. Keep the existing chat
-  endpoint unchanged unless parity tests justify migration.
+- Any further Anthropic call, another provider/model type, or endpoint migration
+  requires a new explicit scope and authorization. The completed Phase 3 proof
+  does not grant standing remote-call or spending authority; keep the existing
+  chat endpoint unchanged unless parity tests justify migration.
 
 The tracked [deferred-work index](docs/DEFERRED-WORK.md) is the canonical
 public-safe list of deferred scope, start gates, and non-authorization

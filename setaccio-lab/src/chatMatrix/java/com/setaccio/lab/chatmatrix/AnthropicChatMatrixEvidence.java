@@ -103,7 +103,7 @@ final class AnthropicChatMatrixEvidence {
                 if (manifest != null) {
                     JsonNode expectedSettings = objectMapper.valueToTree(manifestSettings(result));
                     JsonNode actualSettings = objectMapper.valueToTree(manifest.settings());
-                    if (!expectedSettings.toString().equals(actualSettings.toString())) {
+                    if (!sameJsonValue(expectedSettings, actualSettings)) {
                         failures.add("Anthropic manifest settings differ from raw locked protocol.");
                     }
                     ChatPortabilitySnapshot expectedSnapshot = AnthropicChatMatrixSnapshotFactory.fromResult(
@@ -251,6 +251,40 @@ final class AnthropicChatMatrixEvidence {
             case SUMMARY_ROLE -> AnthropicChatMatrixProtocol.SUMMARY_FILENAME;
             default -> throw new IllegalArgumentException("Unknown Anthropic artifact role: " + role);
         };
+    }
+
+    static boolean sameJsonValue(JsonNode left, JsonNode right) {
+        if (left == null || right == null) {
+            return left == right;
+        }
+        if (left.isNumber() && right.isNumber()) {
+            return left.decimalValue().compareTo(right.decimalValue()) == 0;
+        }
+        if (left.isObject() && right.isObject()) {
+            if (left.size() != right.size()) {
+                return false;
+            }
+            java.util.Iterator<Map.Entry<String, JsonNode>> fields = left.fields();
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                if (!right.has(field.getKey()) || !sameJsonValue(field.getValue(), right.get(field.getKey()))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        if (left.isArray() && right.isArray()) {
+            if (left.size() != right.size()) {
+                return false;
+            }
+            for (int index = 0; index < left.size(); index++) {
+                if (!sameJsonValue(left.get(index), right.get(index))) {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return left.equals(right);
     }
 
     private static Map<String, Object> manifestSettings(AnthropicChatMatrixResult result) {

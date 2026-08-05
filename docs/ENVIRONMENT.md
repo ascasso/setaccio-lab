@@ -552,6 +552,15 @@ remain provider-free and do not read a credential:
   --run-dir=build/anthropic-chat-matrix/<saved-run>
 ```
 
+The one authorized Phase 3 run completed on 2026-08-05 from clean commit
+`3810a19` with the fixed six-row protocol. All six calls completed with
+non-empty outputs and complete usage metadata. The official-price worst-case
+estimate was `$0.005376`; usage-derived cost was `$0.001870` under the task's
+`$3` ceiling and the owner's `$5` authorization. The ignored saved evidence
+verified and reanalyzed offline. This closes the bounded architecture proof;
+it does not authorize another call, quality/performance comparison, additional
+provider, or migration of `POST /api/lab/chat`.
+
 ## Local Tool-Calling Benchmark
 
 The standard Spring AI tool-calling benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.

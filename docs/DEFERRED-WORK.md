@@ -1,6 +1,6 @@
 # Deferred Work
 
-Status: current after the completed Phase 2 local chat reuse proof on 2026-08-05.
+Status: current after the completed Phase 3 Anthropic portability proof on 2026-08-05.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -61,42 +61,42 @@ release, a tag, or a push.
 | Relevancy evaluation and retrieval | Deferred. Ordinary fixture context is not a retrieval flow. | Add a real retrieval path that preserves the retrieved documents and can be evaluated without presenting fixture context as RAG evidence. |
 | Release, tag, and promotion | Deferred. The August feature branch is not a release decision. | Use a separately authorized promotion/release workflow after the appropriate integration review; decide version, changelog release entry, and tag together. |
 
-## Phase 3: authorized implementation; remote proof not yet recorded
+## Completed Phase 3 Boundary
 
-The project owner separately authorized one Anthropic API run with a maximum
-USD budget of `$3.00`. That authorization applies only to the fixed O3 task
-below; it does not authorize another provider, another model, retries, a
-different catalog, an endpoint migration, or a push. The task itself remains
-opt-in and must still complete its local credential and saved-Ollama-evidence
-preflight before it creates an output directory or makes a remote request.
+Phase 3 completed on `feature/anthropic-portability` with one bounded
+architecture-portability proof behind the Phase 2 chat contract. Slice O1 added
+the provider-free Anthropic adapter; Slice O2 added the raw-output-free evidence
+projection; Slice O3 added and executed the opt-in runner. The selected model
+was the pinned hosted ID `claude-haiku-4-5-20251001`; no fabricated local digest
+is claimed. Temperature and maximum output tokens were supported directly,
+timeout was translated to the SDK client timeout, exactly one attempt was
+translated to SDK `maxRetries=0`, seed was rejected as unsupported and never
+simulated, and no common option was silently ignored.
 
-### One Anthropic portability proof
+Because the earlier ignored Phase 2 run was absent, the owner separately
+authorized one replacement local baseline. From clean commit `215ea18`, the
+installed `gemma4:e2b` digest
+`7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`
+completed the locked six-row, `128`-token, `PT2M`, one-attempt, no-pull schedule;
+all six rows retained usage metadata and empty responses. That ignored evidence
+verified and reanalyzed offline.
 
-Slice O1 is implemented and provider-free on `feature/anthropic-portability`.
-It adds exactly one adapter behind the completed Phase 2 chat boundary, using
-the pinned Anthropic model ID `claude-haiku-4-5-20251001`. The adapter maps
-temperature, maximum output tokens, timeout, and one attempt (`maxRetries=0`),
-records returned effective model/usage and a format-validated opaque response
-ID, and records seed as unsupported rather than simulating it. Credentials
-remain local-only and the adapter records neither API keys, headers, nor base
-URLs.
+Immediately before O3, official Claude API pricing was rechecked at `$1` per
+million input tokens and `$5` per million output tokens. The locked ceiling of
+`1,536` input and `768` output tokens produced a `$0.005376` worst-case estimate.
+The owner authorized up to `$5`; the task used a stricter `$3` ceiling. From
+clean commit `3810a19`, all six sequential Anthropic calls completed with
+non-empty outputs and complete usage metadata, with no retry or replacement.
+Usage-derived cost was `$0.001870`. Ignored evidence under
+`build/anthropic-chat-matrix/2026-08-05-claude-haiku-4-5-o3/` verifies and
+reanalyzes offline.
 
-Slice O2 and the O3 runner are implemented with provider-free verification.
-The sole common-option contract is: temperature and maximum output tokens are
-supported directly; timeout is translated to the SDK client timeout; exactly
-one attempt is translated to SDK `maxRetries=0`; seed is rejected as unsupported
-and is never simulated; no common option is silently ignored. The runner
-requires the pinned `claude-haiku-4-5-20251001` provider model ID, six sequential
-calls (three tracked prompts times two unseeded repetitions), `128` output
-tokens, `PT2M`, one attempt per row, a fresh ignored
-`build/anthropic-chat-matrix/<dated-run>/` directory, a verified matching saved
-Ollama matrix, and a command-line ceiling no greater than the authorized
-`$3.00`. The current official price-based worst-case calculation is performed
-immediately before invocation and stored as safe aggregate evidence; a hosted
-model is never assigned a fabricated local digest.
-
-Until the task completes and its ignored evidence verifies and reanalyzes
-offline, Phase 3 remains buildable/authorized-to-run, not complete.
+The prompt inputs, common invocation settings, and framework versions matched,
+so the architecture-portability contract is compatible. The unseeded Anthropic
+repetitions are not protocol-identical to Ollama's seeded repetitions, and a
+hosted provider ID has different reproducibility semantics from an immutable
+local digest. No answer-quality, performance, statistical reliability, model
+ranking, endpoint migration, or future remote-call authorization is claimed.
 
 ## Deferred Through the Current Roadmap
 

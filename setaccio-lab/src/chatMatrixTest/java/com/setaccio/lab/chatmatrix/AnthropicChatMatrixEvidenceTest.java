@@ -69,6 +69,16 @@ class AnthropicChatMatrixEvidenceTest {
         assertThat(result.rows().get(2).sequence()).isEqualTo(3);
     }
 
+    @Test
+    void comparesManifestSettingsIndependentOfMapOrderAndNumericNodeWidth() throws Exception {
+        com.fasterxml.jackson.databind.JsonNode expected = ChatMatrixTestFixtures.OBJECT_MAPPER.readTree(
+                "{\"count\":120000,\"nested\":{\"temperature\":0.0,\"repetitions\":2}}");
+        com.fasterxml.jackson.databind.JsonNode actual = ChatMatrixTestFixtures.OBJECT_MAPPER.readTree(
+                "{\"nested\":{\"repetitions\":2.0,\"temperature\":0},\"count\":120000.0}");
+
+        assertThat(AnthropicChatMatrixEvidence.sameJsonValue(expected, actual)).isTrue();
+    }
+
     private static AnthropicChatMatrixResult successfulResult() {
         ChatPromptCatalog catalog = ChatMatrixTestFixtures.CATALOG;
         ChatPortabilityRunSettings settings = AnthropicChatMatrixProtocol.settings(catalog);
