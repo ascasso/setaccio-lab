@@ -9,6 +9,7 @@ import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 import com.setaccio.gradle.ToolSearchMatrixOfflineTask
 import com.setaccio.gradle.ChatMatrixOfflineTask
 import com.setaccio.gradle.ChatMatrixTask
+import com.setaccio.gradle.AnthropicChatMatrixTask
 import com.setaccio.gradle.LocalEvaluationOfflineTask
 import com.setaccio.gradle.LocalEvaluationTask
 import com.setaccio.gradle.VisionHumanReviewPrepareTask
@@ -120,6 +121,37 @@ tasks.register('chatMatrix', ChatMatrixTask) {
     dependsOn tasks.named('chatMatrixClasses')
     classpath.from(sourceSets.chatMatrix.runtimeClasspath)
     mainClass.set('com.setaccio.lab.chatmatrix.ChatMatrixRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('anthropicChatMatrix', AnthropicChatMatrixTask) {
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.AnthropicChatMatrixRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('anthropicChatMatrixVerify', ChatMatrixOfflineTask) {
+    description = 'Verifies saved Anthropic chat matrix evidence without starting Spring or calling a provider.'
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.AnthropicChatMatrixOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('anthropicChatMatrixReanalyze', ChatMatrixOfflineTask) {
+    description = 'Regenerates saved Anthropic chat matrix evidence without starting Spring or calling a provider.'
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.AnthropicChatMatrixOfflineRunner')
+    mode.set('reanalyze')
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

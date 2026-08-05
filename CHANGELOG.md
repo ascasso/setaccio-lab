@@ -9,6 +9,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the provider-neutral Slice O2 portability projection and the opt-in
+  Slice O3 Anthropic matrix implementation. It keeps hosted versioned model
+  IDs distinct from local digests, records direct, translated, and rejected
+  common-option handling, writes raw provider output only to an ignored
+  non-overwriting directory, and generates a raw-output-free portability
+  report. The separate remote task locks six sequential one-attempt calls,
+  `128` output tokens, `PT2M`, no seed simulation, and an explicit USD ceiling;
+  provider-free tests cover cost, input/path bounds, failed-row retention, and
+  offline verify/reanalyze. No remote execution is claimed by this change.
 - Added the provider-free Slice O1 Anthropic adapter behind the existing chat
   invocation boundary. It selects `claude-haiku-4-5-20251001` as a pinned
   hosted model ID, maps temperature/output-token/timeout/one-attempt settings,

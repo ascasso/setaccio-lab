@@ -61,26 +61,42 @@ release, a tag, or a push.
 | Relevancy evaluation and retrieval | Deferred. Ordinary fixture context is not a retrieval flow. | Add a real retrieval path that preserves the retrieved documents and can be evaluated without presenting fixture context as RAG evidence. |
 | Release, tag, and promotion | Deferred. The August feature branch is not a release decision. | Use a separately authorized promotion/release workflow after the appropriate integration review; decide version, changelog release entry, and tag together. |
 
-## Planned Only After Separate Authorization
+## Phase 3: authorized implementation; remote proof not yet recorded
 
-These remain roadmap candidates, not active work.
+The project owner separately authorized one Anthropic API run with a maximum
+USD budget of `$3.00`. That authorization applies only to the fixed O3 task
+below; it does not authorize another provider, another model, retries, a
+different catalog, an endpoint migration, or a push. The task itself remains
+opt-in and must still complete its local credential and saved-Ollama-evidence
+preflight before it creates an output directory or makes a remote request.
 
-### Phase 3: one Anthropic portability proof
+### One Anthropic portability proof
 
 Slice O1 is implemented and provider-free on `feature/anthropic-portability`.
 It adds exactly one adapter behind the completed Phase 2 chat boundary, using
 the pinned Anthropic model ID `claude-haiku-4-5-20251001`. The adapter maps
 temperature, maximum output tokens, timeout, and one attempt (`maxRetries=0`),
 records returned effective model/usage and a format-validated opaque response
-ID, and records seed as unsupported rather than simulating it. It has no
-runner, live call, credential lookup, fallback, streaming, tool, or multimodal
-path. Credentials remain local-only and the adapter records neither API keys,
-headers, nor base URLs.
+ID, and records seed as unsupported rather than simulating it. Credentials
+remain local-only and the adapter records neither API keys, headers, nor base
+URLs.
 
-Slice O2 and the six-call live proof remain deferred. Immediately before any
-live call, calculate the current official price-based worst-case estimate and
-obtain separate explicit authorization with a maximum USD budget. Until then,
-Phase 3 is buildable with mocked verification, not complete.
+Slice O2 and the O3 runner are implemented with provider-free verification.
+The sole common-option contract is: temperature and maximum output tokens are
+supported directly; timeout is translated to the SDK client timeout; exactly
+one attempt is translated to SDK `maxRetries=0`; seed is rejected as unsupported
+and is never simulated; no common option is silently ignored. The runner
+requires the pinned `claude-haiku-4-5-20251001` provider model ID, six sequential
+calls (three tracked prompts times two unseeded repetitions), `128` output
+tokens, `PT2M`, one attempt per row, a fresh ignored
+`build/anthropic-chat-matrix/<dated-run>/` directory, a verified matching saved
+Ollama matrix, and a command-line ceiling no greater than the authorized
+`$3.00`. The current official price-based worst-case calculation is performed
+immediately before invocation and stored as safe aggregate evidence; a hosted
+model is never assigned a fabricated local digest.
+
+Until the task completes and its ignored evidence verifies and reanalyzes
+offline, Phase 3 remains buildable/authorized-to-run, not complete.
 
 ## Deferred Through the Current Roadmap
 

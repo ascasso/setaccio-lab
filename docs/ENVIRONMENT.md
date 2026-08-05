@@ -10,7 +10,7 @@ These variables are supported by the current `setaccio-lab` application config, 
 
 | Variable | Required for default build | Used for | Notes |
 | --- | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | No | Anthropic portability runner (not yet added) | Empty by default. Required only for a separately authorized live run. |
+| `ANTHROPIC_API_KEY` | No | Explicit Anthropic portability runner | Read only by the opt-in O3 runner after local preflight. Keep it in local environment/config; never put it in a command line, tracked file, or evidence. |
 | `ANTHROPIC_BASE_URL` | No | Anthropic integration | Optional override for the Anthropic API base URL. |
 | `ANTHROPIC_MODEL` | No | Anthropic chat model | Optional default model for live Anthropic chat runs. |
 | `ANTHROPIC_MAX_TOKENS` | No | Anthropic chat options | Optional maximum token override for live Anthropic chat runs. |
@@ -37,9 +37,9 @@ The current Spring AI Anthropic mapping is:
 | `spring.ai.anthropic.chat.options.max-tokens` | `${ANTHROPIC_MAX_TOKENS:4096}` |
 | `spring.ai.anthropic.chat.options.temperature` | Planned: explicit test option, not a default requirement. |
 
-Spring AI also supports Anthropic runtime options through `AnthropicChatOptions` and per-request `Prompt` options. Slice O1 selects the pinned hosted model ID `claude-haiku-4-5-20251001`; it is a provider version identifier, not a locally resolvable content digest. The adapter uses only the official API base URL, receives a credential explicitly from local configuration when a future runner supplies one, and never reads/logs credentials itself.
+Spring AI also supports Anthropic runtime options through `AnthropicChatOptions` and per-request `Prompt` options. Slice O1 selects the pinned hosted model ID `claude-haiku-4-5-20251001`; it is a provider version identifier, not a locally resolvable content digest. The adapter uses only the official API base URL, receives a credential explicitly from local configuration when the O3 runner supplies one, and never logs credentials itself.
 
-For the fixed portability chat contract, `temperature` and `max output tokens` are supported and mapped directly. `timeout` is mapped to the SDK client timeout, and the exactly-one-attempt rule is mapped to SDK `maxRetries=0`. Anthropic exposes no seed in this contract, so seed is explicitly unsupported and never synthesized. Response metadata may retain the returned effective model, usage, and only a format-validated opaque response ID; headers, base URLs, and credential data are excluded.
+For the fixed portability chat contract, `temperature` and `max output tokens` are supported and mapped directly. `timeout` is translated to the SDK client timeout, and the exactly-one-attempt rule is translated to SDK `maxRetries=0`. Anthropic exposes no seed in this contract, so seed is explicitly rejected, never silently ignored, and never synthesized. No common contract option is silently ignored. Response metadata may retain the returned effective model, usage, and only a format-validated opaque response ID; headers, base URLs, and credential data are excluded.
 
 Anthropic-specific future test surfaces include:
 
@@ -509,6 +509,48 @@ or contacting Ollama:
 `SUMMARY.md` reports only protocol integrity, invocation completion, available
 usage, failure categories, and successful latency range. It does not judge
 semantic output quality or rank the single model.
+
+### Bounded Anthropic portability matrix
+
+`anthropicChatMatrix` is the only remote-provider task in this slice. It is
+outside `test`, `check`, `build`, application startup, and CI. It requires a
+separate explicit authorization immediately before execution, a current
+official-price worst-case calculation, and a local `ANTHROPIC_API_KEY`; neither
+the key nor raw responses are printed. Do not put a key in a Gradle option or
+in a tracked/local command transcript.
+
+The task permits one fixed protocol only: model
+`claude-haiku-4-5-20251001`, six sequential calls over the tracked three-prompt
+catalog, two unseeded repetitions, temperature `0.0`, `128` maximum output
+tokens, `PT2M`, and one attempt. Temperature and output tokens are direct
+options; timeout and one attempt translate to SDK timeout and `maxRetries=0`;
+seed is rejected and never simulated. The verified matching Ollama run is used
+only for the offline, raw-output-free portability report.
+
+With the credential already present only in local environment/config, invoke
+the task with an explicit budget ceiling and fresh dated output directory:
+
+```bash
+./gradlew :setaccio-lab:anthropicChatMatrix \
+  --max-tokens=128 \
+  --timeout=PT2M \
+  --max-cost-usd=<explicit-authorized-usd-not-over-3.00> \
+  --output-dir=build/anthropic-chat-matrix/<new-dated-run> \
+  --ollama-run-dir=build/chat-matrix/<verified-matching-run>
+```
+
+The runner refuses an output directory that already exists and writes its raw
+provider result, raw-output-free portability snapshot, manifest, and summary
+only under the ignored `build/anthropic-chat-matrix/` root. These operations
+remain provider-free and do not read a credential:
+
+```bash
+./gradlew :setaccio-lab:anthropicChatMatrixVerify \
+  --run-dir=build/anthropic-chat-matrix/<saved-run>
+
+./gradlew :setaccio-lab:anthropicChatMatrixReanalyze \
+  --run-dir=build/anthropic-chat-matrix/<saved-run>
+```
 
 ## Local Tool-Calling Benchmark
 
