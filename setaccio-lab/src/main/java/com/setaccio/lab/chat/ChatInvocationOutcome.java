@@ -8,6 +8,7 @@ public record ChatInvocationOutcome(
         String promptId,
         boolean invocationSucceeded,
         String rawResponse,
+        String providerResponseId,
         Integer promptTokens,
         Integer completionTokens,
         Integer totalTokens,
@@ -24,6 +25,9 @@ public record ChatInvocationOutcome(
         }
         if (latencyMillis < 0) {
             throw new IllegalArgumentException("latencyMillis must not be negative");
+        }
+        if (providerResponseId != null && !providerResponseId.matches("[A-Za-z0-9_-]{1,128}")) {
+            throw new IllegalArgumentException("providerResponseId must be a safe opaque identifier");
         }
         if (attemptCount < 1) {
             throw new IllegalArgumentException("attemptCount must be positive");
@@ -59,6 +63,24 @@ public record ChatInvocationOutcome(
                 throw new IllegalArgumentException("failed invocation must not record a response");
             }
         }
+    }
+
+    public ChatInvocationOutcome(
+            ChatProviderModelIdentity modelIdentity,
+            ChatProviderOptionSupport optionSupport,
+            String promptId,
+            boolean invocationSucceeded,
+            String rawResponse,
+            Integer promptTokens,
+            Integer completionTokens,
+            Integer totalTokens,
+            long latencyMillis,
+            int attemptCount,
+            ChatInvocationFailureCategory failureCategory,
+            String error
+    ) {
+        this(modelIdentity, optionSupport, promptId, invocationSucceeded, rawResponse, null,
+                promptTokens, completionTokens, totalTokens, latencyMillis, attemptCount, failureCategory, error);
     }
 
     public boolean successful() {

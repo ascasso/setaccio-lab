@@ -62,6 +62,8 @@ class ChatInvocationContractTest {
         assertThat(support.unsupportedReasons()).containsEntry(
                 ChatGenerationOption.SEED,
                 "provider does not expose deterministic seeds");
+        assertThat(support.statuses()).containsEntry(ChatGenerationOption.SEED, ChatProviderOptionStatus.REJECTED);
+        assertThat(support.statuses()).containsEntry(ChatGenerationOption.TEMPERATURE, ChatProviderOptionStatus.SUPPORTED);
         assertThat(settings.seed()).isNull();
     }
 

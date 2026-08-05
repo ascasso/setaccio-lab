@@ -43,4 +43,22 @@ public record ChatProviderOptionSupport(
     public static ChatProviderOptionSupport supportsAll() {
         return new ChatProviderOptionSupport(EnumSet.allOf(ChatGenerationOption.class), Map.of());
     }
+
+    public boolean supports(ChatGenerationOption option) {
+        return supported.contains(Objects.requireNonNull(option, "option must not be null"));
+    }
+
+    /**
+     * Current adapters either apply a common option directly or reject it before invocation.
+     * The explicit enum keeps the evidence vocabulary ready for later translated/ignored cases.
+     */
+    public Map<ChatGenerationOption, ChatProviderOptionStatus> statuses() {
+        EnumMap<ChatGenerationOption, ChatProviderOptionStatus> statuses = new EnumMap<>(ChatGenerationOption.class);
+        for (ChatGenerationOption option : ChatGenerationOption.values()) {
+            statuses.put(option, supported.contains(option)
+                    ? ChatProviderOptionStatus.SUPPORTED
+                    : ChatProviderOptionStatus.REJECTED);
+        }
+        return Collections.unmodifiableMap(statuses);
+    }
 }

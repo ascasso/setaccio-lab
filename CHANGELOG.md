@@ -9,6 +9,31 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Completed the fixed Phase 3 Anthropic portability proof against
+  `claude-haiku-4-5-20251001` from clean commit `3810a19`. Six sequential,
+  one-attempt calls completed with non-empty outputs and full usage metadata;
+  usage-derived cost was `$0.001870` against a `$0.005376` worst-case estimate
+  and a `$3` task ceiling within the owner's `$5` authorization. Ignored
+  evidence verifies and reanalyzes offline. The report establishes architecture
+  compatibility only: Anthropic seed remains unsupported, hosted identity is
+  not a local digest, and no answer-quality, performance, or ranking claim is
+  made.
+- Added the provider-neutral Slice O2 portability projection and the opt-in
+  Slice O3 Anthropic matrix implementation. It keeps hosted versioned model
+  IDs distinct from local digests, records direct, translated, and rejected
+  common-option handling, writes raw provider output only to an ignored
+  non-overwriting directory, and generates a raw-output-free portability
+  report. The separate remote task locks six sequential one-attempt calls,
+  `128` output tokens, `PT2M`, no seed simulation, and an explicit USD ceiling;
+  provider-free tests cover cost, input/path bounds, failed-row retention, and
+  offline verify/reanalyze. The implementation change itself made no remote
+  request.
+- Added the provider-free Slice O1 Anthropic adapter behind the existing chat
+  invocation boundary. It selects `claude-haiku-4-5-20251001` as a pinned
+  hosted model ID, maps temperature/output-token/timeout/one-attempt settings,
+  records seed as unsupported, captures only safe response metadata, and has
+  mocked coverage for usage, failures, metadata, and no-fallback behavior. It
+  added no live runner, credential lookup, or remote call at O1 closeout.
 - Added the provider-free implementation of the dedicated Ollama chat matrix:
   a tracked versioned three-prompt catalog with exact catalog/per-prompt
   SHA-256 identities, one six-row sequential protocol, explicit installed model

@@ -127,6 +127,29 @@ not place a live model call in default tests or CI.
 - Treat chat as the completed Phase 2 reuse surface and the later portability
   surface. Keep its default lifecycle local, no-pull, provider-free, and
   offline.
+- Keep the implemented Anthropic O1 adapter provider-free by default. Mocked
+  tests must cover option mapping, explicit unsupported seed behavior, present
+  and absent usage, effective-model/safe-response-ID metadata, empty response,
+  timeout, authentication, rate-limit, provider failure, one attempt, and no
+  fallback. The separate O3 task may read `ANTHROPIC_API_KEY` only after its
+  explicit user authorization, USD ceiling, saved-Ollama-evidence, and fresh
+  output-directory preflight all pass.
+- Keep the O2 portability projection raw-output-free: preserve the provider's
+  identifier semantics (local digest versus hosted versioned ID), common option
+  handling, usage, outcome, and one-attempt metadata, but never treat a hosted
+  ID as a local digest or copy raw answers into a portability report. Record
+  temperature and output tokens as direct support; timeout and retry policy as
+  translated; seed as rejected and unsimulated; and no common option as silently
+  ignored.
+- Keep `anthropicChatMatrix` outside `test`, `check`, `build`, application
+  startup, and CI. Its sole protocol is six sequential calls, three locked
+  prompts times two unseeded repetitions, `claude-haiku-4-5-20251001`, `0.0`
+  temperature, `128` output tokens, `PT2M`, and exactly one attempt. Require a
+  current official-price worst-case calculation, an explicit USD ceiling no
+  greater than the current authorization, a matching verified Ollama saved run,
+  and a fresh ignored output directory before any remote call. Provider-free
+  tests must cover cost/path/option preflight, row retention without retries,
+  raw-output separation, and standalone offline verify/reanalyze.
 - Keep the internal chat invocation contract provider-neutral for provider and
   requested/effective model identity, prompts, common generation settings,
   explicit supported/unsupported option metadata, and invocation outcomes.

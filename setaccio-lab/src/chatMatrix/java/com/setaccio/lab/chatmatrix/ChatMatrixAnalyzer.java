@@ -187,7 +187,7 @@ final class ChatMatrixAnalyzer {
             String expectedError = switch (row.failureCategory()) {
                 case MODEL_UNAVAILABLE -> "Ollama chat model was unavailable";
                 case TIMEOUT -> "Ollama chat invocation timed out";
-                case PROVIDER_FAILURE -> "Ollama chat provider invocation failed";
+                case AUTHENTICATION, RATE_LIMIT, PROVIDER_FAILURE -> "Ollama chat provider invocation failed";
                 case NONE, EMPTY_RESPONSE -> null;
             };
             if (expectedError == null

@@ -288,9 +288,12 @@ observed verdict-yield question. No A5 row was rerun or replaced. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 On 2026-08-05, Phase 2 closed after the controlled local chat matrix verified
 and reanalyzed offline; the preserved Phase 1 evidence also still verifies.
-The existing interactive endpoint remains unchanged. Phase 3 portability work,
-remaining deferred work, start gates, and non-authorization boundaries are
-indexed in
+Phase 3 then closed with one authorized, six-call Anthropic architecture
+portability proof using a pinned hosted model ID, explicit unsupported-seed
+semantics, bounded cost, and offline-verified ignored evidence. It makes no
+quality, performance, reliability, or model-ranking claim. The existing
+interactive endpoint remains unchanged. Remaining deferred work, start gates,
+and non-authorization boundaries are indexed in
 [the deferred-work guide](docs/DEFERRED-WORK.md).
 
 All benchmarks are local-first and offline-safe by default:
