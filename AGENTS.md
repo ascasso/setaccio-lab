@@ -199,14 +199,18 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   suite-specific schemas remain unchanged. Slice S2 added the minimal
   provider-neutral chat invocation contract and Ollama-only adapter with full
   digest identity, explicit supported-option metadata, classified outcomes,
-  and shared loopback/no-pull/one-attempt model construction. Slice S3 now has
+  and shared loopback/no-pull/one-attempt model construction. Slice S3 has
   one tracked v1 three-prompt catalog, a dedicated sequential six-row runner,
   shared-v1 evidence, deterministic analysis, and standalone offline
-  verify/reanalyze tasks. Provider-free tests pass, but no controlled S3 run
-  has been authorized or performed, so Phase 2 remains active. It does not
-  authorize Anthropic credentials or remote calls, default-lifecycle live
-  execution, or migration of the existing chat endpoint without
-  request/response parity tests.
+  verify/reanalyze tasks. On 2026-08-05, one clean-baseline local
+  `gemma4:e2b` run from commit `51025cf` used `128` output tokens, `PT2M`, and
+  the locked six-row schedule; all invocations completed with usage metadata
+  and empty responses. The ignored evidence verified and reanalyzed offline,
+  and the preserved Phase 1 evidence still verifies. Phase 2 is complete as a
+  contract-reuse proof, without a quality, reliability, or model-ranking claim.
+  It does not authorize Anthropic credentials or remote calls,
+  default-lifecycle live execution, or migration of the existing chat endpoint
+  without request/response parity tests.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
@@ -404,15 +408,14 @@ Completed:
   factuality, ranking judges, or rerunning/replacing A5 rows; record the narrow
   follow-up hypothesis and defer Testcontainers for this cycle.
 
-Active:
-
-- Complete the authorized Phase 2 chat reuse proof after completed Slices S1
-  and S2 and the provider-free S3 implementation. The next gate is one
-  separately explicit controlled `chatMatrix` invocation followed by offline
-  verification/reanalysis and bounded documentation. Keep the existing
-  endpoint unchanged unless parity tests justify migration.
-
 Pending:
+
+- Phase 3 remains a separately authorized portability candidate. Before any
+  remote call, re-check current framework/provider contracts, select one
+  explicit Anthropic model, document option support, confirm local-only
+  credentials, calculate the current worst-case cost, and obtain explicit
+  user authorization with a maximum USD budget. Keep the existing chat
+  endpoint unchanged unless parity tests justify migration.
 
 The tracked [deferred-work index](docs/DEFERRED-WORK.md) is the canonical
 public-safe list of deferred scope, start gates, and non-authorization

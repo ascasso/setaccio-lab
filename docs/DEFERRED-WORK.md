@@ -1,12 +1,11 @@
 # Deferred Work
 
-Status: current after the provider-free Phase 2 Slice S3 implementation on 2026-08-04.
+Status: current after the completed Phase 2 local chat reuse proof on 2026-08-05.
 
-This is the tracked index for the active Phase 2 boundary and work intentionally
-outside the completed August scope. It distinguishes active, deferred, failed,
-and partially completed work. Only the Phase 2 boundary below has a new-start
-decision; no listing here authorizes a live model call, Docker use, a
-credential, spending, a release, or a tag.
+This is the tracked index for completed boundaries and work intentionally
+outside the completed August scope. It distinguishes completed, deferred,
+failed, and partially completed work. No listing here authorizes a live model
+call, Docker use, a credential, spending, a release, or a tag.
 
 ## Completed Boundary
 
@@ -17,7 +16,7 @@ interpretation are recorded in
 [LOCAL-AI-EVALUATION-PLAN.md](LOCAL-AI-EVALUATION-PLAN.md). The saved raw A5
 evidence remains ignored.
 
-## Active Phase 2 Boundary
+## Completed Phase 2 Boundary
 
 On 2026-08-04, the project owner explicitly selected the existing public-safe
 chat surface for the Phase 2 reuse proof and later portability proof. Slice S1
@@ -29,21 +28,26 @@ contract and its only Phase 2 adapter, Ollama. The contract records common
 model, prompt, generation, option-support, response, usage, latency, attempt,
 and failure fields while keeping the full digest specific to Ollama. Model
 construction remains loopback, no-pull, and one-attempt. The existing
-interactive endpoint is unchanged. Slice S3 now has a dedicated implementation:
+interactive endpoint is unchanged. Slice S3 has a dedicated implementation:
 one tracked versioned three-prompt catalog, a sequential six-row Ollama runner,
 shared-v1 evidence, deterministic analysis, and standalone offline
-verify/reanalyze tasks. Its controlled local run has not been authorized or
-performed, so Slice S3 and Phase 2 are not complete.
+verify/reanalyze tasks. On 2026-08-05, one clean-baseline local run from
+commit `51025cf` used `gemma4:e2b` with its full digest, `128` output tokens,
+`PT2M`, and the locked six-row one-attempt schedule. All six invocations
+completed with complete usage metadata and empty responses; no model,
+timeout, or provider failure occurred. The ignored saved evidence verified and
+reanalyzed offline, and the preserved Phase 1 evidence still verifies. This
+closes Phase 2 as a contract-reuse proof, not a quality, reliability, or model
+ranking conclusion.
 
-Phase 2 may extract only proven shared invocation/evidence contracts, add one
-minimal provider-neutral chat boundary with an Ollama adapter, and add one
-dedicated sequential six-row chat matrix. It must remain local, no-pull, and
-provider-free; preserve Phase 1 evidence verification; keep all default tests
-offline; and leave the existing chat endpoint unchanged unless parity tests
-justify migration. The implemented local matrix remains an explicit opt-in
-task and must not enter `test`, `check`, `build`, application startup, or CI.
+Phase 2 extracted only proven shared invocation/evidence contracts, added one
+minimal provider-neutral chat boundary with an Ollama adapter, and executed one
+dedicated sequential six-row chat matrix. It remained local and no-pull, with
+all default tests offline; the existing chat endpoint remains unchanged because
+no parity-tested migration was requested. The matrix remains an explicit
+opt-in task outside `test`, `check`, `build`, application startup, and CI.
 
-This start decision does not authorize Anthropic credentials or calls, another
+Phase 2 closure does not authorize Anthropic credentials or calls, another
 provider or benchmark surface, an automatic model pull, Docker, spending, a
 release, a tag, or a push.
 
@@ -63,12 +67,11 @@ These remain roadmap candidates, not active work.
 
 ### Phase 3: one Anthropic portability proof
 
-The candidate is exactly one Anthropic adapter behind the Phase 2 boundary.
-It remains deferred until Phase 2 is complete, framework
-compatibility is reviewed, credentials are explicitly authorized, and a maximum
-spend is approved immediately before any live call. Without that authorization,
-only offline/mock implementation may be described as buildable; the live proof
-is deferred.
+The candidate is exactly one Anthropic adapter behind the completed Phase 2
+boundary. It remains deferred until framework compatibility is reviewed,
+credentials are explicitly authorized, and a maximum spend is approved
+immediately before any live call. Without that authorization, only offline/mock
+implementation may be described as buildable; the live proof is deferred.
 
 ## Deferred Through the Current Roadmap
 

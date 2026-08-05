@@ -1,9 +1,9 @@
 # Test Plan
 
-The tracked [deferred-work index](DEFERRED-WORK.md) records the active Phase 2
-chat boundary and defines the remaining start gates for future providers,
-retrieval, Testcontainers, model types, and MCP work. Phase 2 authorization
-does not place a live model call in default tests or CI.
+The tracked [deferred-work index](DEFERRED-WORK.md) records the completed Phase
+2 chat reuse proof and the remaining start gates for future providers,
+retrieval, Testcontainers, model types, and MCP work. The Phase 2 closeout did
+not place a live model call in default tests or CI.
 
 ## Near Term
 
@@ -124,8 +124,9 @@ does not place a live model call in default tests or CI.
 
 ## Chat Benchmark Phase
 
-- Treat chat as the project-owner-selected Phase 2 reuse and later portability
-  surface. Keep Phase 2 local, no-pull, provider-free, and offline by default.
+- Treat chat as the completed Phase 2 reuse surface and the later portability
+  surface. Keep its default lifecycle local, no-pull, provider-free, and
+  offline.
 - Keep the internal chat invocation contract provider-neutral for provider and
   requested/effective model identity, prompts, common generation settings,
   explicit supported/unsupported option metadata, and invocation outcomes.

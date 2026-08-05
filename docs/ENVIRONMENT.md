@@ -427,10 +427,11 @@ reference metadata into the saved run.
 ## Local Chat Benchmark
 
 The Phase 2 start gate closed on 2026-08-04 with chat selected as the reuse and
-later portability surface. Slices S1 and S2 are complete. Slice S3's dedicated
-matrix, saved-evidence, and offline tasks are implemented, but no controlled S3
-run has been authorized or performed. The interactive endpoint remains
-unchanged unless later parity tests justify migration. Phase 2 adds no
+later portability surface. Slices S1 through S3 closed on 2026-08-05 after one
+controlled local `gemma4:e2b` matrix from clean commit `51025cf` verified and
+reanalyzed offline. The locked six rows used `128` output tokens and `PT2M`;
+all completed with usage metadata and empty responses. The interactive endpoint
+remains unchanged unless later parity tests justify migration. Phase 2 added no
 Anthropic credential or remote call.
 
 The simple chat benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.

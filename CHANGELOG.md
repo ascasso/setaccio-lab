@@ -16,7 +16,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   deterministic summary, and standalone offline verify/reanalyze tasks. Tests
   cover exact parity with the unchanged interactive defaults, pre-allocation
   rejection, six-call order, failed-row retention, protocol drift, tampering,
-  and summary regeneration. No controlled S3 model run has been performed yet.
+  and summary regeneration.
 - Added a minimal provider-neutral chat invocation contract for provider and
   requested/effective model identity, prompts, common generation settings,
   explicit provider option support, raw response, available usage, latency,
@@ -34,7 +34,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   schemas.
 - Added `docs/DEFERRED-WORK.md` as the public-safe canonical index for work
   intentionally outside the completed August cycle. It now records the active
-  Phase 2 chat boundary plus the Prompt v2, output-budget, Testcontainers,
+  Phase 2 chat closure plus the Prompt v2, output-budget, Testcontainers,
   retrieval, release/tag, and Phase 3 Anthropic gates; links the environment
   and test-plan boundaries; and makes clear that roadmap entries do not
   authorize live execution, credentials, Docker, a release, or a tag.
@@ -144,6 +144,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Completed the Phase 2 local Ollama reuse proof from clean commit `51025cf`
+  with explicit `gemma4:e2b` identity and full digest, `128` output tokens,
+  `PT2M`, and the locked six-row sequential one-attempt schedule. All six
+  invocations completed with usage metadata but returned empty responses;
+  there was no unavailable-model, timeout, or provider failure. Ignored
+  evidence verified and reanalyzed offline, and the preserved Phase 1 evidence
+  still verifies. This closes the invocation/evidence reuse proof without a
+  chat-quality, reliability, or model-ranking claim; the existing interactive
+  endpoint remains unchanged and Phase 3 stays separately authorized.
 - Closed the Phase 2 start gate after the project owner selected the existing
   chat benchmark as the reuse and later portability surface. Slice S1 is now
   active on a dedicated feature branch under local, no-pull, provider-free
