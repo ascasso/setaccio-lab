@@ -133,7 +133,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-03)
+## Current State Snapshot (as of 2026-08-04)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -192,6 +192,12 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   remains experimental and unadopted, and any future decision requires new
   paired controlled evidence plus actual human review.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
+- The Phase 2 start gate closed on 2026-08-04 when the project owner selected
+  chat as the reuse and later portability surface. Slice S1 is active on a
+  dedicated feature branch. Phase 2 remains local, no-pull, and
+  provider-free; it does not authorize Anthropic credentials or remote calls,
+  default-lifecycle live execution, or migration of the existing chat endpoint
+  without request/response parity tests.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
@@ -380,6 +386,14 @@ Completed:
   repetitions as statistical reliability, claiming an order effect or general
   factuality, ranking judges, or rerunning/replacing A5 rows; record the narrow
   follow-up hypothesis and defer Testcontainers for this cycle.
+
+Active:
+
+- Complete the authorized Phase 2 chat reuse proof in three bounded slices:
+  extract only proven shared contracts, add the minimal provider-neutral chat
+  invocation boundary with only an Ollama adapter, and add one dedicated
+  sequential six-row chat matrix with offline verification/reanalysis. Keep
+  the existing endpoint unchanged unless parity tests justify migration.
 
 Pending:
 

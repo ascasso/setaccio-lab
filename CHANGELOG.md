@@ -121,6 +121,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Closed the Phase 2 start gate after the project owner selected the existing
+  chat benchmark as the reuse and later portability surface. Slice S1 is now
+  active on a dedicated feature branch under local, no-pull, provider-free
+  constraints; Anthropic credentials/calls, default-lifecycle live execution,
+  automatic pulls, and untested endpoint migration remain unauthorized.
 - Updated repository agent workflow guidance to commit completed in-scope work
   after appropriate verification, while keeping pushes explicitly user
   authorized and unrelated user changes out of commits.

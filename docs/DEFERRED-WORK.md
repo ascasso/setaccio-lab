@@ -1,11 +1,12 @@
 # Deferred Work
 
-Status: current after the completed August 2026 local fact-check cycle.
+Status: current after the Phase 2 chat start decision on 2026-08-04.
 
-This is the tracked index for work intentionally outside the completed August
-scope. It distinguishes a deferred item from a failed or partially completed
-item. A listing here does not authorize implementation, a live model call,
-Docker use, a credential, spending, a release, or a tag.
+This is the tracked index for the active Phase 2 boundary and work intentionally
+outside the completed August scope. It distinguishes active, deferred, failed,
+and partially completed work. Only the Phase 2 boundary below has a new-start
+decision; no listing here authorizes a live model call, Docker use, a
+credential, spending, a release, or a tag.
 
 ## Completed Boundary
 
@@ -14,8 +15,26 @@ human-confirmed fixture contract, dedicated recording judge boundary, offline
 evidence lifecycle, one controlled host-Ollama run, and bounded A6
 interpretation are recorded in
 [LOCAL-AI-EVALUATION-PLAN.md](LOCAL-AI-EVALUATION-PLAN.md). The saved raw A5
-evidence remains ignored. This document lists only work that deliberately did
-not enter that cycle.
+evidence remains ignored.
+
+## Active Phase 2 Boundary
+
+On 2026-08-04, the project owner explicitly selected the existing public-safe
+chat surface for the Phase 2 reuse proof and later portability proof. Slice S1
+is active on `feature/chat-evidence-reuse`, based on `develop` commit
+`2b47c07`.
+
+Phase 2 may extract only proven shared invocation/evidence contracts, add one
+minimal provider-neutral chat boundary with an Ollama adapter, and add one
+dedicated sequential six-row chat matrix. It must remain local, no-pull, and
+provider-free; preserve Phase 1 evidence verification; keep all default tests
+offline; and leave the existing chat endpoint unchanged unless parity tests
+justify migration. The future local matrix remains an explicit opt-in task and
+must not enter `test`, `check`, `build`, application startup, or CI.
+
+This start decision does not authorize Anthropic credentials or calls, another
+provider or benchmark surface, an automatic model pull, Docker, spending, a
+release, a tag, or a push.
 
 ## Deferred From the August Cycle
 
@@ -27,25 +46,14 @@ not enter that cycle.
 | Relevancy evaluation and retrieval | Deferred. Ordinary fixture context is not a retrieval flow. | Add a real retrieval path that preserves the retrieved documents and can be evaluated without presenting fixture context as RAG evidence. |
 | Release, tag, and promotion | Deferred. The August feature branch is not a release decision. | Use a separately authorized promotion/release workflow after the appropriate integration review; decide version, changelog release entry, and tag together. |
 
-## Planned Only After a New Start Decision
+## Planned Only After Separate Authorization
 
-These are roadmap candidates, not active work.
+These remain roadmap candidates, not active work.
 
-### September: one chat reuse proof
+### Phase 3: one Anthropic portability proof
 
-The candidate is an existing public-safe Ollama chat surface. It should reuse
-the established invocation/evidence contract rather than create a parallel
-framework, and place Ollama behind a narrow provider-neutral boundary.
-
-Before it starts, the project owner must select chat as the surface. The work
-must remain local, no-pull, and provider-free; it must preserve August evidence
-verification and not migrate the existing chat endpoint unless request/response
-parity is tested.
-
-### October: one Anthropic portability proof
-
-The candidate is exactly one Anthropic adapter behind the September boundary.
-It remains deferred until the September work is complete, framework
+The candidate is exactly one Anthropic adapter behind the Phase 2 boundary.
+It remains deferred until Phase 2 is complete, framework
 compatibility is reviewed, credentials are explicitly authorized, and a maximum
 spend is approved immediately before any live call. Without that authorization,
 only offline/mock implementation may be described as buildable; the live proof
@@ -53,8 +61,8 @@ is deferred.
 
 ## Deferred Through the Current Roadmap
 
-The following do not enter the August, September, or narrow October path unless
-the plan is explicitly revised:
+The following do not enter the current three-phase path unless the plan is
+explicitly revised:
 
 - additional remote providers beyond the one authorized Anthropic proof;
 - additional model types such as embeddings, image generation, audio

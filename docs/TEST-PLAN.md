@@ -1,9 +1,9 @@
 # Test Plan
 
-The tracked [deferred-work index](DEFERRED-WORK.md) defines the start gates for
-future providers, retrieval, Testcontainers, model types, and MCP work. A
-future item does not enter default tests or CI merely because it appears in a
-plan or environment table.
+The tracked [deferred-work index](DEFERRED-WORK.md) records the active Phase 2
+chat boundary and defines the remaining start gates for future providers,
+retrieval, Testcontainers, model types, and MCP work. Phase 2 authorization
+does not place a live model call in default tests or CI.
 
 ## Near Term
 
@@ -116,12 +116,24 @@ plan or environment table.
 
 ## Chat Benchmark Phase
 
+- Treat chat as the project-owner-selected Phase 2 reuse and later portability
+  surface. Keep Phase 2 local, no-pull, provider-free, and offline by default.
 - Maintain the dedicated local-only chat benchmark surface at `POST /api/lab/chat`.
 - Keep service-level tests backed by a mocked `OllamaChatModel`; do not add live Ollama calls to default tests.
 - Verify per-request model selection is passed through Spring AI chat options for every prompt/model pair.
 - Verify default prompts and caller-provided prompt lists through controller tests.
 - Verify result rows capture provider/model, prompt id/text, advisor mode, latency, output, failure details, and token-usage metadata when Spring AI exposes it.
 - Verify JSON result writing under ignored `build/lab-results/` output as `*-chat.json`.
+- Before a dedicated matrix call exists, lock the three current default prompts
+  in one versioned catalog with stable IDs, exact bytes, deterministic order,
+  catalog SHA-256, and per-prompt SHA-256 tests.
+- Test the dedicated matrix path separately from the interactive service: one
+  explicit installed model identity/digest, two sequential repetitions,
+  temperature `0.0`, seeds `42`/`43`, explicit token limit and timeout, one
+  attempt, no pull, six rows, non-overwriting ignored output, shared manifest,
+  and offline verify/reanalyze behavior.
+- Keep existing endpoint request/response behavior unchanged unless dedicated
+  parity tests justify migration to the new boundary.
 
 ## Optional Integration Tests
 

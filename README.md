@@ -259,9 +259,11 @@ output-budget compatibility hypothesis without claiming causation. The
 Testcontainers outcome is `defer`, because provisioning would not answer the
 observed verdict-yield question. No A5 row was rerun or replaced. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
-All intentionally deferred follow-up work, its start gates, and its
-non-authorization boundaries are indexed in
-[the deferred-work guide](docs/DEFERRED-WORK.md).
+On 2026-08-04, the project owner selected chat as the Phase 2 reuse and later
+portability surface. Slice S1 is active; no dedicated chat-matrix task exists
+yet, and the existing interactive endpoint remains unchanged. The active Phase
+2 boundary, remaining deferred work, start gates, and non-authorization
+boundaries are indexed in [the deferred-work guide](docs/DEFERRED-WORK.md).
 
 All benchmarks are local-first and offline-safe by default:
 
