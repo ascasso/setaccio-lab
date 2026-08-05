@@ -126,6 +126,16 @@ does not place a live model call in default tests or CI.
 
 - Treat chat as the project-owner-selected Phase 2 reuse and later portability
   surface. Keep Phase 2 local, no-pull, provider-free, and offline by default.
+- Keep the internal chat invocation contract provider-neutral for provider and
+  requested/effective model identity, prompts, common generation settings,
+  explicit supported/unsupported option metadata, and invocation outcomes.
+  Keep Ollama's full digest and seed semantics on the Ollama identity/adapter
+  instead of presenting them as universal provider capabilities.
+- Verify the Ollama adapter with mocked `ChatModel` behavior: explicit model,
+  temperature, seed, and token options; raw response and optional usage;
+  latency and one attempt; and empty-response, unavailable-model, timeout, and
+  provider-failure classification. Verify its model factory remains loopback,
+  pull strategy `never`, and one attempt without contacting Ollama.
 - Maintain the dedicated local-only chat benchmark surface at `POST /api/lab/chat`.
 - Keep service-level tests backed by a mocked `OllamaChatModel`; do not add live Ollama calls to default tests.
 - Verify per-request model selection is passed through Spring AI chat options for every prompt/model pair.

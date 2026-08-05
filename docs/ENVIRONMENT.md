@@ -427,10 +427,11 @@ reference metadata into the saved run.
 ## Local Chat Benchmark
 
 The Phase 2 start gate closed on 2026-08-04 with chat selected as the reuse and
-later portability surface. Slice S1 is complete and Slice S2 is next, but no
-dedicated chat-matrix task exists yet. The commands below continue to describe only the existing
-interactive endpoint; that endpoint remains unchanged unless later parity tests
-justify migration. Phase 2 adds no Anthropic credential or remote call.
+later portability surface. Slices S1 and S2 are complete and Slice S3 is next,
+but no dedicated chat-matrix task exists yet. The commands below continue to
+describe only the existing interactive endpoint; that endpoint remains
+unchanged unless later parity tests justify migration. Phase 2 adds no
+Anthropic credential or remote call.
 
 The simple chat benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.
 

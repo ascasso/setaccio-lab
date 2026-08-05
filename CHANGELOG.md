@@ -9,6 +9,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added a minimal provider-neutral chat invocation contract for provider and
+  requested/effective model identity, prompts, common generation settings,
+  explicit provider option support, raw response, available usage, latency,
+  one-attempt recording, and classified failures. Its Ollama-only adapter keeps
+  the full digest and seed semantics provider-specific, applies explicit model
+  options, and shares loopback/no-pull/one-attempt model construction with the
+  local fact-check judge. Provider-free tests cover success, empty response,
+  unavailable model, timeout, provider failure, and safety-policy behavior;
+  the existing interactive chat endpoint remains unchanged.
 - Added plain-Java `EvidenceFiles` operations for non-overwriting saved-artifact
   writes, directory/path validation, artifact size/SHA-256 checks, saved-run
   layout inspection, deterministic summary verification, and atomic summary

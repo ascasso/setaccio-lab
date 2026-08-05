@@ -1,6 +1,6 @@
 # Deferred Work
 
-Status: current after the Phase 2 chat start decision on 2026-08-04.
+Status: current after Phase 2 Slice S2 on 2026-08-04.
 
 This is the tracked index for the active Phase 2 boundary and work intentionally
 outside the completed August scope. It distinguishes active, deferred, failed,
@@ -24,7 +24,12 @@ chat surface for the Phase 2 reuse proof and later portability proof. Slice S1
 completed on `feature/chat-evidence-reuse`, based on `develop` commit `2b47c07`.
 It extracted shared saved-evidence file operations across vision, Tool Search,
 and local evaluation without merging their suite-specific schemas or changing
-saved formats. Slice S2 is next.
+saved formats. Slice S2 then added the minimal provider-neutral chat invocation
+contract and its only Phase 2 adapter, Ollama. The contract records common
+model, prompt, generation, option-support, response, usage, latency, attempt,
+and failure fields while keeping the full digest specific to Ollama. Model
+construction remains loopback, no-pull, and one-attempt. The existing
+interactive endpoint is unchanged. Slice S3 is next.
 
 Phase 2 may extract only proven shared invocation/evidence contracts, add one
 minimal provider-neutral chat boundary with an Ollama adapter, and add one

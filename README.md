@@ -32,6 +32,14 @@ Vision matrix, Tool Search matrix, and local evaluation now consume those file
 operations while retaining their existing raw-result schemas, analyzers,
 summaries, and failure taxonomies.
 
+Phase 2 Slice S2 added a small provider-neutral chat invocation contract for
+provider/requested/effective model identity, prompts, common generation
+settings, provider option support, and recorded invocation outcomes. Its first
+adapter is Ollama-only: Ollama identity retains the full model digest, request
+options remain explicit, and the shared model construction forces loopback,
+pull strategy `never`, and one attempt. The existing interactive chat endpoint
+has not migrated to this boundary.
+
 The lifecycle deliberately keeps suite result payloads separate and reserves
 BLAKE3 for benchmark input identity. The locked Tool Search matrix and the
 dedicated sequential vision matrix write v1 manifests around their
@@ -267,10 +275,10 @@ Testcontainers outcome is `defer`, because provisioning would not answer the
 observed verdict-yield question. No A5 row was rerun or replaced. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 On 2026-08-04, the project owner selected chat as the Phase 2 reuse and later
-portability surface. Slice S1 is complete and Slice S2 is next; no dedicated
-chat-matrix task exists yet, and the existing interactive endpoint remains
-unchanged. The active Phase 2 boundary, remaining deferred work, start gates,
-and non-authorization boundaries are indexed in
+portability surface. Slices S1 and S2 are complete and Slice S3 is next; no
+dedicated chat-matrix task exists yet, and the existing interactive endpoint
+remains unchanged. The active Phase 2 boundary, remaining deferred work, start
+gates, and non-authorization boundaries are indexed in
 [the deferred-work guide](docs/DEFERRED-WORK.md).
 
 All benchmarks are local-first and offline-safe by default:
