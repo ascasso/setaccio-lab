@@ -133,7 +133,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-03)
+## Current State Snapshot (as of 2026-08-04)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -192,6 +192,25 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   remains experimental and unadopted, and any future decision requires new
   paired controlled evidence plus actual human review.
 - The local chat benchmark endpoint is wired at `POST /api/lab/chat`; it accepts explicit model lists and public-safe prompts, records token usage when available, and keeps live Ollama calls opt-in.
+- The Phase 2 start gate closed on 2026-08-04 when the project owner selected
+  chat as the reuse and later portability surface. Slice S1 completed on a
+  dedicated feature branch by extracting only proven shared saved-evidence
+  file operations across vision, Tool Search, and local evaluation; their
+  suite-specific schemas remain unchanged. Slice S2 added the minimal
+  provider-neutral chat invocation contract and Ollama-only adapter with full
+  digest identity, explicit supported-option metadata, classified outcomes,
+  and shared loopback/no-pull/one-attempt model construction. Slice S3 has
+  one tracked v1 three-prompt catalog, a dedicated sequential six-row runner,
+  shared-v1 evidence, deterministic analysis, and standalone offline
+  verify/reanalyze tasks. On 2026-08-05, one clean-baseline local
+  `gemma4:e2b` run from commit `51025cf` used `128` output tokens, `PT2M`, and
+  the locked six-row schedule; all invocations completed with usage metadata
+  and empty responses. The ignored evidence verified and reanalyzed offline,
+  and the preserved Phase 1 evidence still verifies. Phase 2 is complete as a
+  contract-reuse proof, without a quality, reliability, or model-ranking claim.
+  It does not authorize Anthropic credentials or remote calls,
+  default-lifecycle live execution, or migration of the existing chat endpoint
+  without request/response parity tests.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
@@ -240,7 +259,15 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   mode passed all 30 rows while regex Tool Search passed 12 of 30. Discovery
   behavior remains the bounded diagnostic surface, and no alternate index or
   provider is selected from this result alone.
-- `setaccio-lab` includes plain Java shared evidence primitives for versioned manifests, non-overwriting run directories, Git/framework provenance, relative artifact links, SHA-256 integrity metadata, and strict offline verification. The locked Tool Search matrix and sequential vision matrix use the shared v1 manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while vision verification accepts v1 evidence only.
+- `setaccio-lab` includes plain Java shared evidence primitives for versioned
+  manifests, non-overwriting run directories and artifact writes,
+  Git/framework provenance, relative artifact links, SHA-256 integrity
+  metadata, saved-run layout checks, deterministic summary handling, and
+  strict offline verification. The common file operations have vision, Tool
+  Search, and local-evaluation consumers without merging their schemas. The
+  locked Tool Search matrix and sequential vision matrix use the shared v1
+  manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while
+  vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
@@ -383,6 +410,13 @@ Completed:
 
 Pending:
 
+- Phase 3 remains a separately authorized portability candidate. Before any
+  remote call, re-check current framework/provider contracts, select one
+  explicit Anthropic model, document option support, confirm local-only
+  credentials, calculate the current worst-case cost, and obtain explicit
+  user authorization with a maximum USD budget. Keep the existing chat
+  endpoint unchanged unless parity tests justify migration.
+
 The tracked [deferred-work index](docs/DEFERRED-WORK.md) is the canonical
 public-safe list of deferred scope, start gates, and non-authorization
 boundaries. Keep it aligned with this section, the environment guide, test
@@ -513,6 +547,7 @@ MCP phase:
 ```bash
 ./gradlew :setaccio-core:test
 ./gradlew :setaccio-lab:test
+./gradlew :setaccio-lab:chatMatrixTest
 ./gradlew :setaccio-lab:localEvaluationTest
 ./gradlew :setaccio-lab:visionMatrixTest
 ./gradlew :setaccio-testcontainers:test

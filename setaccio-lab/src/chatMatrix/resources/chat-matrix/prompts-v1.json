@@ -1,0 +1,21 @@
+{
+  "id": "local-chat-prompts",
+  "version": "1",
+  "prompts": [
+    {
+      "id": "concise-summary",
+      "text": "Summarize the purpose of a local AI benchmark harness in three concise bullet points.",
+      "sha256": "ebc7de5dfec2db66d2b118673349deb173bf127d26914acaaa982c1041627f8c"
+    },
+    {
+      "id": "classification-policy",
+      "text": "Classify this file-management request as organize, search, compare, or unknown: Find duplicate receipts from last quarter.",
+      "sha256": "192f85a28601c9ae700d6d9a2b245402add14ce0e13003daf7cb66083c06914c"
+    },
+    {
+      "id": "json-shape",
+      "text": "Return a compact JSON object with fields category and confidence for this text: warranty invoice for laptop repair.",
+      "sha256": "90da8d5b8cf6a65a0de48761dd06b3ed074e48556c79cf77af20b0c38feaf62c"
+    }
+  ]
+}

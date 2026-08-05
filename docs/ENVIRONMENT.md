@@ -426,6 +426,14 @@ reference metadata into the saved run.
 
 ## Local Chat Benchmark
 
+The Phase 2 start gate closed on 2026-08-04 with chat selected as the reuse and
+later portability surface. Slices S1 through S3 closed on 2026-08-05 after one
+controlled local `gemma4:e2b` matrix from clean commit `51025cf` verified and
+reanalyzed offline. The locked six rows used `128` output tokens and `PT2M`;
+all completed with usage metadata and empty responses. The interactive endpoint
+remains unchanged unless later parity tests justify migration. Phase 2 added no
+Anthropic credential or remote call.
+
 The simple chat benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.
 
 Start the app explicitly:
@@ -460,6 +468,45 @@ Optional request fields:
 | `prompts` | No | List of `{ "id": "...", "text": "..." }` prompt objects. Required when `useDefaultPrompts` is `false`. |
 
 No new environment variables are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE` and `SETACCIO_LAB_OUTPUT_DIR`.
+
+### Dedicated controlled chat matrix
+
+The dedicated matrix is not an HTTP endpoint and does not start Spring. It
+requires five explicit task options, resolves the requested already-installed
+model to its full Ollama digest before output allocation, and then runs exactly
+three locked prompts twice in sequential order with temperature `0.0`, seeds
+`42`/`43`, one attempt, and pull strategy `never`.
+
+Running it contacts local Ollama and requires separate explicit authorization:
+
+```bash
+./gradlew :setaccio-lab:chatMatrix \
+  --ollama-base-url=http://127.0.0.1:11434 \
+  --model=<already-installed-model-tag> \
+  --max-tokens=<positive-limit-1-through-32768> \
+  --timeout=<positive-ISO-8601-duration-up-to-PT10M> \
+  --output-dir=build/chat-matrix/2026-08-04-<run-id>
+```
+
+The output directory must be new, dated, and directly under ignored
+`build/chat-matrix/`. The task never pulls a model and is not attached to
+`test`, `check`, `build`, application startup, or CI. A failed invocation is
+retained as its scheduled row without retry or replacement.
+
+Verify or deterministically regenerate a saved summary without starting Spring
+or contacting Ollama:
+
+```bash
+./gradlew :setaccio-lab:chatMatrixVerify \
+  --run-dir=build/chat-matrix/<saved-run>
+
+./gradlew :setaccio-lab:chatMatrixReanalyze \
+  --run-dir=build/chat-matrix/<saved-run>
+```
+
+`SUMMARY.md` reports only protocol integrity, invocation completion, available
+usage, failure categories, and successful latency range. It does not judge
+semantic output quality or rank the single model.
 
 ## Local Tool-Calling Benchmark
 
