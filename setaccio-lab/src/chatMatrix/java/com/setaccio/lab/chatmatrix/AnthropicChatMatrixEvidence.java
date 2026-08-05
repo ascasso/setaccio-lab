@@ -317,6 +317,10 @@ final class AnthropicChatMatrixEvidence {
                 || result.preflightCostEstimate().estimatedUsd().compareTo(result.maximumAuthorizedCostUsd()) > 0) {
             throw new IllegalArgumentException("Anthropic raw result drifted from the locked O3 contract");
         }
+        if (AnthropicChatMatrixExecutor.observedCost(result.rows(), result.preflightCostEstimate())
+                .compareTo(result.maximumAuthorizedCostUsd()) > 0) {
+            throw new IllegalArgumentException("Anthropic raw result exceeded the authorized cost ceiling");
+        }
         ChatPortabilityRunSettings expected = AnthropicChatMatrixProtocol.settings(
                 ChatPromptCatalog.load(com.fasterxml.jackson.databind.json.JsonMapper.builder().findAndAddModules().build()));
         if (!result.runSettings().equals(expected)) {

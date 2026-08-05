@@ -56,7 +56,10 @@ final class AnthropicChatInvocation implements ChatInvocation {
             throw new IllegalArgumentException("request settings must match the bound Anthropic model settings");
         }
 
-        AnthropicChatOptions options = AnthropicChatOptions.builder()
+        if (!(chatModel.getOptions() instanceof AnthropicChatOptions modelOptions)) {
+            throw new IllegalStateException("Anthropic adapter requires Anthropic chat options");
+        }
+        AnthropicChatOptions options = modelOptions.mutate()
                 .model(modelIdentity.requestedModel())
                 .maxTokens(settings.maxOutputTokens())
                 .temperature(settings.temperature())

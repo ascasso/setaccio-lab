@@ -40,6 +40,8 @@ class AnthropicChatInvocationTest {
             assertThat(options.getModel()).isEqualTo("claude-haiku-4-5-20251001");
             assertThat(options.getTemperature()).isEqualTo(0.0);
             assertThat(options.getMaxTokens()).isEqualTo(128);
+            assertThat(options.getTimeout()).isEqualTo(Duration.ofSeconds(30));
+            assertThat(options.getMaxRetries()).isZero();
         });
         assertThat(outcome.modelIdentity()).isEqualTo(identity());
         assertThat(outcome.providerResponseId()).isEqualTo("msg_01ABC");
@@ -125,6 +127,13 @@ class AnthropicChatInvocationTest {
     }
 
     private static AnthropicChatInvocation invocation(ChatModel chatModel) {
+        when(chatModel.getOptions()).thenReturn(AnthropicChatOptions.builder()
+                .model(identity().requestedModel())
+                .maxTokens(settings().maxOutputTokens())
+                .temperature(settings().temperature())
+                .timeout(settings().requestTimeout())
+                .maxRetries(0)
+                .build());
         return new AnthropicChatInvocation(chatModel, identity(), settings());
     }
 

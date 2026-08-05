@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AnthropicChatMatrixEvidenceTest {
 
@@ -67,6 +68,30 @@ class AnthropicChatMatrixEvidenceTest {
         assertThat(result.rows()).hasSize(6);
         assertThat(result.rows().get(1).failureCategory()).isEqualTo(ChatInvocationFailureCategory.RATE_LIMIT);
         assertThat(result.rows().get(2).sequence()).isEqualTo(3);
+    }
+
+    @Test
+    void stopsImmediatelyWhenObservedUsageExceedsAuthorizedCostCeiling() {
+        ChatPromptCatalog catalog = ChatMatrixTestFixtures.CATALOG;
+        ChatPortabilityRunSettings settings = AnthropicChatMatrixProtocol.settings(catalog);
+        ChatEstimatedCost rates = new ChatEstimatedCost(
+                "USD", 0, 0, BigDecimal.ONE, BigDecimal.ONE,
+                Instant.parse("2026-08-05T12:00:00Z"), AnthropicChatMatrixProtocol.OFFICIAL_PRICE_SOURCE);
+        List<Integer> calls = new ArrayList<>();
+        AnthropicChatMatrixExecutor executor = new AnthropicChatMatrixExecutor();
+
+        assertThatThrownBy(() -> executor.execute(new AnthropicChatMatrixExecutor.Prepared(
+                catalog, settings, AnthropicChatMatrixProtocol.modelIdentity(), rates,
+                new BigDecimal("0.00000099"), (prompt, model, generation) -> {
+                    calls.add(calls.size() + 1);
+                    return new com.setaccio.lab.chat.ChatInvocationOutcome(
+                            model, AnthropicChatMatrixProtocol.optionSupport(), prompt.id(), true,
+                            "answer", "msg_" + calls.size(), 1, 0, 1, 4, 1,
+                            ChatInvocationFailureCategory.NONE, null);
+                })))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("Anthropic run stopped because observed usage exceeded the authorized cost ceiling");
+        assertThat(calls).containsExactly(1);
     }
 
     @Test

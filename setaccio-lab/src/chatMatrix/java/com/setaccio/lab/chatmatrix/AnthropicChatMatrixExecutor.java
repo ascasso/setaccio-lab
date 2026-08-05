@@ -37,6 +37,9 @@ final class AnthropicChatMatrixExecutor {
                     java.time.Duration.ofMillis(prepared.settings().timeoutMillis()), prepared.settings().maxAttempts());
             ChatInvocationOutcome outcome = prepared.session().invoke(prompt, prepared.modelIdentity(), settings);
             rows.add(AnthropicChatMatrixRow.from(index + 1, repetition, prompt, settings, prepared.modelIdentity(), outcome));
+            if (observedCost(rows, prepared.costEstimate()).compareTo(prepared.maximumAuthorizedCostUsd()) > 0) {
+                throw new IllegalStateException("Anthropic run stopped because observed usage exceeded the authorized cost ceiling");
+            }
         }
         return new AnthropicChatMatrixResult(
                 AnthropicChatMatrixProtocol.VERSION,
