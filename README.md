@@ -40,6 +40,15 @@ options remain explicit, and the shared model construction forces loopback,
 pull strategy `never`, and one attempt. The existing interactive chat endpoint
 has not migrated to this boundary.
 
+Phase 2 Slice S3 now has a provider-free implementation: the three existing
+default chat prompts are locked in one tracked v1 catalog with catalog and
+per-prompt SHA-256 identities, and a dedicated `chatMatrix` task executes the
+fixed six-row protocol through the S2 boundary. Suite-specific raw JSON,
+shared-v1 manifest, deterministic summary, and standalone `chatMatrixVerify`
+and `chatMatrixReanalyze` tasks stay under ignored `build/chat-matrix/`. No
+controlled S3 model run has been performed yet, so Phase 2 evidence acceptance
+remains open.
+
 The lifecycle deliberately keeps suite result payloads separate and reserves
 BLAKE3 for benchmark input identity. The locked Tool Search matrix and the
 dedicated sequential vision matrix write v1 manifests around their
@@ -275,10 +284,11 @@ Testcontainers outcome is `defer`, because provisioning would not answer the
 observed verdict-yield question. No A5 row was rerun or replaced. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
 On 2026-08-04, the project owner selected chat as the Phase 2 reuse and later
-portability surface. Slices S1 and S2 are complete and Slice S3 is next; no
-dedicated chat-matrix task exists yet, and the existing interactive endpoint
-remains unchanged. The active Phase 2 boundary, remaining deferred work, start
-gates, and non-authorization boundaries are indexed in
+portability surface. Slices S1 and S2 are complete; Slice S3 is implemented and
+provider-free tests pass, but its controlled Ollama evidence run has not been
+authorized or performed. The existing interactive endpoint remains unchanged.
+The active Phase 2 boundary, remaining deferred work, start gates, and
+non-authorization boundaries are indexed in
 [the deferred-work guide](docs/DEFERRED-WORK.md).
 
 All benchmarks are local-first and offline-safe by default:

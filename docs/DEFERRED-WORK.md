@@ -1,6 +1,6 @@
 # Deferred Work
 
-Status: current after Phase 2 Slice S2 on 2026-08-04.
+Status: current after the provider-free Phase 2 Slice S3 implementation on 2026-08-04.
 
 This is the tracked index for the active Phase 2 boundary and work intentionally
 outside the completed August scope. It distinguishes active, deferred, failed,
@@ -29,15 +29,19 @@ contract and its only Phase 2 adapter, Ollama. The contract records common
 model, prompt, generation, option-support, response, usage, latency, attempt,
 and failure fields while keeping the full digest specific to Ollama. Model
 construction remains loopback, no-pull, and one-attempt. The existing
-interactive endpoint is unchanged. Slice S3 is next.
+interactive endpoint is unchanged. Slice S3 now has a dedicated implementation:
+one tracked versioned three-prompt catalog, a sequential six-row Ollama runner,
+shared-v1 evidence, deterministic analysis, and standalone offline
+verify/reanalyze tasks. Its controlled local run has not been authorized or
+performed, so Slice S3 and Phase 2 are not complete.
 
 Phase 2 may extract only proven shared invocation/evidence contracts, add one
 minimal provider-neutral chat boundary with an Ollama adapter, and add one
 dedicated sequential six-row chat matrix. It must remain local, no-pull, and
 provider-free; preserve Phase 1 evidence verification; keep all default tests
 offline; and leave the existing chat endpoint unchanged unless parity tests
-justify migration. The future local matrix remains an explicit opt-in task and
-must not enter `test`, `check`, `build`, application startup, or CI.
+justify migration. The implemented local matrix remains an explicit opt-in
+task and must not enter `test`, `check`, `build`, application startup, or CI.
 
 This start decision does not authorize Anthropic credentials or calls, another
 provider or benchmark surface, an automatic model pull, Docker, spending, a

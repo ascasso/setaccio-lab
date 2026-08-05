@@ -72,6 +72,29 @@ class OllamaChatModelFactoryTest {
                 .hasMessage("seed must be explicit for the Ollama chat adapter");
     }
 
+    @Test
+    void createsTheBoundInvocationFromAnExistingApiWithoutPullOrRetry() {
+        OllamaApi ollamaApi = mock(OllamaApi.class);
+        OllamaChatModelFactory factory = new OllamaChatModelFactory();
+
+        ChatInvocation invocation = factory.createInvocation(
+                ollamaApi,
+                ChatInvocationContractTest.identity(),
+                settings());
+
+        verifyNoInteractions(ollamaApi);
+        when(ollamaApi.chat(any(OllamaApi.ChatRequest.class)))
+                .thenThrow(new IllegalStateException("provider failure"));
+        ChatInvocationOutcome outcome = invocation.invoke(new ChatInvocationRequest(
+                ChatInvocationContractTest.identity(),
+                new ChatInvocationPrompt("prompt", "Text"),
+                settings()));
+
+        assertThat(outcome.failureCategory()).isEqualTo(ChatInvocationFailureCategory.PROVIDER_FAILURE);
+        assertThat(outcome.attemptCount()).isEqualTo(1);
+        verify(ollamaApi, times(1)).chat(any(OllamaApi.ChatRequest.class));
+    }
+
     private static ChatGenerationSettings settings() {
         return new ChatGenerationSettings(0.0, 42, 128, Duration.ofSeconds(30), 1);
     }

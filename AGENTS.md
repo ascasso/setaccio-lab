@@ -199,11 +199,14 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   suite-specific schemas remain unchanged. Slice S2 added the minimal
   provider-neutral chat invocation contract and Ollama-only adapter with full
   digest identity, explicit supported-option metadata, classified outcomes,
-  and shared loopback/no-pull/one-attempt model construction. Slice S3 is next.
-  Phase 2 remains local, no-pull, and provider-free; it does not authorize
-  Anthropic credentials or remote calls, default-lifecycle live execution, or
-  migration of the existing chat endpoint without request/response parity
-  tests.
+  and shared loopback/no-pull/one-attempt model construction. Slice S3 now has
+  one tracked v1 three-prompt catalog, a dedicated sequential six-row runner,
+  shared-v1 evidence, deterministic analysis, and standalone offline
+  verify/reanalyze tasks. Provider-free tests pass, but no controlled S3 run
+  has been authorized or performed, so Phase 2 remains active. It does not
+  authorize Anthropic credentials or remote calls, default-lifecycle live
+  execution, or migration of the existing chat endpoint without
+  request/response parity tests.
 - The local tool benchmark endpoint is wired at `POST /api/lab/tools`; it supports standard tool calling plus an opt-in standard-versus-regex-Tool-Search comparison with paired sequential repetitions, alternating advisor order, explicit case expectations, normalized discovery traces, and named assertions.
 - The deterministic fixture evaluation endpoint is wired at `POST
   /api/lab/evaluations`; it exercises Spring AI's `Evaluator` contract without
@@ -403,11 +406,11 @@ Completed:
 
 Active:
 
-- Continue the authorized Phase 2 chat reuse proof after completed Slices S1
-  and S2. Slice S3 adds one dedicated sequential six-row chat matrix with
-  offline verification/reanalysis, applying the new invocation boundary before
-  considering any endpoint migration. Keep the existing endpoint unchanged
-  unless parity tests justify migration.
+- Complete the authorized Phase 2 chat reuse proof after completed Slices S1
+  and S2 and the provider-free S3 implementation. The next gate is one
+  separately explicit controlled `chatMatrix` invocation followed by offline
+  verification/reanalysis and bounded documentation. Keep the existing
+  endpoint unchanged unless parity tests justify migration.
 
 Pending:
 
@@ -541,6 +544,7 @@ MCP phase:
 ```bash
 ./gradlew :setaccio-core:test
 ./gradlew :setaccio-lab:test
+./gradlew :setaccio-lab:chatMatrixTest
 ./gradlew :setaccio-lab:localEvaluationTest
 ./gradlew :setaccio-lab:visionMatrixTest
 ./gradlew :setaccio-testcontainers:test

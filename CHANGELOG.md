@@ -9,6 +9,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the provider-free implementation of the dedicated Ollama chat matrix:
+  a tracked versioned three-prompt catalog with exact catalog/per-prompt
+  SHA-256 identities, one six-row sequential protocol, explicit installed model
+  digest and generation settings, S2-bound invocation, shared-v1 evidence,
+  deterministic summary, and standalone offline verify/reanalyze tasks. Tests
+  cover exact parity with the unchanged interactive defaults, pre-allocation
+  rejection, six-call order, failed-row retention, protocol drift, tampering,
+  and summary regeneration. No controlled S3 model run has been performed yet.
 - Added a minimal provider-neutral chat invocation contract for provider and
   requested/effective model identity, prompts, common generation settings,
   explicit provider option support, raw response, available usage, latency,

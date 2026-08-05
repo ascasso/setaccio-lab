@@ -42,13 +42,26 @@ public final class OllamaChatModelFactory {
         if (settings.seed() == null) {
             throw new IllegalArgumentException("seed must be explicit for the Ollama chat adapter");
         }
+        OllamaApi ollamaApi = ollamaApiFactory.create(baseUrl, settings.requestTimeout());
+        return create(ollamaApi, modelIdentity, settings);
+    }
+
+    public ChatModel create(
+            OllamaApi ollamaApi,
+            OllamaChatModelIdentity modelIdentity,
+            ChatGenerationSettings settings
+    ) {
+        Objects.requireNonNull(modelIdentity, "modelIdentity must not be null");
+        Objects.requireNonNull(settings, "settings must not be null");
+        if (settings.seed() == null) {
+            throw new IllegalArgumentException("seed must be explicit for the Ollama chat adapter");
+        }
         OllamaChatOptions options = OllamaChatOptions.builder()
                 .model(modelIdentity.requestedModel())
                 .temperature(settings.temperature())
                 .seed(settings.seed())
                 .numPredict(settings.maxOutputTokens())
                 .build();
-        OllamaApi ollamaApi = ollamaApiFactory.create(baseUrl, settings.requestTimeout());
         return createNoPullModel(ollamaApi, options, settings.requestTimeout(), settings.maxAttempts());
     }
 
@@ -59,6 +72,17 @@ public final class OllamaChatModelFactory {
     ) {
         return new OllamaChatInvocation(
                 create(baseUrl, modelIdentity, settings),
+                modelIdentity,
+                settings);
+    }
+
+    public ChatInvocation createInvocation(
+            OllamaApi ollamaApi,
+            OllamaChatModelIdentity modelIdentity,
+            ChatGenerationSettings settings
+    ) {
+        return new OllamaChatInvocation(
+                create(ollamaApi, modelIdentity, settings),
                 modelIdentity,
                 settings);
     }

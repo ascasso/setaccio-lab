@@ -142,14 +142,23 @@ does not place a live model call in default tests or CI.
 - Verify default prompts and caller-provided prompt lists through controller tests.
 - Verify result rows capture provider/model, prompt id/text, advisor mode, latency, output, failure details, and token-usage metadata when Spring AI exposes it.
 - Verify JSON result writing under ignored `build/lab-results/` output as `*-chat.json`.
-- Before a dedicated matrix call exists, lock the three current default prompts
-  in one versioned catalog with stable IDs, exact bytes, deterministic order,
-  catalog SHA-256, and per-prompt SHA-256 tests.
-- Test the dedicated matrix path separately from the interactive service: one
+- Keep the three current default prompts locked in the tracked v1 matrix
+  catalog with stable IDs, exact bytes, deterministic order, catalog SHA-256,
+  per-prompt SHA-256, and explicit parity with the unchanged interactive
+  defaults.
+- Test the dedicated `chatMatrix` path separately from the interactive service: one
   explicit installed model identity/digest, two sequential repetitions,
   temperature `0.0`, seeds `42`/`43`, explicit token limit and timeout, one
   attempt, no pull, six rows, non-overwriting ignored output, shared manifest,
   and offline verify/reanalyze behavior.
+- Keep `chatMatrix` outside `test`, `check`, `build`, application startup, and
+  CI. Keep `chatMatrixTest`, `chatMatrixVerify`, and `chatMatrixReanalyze`
+  provider-free; verification and reanalysis must not start Spring, read the
+  interactive endpoint, inspect provider state, or make a provider call.
+- Reject contract/catalog/model/schedule/settings drift, missing or replacement
+  rows, selective retries, tampered raw artifacts, summary drift, undeclared
+  files, unsafe paths, and incomplete usage metadata. Deterministic summaries
+  must not judge semantic response quality or rank the single model.
 - Keep existing endpoint request/response behavior unchanged unless dedicated
   parity tests justify migration to the new boundary.
 
