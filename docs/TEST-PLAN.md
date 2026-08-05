@@ -1,9 +1,9 @@
 # Test Plan
 
-The tracked [deferred-work index](DEFERRED-WORK.md) defines the start gates for
-future providers, retrieval, Testcontainers, model types, and MCP work. A
-future item does not enter default tests or CI merely because it appears in a
-plan or environment table.
+The tracked [deferred-work index](DEFERRED-WORK.md) records the completed Phase
+2 chat reuse proof and the remaining start gates for future providers,
+retrieval, Testcontainers, model types, and MCP work. The Phase 2 closeout did
+not place a live model call in default tests or CI.
 
 ## Near Term
 
@@ -25,6 +25,14 @@ plan or environment table.
 - Reject absolute, parent-traversing, cross-platform absolute, or symbolic-link artifact paths.
 - Verify saved runs entirely offline and report missing, modified, empty, duplicate, undeclared, or unsafe artifacts clearly.
 - Keep manifest JSON free of hostnames, absolute paths, credentials, and raw private environment details.
+- Keep shared saved-evidence file operations covered independently for
+  non-overwriting writes, safe directory/path handling, artifact size/SHA-256
+  checks, allowed-layout inspection, deterministic text verification, and
+  atomic replacement.
+- Reuse those file operations from vision, Tool Search, and local evaluation,
+  but retain suite-specific result rows, analyzers, summaries, failure
+  taxonomies, and identity/outcome schemas until compatible semantics are
+  demonstrated by real consumers.
 - Keep the locked Tool Search matrix on the shared v1 manifest while retaining
   legacy-v0 reads for existing unversioned matrix directories.
 - Do not describe vision, chat, or evaluation output as using the shared
@@ -116,12 +124,67 @@ plan or environment table.
 
 ## Chat Benchmark Phase
 
+- Treat chat as the completed Phase 2 reuse surface and the later portability
+  surface. Keep its default lifecycle local, no-pull, provider-free, and
+  offline.
+- Keep the implemented Anthropic O1 adapter provider-free by default. Mocked
+  tests must cover option mapping, explicit unsupported seed behavior, present
+  and absent usage, effective-model/safe-response-ID metadata, empty response,
+  timeout, authentication, rate-limit, provider failure, one attempt, and no
+  fallback. The separate O3 task may read `ANTHROPIC_API_KEY` only after its
+  explicit user authorization, USD ceiling, saved-Ollama-evidence, and fresh
+  output-directory preflight all pass.
+- Keep the O2 portability projection raw-output-free: preserve the provider's
+  identifier semantics (local digest versus hosted versioned ID), common option
+  handling, usage, outcome, and one-attempt metadata, but never treat a hosted
+  ID as a local digest or copy raw answers into a portability report. Record
+  temperature and output tokens as direct support; timeout and retry policy as
+  translated; seed as rejected and unsimulated; and no common option as silently
+  ignored.
+- Keep `anthropicChatMatrix` outside `test`, `check`, `build`, application
+  startup, and CI. Its sole protocol is six sequential calls, three locked
+  prompts times two unseeded repetitions, `claude-haiku-4-5-20251001`, `0.0`
+  temperature, `128` output tokens, `PT2M`, and exactly one attempt. Require a
+  current official-price worst-case calculation, an explicit USD ceiling no
+  greater than the current authorization, a matching verified Ollama saved run,
+  and a fresh ignored output directory before any remote call. Provider-free
+  tests must cover cost/path/option preflight, row retention without retries,
+  raw-output separation, and standalone offline verify/reanalyze.
+- Keep the internal chat invocation contract provider-neutral for provider and
+  requested/effective model identity, prompts, common generation settings,
+  explicit supported/unsupported option metadata, and invocation outcomes.
+  Keep Ollama's full digest and seed semantics on the Ollama identity/adapter
+  instead of presenting them as universal provider capabilities.
+- Verify the Ollama adapter with mocked `ChatModel` behavior: explicit model,
+  temperature, seed, and token options; raw response and optional usage;
+  latency and one attempt; and empty-response, unavailable-model, timeout, and
+  provider-failure classification. Verify its model factory remains loopback,
+  pull strategy `never`, and one attempt without contacting Ollama.
 - Maintain the dedicated local-only chat benchmark surface at `POST /api/lab/chat`.
 - Keep service-level tests backed by a mocked `OllamaChatModel`; do not add live Ollama calls to default tests.
 - Verify per-request model selection is passed through Spring AI chat options for every prompt/model pair.
 - Verify default prompts and caller-provided prompt lists through controller tests.
 - Verify result rows capture provider/model, prompt id/text, advisor mode, latency, output, failure details, and token-usage metadata when Spring AI exposes it.
 - Verify JSON result writing under ignored `build/lab-results/` output as `*-chat.json`.
+- Keep the three current default prompts locked in the tracked v1 matrix
+  catalog with stable IDs, exact bytes, deterministic order, catalog SHA-256,
+  per-prompt SHA-256, and explicit parity with the unchanged interactive
+  defaults.
+- Test the dedicated `chatMatrix` path separately from the interactive service: one
+  explicit installed model identity/digest, two sequential repetitions,
+  temperature `0.0`, seeds `42`/`43`, explicit token limit and timeout, one
+  attempt, no pull, six rows, non-overwriting ignored output, shared manifest,
+  and offline verify/reanalyze behavior.
+- Keep `chatMatrix` outside `test`, `check`, `build`, application startup, and
+  CI. Keep `chatMatrixTest`, `chatMatrixVerify`, and `chatMatrixReanalyze`
+  provider-free; verification and reanalysis must not start Spring, read the
+  interactive endpoint, inspect provider state, or make a provider call.
+- Reject contract/catalog/model/schedule/settings drift, missing or replacement
+  rows, selective retries, tampered raw artifacts, summary drift, undeclared
+  files, unsafe paths, and incomplete usage metadata. Deterministic summaries
+  must not judge semantic response quality or rank the single model.
+- Keep existing endpoint request/response behavior unchanged unless dedicated
+  parity tests justify migration to the new boundary.
 
 ## Optional Integration Tests
 

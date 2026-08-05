@@ -5,19 +5,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.evidence.EvidenceArtifact;
 import com.setaccio.lab.evidence.EvidenceCodeBaseline;
+import com.setaccio.lab.evidence.EvidenceFiles;
 import com.setaccio.lab.evidence.EvidenceIntegrity;
 import com.setaccio.lab.evidence.EvidenceManifest;
 import com.setaccio.lab.evidence.EvidenceManifestStore;
 import com.setaccio.lab.evidence.EvidenceProvenance;
 import com.setaccio.lab.evidence.EvidenceVerification;
 import com.setaccio.lab.evidence.EvidenceVerifier;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -75,12 +70,13 @@ final class LocalEvaluationEvidence {
         }
         Path root = requireWritableRunDirectory(runDirectory);
         Path rawPath = root.resolve(LocalEvaluationProtocol.RAW_FILENAME);
+        byte[] rawJson;
         try {
-            byte[] rawJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(result);
-            Files.write(rawPath, rawJson, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+            rawJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(result);
         } catch (Exception exception) {
             throw new IllegalStateException("Failed to write raw local evaluation result", exception);
         }
+        EvidenceFiles.writeNewBytes(rawPath, rawJson, "Failed to write raw local evaluation result");
 
         EvidenceArtifact rawArtifact = EvidenceIntegrity.describe(root, rawPath, RAW_ROLE);
         String summary = report.render(
@@ -90,16 +86,7 @@ final class LocalEvaluationEvidence {
                 rawArtifact.sha256(),
                 codeBaseline);
         Path summaryPath = root.resolve(SUMMARY_FILENAME);
-        try {
-            Files.writeString(
-                    summaryPath,
-                    summary,
-                    StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE_NEW,
-                    StandardOpenOption.WRITE);
-        } catch (Exception exception) {
-            throw new IllegalStateException("Failed to write local evaluation summary", exception);
-        }
+        EvidenceFiles.writeNewText(summaryPath, summary, "Failed to write local evaluation summary");
 
         EvidenceArtifact summaryArtifact = EvidenceIntegrity.describe(root, summaryPath, SUMMARY_ROLE);
         EvidenceManifest manifest = new EvidenceManifest(
@@ -212,29 +199,18 @@ final class LocalEvaluationEvidence {
     }
 
     private static Path requireWritableRunDirectory(Path runDirectory) {
-        if (runDirectory == null) {
-            throw new IllegalArgumentException("runDirectory must not be null");
-        }
-        Path root = runDirectory.toAbsolutePath().normalize();
-        if (Files.isSymbolicLink(root)
-                || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("runDirectory must be an existing regular directory");
-        }
-        return root;
+        return EvidenceFiles.requireWritableRunDirectory(
+                runDirectory,
+                "runDirectory must not be null",
+                "runDirectory must be an existing regular directory");
     }
 
     private static Path normalizedRunDirectory(Path runDirectory, List<String> failures) {
-        if (runDirectory == null) {
-            failures.add("Local evaluation run directory must not be null.");
-            return null;
-        }
-        Path root = runDirectory.toAbsolutePath().normalize();
-        if (Files.isSymbolicLink(root)
-                || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Local evaluation run directory is missing or unsafe.");
-            return null;
-        }
-        return root;
+        return EvidenceFiles.inspectRunDirectory(
+                runDirectory,
+                failures,
+                "Local evaluation run directory must not be null.",
+                "Local evaluation run directory is missing or unsafe.");
     }
 
     private void validateEnvelope(EvidenceManifest manifest, List<String> failures) {
@@ -278,14 +254,11 @@ final class LocalEvaluationEvidence {
             String role,
             List<String> failures
     ) {
-        List<EvidenceArtifact> matches = artifacts.stream()
-                .filter(artifact -> role.equals(artifact.role()))
-                .toList();
-        if (matches.size() != 1) {
-            failures.add("Local evaluation manifest must declare exactly one " + role + " artifact.");
-            return null;
-        }
-        return matches.getFirst();
+        return EvidenceFiles.singleArtifact(
+                artifacts,
+                role,
+                failures,
+                "Local evaluation manifest must declare exactly one " + role + " artifact.");
     }
 
     private static Path resolveArtifact(
@@ -293,15 +266,11 @@ final class LocalEvaluationEvidence {
             EvidenceArtifact artifact,
             List<String> failures
     ) {
-        if (artifact == null) {
-            return null;
-        }
-        Path resolved = root.resolve(artifact.path()).normalize();
-        if (!resolved.startsWith(root)) {
-            failures.add("Local evaluation raw artifact path escapes the evidence directory.");
-            return null;
-        }
-        return resolved;
+        return EvidenceFiles.resolveArtifact(
+                root,
+                artifact,
+                failures,
+                "Local evaluation raw artifact path escapes the evidence directory.");
     }
 
     private static boolean verifyRawArtifact(
@@ -309,32 +278,16 @@ final class LocalEvaluationEvidence {
             EvidenceArtifact artifact,
             List<String> failures
     ) {
-        if (rawPath == null || artifact == null) {
-            return false;
-        }
-        if (Files.isSymbolicLink(rawPath)
-                || !Files.isRegularFile(rawPath, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Raw local evaluation artifact is missing or unsafe.");
-            return false;
-        }
-        try {
-            long size = Files.size(rawPath);
-            if (size == 0) {
-                failures.add("Raw local evaluation artifact is empty.");
-                return false;
-            }
-            if (size != artifact.sizeBytes()) {
-                failures.add("Raw local evaluation artifact size does not match its manifest.");
-            }
-            if (!EvidenceIntegrity.sha256(rawPath).equals(artifact.sha256())) {
-                failures.add("Raw local evaluation artifact SHA-256 does not match its manifest.");
-                return false;
-            }
-            return true;
-        } catch (Exception exception) {
-            failures.add("Raw local evaluation artifact could not be verified.");
-            return false;
-        }
+        return EvidenceFiles.verifyArtifact(
+                rawPath,
+                artifact,
+                true,
+                failures,
+                "Raw local evaluation artifact is missing or unsafe.",
+                "Raw local evaluation artifact is empty.",
+                "Raw local evaluation artifact size does not match its manifest.",
+                "Raw local evaluation artifact SHA-256 does not match its manifest.",
+                "Raw local evaluation artifact could not be verified.");
     }
 
     private static void validateRegeneratedSummaryDescriptor(
@@ -342,14 +295,11 @@ final class LocalEvaluationEvidence {
             String expectedSummary,
             List<String> failures
     ) {
-        if (expectedSummary == null) {
-            return;
-        }
-        byte[] bytes = expectedSummary.getBytes(StandardCharsets.UTF_8);
-        if (summaryArtifact.sizeBytes() != bytes.length
-                || !summaryArtifact.sha256().equals(EvidenceIntegrity.sha256(bytes))) {
-            failures.add("Regenerated local evaluation summary does not match the manifest.");
-        }
+        EvidenceFiles.validateTextDescriptor(
+                summaryArtifact,
+                expectedSummary,
+                failures,
+                "Regenerated local evaluation summary does not match the manifest.");
     }
 
     private static void validateInputLayout(Path root, List<String> failures) {
@@ -357,79 +307,37 @@ final class LocalEvaluationEvidence {
                 EvidenceManifestStore.MANIFEST_FILENAME,
                 LocalEvaluationProtocol.RAW_FILENAME,
                 SUMMARY_FILENAME);
-        try (var paths = Files.walk(root)) {
-            paths.filter(path -> !path.equals(root)).forEach(path -> {
-                String relative = root.relativize(path).toString().replace('\\', '/');
-                if (Files.isSymbolicLink(path)) {
-                    failures.add("Unsafe symbolic link is present in local evaluation evidence: "
-                            + relative + ".");
-                } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-                    failures.add("Unexpected directory is present in local evaluation evidence: "
-                            + relative + ".");
-                } else if (!allowed.contains(relative)) {
-                    failures.add("Unexpected artifact is present in local evaluation evidence: "
-                            + relative + ".");
-                }
-            });
-        } catch (Exception exception) {
-            failures.add("Local evaluation evidence directory could not be inspected.");
-        }
+        EvidenceFiles.validateLayout(
+                root,
+                allowed,
+                failures,
+                "Unsafe symbolic link is present in local evaluation evidence: ",
+                "Unexpected directory is present in local evaluation evidence: ",
+                "Unexpected artifact is present in local evaluation evidence: ",
+                "Local evaluation evidence directory could not be inspected.");
     }
 
     private static void verifySummary(
             Inspection inspection,
             Set<String> failures
     ) {
-        if (inspection.summaryPath() == null || inspection.expectedSummary() == null) {
-            return;
-        }
-        Path summary = inspection.summaryPath();
-        if (Files.isSymbolicLink(summary)
-                || !Files.isRegularFile(summary, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Local evaluation summary is missing or unsafe.");
-            return;
-        }
-        try {
-            String actual = Files.readString(summary, StandardCharsets.UTF_8);
-            if (!inspection.expectedSummary().equals(actual)) {
-                failures.add("Local evaluation summary drifted from deterministic reanalysis.");
-            }
-        } catch (Exception exception) {
-            failures.add("Local evaluation summary could not be read.");
-        }
+        EvidenceFiles.verifyText(
+                inspection.summaryPath(),
+                inspection.expectedSummary(),
+                failures,
+                "Local evaluation summary is missing or unsafe.",
+                "Local evaluation summary drifted from deterministic reanalysis.",
+                "Local evaluation summary drifted from deterministic reanalysis.",
+                "Local evaluation summary could not be read.");
     }
 
     private static void writeSummaryAtomically(Path summaryPath, String summary) {
-        Path root = summaryPath.getParent();
-        Path temporary = null;
-        try {
-            temporary = Files.createTempFile(root, ".local-evaluation-summary-", ".tmp");
-            Files.writeString(
-                    temporary,
-                    summary,
-                    StandardCharsets.UTF_8,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.WRITE);
-            try {
-                Files.move(
-                        temporary,
-                        summaryPath,
-                        StandardCopyOption.ATOMIC_MOVE,
-                        StandardCopyOption.REPLACE_EXISTING);
-            } catch (AtomicMoveNotSupportedException exception) {
-                Files.move(temporary, summaryPath, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (Exception exception) {
-            throw new IllegalStateException("Failed to regenerate local evaluation summary", exception);
-        } finally {
-            if (temporary != null) {
-                try {
-                    Files.deleteIfExists(temporary);
-                } catch (Exception ignored) {
-                    // The primary write or move failure remains authoritative.
-                }
-            }
-        }
+        EvidenceFiles.replaceTextAtomically(
+                summaryPath,
+                summary,
+                ".local-evaluation-summary-",
+                null,
+                "Failed to regenerate local evaluation summary");
     }
 
     private static String safeMessage(Throwable throwable) {

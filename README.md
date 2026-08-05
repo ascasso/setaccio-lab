@@ -25,6 +25,33 @@ runs offline. Verification rejects missing, modified, empty, duplicate,
 undeclared, path-escaping, or symbolic-link artifacts without starting Spring
 or contacting a model provider.
 
+Phase 2 Slice S1 added shared `EvidenceFiles` operations for non-overwriting
+artifact writes, saved-run path/layout checks, artifact size/SHA-256 checks,
+deterministic summary verification, and atomic offline summary replacement.
+Vision matrix, Tool Search matrix, and local evaluation now consume those file
+operations while retaining their existing raw-result schemas, analyzers,
+summaries, and failure taxonomies.
+
+Phase 2 Slice S2 added a small provider-neutral chat invocation contract for
+provider/requested/effective model identity, prompts, common generation
+settings, provider option support, and recorded invocation outcomes. Its first
+adapter is Ollama-only: Ollama identity retains the full model digest, request
+options remain explicit, and the shared model construction forces loopback,
+pull strategy `never`, and one attempt. The existing interactive chat endpoint
+has not migrated to this boundary.
+
+Phase 2 Slice S3 has a provider-free implementation: the three existing
+default chat prompts are locked in one tracked v1 catalog with catalog and
+per-prompt SHA-256 identities, and a dedicated `chatMatrix` task executes the
+fixed six-row protocol through the S2 boundary. Suite-specific raw JSON,
+shared-v1 manifest, deterministic summary, and standalone `chatMatrixVerify`
+and `chatMatrixReanalyze` tasks stay under ignored `build/chat-matrix/`. One
+clean-baseline local run from commit `51025cf` used `gemma4:e2b`, its full
+digest, `128` output tokens, `PT2M`, and the locked six-row schedule. The
+evidence verified and reanalyzed offline; all six rows had complete usage but
+empty responses. This completes the contract-reuse proof without a chat-quality
+or model-ranking claim.
+
 The lifecycle deliberately keeps suite result payloads separate and reserves
 BLAKE3 for benchmark input identity. The locked Tool Search matrix and the
 dedicated sequential vision matrix write v1 manifests around their
@@ -259,8 +286,14 @@ output-budget compatibility hypothesis without claiming causation. The
 Testcontainers outcome is `defer`, because provisioning would not answer the
 observed verdict-yield question. No A5 row was rerun or replaced. See
 [the local AI-judged evaluation plan](docs/LOCAL-AI-EVALUATION-PLAN.md).
-All intentionally deferred follow-up work, its start gates, and its
-non-authorization boundaries are indexed in
+On 2026-08-05, Phase 2 closed after the controlled local chat matrix verified
+and reanalyzed offline; the preserved Phase 1 evidence also still verifies.
+Phase 3 then closed with one authorized, six-call Anthropic architecture
+portability proof using a pinned hosted model ID, explicit unsupported-seed
+semantics, bounded cost, and offline-verified ignored evidence. It makes no
+quality, performance, reliability, or model-ranking claim. The existing
+interactive endpoint remains unchanged. Remaining deferred work, start gates,
+and non-authorization boundaries are indexed in
 [the deferred-work guide](docs/DEFERRED-WORK.md).
 
 All benchmarks are local-first and offline-safe by default:

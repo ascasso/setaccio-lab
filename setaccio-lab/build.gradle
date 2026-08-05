@@ -7,6 +7,9 @@ plugins {
 import com.setaccio.gradle.ToolSearchSmokeTask
 import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 import com.setaccio.gradle.ToolSearchMatrixOfflineTask
+import com.setaccio.gradle.ChatMatrixOfflineTask
+import com.setaccio.gradle.ChatMatrixTask
+import com.setaccio.gradle.AnthropicChatMatrixTask
 import com.setaccio.gradle.LocalEvaluationOfflineTask
 import com.setaccio.gradle.LocalEvaluationTask
 import com.setaccio.gradle.VisionHumanReviewPrepareTask
@@ -83,6 +86,16 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.localEvaluation.output
         runtimeClasspath += output + compileClasspath
     }
+    chatMatrix {
+        java.srcDir 'src/chatMatrix/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    chatMatrixTest {
+        java.srcDir 'src/chatMatrixTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.chatMatrix.output
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
 configurations {
@@ -98,6 +111,81 @@ configurations {
     localEvaluationRuntimeOnly.extendsFrom runtimeOnly
     localEvaluationTestImplementation.extendsFrom testImplementation, localEvaluationImplementation
     localEvaluationTestRuntimeOnly.extendsFrom testRuntimeOnly, localEvaluationRuntimeOnly
+    chatMatrixImplementation.extendsFrom implementation
+    chatMatrixRuntimeOnly.extendsFrom runtimeOnly
+    chatMatrixTestImplementation.extendsFrom testImplementation, chatMatrixImplementation
+    chatMatrixTestRuntimeOnly.extendsFrom testRuntimeOnly, chatMatrixRuntimeOnly
+}
+
+tasks.register('chatMatrix', ChatMatrixTask) {
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.ChatMatrixRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('anthropicChatMatrix', AnthropicChatMatrixTask) {
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.AnthropicChatMatrixRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('anthropicChatMatrixVerify', ChatMatrixOfflineTask) {
+    description = 'Verifies saved Anthropic chat matrix evidence without starting Spring or calling a provider.'
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.AnthropicChatMatrixOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('anthropicChatMatrixReanalyze', ChatMatrixOfflineTask) {
+    description = 'Regenerates saved Anthropic chat matrix evidence without starting Spring or calling a provider.'
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.AnthropicChatMatrixOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('chatMatrixVerify', ChatMatrixOfflineTask) {
+    description = 'Verifies a saved Ollama chat matrix without starting Spring or calling a model provider.'
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.ChatMatrixOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('chatMatrixReanalyze', ChatMatrixOfflineTask) {
+    description = 'Regenerates and verifies a saved Ollama chat matrix summary without starting Spring or calling a model provider.'
+    dependsOn tasks.named('chatMatrixClasses')
+    classpath.from(sourceSets.chatMatrix.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.chatmatrix.ChatMatrixOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('chatMatrixTest', Test) {
+    description = 'Runs provider-free tests for the dedicated sequential Ollama chat matrix.'
+    group = 'verification'
+    testClassesDirs = sourceSets.chatMatrixTest.output.classesDirs
+    classpath = sourceSets.chatMatrixTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
 }
 
 tasks.register('localEvaluationVerify', LocalEvaluationOfflineTask) {

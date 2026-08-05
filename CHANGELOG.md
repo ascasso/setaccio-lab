@@ -9,12 +9,60 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Completed the fixed Phase 3 Anthropic portability proof against
+  `claude-haiku-4-5-20251001` from clean commit `3810a19`. Six sequential,
+  one-attempt calls completed with non-empty outputs and full usage metadata;
+  usage-derived cost was `$0.001870` against a `$0.005376` worst-case estimate
+  and a `$3` task ceiling within the owner's `$5` authorization. Ignored
+  evidence verifies and reanalyzes offline. The report establishes architecture
+  compatibility only: Anthropic seed remains unsupported, hosted identity is
+  not a local digest, and no answer-quality, performance, or ranking claim is
+  made.
+- Added the provider-neutral Slice O2 portability projection and the opt-in
+  Slice O3 Anthropic matrix implementation. It keeps hosted versioned model
+  IDs distinct from local digests, records direct, translated, and rejected
+  common-option handling, writes raw provider output only to an ignored
+  non-overwriting directory, and generates a raw-output-free portability
+  report. The separate remote task locks six sequential one-attempt calls,
+  `128` output tokens, `PT2M`, no seed simulation, and an explicit USD ceiling;
+  provider-free tests cover cost, input/path bounds, failed-row retention, and
+  offline verify/reanalyze. The implementation change itself made no remote
+  request.
+- Added the provider-free Slice O1 Anthropic adapter behind the existing chat
+  invocation boundary. It selects `claude-haiku-4-5-20251001` as a pinned
+  hosted model ID, maps temperature/output-token/timeout/one-attempt settings,
+  records seed as unsupported, captures only safe response metadata, and has
+  mocked coverage for usage, failures, metadata, and no-fallback behavior. It
+  added no live runner, credential lookup, or remote call at O1 closeout.
+- Added the provider-free implementation of the dedicated Ollama chat matrix:
+  a tracked versioned three-prompt catalog with exact catalog/per-prompt
+  SHA-256 identities, one six-row sequential protocol, explicit installed model
+  digest and generation settings, S2-bound invocation, shared-v1 evidence,
+  deterministic summary, and standalone offline verify/reanalyze tasks. Tests
+  cover exact parity with the unchanged interactive defaults, pre-allocation
+  rejection, six-call order, failed-row retention, protocol drift, tampering,
+  and summary regeneration.
+- Added a minimal provider-neutral chat invocation contract for provider and
+  requested/effective model identity, prompts, common generation settings,
+  explicit provider option support, raw response, available usage, latency,
+  one-attempt recording, and classified failures. Its Ollama-only adapter keeps
+  the full digest and seed semantics provider-specific, applies explicit model
+  options, and shares loopback/no-pull/one-attempt model construction with the
+  local fact-check judge. Provider-free tests cover success, empty response,
+  unavailable model, timeout, provider failure, and safety-policy behavior;
+  the existing interactive chat endpoint remains unchanged.
+- Added plain-Java `EvidenceFiles` operations for non-overwriting saved-artifact
+  writes, directory/path validation, artifact size/SHA-256 checks, saved-run
+  layout inspection, deterministic summary verification, and atomic summary
+  replacement. Vision matrix, Tool Search matrix, and local evaluation now
+  share those operations without changing their saved formats or suite-specific
+  schemas.
 - Added `docs/DEFERRED-WORK.md` as the public-safe canonical index for work
-  intentionally outside the completed August cycle. It records the Prompt v2,
-  output-budget, Testcontainers, retrieval, release/tag, September chat, and
-  October Anthropic gates; links the environment and test-plan boundaries; and
-  makes clear that future variables or roadmap entries do not authorize live
-  execution, credentials, Docker, a release, or a tag.
+  intentionally outside the completed August cycle. It now records the active
+  Phase 2 chat closure plus the Prompt v2, output-budget, Testcontainers,
+  retrieval, release/tag, and Phase 3 Anthropic gates; links the environment
+  and test-plan boundaries; and makes clear that roadmap entries do not
+  authorize live execution, credentials, Docker, a release, or a tag.
 - Closed the first local fact-check cycle with a bounded offline interpretation
   of the immutable A5 evidence. Supported agreement was not measurable; two
   unsupported rows were evaluable and both agreed, one fixture had two valid
@@ -121,6 +169,20 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Completed the Phase 2 local Ollama reuse proof from clean commit `51025cf`
+  with explicit `gemma4:e2b` identity and full digest, `128` output tokens,
+  `PT2M`, and the locked six-row sequential one-attempt schedule. All six
+  invocations completed with usage metadata but returned empty responses;
+  there was no unavailable-model, timeout, or provider failure. Ignored
+  evidence verified and reanalyzed offline, and the preserved Phase 1 evidence
+  still verifies. This closes the invocation/evidence reuse proof without a
+  chat-quality, reliability, or model-ranking claim; the existing interactive
+  endpoint remains unchanged and Phase 3 stays separately authorized.
+- Closed the Phase 2 start gate after the project owner selected the existing
+  chat benchmark as the reuse and later portability surface. Slice S1 is now
+  active on a dedicated feature branch under local, no-pull, provider-free
+  constraints; Anthropic credentials/calls, default-lifecycle live execution,
+  automatic pulls, and untested endpoint migration remain unauthorized.
 - Updated repository agent workflow guidance to commit completed in-scope work
   after appropriate verification, while keeping pushes explicitly user
   authorized and unrelated user changes out of commits.

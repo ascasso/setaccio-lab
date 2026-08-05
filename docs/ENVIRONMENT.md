@@ -10,7 +10,7 @@ These variables are supported by the current `setaccio-lab` application config, 
 
 | Variable | Required for default build | Used for | Notes |
 | --- | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | No | Anthropic integration | Empty by default. Required only for explicit live Anthropic runs once those are added. |
+| `ANTHROPIC_API_KEY` | No | Explicit Anthropic portability runner | Read only by the opt-in O3 runner after local preflight. Keep it in local environment/config; never put it in a command line, tracked file, or evidence. |
 | `ANTHROPIC_BASE_URL` | No | Anthropic integration | Optional override for the Anthropic API base URL. |
 | `ANTHROPIC_MODEL` | No | Anthropic chat model | Optional default model for live Anthropic chat runs. |
 | `ANTHROPIC_MAX_TOKENS` | No | Anthropic chat options | Optional maximum token override for live Anthropic chat runs. |
@@ -37,7 +37,9 @@ The current Spring AI Anthropic mapping is:
 | `spring.ai.anthropic.chat.options.max-tokens` | `${ANTHROPIC_MAX_TOKENS:4096}` |
 | `spring.ai.anthropic.chat.options.temperature` | Planned: explicit test option, not a default requirement. |
 
-Spring AI also supports Anthropic runtime options through `AnthropicChatOptions` and per-request `Prompt` options. Future tests should cover default options versus request-specific overrides.
+Spring AI also supports Anthropic runtime options through `AnthropicChatOptions` and per-request `Prompt` options. Slice O1 selects the pinned hosted model ID `claude-haiku-4-5-20251001`; it is a provider version identifier, not a locally resolvable content digest. The adapter uses only the official API base URL, receives a credential explicitly from local configuration when the O3 runner supplies one, and never logs credentials itself.
+
+For the fixed portability chat contract, `temperature` and `max output tokens` are supported and mapped directly. `timeout` is translated to the SDK client timeout, and the exactly-one-attempt rule is translated to SDK `maxRetries=0`. Anthropic exposes no seed in this contract, so seed is explicitly rejected, never silently ignored, and never synthesized. No common contract option is silently ignored. Response metadata may retain the returned effective model, usage, and only a format-validated opaque response ID; headers, base URLs, and credential data are excluded.
 
 Anthropic-specific future test surfaces include:
 
@@ -426,6 +428,14 @@ reference metadata into the saved run.
 
 ## Local Chat Benchmark
 
+The Phase 2 start gate closed on 2026-08-04 with chat selected as the reuse and
+later portability surface. Slices S1 through S3 closed on 2026-08-05 after one
+controlled local `gemma4:e2b` matrix from clean commit `51025cf` verified and
+reanalyzed offline. The locked six rows used `128` output tokens and `PT2M`;
+all completed with usage metadata and empty responses. The interactive endpoint
+remains unchanged unless later parity tests justify migration. Phase 2 added no
+Anthropic credential or remote call.
+
 The simple chat benchmark path is manually runnable only through the `local` profile. It does not add a default test, CI, or startup path that calls Ollama.
 
 Start the app explicitly:
@@ -460,6 +470,96 @@ Optional request fields:
 | `prompts` | No | List of `{ "id": "...", "text": "..." }` prompt objects. Required when `useDefaultPrompts` is `false`. |
 
 No new environment variables are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE` and `SETACCIO_LAB_OUTPUT_DIR`.
+
+### Dedicated controlled chat matrix
+
+The dedicated matrix is not an HTTP endpoint and does not start Spring. It
+requires five explicit task options, resolves the requested already-installed
+model to its full Ollama digest before output allocation, and then runs exactly
+three locked prompts twice in sequential order with temperature `0.0`, seeds
+`42`/`43`, one attempt, and pull strategy `never`.
+
+Running it contacts local Ollama and requires separate explicit authorization:
+
+```bash
+./gradlew :setaccio-lab:chatMatrix \
+  --ollama-base-url=http://127.0.0.1:11434 \
+  --model=<already-installed-model-tag> \
+  --max-tokens=<positive-limit-1-through-32768> \
+  --timeout=<positive-ISO-8601-duration-up-to-PT10M> \
+  --output-dir=build/chat-matrix/2026-08-04-<run-id>
+```
+
+The output directory must be new, dated, and directly under ignored
+`build/chat-matrix/`. The task never pulls a model and is not attached to
+`test`, `check`, `build`, application startup, or CI. A failed invocation is
+retained as its scheduled row without retry or replacement.
+
+Verify or deterministically regenerate a saved summary without starting Spring
+or contacting Ollama:
+
+```bash
+./gradlew :setaccio-lab:chatMatrixVerify \
+  --run-dir=build/chat-matrix/<saved-run>
+
+./gradlew :setaccio-lab:chatMatrixReanalyze \
+  --run-dir=build/chat-matrix/<saved-run>
+```
+
+`SUMMARY.md` reports only protocol integrity, invocation completion, available
+usage, failure categories, and successful latency range. It does not judge
+semantic output quality or rank the single model.
+
+### Bounded Anthropic portability matrix
+
+`anthropicChatMatrix` is the only remote-provider task in this slice. It is
+outside `test`, `check`, `build`, application startup, and CI. It requires a
+separate explicit authorization immediately before execution, a current
+official-price worst-case calculation, and a local `ANTHROPIC_API_KEY`; neither
+the key nor raw responses are printed. Do not put a key in a Gradle option or
+in a tracked/local command transcript.
+
+The task permits one fixed protocol only: model
+`claude-haiku-4-5-20251001`, six sequential calls over the tracked three-prompt
+catalog, two unseeded repetitions, temperature `0.0`, `128` maximum output
+tokens, `PT2M`, and one attempt. Temperature and output tokens are direct
+options; timeout and one attempt translate to SDK timeout and `maxRetries=0`;
+seed is rejected and never simulated. The verified matching Ollama run is used
+only for the offline, raw-output-free portability report.
+
+With the credential already present only in local environment/config, invoke
+the task with an explicit budget ceiling and fresh dated output directory:
+
+```bash
+./gradlew :setaccio-lab:anthropicChatMatrix \
+  --max-tokens=128 \
+  --timeout=PT2M \
+  --max-cost-usd=<explicit-authorized-usd-not-over-3.00> \
+  --output-dir=build/anthropic-chat-matrix/<new-dated-run> \
+  --ollama-run-dir=build/chat-matrix/<verified-matching-run>
+```
+
+The runner refuses an output directory that already exists and writes its raw
+provider result, raw-output-free portability snapshot, manifest, and summary
+only under the ignored `build/anthropic-chat-matrix/` root. These operations
+remain provider-free and do not read a credential:
+
+```bash
+./gradlew :setaccio-lab:anthropicChatMatrixVerify \
+  --run-dir=build/anthropic-chat-matrix/<saved-run>
+
+./gradlew :setaccio-lab:anthropicChatMatrixReanalyze \
+  --run-dir=build/anthropic-chat-matrix/<saved-run>
+```
+
+The one authorized Phase 3 run completed on 2026-08-05 from clean commit
+`3810a19` with the fixed six-row protocol. All six calls completed with
+non-empty outputs and complete usage metadata. The official-price worst-case
+estimate was `$0.005376`; usage-derived cost was `$0.001870` under the task's
+`$3` ceiling and the owner's `$5` authorization. The ignored saved evidence
+verified and reanalyzed offline. This closes the bounded architecture proof;
+it does not authorize another call, quality/performance comparison, additional
+provider, or migration of `POST /api/lab/chat`.
 
 ## Local Tool-Calling Benchmark
 

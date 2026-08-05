@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.evidence.EvidenceArtifact;
+import com.setaccio.lab.evidence.EvidenceFiles;
 import com.setaccio.lab.evidence.EvidenceIntegrity;
 import com.setaccio.lab.evidence.EvidenceManifest;
 import com.setaccio.lab.evidence.EvidenceManifestStore;
@@ -11,13 +12,7 @@ import com.setaccio.lab.evidence.EvidenceProvenance;
 import com.setaccio.lab.evidence.EvidenceVerification;
 import com.setaccio.lab.evidence.EvidenceVerifier;
 import com.setaccio.lab.service.VisionPromptDefinition;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -60,26 +55,18 @@ final class VisionMatrixEvidence {
             throw new IllegalArgumentException("analysis must not be null");
         }
         Path rawPath = runDirectory.resolve(VisionMatrixProtocol.RAW_FILENAME);
+        byte[] rawJson;
         try {
-            byte[] rawJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(result);
-            Files.write(rawPath, rawJson, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+            rawJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(result);
         } catch (Exception e) {
             throw new IllegalStateException("Failed to write raw vision matrix result", e);
         }
+        EvidenceFiles.writeNewBytes(rawPath, rawJson, "Failed to write raw vision matrix result");
 
         EvidenceArtifact rawArtifact = EvidenceIntegrity.describe(runDirectory, rawPath, RAW_ROLE);
         String summary = report.render(result, analysis, rawArtifact.path(), rawArtifact.sha256());
         Path summaryPath = runDirectory.resolve(SUMMARY_FILENAME);
-        try {
-            Files.writeString(
-                    summaryPath,
-                    summary,
-                    StandardCharsets.UTF_8,
-                    StandardOpenOption.CREATE_NEW,
-                    StandardOpenOption.WRITE);
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to write vision matrix summary", e);
-        }
+        EvidenceFiles.writeNewText(summaryPath, summary, "Failed to write vision matrix summary");
 
         EvidenceArtifact summaryArtifact = EvidenceIntegrity.describe(runDirectory, summaryPath, SUMMARY_ROLE);
         EvidenceManifest manifest = new EvidenceManifest(
@@ -226,14 +213,11 @@ final class VisionMatrixEvidence {
             List<EvidenceArtifact> artifacts,
             String role,
             List<String> failures) {
-        List<EvidenceArtifact> matches = artifacts.stream()
-                .filter(artifact -> role.equals(artifact.role()))
-                .toList();
-        if (matches.size() != 1) {
-            failures.add("Vision matrix manifest must declare exactly one " + role + " artifact.");
-            return null;
-        }
-        return matches.getFirst();
+        return EvidenceFiles.singleArtifact(
+                artifacts,
+                role,
+                failures,
+                "Vision matrix manifest must declare exactly one " + role + " artifact.");
     }
 
     private static Path resolveArtifact(
@@ -243,58 +227,38 @@ final class VisionMatrixEvidence {
         if (artifact == null) {
             return null;
         }
-        Path resolved = root.resolve(artifact.path()).normalize();
-        if (!resolved.startsWith(root)) {
-            failures.add("Vision matrix raw artifact path escapes the evidence directory.");
-            return null;
-        }
-        return resolved;
+        return EvidenceFiles.resolveArtifact(
+                root,
+                artifact,
+                failures,
+                "Vision matrix raw artifact path escapes the evidence directory.");
     }
 
     private static boolean verifyRawArtifact(
             Path rawPath,
             EvidenceArtifact artifact,
             List<String> failures) {
-        if (rawPath == null || artifact == null) {
-            return false;
-        }
-        if (Files.isSymbolicLink(rawPath)
-                || !Files.isRegularFile(rawPath, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Raw vision matrix artifact is missing or unsafe.");
-            return false;
-        }
-        try {
-            long size = Files.size(rawPath);
-            if (size == 0) {
-                failures.add("Raw vision matrix artifact is empty.");
-                return false;
-            }
-            if (size != artifact.sizeBytes()) {
-                failures.add("Raw vision matrix artifact size does not match its manifest.");
-            }
-            if (!EvidenceIntegrity.sha256(rawPath).equals(artifact.sha256())) {
-                failures.add("Raw vision matrix artifact SHA-256 does not match its manifest.");
-                return false;
-            }
-            return true;
-        } catch (Exception e) {
-            failures.add("Raw vision matrix artifact could not be verified.");
-            return false;
-        }
+        return EvidenceFiles.verifyArtifact(
+                rawPath,
+                artifact,
+                true,
+                failures,
+                "Raw vision matrix artifact is missing or unsafe.",
+                "Raw vision matrix artifact is empty.",
+                "Raw vision matrix artifact size does not match its manifest.",
+                "Raw vision matrix artifact SHA-256 does not match its manifest.",
+                "Raw vision matrix artifact could not be verified.");
     }
 
     private static void validateRegeneratedSummaryDescriptor(
             EvidenceArtifact summaryArtifact,
             String expectedSummary,
             List<String> failures) {
-        if (expectedSummary == null) {
-            return;
-        }
-        byte[] bytes = expectedSummary.getBytes(StandardCharsets.UTF_8);
-        if (summaryArtifact.sizeBytes() != bytes.length
-                || !summaryArtifact.sha256().equals(EvidenceIntegrity.sha256(bytes))) {
-            failures.add("Regenerated vision matrix summary does not match the manifest.");
-        }
+        EvidenceFiles.validateTextDescriptor(
+                summaryArtifact,
+                expectedSummary,
+                failures,
+                "Regenerated vision matrix summary does not match the manifest.");
     }
 
     private static void validateInputLayout(
@@ -307,94 +271,45 @@ final class VisionMatrixEvidence {
         if (rawArtifact != null) {
             allowed.add(rawArtifact.path());
         }
-        try (var paths = Files.walk(root)) {
-            paths.filter(path -> !path.equals(root)).forEach(path -> {
-                String relative = root.relativize(path).toString().replace('\\', '/');
-                if (Files.isSymbolicLink(path)) {
-                    failures.add("Unsafe symbolic link is present in saved vision evidence: " + relative + ".");
-                } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS) && !allowed.contains(relative)) {
-                    failures.add("Unexpected artifact is present in saved vision evidence: " + relative + ".");
-                }
-            });
-        } catch (Exception e) {
-            failures.add("Saved vision evidence directory could not be inspected.");
-        }
+        EvidenceFiles.validateLayout(
+                root,
+                allowed,
+                failures,
+                "Unsafe symbolic link is present in saved vision evidence: ",
+                "Unexpected artifact is present in saved vision evidence: ",
+                "Saved vision evidence directory could not be inspected.");
     }
 
     private static void verifySummary(Inspection inspection, Set<String> failures) {
-        if (inspection.summaryPath() == null || inspection.expectedSummary() == null) {
-            return;
-        }
-        Path summaryPath = inspection.summaryPath();
-        if (Files.isSymbolicLink(summaryPath)
-                || !Files.isRegularFile(summaryPath, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Vision matrix summary is missing or unsafe.");
-            return;
-        }
-        try {
-            if (Files.size(summaryPath) == 0) {
-                failures.add("Vision matrix summary is empty.");
-            } else if (!Files.readString(summaryPath, StandardCharsets.UTF_8)
-                    .equals(inspection.expectedSummary())) {
-                failures.add("Vision matrix summary differs from deterministic offline reanalysis.");
-            }
-        } catch (Exception e) {
-            failures.add("Vision matrix summary could not be verified.");
-        }
+        EvidenceFiles.verifyText(
+                inspection.summaryPath(),
+                inspection.expectedSummary(),
+                failures,
+                "Vision matrix summary is missing or unsafe.",
+                "Vision matrix summary is empty.",
+                "Vision matrix summary differs from deterministic offline reanalysis.",
+                "Vision matrix summary could not be verified.");
     }
 
     private static void writeSummaryAtomically(Path summaryPath, String summary) {
-        Path root = summaryPath.getParent();
-        Path temporary = null;
-        try {
-            if (Files.isSymbolicLink(summaryPath)) {
-                throw new IllegalArgumentException("Vision matrix summary must not be a symbolic link");
-            }
-            temporary = Files.createTempFile(root, ".vision-summary-", ".tmp");
-            Files.writeString(
-                    temporary,
-                    summary,
-                    StandardCharsets.UTF_8,
-                    StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.WRITE);
-            try {
-                Files.move(
-                        temporary,
-                        summaryPath,
-                        StandardCopyOption.ATOMIC_MOVE,
-                        StandardCopyOption.REPLACE_EXISTING);
-            } catch (AtomicMoveNotSupportedException ignored) {
-                Files.move(temporary, summaryPath, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Failed to regenerate vision matrix summary", e);
-        } finally {
-            if (temporary != null) {
-                try {
-                    Files.deleteIfExists(temporary);
-                } catch (Exception ignored) {
-                    // Preserve the primary failure.
-                }
-            }
-        }
+        EvidenceFiles.replaceTextAtomically(
+                summaryPath,
+                summary,
+                ".vision-summary-",
+                "Vision matrix summary must not be a symbolic link",
+                "Failed to regenerate vision matrix summary");
     }
 
     private static Path normalizedRunDirectory(Path runDirectory, List<String> failures) {
-        if (runDirectory == null) {
-            failures.add("Vision evidence directory must not be null.");
-            return null;
-        }
-        Path root = runDirectory.toAbsolutePath().normalize();
-        if (Files.isSymbolicLink(root) || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
-            failures.add("Vision evidence directory is missing or unsafe.");
-            return null;
-        }
-        return root;
+        return EvidenceFiles.inspectRunDirectory(
+                runDirectory,
+                failures,
+                "Vision evidence directory must not be null.",
+                "Vision evidence directory is missing or unsafe.");
     }
 
     private static String safeMessage(Exception exception) {
-        String message = exception.getMessage();
-        return message == null || message.isBlank() ? exception.getClass().getSimpleName() : message;
+        return EvidenceFiles.safeMessage(exception);
     }
 
     record OfflineResult(List<String> failures) {
