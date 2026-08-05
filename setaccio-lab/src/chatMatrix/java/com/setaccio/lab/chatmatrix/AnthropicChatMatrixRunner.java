@@ -181,11 +181,21 @@ public final class AnthropicChatMatrixRunner {
                     runDirectory.resolve(ChatMatrixProtocol.RAW_FILENAME).toFile());
             EvidenceManifest manifest = new EvidenceManifestStore(mapper).read(runDirectory);
             return ChatPortabilitySnapshotFactory.fromVerifiedOllama(
-                    runDirectory.getFileName().toString(), result, manifest,
-                    new ChatEstimatedCost("USD", 0, 0, BigDecimal.ZERO, BigDecimal.ZERO, Instant.now(), "https://ollama.com"));
+                    runDirectory.getFileName().toString(), result, manifest, localCostEstimate(result));
         } catch (Exception exception) {
             throw new IllegalArgumentException("Saved Ollama evidence could not be loaded after verification", exception);
         }
+    }
+
+    static ChatEstimatedCost localCostEstimate(ChatMatrixResult result) {
+        if (result == null) {
+            throw new IllegalArgumentException("verified Ollama result must not be null");
+        }
+        long outputTokenCeiling = Math.multiplyExact(
+                (long) result.rows().size(), result.runSettings().maxOutputTokens());
+        return new ChatEstimatedCost(
+                "USD", 0, outputTokenCeiling, BigDecimal.ZERO, BigDecimal.ZERO,
+                Instant.now(), "https://ollama.com");
     }
 
     private static String requireLocalCredential() {

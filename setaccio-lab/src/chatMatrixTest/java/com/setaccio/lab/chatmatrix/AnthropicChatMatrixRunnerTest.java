@@ -49,6 +49,15 @@ class AnthropicChatMatrixRunnerTest {
     }
 
     @Test
+    void preservesTheVerifiedOllamaOutputCeilingEvenThoughItsApiCostIsZero() {
+        ChatEstimatedCost estimate = AnthropicChatMatrixRunner.localCostEstimate(
+                ChatMatrixTestFixtures.successfulResult());
+
+        assertThat(estimate.outputTokenCeiling()).isEqualTo(6L * 128L);
+        assertThat(estimate.estimatedUsd()).isEqualByComparingTo("0.00000000");
+    }
+
+    @Test
     void confinesInputAndOutputDirectoriesToTheirDedicatedIgnoredRoots() throws Exception {
         Path output = AnthropicChatMatrixRunner.resolveNewOutputDirectory(
                 projectDirectory, "build/anthropic-chat-matrix/2026-08-05-haiku-o3");
