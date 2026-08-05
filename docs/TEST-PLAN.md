@@ -127,6 +127,12 @@ not place a live model call in default tests or CI.
 - Treat chat as the completed Phase 2 reuse surface and the later portability
   surface. Keep its default lifecycle local, no-pull, provider-free, and
   offline.
+- Keep the implemented Anthropic O1 adapter provider-free by default. Mocked
+  tests must cover option mapping, explicit unsupported seed behavior, present
+  and absent usage, effective-model/safe-response-ID metadata, empty response,
+  timeout, authentication, rate-limit, provider failure, one attempt, and no
+  fallback. No task may read a credential or contact Anthropic until a later
+  explicit live-run authorization and USD budget gate.
 - Keep the internal chat invocation contract provider-neutral for provider and
   requested/effective model identity, prompts, common generation settings,
   explicit supported/unsupported option metadata, and invocation outcomes.

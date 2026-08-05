@@ -10,7 +10,7 @@ These variables are supported by the current `setaccio-lab` application config, 
 
 | Variable | Required for default build | Used for | Notes |
 | --- | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | No | Anthropic integration | Empty by default. Required only for explicit live Anthropic runs once those are added. |
+| `ANTHROPIC_API_KEY` | No | Anthropic portability runner (not yet added) | Empty by default. Required only for a separately authorized live run. |
 | `ANTHROPIC_BASE_URL` | No | Anthropic integration | Optional override for the Anthropic API base URL. |
 | `ANTHROPIC_MODEL` | No | Anthropic chat model | Optional default model for live Anthropic chat runs. |
 | `ANTHROPIC_MAX_TOKENS` | No | Anthropic chat options | Optional maximum token override for live Anthropic chat runs. |
@@ -37,7 +37,9 @@ The current Spring AI Anthropic mapping is:
 | `spring.ai.anthropic.chat.options.max-tokens` | `${ANTHROPIC_MAX_TOKENS:4096}` |
 | `spring.ai.anthropic.chat.options.temperature` | Planned: explicit test option, not a default requirement. |
 
-Spring AI also supports Anthropic runtime options through `AnthropicChatOptions` and per-request `Prompt` options. Future tests should cover default options versus request-specific overrides.
+Spring AI also supports Anthropic runtime options through `AnthropicChatOptions` and per-request `Prompt` options. Slice O1 selects the pinned hosted model ID `claude-haiku-4-5-20251001`; it is a provider version identifier, not a locally resolvable content digest. The adapter uses only the official API base URL, receives a credential explicitly from local configuration when a future runner supplies one, and never reads/logs credentials itself.
+
+For the fixed portability chat contract, `temperature` and `max output tokens` are supported and mapped directly. `timeout` is mapped to the SDK client timeout, and the exactly-one-attempt rule is mapped to SDK `maxRetries=0`. Anthropic exposes no seed in this contract, so seed is explicitly unsupported and never synthesized. Response metadata may retain the returned effective model, usage, and only a format-validated opaque response ID; headers, base URLs, and credential data are excluded.
 
 Anthropic-specific future test surfaces include:
 

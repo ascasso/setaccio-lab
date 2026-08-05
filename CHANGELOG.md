@@ -9,6 +9,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the provider-free Slice O1 Anthropic adapter behind the existing chat
+  invocation boundary. It selects `claude-haiku-4-5-20251001` as a pinned
+  hosted model ID, maps temperature/output-token/timeout/one-attempt settings,
+  records seed as unsupported, captures only safe response metadata, and has
+  mocked coverage for usage, failures, metadata, and no-fallback behavior. It
+  adds no live runner, credential lookup, or remote call; Phase 3 remains
+  buildable/deferred pending the separate cost authorization gate.
 - Added the provider-free implementation of the dedicated Ollama chat matrix:
   a tracked versioned three-prompt catalog with exact catalog/per-prompt
   SHA-256 identities, one six-row sequential protocol, explicit installed model

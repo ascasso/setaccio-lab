@@ -67,11 +67,20 @@ These remain roadmap candidates, not active work.
 
 ### Phase 3: one Anthropic portability proof
 
-The candidate is exactly one Anthropic adapter behind the completed Phase 2
-boundary. It remains deferred until framework compatibility is reviewed,
-credentials are explicitly authorized, and a maximum spend is approved
-immediately before any live call. Without that authorization, only offline/mock
-implementation may be described as buildable; the live proof is deferred.
+Slice O1 is implemented and provider-free on `feature/anthropic-portability`.
+It adds exactly one adapter behind the completed Phase 2 chat boundary, using
+the pinned Anthropic model ID `claude-haiku-4-5-20251001`. The adapter maps
+temperature, maximum output tokens, timeout, and one attempt (`maxRetries=0`),
+records returned effective model/usage and a format-validated opaque response
+ID, and records seed as unsupported rather than simulating it. It has no
+runner, live call, credential lookup, fallback, streaming, tool, or multimodal
+path. Credentials remain local-only and the adapter records neither API keys,
+headers, nor base URLs.
+
+Slice O2 and the six-call live proof remain deferred. Immediately before any
+live call, calculate the current official price-based worst-case estimate and
+obtain separate explicit authorization with a maximum USD budget. Until then,
+Phase 3 is buildable with mocked verification, not complete.
 
 ## Deferred Through the Current Roadmap
 

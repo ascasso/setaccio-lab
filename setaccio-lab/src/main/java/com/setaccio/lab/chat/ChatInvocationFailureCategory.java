@@ -5,5 +5,7 @@ public enum ChatInvocationFailureCategory {
     EMPTY_RESPONSE,
     MODEL_UNAVAILABLE,
     TIMEOUT,
+    AUTHENTICATION,
+    RATE_LIMIT,
     PROVIDER_FAILURE
 }
