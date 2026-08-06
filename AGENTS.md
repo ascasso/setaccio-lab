@@ -442,7 +442,11 @@ plan, changelog, and dated log when the status of a deferred item changes.
   controlled protocol with new preserved evidence and actual human review.
 - If separately authorized, design a new output-budget compatibility
   experiment that changes only the explicit positive token limit and writes a
-  new evidence directory; do not treat it as a retry or correction of A5.
+  new evidence directory; do not treat it as a retry or correction of A5. Its
+  fresh 64- and 256-token arms must execute from the same clean Git commit
+  (see [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
+  Phase 4); if the worktree becomes dirty or the commit changes between arms,
+  stop and restart both from a new clean commit.
 - Keep any later container-backed work isolated in `setaccio-testcontainers`
   and justify it with a provisioning or service-connection question distinct
   from the completed host-Ollama fact-check cycle.

@@ -9,6 +9,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Revised the proposed [Small-Model Tool-Calling Compatibility
+  Plan](docs/SmallModelToolCallingCompatibilityPlan.md) to address three PR
+  review findings: corrected the Phase 0 filename reference to the actual
+  tracked path, required raw tool-call argument JSON to be preserved and
+  validated against the declared schema before callback binding so ordinary
+  Spring AI DTO coercion cannot be mistaken for schema-valid model output, and
+  locked the Phase 4 fresh 64- and 256-token arms to the same clean Git commit
+  with an explicit stop-and-restart rule on drift. This is a documentation-only
+  change; no implementation, live model call, or Docker use occurred.
 - Completed the fixed Phase 3 Anthropic portability proof against
   `claude-haiku-4-5-20251001` from clean commit `3810a19`. Six sequential,
   one-attempt calls completed with non-empty outputs and full usage metadata;
