@@ -173,7 +173,9 @@ At minimum, retain separately:
 - valid tool-call production;
 - correct tool selection;
 - forbidden-tool avoidance;
-- argument validity;
+- raw argument JSON validity;
+- raw argument declared-schema validity (kept distinct from callback binding/execution outcomes, since Java DTO coercion can mask schema-invalid model output);
+- callback binding success;
 - callback execution;
 - callback result correctness;
 - multi-step continuation;
@@ -195,10 +197,10 @@ Define and lock the experiment before implementing a live runner.
 
 ## Slice T0.1 — Documentation and authorization boundary
 
-Create:
+Track this plan as:
 
 ```text
-docs/SMALL-MODEL-TOOL-CALLING-PLAN.md
+docs/SmallModelToolCallingCompatibilityPlan.md
 ```
 
 Update:
@@ -436,6 +438,10 @@ record ToolCompatibilityRow(
     boolean toolCallValid,
     boolean requiredToolSelected,
     boolean forbiddenToolSelected,
+    String rawArgumentJson,
+    boolean rawArgumentJsonValid,
+    boolean rawArgumentSchemaValid,
+    boolean callbackBindingSucceeded,
     boolean callbackExecuted,
     boolean callbackSucceeded,
     boolean finalResponsePresent,
@@ -516,8 +522,9 @@ The summary should include counts for:
 
 - valid tool call;
 - malformed tool call;
-- valid arguments;
-- invalid arguments;
+- raw argument JSON validity;
+- raw argument declared-schema validity;
+- callback binding success (including cases where the framework coerces a schema-invalid raw argument into a bound value);
 - callback success;
 - callback failure;
 - expected deterministic callback failure correctly retained.
@@ -1118,22 +1125,27 @@ Do not begin with four or more token levels.
 
 ### Fixed variables
 
-Retain:
+Both the fresh 64-token arm and the fresh 256-token arm must execute from the same clean Git commit. No code-baseline drift between the two arms is permitted.
 
+Retain identically across both arms:
+
+- Git commit;
+- dirty-worktree state (clean in both arms);
+- Spring Boot version;
+- Spring AI version;
+- execution engine;
 - exact judge model digest;
-- prompt ID, version, text, and digest;
+- judge model digest;
+- prompt ID, version, text, and digest (prompt identity);
 - fixture catalog identity and order;
-- human-confirmation record;
-- twelve-row counterbalanced schedule;
+- human-confirmation record (human-review identity);
+- twelve-row counterbalanced schedule (row order);
 - temperature `0.0`;
 - seeds `42` and `43`;
 - timeout `PT2M`;
-- one attempt;
+- one attempt (attempt policy);
 - no pull;
-- loopback-only endpoint;
-- Spring Boot version;
-- Spring AI version;
-- execution engine.
+- loopback-only endpoint.
 
 ### Changed variable
 
@@ -1141,11 +1153,21 @@ Retain:
 maximum output tokens
 ```
 
+Permitted differences between the two arms are limited to:
+
+- maximum output tokens;
+- run ID;
+- generated timestamp;
+- output-directory identity;
+- observed invocation outcomes.
+
+If the repository becomes dirty, the commit changes, or implementation code changes between the two arms, the paired experiment must stop and restart from two fresh run directories after a new clean commit is established. Partial completion under a changed baseline must not be salvaged into the comparison.
+
 ## Slice F2 — Paired evidence
 
-Use two new run directories.
+Use two new run directories, both created from the same clean commit described above.
 
-Do not reuse, overwrite, or modify the previous A5 evidence.
+Do not reuse, overwrite, or modify the previous A5 evidence. The historic A5 run remains contextual evidence only; it must not serve as one arm of the causal comparison, because its code, framework, or environment provenance is not guaranteed to match either fresh arm.
 
 Suggested names:
 
@@ -1154,11 +1176,11 @@ build/evaluation-matrix/YYYY-MM-DD-budget-64
 build/evaluation-matrix/YYYY-MM-DD-budget-256
 ```
 
-The 64-token arm is a new paired baseline. Do not compare a fresh 256-token run directly against the historic 64-token run if code, framework, or environment provenance differs.
+Both the fresh 64-token arm and the fresh 256-token arm are new paired runs from the identical clean commit. Neither fresh arm may be compared against the historic 64-token A5 run as if it were a controlled pair.
 
 ## Slice F3 — Comparison
 
-Add an offline comparison requiring parity except for maximum output tokens and code baseline where explicitly allowed.
+Add an offline comparison requiring parity for Git commit, dirty-worktree state, Spring Boot version, Spring AI version, execution engine, judge model digest, prompt identity, fixture catalog identity, human-review identity, row order, temperature, seeds, timeout, attempt policy, and all settings other than maximum output tokens. Permit differences only in maximum output tokens, run ID, generated timestamp, output-directory identity, and observed invocation outcomes.
 
 Report:
 
@@ -1219,10 +1241,11 @@ This later slice must be separately planned and authorized.
 
 ## Phase 4 exit criteria
 
-- Fresh paired evidence exists.
-- Only output budget differs materially.
+- Fresh paired evidence exists, and both arms executed from the same clean Git commit.
+- Only maximum output tokens differs materially; every other setting (Git commit, dirty-worktree state, Spring Boot version, Spring AI version, execution engine, judge model digest, prompt identity, fixture catalog identity, human-review identity, row order, temperature, seeds, timeout, attempt policy) is identical between arms.
 - Verification and deterministic comparison pass.
 - Causal language remains bounded to the controlled comparison.
+- The historic A5 run was treated as contextual evidence only, not as one arm of the causal comparison.
 - No judge ranking or general factuality claim is made.
 
 ---
@@ -1554,7 +1577,7 @@ retrievalEvaluationMatrix
 
 ## Phase 4
 
-- Fresh 64- and 256-token arms are paired.
+- Fresh 64- and 256-token arms are paired and executed from the same clean Git commit.
 - Only maximum output tokens differ.
 - Valid-yield and formatting effects are separated.
 - No unsupported causal or factuality claim is made.
@@ -1809,31 +1832,17 @@ These represent different compatibility findings.
 
 The benchmark measures compatibility with the declared tool contract.
 
-It does not attempt to maximize callback success through permissive coercion.
+It does not attempt to maximize callback success through permissive coercion, and it must not let ordinary framework coercion inside the Spring AI callback path be mistaken for evidence that the model itself emitted schema-valid arguments.
 
-## Required behavior
+## Background: callback success does not prove schema-valid output
 
-Tool argument DTOs shall retain ordinary strict typing.
-
-Example:
+The existing Spring AI callback path binds tool-call arguments into ordinary Java DTOs. Ordinary Java typing performs implicit coercion. For example, a DTO such as:
 
 ```java
 record CountRequest(int count) {}
 ```
 
-The benchmark shall record observed model behavior rather than relaxing schema validation.
-
-For example:
-
-Correct:
-
-```json
-{
-  "count": 5
-}
-```
-
-Potential incompatibility:
+may accept the model-emitted raw argument JSON:
 
 ```json
 {
@@ -1841,20 +1850,59 @@ Potential incompatibility:
 }
 ```
 
-If callback binding fails because the generated arguments do not satisfy the declared schema, the failure shall be preserved as evidence.
+because the callback binding layer coerces the JSON string `"5"` into the Java `int` `5` before or during invocation. The callback then executes and succeeds. That callback success is real, but it is not evidence that the model emitted an argument value that satisfies the tool's declared JSON Schema, which requires `count` to be a JSON number, not a JSON string.
 
-The benchmark shall not intentionally introduce lenient coercion solely to improve compatibility statistics.
+The benchmark shall not classify this outcome as full schema compliance merely because the framework tolerated it.
+
+## Required behavior
+
+The raw tool-call argument JSON, exactly as returned by the model before any callback binding, shall be captured and preserved as evidence prior to DTO binding.
+
+Where the selected tool exposes a JSON Schema, the raw argument JSON shall be validated against that declared schema independently of, and prior to, callback binding.
+
+The following dimensions shall be recorded separately and shall not be collapsed into one flag:
+
+```text
+rawArgumentJsonValid
+
+rawArgumentSchemaValid
+
+callbackBindingSucceeded
+
+callbackExecuted
+
+callbackSucceeded
+```
+
+The following outcome is an explicitly allowed and expected compatibility finding, not an error state to be hidden or corrected:
+
+```text
+rawArgumentJsonValid = true
+rawArgumentSchemaValid = false
+callbackBindingSucceeded = true
+callbackSucceeded = true
+```
+
+This outcome shall be reported as a compatibility finding — the model emitted a schema-invalid argument that the framework's ordinary Java typing happened to coerce — rather than being suppressed by, or merged into, a single "callback succeeded" signal.
+
+Tool argument DTOs shall retain ordinary strict typing exactly as Spring AI provides it today. The benchmark shall not introduce a custom lenient or strict `ObjectMapper`, or otherwise modify existing framework coercion behavior, merely to influence pass rates in either direction.
+
+If callback binding fails outright because the generated arguments cannot be bound at all, that failure shall also be preserved as evidence, distinct from the coercion case above.
+
+The guiding principle: observe and record framework coercion; do not confuse it with model schema compliance.
 
 ---
 
-# A5. Tool argument failure taxonomy
+# A5. Tool argument failure and diagnostic taxonomy
 
-Where practical, callback failures should distinguish their primary cause.
+Where practical, raw-argument and callback outcomes should distinguish their primary cause.
 
 Suggested categories include:
 
 ```text
 MALFORMED_JSON
+
+RAW_ARGUMENT_SCHEMA_MISMATCH
 
 SCHEMA_TYPE_MISMATCH
 
@@ -1866,6 +1914,8 @@ CALLBACK_BINDING_FAILURE
 
 CALLBACK_INVOCATION_FAILURE
 ```
+
+`RAW_ARGUMENT_SCHEMA_MISMATCH` records that the raw model-emitted argument JSON failed declared-schema validation, independent of whatever the callback binding layer subsequently did with it. It shall not be assigned automatically whenever a callback fails, and it shall not be withheld automatically whenever a callback succeeds: the two dimensions are evaluated and recorded separately, as described in A4.
 
 The implementation should classify observable failure causes rather than relying on specific exception class names.
 
