@@ -1661,3 +1661,337 @@ The first live execution should occur only after:
 This gives the project one clean answer before introducing prompt interventions or model comparisons:
 
 > Can this specific small model complete this specific existing tool contract, and if not, at which boundary does it fail?
+
+# Appendix A 
+ Spring AI 2.0 Tool-Calling Implementation Notes
+
+## Status
+
+This appendix supplements the implementation guidance in the Small-Model Tool-Calling Compatibility Plan.
+
+It introduces no new research questions, experimental variables, or authorization. It records implementation constraints discovered before coding so that Phase 1 preserves correct evidence boundaries when exercising Spring AI 2.0 tool calling through Ollama.
+
+These notes apply to the existing standard `ToolCallingAdvisor` execution path unless a later phase explicitly authorizes a different execution model.
+
+---
+
+# A1. Tool-call detection precedence
+
+## Background
+
+A successful assistant response requesting tool execution may legitimately contain:
+
+- one or more tool calls,
+- empty assistant text,
+- `null` assistant text,
+- preliminary reasoning-style text,
+- or any combination of the above.
+
+Therefore, assistant text alone must never determine whether the model produced a valid action.
+
+## Required evaluation order
+
+Assistant responses shall be evaluated in the following order:
+
+1. assistant message present;
+2. tool-call presence;
+3. assistant text presence;
+4. finish metadata;
+5. downstream callback outcome.
+
+The existence of one or more tool calls is the primary indicator that the model requested tool execution.
+
+A blank or missing assistant text field shall not by itself classify the row as an empty model response.
+
+## Classification guidance
+
+The following conditions shall remain separate:
+
+```text
+provider invocation succeeded
+
+tool call produced
+
+tool call valid
+
+callback executed
+
+callback succeeded
+
+final assistant response present
+
+final contract passed
+```
+
+A row may therefore legitimately satisfy:
+
+```text
+provider invocation succeeded = true
+
+tool call produced = true
+
+assistant text present = false
+```
+
+without representing a failure.
+
+---
+
+# A2. Finish-reason handling
+
+## Background
+
+Provider finish metadata is provider-specific diagnostic information.
+
+Different Ollama models, GGUF chat templates, or provider adapters may report different finish reasons while still requesting identical tool execution.
+
+The experiment therefore shall not rely on finish reason to determine whether a tool request occurred.
+
+## Required behavior
+
+Tool-call presence shall be the ground truth.
+
+Finish reason shall be retained only as diagnostic metadata.
+
+Possible observations include:
+
+```text
+toolCalls + finishReason=tool_calls
+
+toolCalls + finishReason=stop
+
+toolCalls + finishReason=null
+
+noToolCalls + finishReason=stop
+
+noToolCalls + finishReason=length
+```
+
+No finish-reason value shall override the observed tool-call collection.
+
+---
+
+# A3. Assistant lifecycle boundaries
+
+The recorder shall preserve distinct lifecycle stages.
+
+At minimum, evidence shall distinguish:
+
+```text
+provider invocation
+
+assistant tool request
+
+tool execution
+
+tool callback result
+
+final assistant completion
+```
+
+The implementation shall avoid collapsing these stages into one success flag.
+
+Examples:
+
+A callback may succeed while the final assistant response is empty.
+
+A valid tool request may be followed by malformed final output.
+
+A provider invocation may succeed without producing any tool request.
+
+These represent different compatibility findings.
+
+---
+
+# A4. Tool argument schema fidelity
+
+## Objective
+
+The benchmark measures compatibility with the declared tool contract.
+
+It does not attempt to maximize callback success through permissive coercion.
+
+## Required behavior
+
+Tool argument DTOs shall retain ordinary strict typing.
+
+Example:
+
+```java
+record CountRequest(int count) {}
+```
+
+The benchmark shall record observed model behavior rather than relaxing schema validation.
+
+For example:
+
+Correct:
+
+```json
+{
+  "count": 5
+}
+```
+
+Potential incompatibility:
+
+```json
+{
+  "count": "5"
+}
+```
+
+If callback binding fails because the generated arguments do not satisfy the declared schema, the failure shall be preserved as evidence.
+
+The benchmark shall not intentionally introduce lenient coercion solely to improve compatibility statistics.
+
+---
+
+# A5. Tool argument failure taxonomy
+
+Where practical, callback failures should distinguish their primary cause.
+
+Suggested categories include:
+
+```text
+MALFORMED_JSON
+
+SCHEMA_TYPE_MISMATCH
+
+MISSING_REQUIRED_ARGUMENT
+
+UNKNOWN_ARGUMENT
+
+CALLBACK_BINDING_FAILURE
+
+CALLBACK_INVOCATION_FAILURE
+```
+
+The implementation should classify observable failure causes rather than relying on specific exception class names.
+
+---
+
+# A6. Visible reasoning text
+
+Some local models emit observable reasoning-style text before, during, or after tool requests.
+
+Examples include:
+
+```text
+<think>
+
+</think>
+
+Thinking...
+
+Here's a thinking process:
+```
+
+These markers are observable output only.
+
+The benchmark shall not describe them as the model's actual internal reasoning.
+
+Suggested terminology:
+
+```text
+visibleReasoningText
+
+reasoningStyleOutput
+```
+
+rather than:
+
+```text
+chainOfThought
+```
+
+unless future provider documentation explicitly establishes stronger semantics.
+
+Visible reasoning text should remain a diagnostic observation unless a specific case contract explicitly forbids it.
+
+---
+
+# A7. Standard ToolCallingAdvisor observability
+
+Phase 1 intentionally evaluates the existing standard Spring AI `ToolCallingAdvisor` path.
+
+The implementation shall first determine whether the standard advisor exposes sufficient trace information to preserve:
+
+```text
+initial assistant tool request
+
+tool execution
+
+tool callback
+
+final assistant response
+```
+
+If the standard advisor provides adequate observability, no custom execution loop shall be introduced.
+
+If observability is incomplete, the limitation shall be documented rather than immediately replacing the standard execution model.
+
+A custom execution loop using lower-level Spring AI tool-calling APIs remains possible in a future separately authorized phase, but is outside the scope of this plan.
+
+---
+
+# A8. Row-level resilience
+
+The compatibility matrix should continue executing after ordinary model compatibility failures.
+
+Examples include:
+
+- malformed tool arguments,
+- callback binding failures,
+- callback execution failures,
+- unsupported model tool behavior,
+- provider parsing failures,
+- empty assistant responses.
+
+These outcomes shall be retained as row evidence.
+
+By contrast, protocol integrity failures shall terminate execution before or during the run.
+
+Examples include:
+
+- failed preflight validation,
+- unresolved model identity,
+- invalid output directory,
+- evidence corruption,
+- manifest integrity failure,
+- protocol drift,
+- programmer invariant violations.
+
+The implementation shall distinguish between:
+
+```text
+compatibility failure
+```
+
+and
+
+```text
+experimental integrity failure
+```
+
+Only the latter should abort the controlled matrix.
+
+---
+
+# A9. Implementation principle
+
+The compatibility study exists to observe model behavior rather than compensate for it.
+
+Accordingly, the implementation should prefer preserving evidence over silently repairing model output.
+
+Whenever practical:
+
+- record,
+- classify,
+- preserve,
+- verify,
+- and interpret,
+
+rather than automatically correcting or normalizing incompatible model behavior.
+
+This principle is consistent with the existing evidence lifecycle used throughout `setaccio-lab`.
