@@ -1,0 +1,2652 @@
+# Small-Model Tool-Calling Compatibility Plan
+
+## Status
+
+Proposed next work after completion of:
+
+- the local fact-checking cycle;
+- the shared evidence lifecycle extraction;
+- the provider-neutral chat invocation boundary;
+- the controlled Ollama chat matrix;
+- the bounded Anthropic architecture-portability proof;
+- the existing standard-versus-regex Tool Search baseline.
+
+This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete.
+
+Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
+every formal slice has a Codex dispatch packet below. The Phase 0 documentation
+gate is prepared, but the provider-free implementation gate remains open until
+the project owner explicitly authorizes it.
+
+## Purpose
+
+Evaluate whether small, fast, locally hosted language models can reliably perform constrained tool-calling tasks even when their general factual knowledge and open-ended conversational quality are limited.
+
+The motivating observation is that a small model may perform poorly at unsupported factual recall yet still be useful as a tool router, argument extractor, or deterministic agent component when authoritative information is supplied by tools.
+
+The initial subject is:
+
+```text
+hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0
+```
+
+The plan begins with one untreated model and the existing tool cases. It does not initially add new tools, providers, indexes, fixtures, or model types.
+
+## Primary research questions
+
+### RQ1 — Baseline compatibility
+
+Can the untreated LFM2.5 model complete the existing Setaccio tool-calling protocol through Spring AI and Ollama?
+
+### RQ2 — Failure location
+
+When a case fails, where does it fail?
+
+Possible boundaries include:
+
+- tool selection;
+- tool-call serialization;
+- argument generation;
+- callback execution;
+- multi-step continuation;
+- final-answer generation;
+- output-budget exhaustion;
+- reasoning leakage;
+- provider or framework incompatibility.
+
+### RQ3 — Prompt intervention
+
+Does a narrowly defined tool-discipline system prompt improve contract completion without changing model bytes, fixtures, tools, generation settings, execution order, or framework versions?
+
+### RQ4 — Small-model viability
+
+After the one-model protocol is proven, how do several small local models differ across tool compatibility, abstention, argument correctness, final-answer yield, token use, and latency?
+
+### RQ5 — Output-budget compatibility
+
+Does increasing the explicit output-token limit improve valid result yield for the existing fact-checking judge protocol while all other experimental variables remain unchanged?
+
+### RQ6 — Retrieval readiness
+
+What is the smallest real retrieval path that can preserve retrieved evidence and support a future relevancy evaluation without misrepresenting ordinary fixture context as RAG?
+
+---
+
+# Non-goals
+
+This work will not:
+
+- produce a general intelligence score;
+- claim that one model is universally better;
+- rank models using one aggregate number;
+- add new production Setaccio behavior;
+- copy private Setaccio application code or roadmap material;
+- add Docker or Testcontainers dependencies to `setaccio-lab`;
+- add remote providers;
+- add MCP in the first phases;
+- add a new Tool Search index;
+- change the existing interactive endpoint contract;
+- automatically pull missing Ollama models;
+- place live runs in `test`, `check`, `build`, application startup, or CI;
+- treat structural compliance as semantic correctness;
+- treat two repetitions as statistical reliability;
+- replace or selectively retry failed rows;
+- publish ignored raw model outputs unless separately reviewed and authorized;
+- hide the experimental system prompt inside an opaque mutable Ollama tag.
+
+---
+
+# Shared principles
+
+## Explicit experimental variables
+
+Every controlled run must identify the variable intentionally changed from its baseline.
+
+All other relevant variables must either:
+
+- remain identical;
+- be rejected before execution;
+- or be recorded as a declared limitation.
+
+## Immutable model identity
+
+Every Ollama model must be resolved before output-directory allocation to:
+
+- requested tag;
+- normalized installed name;
+- full immutable Ollama digest.
+
+Missing models, incomplete digests, and duplicate aliases resolving to identical bytes must fail preflight.
+
+No task may pull a model.
+
+## One attempt
+
+Every row receives exactly one model invocation attempt.
+
+There are no:
+
+- framework retries;
+- SDK retries;
+- replacement rows;
+- selective reruns;
+- fallback models.
+
+A failed attempt remains part of the evidence.
+
+## Sequential execution
+
+Controlled matrices execute sequentially.
+
+This avoids hidden concurrency effects and keeps:
+
+- row ordering deterministic;
+- tool state deterministic;
+- latency interpretation bounded;
+- failures attributable to one invocation path.
+
+## Evidence lifecycle
+
+Each controlled run writes a new ignored directory containing:
+
+```text
+raw-results.json
+manifest.json
+SUMMARY.md
+```
+
+Names may become suite-specific, but each run must contain exactly the declared artifacts.
+
+Every run must support:
+
+- offline verification;
+- deterministic reanalysis;
+- tamper detection;
+- non-overwriting creation;
+- relative artifact paths;
+- SHA-256 artifact integrity;
+- Git and framework provenance;
+- no hostname, credentials, endpoint, absolute path, or private corpus data.
+
+## Separate outcome dimensions
+
+The analysis must not collapse distinct outcomes into one score.
+
+At minimum, retain separately:
+
+- provider invocation success;
+- valid tool-call production;
+- correct tool selection;
+- forbidden-tool avoidance;
+- raw argument JSON validity;
+- raw argument declared-schema validity (kept distinct from callback binding/execution outcomes, since Java DTO coercion can mask schema-invalid model output);
+- callback binding success;
+- callback execution;
+- callback result correctness;
+- multi-step continuation;
+- final-response presence;
+- final-response contract assertions;
+- token metadata availability;
+- output-limit behavior;
+- reasoning leakage;
+- latency;
+- infrastructure failure.
+
+---
+
+# Phase 0 — Plan and contract gate
+
+## Objective
+
+Define and lock the experiment before implementing a live runner.
+
+## Slice T0.1 — Documentation and authorization boundary
+
+Track this plan as:
+
+```text
+docs/SmallModelToolCallingCompatibilityPlan.md
+```
+
+Update:
+
+```text
+docs/DEFERRED-WORK.md
+docs/TEST-PLAN.md
+docs/ENVIRONMENT.md
+CHANGELOG.md
+AGENTS.md
+docs/logs/YYYY-MM-DD.md
+```
+
+### Locked Phase 1 decisions
+
+The following decisions are fixed for the first implementation. An implementing
+agent must not substitute an alternative merely because another existing matrix
+uses it:
+
+| Decision | Locked value |
+| --- | --- |
+| Initial model tag | `hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0` |
+| Provider and advisor | Ollama through the standard Spring AI `ToolCallingAdvisor`; no Tool Search |
+| Ordered case IDs | `arithmetic-add`, `fixed-utc-time`, `fixed-zone-time`, `catalog-lookup`, `catalog-multi-step`, `catalog-no-match`, `no-applicable-domain-tool`, `deterministic-tool-failure` |
+| Exposed tools | Exact ordered names returned by `ToolBenchmarkCases.toolNames()`; no additions or omissions |
+| Repetitions and seeds | Two repetitions; repetition 1 uses `42`, repetition 2 uses `43` |
+| Temperature | `0.0` |
+| Maximum output tokens | `512` |
+| Timeout | `PT2M` per invocation |
+| Attempts | Exactly one; no framework retry, replacement, or fallback |
+| Row schedule | Repetition outer loop, then the eight cases in the order above; exactly 16 rows |
+| Raw result | `tool-compatibility-results.json` |
+| Manifest suite ID | `ollama-tool-compatibility` |
+| Execution engine | `spring-ai-standard-tool-calling-advisor` |
+| Evidence files | Exactly the raw result, `manifest.json`, and deterministic `SUMMARY.md` |
+| Output root | `setaccio-lab/build/tool-compatibility/`; each run is one new dated direct child |
+| Source sets | `toolCompatibility` and `toolCompatibilityTest` |
+| Base package | `com.setaccio.lab.toolcompat` |
+| Untreated system prompt | ID `tool-system-none`, version `1`, empty UTF-8 text, `present=false`, SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| Schema validation | Parse the exact `ToolDefinition.inputSchema()` and validate the current fixture schemas with the locked bounded validator described below; do not add a schema library silently |
+
+The bounded raw-argument schema validator supports the subset exercised by the
+current deterministic fixture tools: a root object, `properties`, `required`,
+`additionalProperties`, and the JSON types `object`, `array`, `string`,
+`number`, `integer`, `boolean`, and `null`. It must accept and ignore the
+non-validation metadata keywords `description`, `title`, `$schema`, and
+`default`, which Spring AI may generate from tool metadata such as
+`@ToolParam(description = ...)`. It must reject malformed raw JSON, missing
+required properties, unknown properties when disallowed, and type mismatches
+before callback binding. If a selected tool schema contains any other keyword
+or shape outside that subset, preflight must fail with a classified
+unsupported-schema integrity error. Do not approximate validation, treat Java
+DTO coercion as schema validity, or add a third-party validator without a
+separately reviewed dependency change.
+
+The `no-applicable-domain-tool` prompt retains its existing phrase "Use tool
+discovery" because changing a canonical prompt would create a new experimental
+variable. In Phase 1 it is interpreted only as the existing abstention contract
+under the standard advisor. Record that inherited wording as a protocol
+limitation; do not silently rewrite or remove the case.
+
+### Locked initial protocol
+
+```text
+Model:
+hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0
+
+Advisor:
+standard ToolCallingAdvisor only
+
+Cases, in order:
+arithmetic-add
+fixed-utc-time
+fixed-zone-time
+catalog-lookup
+catalog-multi-step
+catalog-no-match
+no-applicable-domain-tool
+deterministic-tool-failure
+
+Repetitions:
+2
+
+Temperature:
+0.0
+
+Seeds:
+42 and 43
+
+Maximum output tokens:
+512
+
+Timeout:
+PT2M
+
+Attempts:
+1
+
+Execution:
+strictly sequential
+
+Pull strategy:
+never
+```
+
+The `512`-token starting budget is deliberately larger than the fact-checking experiment’s `64` tokens because this model visibly emits substantial reasoning text. It should still be treated as an explicit bounded policy, not as a claim that 512 is optimal.
+
+### Locked case-selection rule
+
+Resolve the eight IDs above directly from `ToolBenchmarkCases.defaults()` and
+fail before output allocation if an ID is missing, duplicated, reordered, or if
+its prompt or expectation bytes drift. Fingerprint the ordered canonical cases
+and ordered tool definitions in the saved protocol. Do not transcribe prompts,
+expectations, or tool schemas into a second hand-maintained catalog.
+
+### Exit criteria
+
+- The plan and locked decisions are reviewed.
+- Experimental variables are explicit and no implementation choice remains
+  described only as "suggested" or "recommended" for Phase 1.
+- No live execution has occurred.
+- Existing deferred-work text is updated to distinguish this narrow compatibility study from a broad tool-calling expansion.
+- Default lifecycle remains provider-free.
+- The project owner explicitly authorizes the provider-free implementation
+  scope; that authorization still does not authorize the live matrix.
+
+---
+
+# Phase 1 — Untreated LFM baseline
+
+## Objective
+
+Determine whether the unmodified LFM2.5 model is technically and behaviorally compatible with the existing standard tool-calling path.
+
+No custom system prompt is introduced in this phase.
+
+## Slice T1.1 — Provider-free protocol model
+
+Create a dedicated source set or package for the controlled matrix, following existing matrix conventions.
+
+Required package:
+
+```text
+com.setaccio.lab.toolcompat
+```
+
+Required source sets:
+
+```text
+toolCompatibility
+toolCompatibilityTest
+```
+
+Reuse existing shared evidence primitives and existing canonical tool cases where semantics match.
+
+Do not alter the interactive `/api/lab/tools` endpoint.
+
+### Core protocol types
+
+Required suite-specific protocol types:
+
+```java
+ToolCompatibilityProtocol
+ToolCompatibilityCaseSelection
+ToolCompatibilityRunSettings
+ToolCompatibilityModelIdentity
+ToolCompatibilitySystemPromptIdentity
+ToolCompatibilityRow
+ToolCompatibilityResult
+ToolCompatibilityFailure
+ToolCompatibilityDiagnostic
+```
+
+Avoid creating generic abstractions unless at least two real consumers already demonstrate identical semantics.
+
+## Slice T1.2 — Explicit system-prompt representation
+
+Even though Phase 1 uses no custom system prompt, make system-prompt state explicit.
+
+Required representation:
+
+```java
+record ToolCompatibilitySystemPromptIdentity(
+    String id,
+    int version,
+    String sha256,
+    String text,
+    boolean present
+) {}
+```
+
+For the untreated baseline:
+
+```text
+id: tool-system-none
+version: 1
+text: ""
+present: false
+sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+```
+
+This is the SHA-256 of zero bytes. Do not use `null`, an implementation-defined
+sentinel, or a digest of a newline.
+
+Do not infer or extract training-time behavior from model weights.
+
+Do not describe the absence of a Modelfile `SYSTEM` block as proof that the weights contain no persona or instruction tuning.
+
+## Slice T1.3 — Invocation boundary
+
+Reuse the existing Ollama construction rules:
+
+- explicit loopback URL;
+- pull strategy `never`;
+- exact requested model;
+- full installed digest resolution;
+- temperature `0.0`;
+- seed per repetition;
+- explicit maximum output tokens;
+- explicit timeout;
+- retries disabled;
+- exactly one attempt.
+
+Use the existing Spring AI standard tool-calling path without Tool Search.
+
+The runner must retain:
+
+- raw assistant response;
+- tool-call requests;
+- tool-call arguments;
+- callback outputs;
+- final assistant response;
+- response metadata;
+- token usage when available;
+- finish reason when available;
+- latency;
+- classified failure.
+
+## Slice T1.4 — Canonical result row
+
+Each row should retain enough evidence to distinguish tool routing from final-answer generation.
+
+Suggested shape:
+
+```java
+record ToolCompatibilityRow(
+    int sequence,
+    String caseId,
+    int repetition,
+    Integer seed,
+
+    String provider,
+    String requestedModel,
+    String effectiveModel,
+    String modelDigest,
+
+    String systemPromptId,
+    int systemPromptVersion,
+    String systemPromptSha256,
+
+    double temperature,
+    int maxOutputTokens,
+    Duration timeout,
+    int attemptCount,
+
+    boolean providerInvocationSucceeded,
+    boolean toolCallProduced,
+    boolean toolCallValid,
+    boolean requiredToolSelected,
+    boolean forbiddenToolSelected,
+    String rawArgumentJson,
+    boolean rawArgumentJsonValid,
+    boolean rawArgumentSchemaValid,
+    boolean callbackBindingSucceeded,
+    boolean callbackExecuted,
+    boolean callbackSucceeded,
+    boolean finalResponsePresent,
+    boolean caseContractPassed,
+
+    List<ToolCallEvidence> toolCalls,
+    List<ToolResponseEvidence> toolResponses,
+    List<NamedAssertionResult> assertions,
+
+    String rawAssistantOutput,
+    String finalAssistantOutput,
+
+    boolean thinkTagDetected,
+    boolean reasoningMarkerDetected,
+    boolean outputLimitReached,
+
+    TokenUsageEvidence usage,
+    Duration latency,
+
+    String failureCategory,
+    String diagnosticCategory,
+    String safeErrorMessage
+) {}
+```
+
+Reuse existing tool trace and assertion types if their semantics already match.
+
+Do not duplicate raw callback data into multiple fields unless needed for verification.
+
+## Slice T1.5 — Reasoning-leakage diagnostics
+
+Add deterministic diagnostics for visible reasoning markers.
+
+Initial markers may include:
+
+```text
+<think>
+</think>
+Thinking...
+...done thinking.
+Here's a thinking process:
+```
+
+Classify, but do not automatically fail, a row based only on reasoning leakage unless the locked case contract explicitly forbids it.
+
+Record separately:
+
+- marker detected anywhere;
+- marker detected before first tool call;
+- marker detected after tool execution;
+- reasoning text present in final user-facing output.
+
+Do not claim these markers reveal the model’s actual private reasoning process. Name the category `visibleReasoningText` or `reasoningStyleOutput`, not `chainOfThought`.
+
+## Slice T1.6 — Deterministic analysis
+
+The summary should include counts for:
+
+### Invocation
+
+- planned rows;
+- completed attempts;
+- provider successes;
+- provider failures;
+- timeouts;
+- unavailable models;
+- empty provider responses.
+
+### Tool selection
+
+- required tool selected;
+- required tool missing;
+- forbidden tool selected;
+- unnecessary tool use;
+- valid abstentions.
+
+### Tool execution
+
+- valid tool call;
+- malformed tool call;
+- raw argument JSON validity;
+- raw argument declared-schema validity;
+- callback binding success (including cases where the framework coerces a schema-invalid raw argument into a bound value);
+- callback success;
+- callback failure;
+- expected deterministic callback failure correctly retained.
+
+### Completion
+
+- final response present;
+- final response empty;
+- final contract pass;
+- tool succeeded but final answer failed;
+- output limit reached.
+
+### Reasoning-style output
+
+- `<think>` marker detected;
+- other reasoning marker detected;
+- reasoning marker before tool call;
+- reasoning marker in final response.
+
+### Usage and latency
+
+- rows with complete usage;
+- prompt tokens;
+- completion tokens;
+- total tokens;
+- successful-row median latency;
+- observed successful-row latency range.
+
+With two repetitions, do not calculate percentiles.
+
+## Slice T1.7 — Offline evidence lifecycle
+
+Required task names:
+
+```bash
+./gradlew :setaccio-lab:toolCompatibilityTest
+
+./gradlew :setaccio-lab:toolCompatibilityMatrix \
+  --ollama-base-url=http://localhost:11434 \
+  --model=hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0 \
+  --max-tokens=512 \
+  --timeout=PT2M \
+  --output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline
+
+./gradlew :setaccio-lab:toolCompatibilityVerify \
+  --run-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline
+
+./gradlew :setaccio-lab:toolCompatibilityReanalyze \
+  --run-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline
+```
+
+The live task must require every option shown above.
+
+Do not inherit:
+
+- `OLLAMA_MODEL`;
+- application chat defaults;
+- endpoint defaults;
+- an output directory;
+- a token budget;
+- a timeout.
+
+Temperature and seeds are protocol constants in `ToolCompatibilityProtocol` and
+must be recorded in evidence; they are not live-task CLI options. Maximum
+output tokens and timeout remain mandatory CLI options so the effective values
+are explicit at invocation while still being checked against the locked Phase 1
+values.
+
+## Slice T1.8 — Provider-free tests
+
+Tests must cover:
+
+### Preflight
+
+- missing model option;
+- unknown option;
+- duplicate option;
+- missing installed model;
+- incomplete digest;
+- duplicate alias for same digest where disallowed;
+- non-loopback endpoint;
+- endpoint with userinfo;
+- endpoint with path/query/fragment where disallowed;
+- reused output directory;
+- output path outside required root;
+- symbolic-link output path;
+- invalid token bounds;
+- invalid timeout bounds.
+
+### Execution
+
+Using fake model and deterministic tools:
+
+- exact row count;
+- exact row order;
+- seeds 42 and 43;
+- one attempt per row;
+- no replacement after failure;
+- successful single-step tool;
+- successful multi-step tool;
+- abstention;
+- no-match;
+- invalid arguments;
+- callback failure;
+- tool success followed by empty final response;
+- output-limit completion;
+- visible reasoning marker;
+- usage present;
+- usage absent;
+- timeout;
+- provider failure.
+
+### Evidence
+
+- raw-result schema validation;
+- manifest suite and run identity;
+- prompt/system-prompt identity;
+- full model digest;
+- settings parity;
+- artifact SHA-256;
+- missing artifact rejection;
+- extra artifact rejection;
+- empty artifact rejection;
+- path traversal rejection;
+- symlink rejection;
+- row-order drift rejection;
+- attempt-count drift rejection;
+- summary drift rejection;
+- deterministic reanalysis.
+
+## Phase 1 live-run gate
+
+Before the live run:
+
+- worktree state is captured;
+- model is already installed;
+- full digest resolves;
+- no model pull is needed;
+- provider-free tests pass;
+- output directory does not exist;
+- exact command is reviewed;
+- no remote credential is involved.
+
+## Phase 1 interpretation
+
+The closeout must state only what the evidence supports.
+
+Allowed examples:
+
+- “The model produced valid tool calls in N of M rows.”
+- “Tool execution succeeded, but final responses were empty in N rows.”
+- “Visible `<think>` output appeared before the tool call in N rows.”
+- “The model reached the explicit output limit in N rows.”
+
+Not allowed:
+
+- “LFM is a good agent.”
+- “LFM is better than Gemma.”
+- “Small models are sufficient for production.”
+- “The model reasoned correctly.”
+- “The model is reliable.”
+
+## Phase 1 exit criteria
+
+- One clean or explicitly diagnostic baseline run completes.
+- Raw evidence verifies offline.
+- Reanalysis reproduces `SUMMARY.md`.
+- Failure locations are distinguishable.
+- No prompt intervention has been introduced.
+- A bounded interpretation is committed.
+- Phase 2 is either authorized or explicitly deferred based on the evidence.
+
+---
+
+# Phase 2 — Controlled system-prompt intervention
+
+## Objective
+
+Test whether one explicit tool-discipline system prompt changes compatibility outcomes for the exact same model and protocol.
+
+## Experimental hypothesis
+
+An explicit system prompt emphasizing tool discipline and suppression of visible reasoning text may:
+
+- increase required-tool selection;
+- reduce unnecessary tool calls;
+- reduce unsupported answer fabrication;
+- reduce visible `<think>` output;
+- improve final-response yield;
+- reduce token use before the first tool call.
+
+No direction is assumed in advance.
+
+## Slice T2.1 — Tracked prompt catalog
+
+Create a dedicated catalog containing exactly two prompt conditions:
+
+### Condition A — Untreated baseline
+
+```text
+ID: tool-system-none
+Version: 1
+Text: empty
+```
+
+### Condition B — Tool discipline
+
+```text
+ID: tool-system-discipline
+Version: 1
+```
+
+Exact text:
+
+```text
+You are a tool-using assistant.
+
+Use a tool when the request requires external information or an action.
+Do not invent tool results.
+Do not call a tool when it is unnecessary.
+Use only the tools available to you.
+Think silently and do not output internal reasoning or <think> tags.
+After a tool completes, answer using only its returned result.
+```
+
+Lock:
+
+- catalog ID;
+- catalog version;
+- catalog SHA-256;
+- per-prompt SHA-256;
+- exact UTF-8 bytes;
+- deterministic order.
+
+Do not use an Ollama-derived model tag to encode the prompt.
+
+## Slice T2.2 — Paired execution protocol
+
+Recommended order:
+
+```text
+For each case:
+  repetition 1:
+    untreated
+    prompted
+  repetition 2:
+    prompted
+    untreated
+```
+
+This alternates condition order across repetitions.
+
+Do not fall back to whole-condition ordering. The alternating per-case order is
+part of the locked Phase 2 protocol and must be proved by provider-free schedule
+tests before either live condition is authorized.
+
+Keep identical:
+
+- model digest;
+- case catalog;
+- advisor;
+- tool definitions;
+- temperature;
+- seeds;
+- output budget;
+- timeout;
+- attempt count;
+- Spring Boot version;
+- Spring AI version;
+- execution engine.
+
+Record one shared paired-execution schedule identity in both condition runs.
+It must bind the complete interleaved A/B order above, including every case,
+repetition, sequence position, and condition, so an offline comparison can
+prove that it is comparing the paired execution rather than independently run
+conditions.
+
+## Slice T2.3 — Comparison gate
+
+Add:
+
+```bash
+./gradlew :setaccio-lab:toolCompatibilityCompare \
+  --baseline-run=build/tool-compatibility/YYYY-MM-DD-lfm-baseline \
+  --candidate-run=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
+```
+
+The comparison must reject mismatches in:
+
+- model digest;
+- model order;
+- case IDs;
+- case order;
+- repetition count;
+- seeds;
+- temperature;
+- output tokens;
+- timeout;
+- attempts;
+- advisor mode;
+- tool catalog identity;
+- framework versions;
+- execution engine.
+
+The comparison must also reject runs that do not share the same clean Git
+commit, or that do not carry the identical paired-execution schedule identity.
+The paired runs must stop before allocation if either worktree is dirty; if
+the commit or worktree changes between conditions, restart both conditions
+from a new clean commit.
+
+Permit differences only in:
+
+- system-prompt identity;
+- generated timestamp;
+- output-directory identity.
+
+## Slice T2.4 — Deterministic comparison report
+
+Report paired changes by case and repetition:
+
+- contract fail → pass;
+- pass → fail;
+- unchanged pass;
+- unchanged fail;
+- required tool newly selected;
+- required tool newly missed;
+- forbidden tool newly selected;
+- final response newly present;
+- final response newly empty;
+- visible reasoning marker removed;
+- visible reasoning marker introduced;
+- output-limit state changed;
+- completion-token delta;
+- latency delta.
+
+Do not declare an overall winner automatically.
+
+## Slice T2.5 — Human interpretation
+
+Human review should answer:
+
+- Did the prompt improve behavior in the cases that matter?
+- Did it merely suppress text while harming tool selection?
+- Did it increase abstention incorrectly?
+- Did it make final answers mechanically terse or incomplete?
+- Did it introduce prompt-specific artifacts?
+- Is the prompt worth adopting for later small-model studies?
+
+Decision vocabulary:
+
+```text
+adopt
+revise
+reject
+inconclusive
+```
+
+Bind the human decision to:
+
+- baseline run identity;
+- candidate run identity;
+- prompt catalog digest;
+- comparison report digest;
+- review date.
+
+## Phase 2 exit criteria
+
+- Paired runs verify offline.
+- Comparison preconditions pass.
+- Deterministic comparison is reproducible.
+- Human decision is recorded separately from deterministic analysis.
+- No model ranking claim is made.
+
+---
+
+# Phase 3 — Small-local-model compatibility cohort
+
+## Objective
+
+Determine how several small local models behave under the same existing tool contract.
+
+This phase begins only after Phases 1 and 2 establish a working protocol.
+
+## Candidate cohort
+
+Recommended initial cohort:
+
+```text
+hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0
+granite4.1:3b
+ministral-3:3b
+gemma4:e2b
+qwen3.5:0.8b
+dolphin-phi:latest
+```
+
+Reference model:
+
+```text
+qwen3.6:latest
+```
+
+The reference model is not grouped as a size peer. It provides a higher-capability local comparison point.
+
+Before locking the cohort, inspect each installed model’s:
+
+- architecture;
+- tool-calling support;
+- chat template;
+- default system prompt;
+- reasoning-output behavior;
+- immutable digest.
+
+Models that cannot express Spring AI/Ollama tool calls should not be silently removed. They may remain as compatibility failures if the protocol question includes unsupported models.
+
+## Slice T3.1 — Cohort preflight
+
+Require explicit ordered model tags.
+
+Resolve each to:
+
+- normalized installed identity;
+- full digest;
+- size metadata if reliably available;
+- template/tool capability metadata where available.
+
+Reject:
+
+- missing tags;
+- duplicate aliases for identical digests;
+- incomplete identities;
+- cloud-only models;
+- models requiring remote execution;
+- models pulled automatically.
+
+## Slice T3.2 — Prompt policy
+
+Use the Phase 2 human decision:
+
+- if `adopt`, use the adopted system prompt for the cohort;
+- if `reject`, use untreated prompts;
+- if `revise`, complete a new prompt experiment first;
+- if `inconclusive`, prefer untreated operation and record the limitation.
+
+Do not choose per-model prompts in the initial cohort. That would introduce a confounded optimization layer.
+
+## Slice T3.3 — Locked model matrix
+
+Recommended protocol:
+
+```text
+Models:
+explicit ordered cohort
+
+Cases:
+same canonical tool cases
+
+Repetitions:
+2
+
+Seeds:
+42 and 43 where supported
+
+Temperature:
+0.0
+
+Maximum output tokens:
+512
+
+Timeout:
+PT2M
+
+Attempts:
+1
+
+Advisor:
+standard ToolCallingAdvisor
+
+Order:
+sequential
+```
+
+If a model/provider does not support seed, record unsupported semantics explicitly. Do not simulate a seed.
+
+For Ollama models, seed should normally remain supported and explicit.
+
+## Slice T3.4 — Analysis dimensions
+
+Produce per-model sections without a total rank.
+
+### Compatibility
+
+- provider invocation yield;
+- valid tool-call yield;
+- callback execution yield;
+- final-answer yield.
+
+### Discipline
+
+- required tool use;
+- forbidden tool use;
+- valid abstention;
+- unnecessary invocation;
+- no-match handling.
+
+### Arguments
+
+- schema validity;
+- expected argument values;
+- omitted required values;
+- invented values.
+
+### Multi-step behavior
+
+- first tool correct;
+- second tool correct;
+- dependency order;
+- continuation after first callback;
+- premature final response;
+- duplicate calls.
+
+### Failure recovery
+
+- deterministic callback failure retained;
+- fabricated success after failure;
+- correct error reporting;
+- empty final response.
+
+### Output behavior
+
+- visible reasoning markers;
+- output-limit completion;
+- response-format pollution;
+- final-answer concision.
+
+### Efficiency
+
+- median successful-row latency;
+- observed successful-row latency range;
+- prompt tokens;
+- completion tokens;
+- total tokens;
+- tokens per passing row.
+
+“Tokens per passing row” may be reported descriptively but must not become a universal efficiency score.
+
+## Slice T3.5 — Reference-model comparison
+
+Compare each small model with the reference model only descriptively.
+
+Examples:
+
+- cases passed by both;
+- cases passed only by the reference;
+- cases passed only by the small model;
+- latency and token differences;
+- compatibility failures unique to one model.
+
+Do not infer that the reference answer is semantically correct merely because the reference model is larger.
+
+## Slice T3.6 — Optional capability frontier
+
+After the first cohort, a later analysis may define:
+
+> the smallest tested model that passed every required case under this exact protocol.
+
+This must be phrased narrowly.
+
+Allowed:
+
+> “Among the six tested installed models, model X was the smallest model that passed all locked cases in both repetitions.”
+
+Not allowed:
+
+> “Model X is the smallest model capable of tool calling.”
+
+## Phase 3 exit criteria
+
+- Cohort identities and digests are locked.
+- All planned rows are retained.
+- Evidence verifies and reanalyzes offline.
+- Results remain multidimensional.
+- No global leaderboard or general intelligence claim is made.
+- Follow-up hypotheses are identified without silently expanding scope.
+
+---
+
+# Phase 4 — Fact-check output-budget compatibility
+
+## Objective
+
+Test the deferred hypothesis arising from the prior `64`-token fact-check run.
+
+Observed prior association:
+
+- ten empty outputs reached the explicit 64-token limit;
+- two valid `no` verdicts used two completion tokens.
+
+The earlier evidence did not establish causation.
+
+## Primary hypothesis
+
+Increasing the explicit output-token budget while preserving every other material protocol variable may increase the number of valid `yes` or `no` verdicts.
+
+## Slice F1 — Two-arm experiment
+
+Use exactly two budgets:
+
+```text
+64
+256
+```
+
+Do not begin with four or more token levels.
+
+### Fixed variables
+
+Both the fresh 64-token arm and the fresh 256-token arm must execute from the same clean Git commit. No code-baseline drift between the two arms is permitted.
+
+Retain identically across both arms:
+
+- Git commit;
+- dirty-worktree state (clean in both arms);
+- Spring Boot version;
+- Spring AI version;
+- execution engine;
+- exact judge model digest;
+- judge model digest;
+- prompt ID, version, text, and digest (prompt identity);
+- fixture catalog identity and order;
+- human-confirmation record (human-review identity);
+- twelve-row counterbalanced schedule (row order);
+- temperature `0.0`;
+- seeds `42` and `43`;
+- timeout `PT2M`;
+- one attempt (attempt policy);
+- no pull;
+- loopback-only endpoint.
+
+### Changed variable
+
+```text
+maximum output tokens
+```
+
+Permitted differences between the two arms are limited to:
+
+- maximum output tokens;
+- run ID;
+- generated timestamp;
+- output-directory identity;
+- observed invocation outcomes.
+
+If the repository becomes dirty, the commit changes, or implementation code changes between the two arms, the paired experiment must stop and restart from two fresh run directories after a new clean commit is established. Partial completion under a changed baseline must not be salvaged into the comparison.
+
+## Slice F2 — Paired evidence
+
+Use two new run directories, both created from the same clean commit described above.
+
+Do not reuse, overwrite, or modify the previous A5 evidence. The historic A5 run remains contextual evidence only; it must not serve as one arm of the causal comparison, because its code, framework, or environment provenance is not guaranteed to match either fresh arm.
+
+Suggested names:
+
+```text
+build/evaluation-matrix/YYYY-MM-DD-budget-64
+build/evaluation-matrix/YYYY-MM-DD-budget-256
+```
+
+Both the fresh 64-token arm and the fresh 256-token arm are new paired runs from the identical clean commit. Neither fresh arm may be compared against the historic 64-token A5 run as if it were a controlled pair.
+
+## Slice F3 — Comparison
+
+Add an offline comparison requiring parity for Git commit, dirty-worktree state, Spring Boot version, Spring AI version, execution engine, judge model digest, prompt identity, fixture catalog identity, human-review identity, row order, temperature, seeds, timeout, attempt policy, and all settings other than maximum output tokens. Permit differences only in maximum output tokens, run ID, generated timestamp, output-directory identity, and observed invocation outcomes.
+
+Report:
+
+- valid verdict yield;
+- empty output yield;
+- malformed verdict yield;
+- expectation agreement among valid verdicts;
+- supported-label yield;
+- unsupported-label yield;
+- repetition consistency;
+- output-limit finish state;
+- completion-token distribution;
+- latency.
+
+Do not calculate accuracy over rows without valid verdicts.
+
+## Slice F4 — Interpretation
+
+Possible outcomes:
+
+### Outcome A
+
+256 produces substantially more valid verdicts.
+
+Register a later breakpoint study.
+
+### Outcome B
+
+256 remains mostly empty.
+
+Reject the simple output-budget explanation and investigate prompt/model compatibility separately.
+
+### Outcome C
+
+256 produces longer malformed text.
+
+The model may need a stronger verdict-format prompt rather than merely more tokens.
+
+### Outcome D
+
+Results differ inconsistently between repetitions.
+
+Treat as inconclusive; do not infer reliability from two repetitions.
+
+## Optional later breakpoint slice
+
+Only after a successful 64-versus-256 result:
+
+```text
+64
+96
+128
+192
+256
+```
+
+This later slice must be separately planned and authorized.
+
+## Phase 4 exit criteria
+
+- Fresh paired evidence exists, and both arms executed from the same clean Git commit.
+- Only maximum output tokens differs materially; every other setting (Git commit, dirty-worktree state, Spring Boot version, Spring AI version, execution engine, judge model digest, prompt identity, fixture catalog identity, human-review identity, row order, temperature, seeds, timeout, attempt policy) is identical between arms.
+- Verification and deterministic comparison pass.
+- Causal language remains bounded to the controlled comparison.
+- The historic A5 run was treated as contextual evidence only, not as one arm of the causal comparison.
+- No judge ranking or general factuality claim is made.
+
+---
+
+# Phase 5 — Public-safe retrieval and relevancy foundation
+
+## Objective
+
+Create a genuine retrieval path that preserves retrieved documents and can support future relevancy evaluation.
+
+This phase is intentionally later because it introduces a new model/evaluation surface rather than reusing an existing tool protocol.
+
+## Research questions
+
+- Did retrieval return the expected supporting document?
+- Was the expected document ranked sufficiently high?
+- Did the answer use only retrieved evidence?
+- Did the model abstain when retrieval returned no support?
+- Can retrieval quality be evaluated separately from answer quality?
+
+## Slice R0 — Retrieval contract design
+
+Define a small repository-authored public-safe corpus.
+
+Recommended first corpus:
+
+- 12–20 short Markdown documents;
+- stable document IDs;
+- stable filenames;
+- no copyrighted external articles;
+- no personal data;
+- no private Setaccio material;
+- a mix of overlapping and distinct topics;
+- deliberate distractor documents;
+- at least two questions with no supporting document.
+
+Each document should have:
+
+```text
+documentId
+relativePath
+contentSha256 or BLAKE3
+title
+topic
+privacyReviewState
+```
+
+## Slice R1 — Query fixture catalog
+
+Create stable fixtures containing:
+
+```text
+caseId
+query
+expectedSupportingDocumentIds
+allowedSupportingDocumentIds
+forbiddenDocumentIds
+expectedNoMatch
+humanReviewState
+```
+
+Do not encode the expected answer in the retrieval fixture if the first phase evaluates retrieval only.
+
+## Slice R2 — Deterministic lexical baseline
+
+Before embeddings, implement a simple deterministic retrieval baseline such as:
+
+- exact term matching;
+- BM25;
+- or another plain Java lexical method.
+
+This provides a provider-free retrieval path and helps validate the evidence model before introducing embedding variability.
+
+Record:
+
+- query identity;
+- corpus identity;
+- retrieved document IDs;
+- rank;
+- retrieval score;
+- content digest;
+- retrieval parameters.
+
+## Slice R3 — Retrieval-only evaluation
+
+Initial metrics:
+
+- expected document retrieved;
+- expected document in top 1;
+- expected document in top 3;
+- forbidden document retrieved;
+- correct no-match;
+- result stability.
+
+Do not call an LLM.
+
+Do not use `RelevancyEvaluator` yet.
+
+## Slice R4 — Embedding retrieval
+
+After the lexical lifecycle is proven, add an explicit embedding provider/model.
+
+Potential local candidates should be selected separately.
+
+Retain:
+
+- embedding provider;
+- requested and effective model;
+- immutable local digest where applicable;
+- vector dimension;
+- chunking policy;
+- normalization policy;
+- distance metric;
+- top K;
+- corpus identity.
+
+Keep embedding generation opt-in and out of default tests.
+
+Use fixtures or recorded vectors for provider-free tests.
+
+## Slice R5 — Answer generation
+
+Only after retrieval evidence is preserved, add a model answer stage.
+
+Each answer row should retain:
+
+- retrieved document identities;
+- exact document ranks;
+- prompt identity;
+- answer model identity;
+- answer text;
+- citation or document-reference behavior;
+- unsupported assertions;
+- abstention behavior.
+
+Do not merge retrieval success and answer correctness.
+
+## Slice R6 — Relevancy evaluation
+
+Introduce Spring AI `RelevancyEvaluator` only when the actual retrieved documents are supplied to it.
+
+Keep separate:
+
+- deterministic retrieval expectation;
+- evaluator invocation success;
+- evaluator score/verdict;
+- human support judgment;
+- answer correctness.
+
+An AI evaluator is not ground truth.
+
+## Phase 5 exit criteria
+
+- A real retrieval path exists.
+- Retrieved documents are preserved in evidence.
+- Retrieval-only evaluation is complete before LLM judging.
+- No ordinary fixture context is described as RAG.
+- Embeddings, answer generation, and AI judgment remain separately attributable.
+
+---
+
+# Documentation and branch strategy
+
+## Recommended branch sequence
+
+```text
+feature/tool-compatibility-plan
+feature/lfm-tool-baseline
+feature/lfm-system-prompt
+feature/small-model-tool-cohort
+feature/fact-check-token-budget
+feature/retrieval-foundation
+```
+
+Use the repository’s normal integration branch flow.
+
+Commit every completed in-scope slice after verification.
+
+Do not push without explicit instruction.
+
+## Suggested commit sequence for Phase 1
+
+```text
+Document small-model tool compatibility protocol
+Add provider-free tool compatibility contracts
+Add deterministic tool compatibility analyzer
+Add offline tool compatibility evidence lifecycle
+Add explicit host-Ollama tool compatibility runner
+Record controlled LFM baseline
+Interpret LFM compatibility evidence
+Close LFM baseline phase
+```
+
+## Suggested commit sequence for Phase 2
+
+```text
+Add versioned tool system-prompt catalog
+Add paired system-prompt compatibility protocol
+Add offline tool prompt comparison
+Record controlled LFM prompt intervention
+Record human prompt decision
+Close LFM prompt phase
+```
+
+## Suggested commit sequence for Phase 3
+
+```text
+Lock small-model compatibility cohort
+Add multi-model compatibility matrix
+Add cohort offline analysis and verification
+Record controlled small-model cohort
+Interpret small-model compatibility evidence
+Close small-model cohort phase
+```
+
+---
+
+# Required documentation updates per phase
+
+Every completed phase should update as applicable:
+
+```text
+README.md
+AGENTS.md
+CHANGELOG.md
+docs/TEST-PLAN.md
+docs/ENVIRONMENT.md
+docs/DEFERRED-WORK.md
+docs/logs/YYYY-MM-DD.md
+```
+
+Add a dedicated closeout section stating:
+
+- what was implemented;
+- what was executed;
+- exact model identities;
+- exact settings;
+- evidence location;
+- verification outcome;
+- bounded findings;
+- unresolved questions;
+- work explicitly not authorized by the closeout.
+
+---
+
+# Locked Gradle task inventory
+
+## Phase 1 and 2
+
+```text
+toolCompatibilityTest
+toolCompatibilityMatrix
+toolCompatibilityVerify
+toolCompatibilityReanalyze
+toolCompatibilityCompare
+```
+
+## Phase 3
+
+Phase 3 uses dedicated cohort task names so the locked single-model Phase 1/2
+CLI does not change after evidence exists:
+
+```text
+toolCompatibilityCohort
+toolCompatibilityCohortVerify
+toolCompatibilityCohortReanalyze
+```
+
+Use source sets `toolCompatibility` and `toolCompatibilityTest`; the cohort
+tasks reuse those classes and evidence schema with an explicit ordered model
+list. Do not overload `--model` with comma-separated semantics.
+
+## Phase 4
+
+Use dedicated source sets `localEvaluationBudget` and
+`localEvaluationBudgetTest` and the following tasks. Do not modify the original
+`localEvaluation` CLI or reinterpret its immutable A5 evidence:
+
+```text
+localEvaluationBudgetMatrix
+localEvaluationBudgetVerify
+localEvaluationBudgetReanalyze
+localEvaluationBudgetCompare
+```
+
+The budget source set may compile against `main` and `localEvaluation` output,
+but `localEvaluation` must not depend on it.
+
+## Phase 5
+
+```text
+retrievalFixtureTest
+retrievalMatrix
+retrievalVerify
+retrievalReanalyze
+retrievalCompare
+```
+
+Use source sets `retrieval` and `retrievalTest` under package
+`com.setaccio.lab.retrieval`. `retrievalFixtureTest` is the provider-free test
+task for the contract, fixtures, lexical baseline, evidence, and later mocked
+provider boundaries.
+
+Later:
+
+```text
+embeddingRetrievalMatrix
+retrievalAnswerMatrix
+retrievalEvaluationMatrix
+```
+
+---
+
+# Acceptance criteria summary
+
+## Phase 1
+
+- Untreated LFM model runs through existing standard tool cases.
+- Full digest is recorded.
+- No prompt customization occurs.
+- Tool and final-answer failures are distinguishable.
+- Evidence verifies offline.
+
+## Phase 2
+
+- Exactly one explicit prompt intervention is tested.
+- Model digest and all non-prompt settings match.
+- Comparison is deterministic.
+- Human adoption decision is separate.
+
+## Phase 3
+
+- Multiple explicit small models use one locked protocol.
+- No model receives private optimization.
+- Results remain multidimensional.
+- Reference model is labeled separately.
+- No aggregate winner is produced.
+
+## Phase 4
+
+- Fresh 64- and 256-token arms are paired and executed from the same clean Git commit.
+- Only maximum output tokens differ.
+- Valid-yield and formatting effects are separated.
+- No unsupported causal or factuality claim is made.
+
+## Phase 5
+
+- Retrieval is real and document identities are preserved.
+- Retrieval is evaluated before answer generation.
+- Relevancy evaluation receives actual retrieved documents.
+- Public/private and offline-default boundaries remain intact.
+
+---
+
+# Work explicitly postponed
+
+## Testcontainers
+
+Postpone until there is a concrete provisioning or service-connection question.
+
+Containerizing Ollama would not answer:
+
+- reasoning leakage;
+- tool selection;
+- malformed arguments;
+- final-response emptiness;
+- token-budget compatibility.
+
+Any future container work stays in `setaccio-testcontainers`.
+
+## Additional hosted providers
+
+The Anthropic proof already demonstrates the provider-neutral chat boundary.
+
+Do not add OpenAI, Google, Amazon, or Microsoft merely to increase provider count.
+
+Add another provider only for a specific capability question, such as:
+
+- provider-native tool semantics;
+- structured output differences;
+- server-side tool metadata;
+- multimodal behavior;
+- unsupported-option handling.
+
+## MCP
+
+Postpone until the direct tool-calling compatibility baseline is understood.
+
+MCP would add:
+
+- discovery;
+- transport;
+- server lifecycle;
+- remote capability metadata;
+- another failure boundary.
+
+The first small-model study should not confuse model tool behavior with MCP transport behavior.
+
+## New Tool Search indexes
+
+Regex Tool Search already has a controlled baseline.
+
+Do not introduce semantic, vector, or hybrid discovery indexes until there is a specific discovery hypothesis.
+
+## Additional model types
+
+Postpone image generation, transcription, speech synthesis, moderation, and general embedding work.
+
+Embeddings become justified as part of the retrieval phase rather than as isolated API-surface coverage.
+
+## Interactive endpoint migration
+
+Do not migrate `/api/lab/tools`, `/api/lab/chat`, or other interactive endpoints to new internal boundaries without explicit parity tests and a separately stated migration purpose.
+
+## Release and tag
+
+Postpone until the next body of work forms a coherent public milestone.
+
+When chosen, decide together:
+
+- semantic version;
+- changelog release section;
+- branch promotion;
+- release notes;
+- tag.
+
+---
+
+# Recommended immediate next action
+
+Begin with Phase 0 and Phase 1 only.
+
+The first authorized implementation scope should be:
+
+> Add a provider-free, offline-verifiable standard tool-calling compatibility matrix for one already-installed LFM2.5 Ollama model, reusing the existing canonical public-safe tool cases without changing the interactive endpoint, tool catalog, Tool Search implementation, or default Gradle lifecycle.
+
+The first live execution should occur only after:
+
+- the protocol is locked;
+- all provider-free tests pass;
+- the model digest resolves;
+- the output directory is fresh;
+- the exact command is explicitly reviewed.
+
+This gives the project one clean answer before introducing prompt interventions or model comparisons:
+
+> Can this specific small model complete this specific existing tool contract, and if not, at which boundary does it fail?
+
+# Codex Execution Runbook
+
+This section turns the research plan into bounded implementation packets. It is
+an execution aid, not standing authorization. A packet may begin only when its
+dependency and authorization lines are satisfied.
+
+## Codex model routing
+
+As of 2026-08-15, the official OpenAI [model guide](https://developers.openai.com/api/docs/models)
+describes Sol as the flagship choice for complex reasoning and coding, Terra as
+the balance of intelligence and cost, and Luna as the cost-sensitive,
+high-volume choice. For this plan:
+
+- **Terra is the default executor.** Use it for one packet at a time, especially
+  when the packet changes protocol, invocation, evidence, or comparison logic.
+- **Luna is eligible only for packets marked `Luna-ready`.** Keep its scope to
+  one mechanical contract at a time and give it the exact packet below.
+- **Sol is an escalation and review option, not the default.** Prefer it for the
+  first pass on the hardest architecture boundaries, for a final review of
+  those boundaries, or after Terra repeats the same blocker twice. Paying for
+  Sol on every fixture, report, or documentation packet is unnecessary.
+- Model choice never authorizes a live provider call, model pull, Docker use,
+  credential use, spending, push, release, or work on a later packet.
+
+The routing labels are workflow guidance, not benchmark results about Codex
+models. A human reviewer remains responsible for authorization, experimental
+decisions, privacy review, and semantic judgments.
+
+## Universal dispatch prompt
+
+Copy this prompt into Codex, replace `<SLICE-ID>`, and append the matching packet
+below:
+
+```text
+Implement only Slice <SLICE-ID> from
+docs/SmallModelToolCallingCompatibilityPlan.md.
+
+Before editing, read AGENTS.md, .gitignore, the plan Status, Non-goals, Shared
+principles, locked Phase 1 decisions, the complete target slice, its matching
+Codex execution packet, and the relevant Appendix A sections. Inspect every
+listed repository precedent directly. Confirm the dependency gate from tracked
+source and Git history; do not infer it from this prompt.
+
+Stay inside the packet's allowed paths and preserve unrelated worktree changes.
+Do not implement a later slice. Do not make a live Ollama or remote-provider
+call, pull a model, use Docker, read credentials, publish ignored evidence,
+push, release, or tag unless the packet and a separate current user instruction
+explicitly authorize that exact action.
+
+Implement the smallest suite-specific design satisfying the locked contract.
+Do not widen existing main-code visibility or create generic abstractions just
+to reuse code. Run the packet checks plus git diff --check. If a stop condition
+occurs, stop without inventing a workaround and report the exact evidence.
+
+When the slice is complete, update the dated public-safe log and any other docs
+named by the packet, verify them, and commit only the in-scope paths. Do not
+push.
+```
+
+## Universal completion contract
+
+Every implementation packet must finish with all of the following:
+
+1. Provider-free tests cover the new behavior and its failure boundary.
+2. Existing default tests remain offline; the new live task, if any, is not
+   attached to `test`, `check`, `build`, application startup, or CI.
+3. No ignored output, local model data, credentials, hostname, endpoint,
+   absolute path, or private material is staged.
+4. `git diff --check` passes and the packet's focused Gradle tasks pass.
+5. The dated log distinguishes implementation from execution and lists actions
+   that remain unauthorized.
+6. One focused commit contains only the completed packet. No push occurs.
+
+Phase closeout additionally runs the full provider-free verification command
+recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
+`CHANGELOG.md`, `docs/TEST-PLAN.md`, `docs/ENVIRONMENT.md`,
+`docs/DEFERRED-WORK.md`, and the dated log as applicable.
+
+## Phase 0 and Phase 1 packets
+
+### T0.1 — Documentation and authorization boundary
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** none. This packet does not authorize T1.1.
+- **Allowed paths:** this plan, `AGENTS.md`, `CHANGELOG.md`,
+  `docs/DEFERRED-WORK.md`, `docs/TEST-PLAN.md`, `docs/ENVIRONMENT.md`, and one
+  dated log.
+- **Deliverable:** align those documents with the locked 16-row Phase 1
+  protocol, source sets, tasks, no-pull boundary, and separate live-run gate.
+- **Checks:** tracked Markdown links, stale plan filename search,
+  `git diff --check`, and `git status --short`.
+- **Stop:** leave the implementation gate open unless the project owner
+  explicitly authorizes provider-free Phase 1 code. Documentation hardening is
+  not that authorization.
+
+### T1.1 — Provider-free protocol model
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready for the first pass.
+- **Dependency:** T0.1 closed with explicit provider-free implementation
+  authorization.
+- **Allowed paths:** `setaccio-lab/build.gradle`,
+  `setaccio-lab/src/toolCompatibility/**`,
+  `setaccio-lab/src/toolCompatibilityTest/**`, and the dated log.
+- **Read-only precedents:** `ChatMatrixProtocol`, `ToolSearchMatrixProtocol`,
+  `ToolBenchmarkCases`, and shared classes under `com.setaccio.lab.evidence`.
+- **Deliverable:** register the two locked source sets and implement immutable,
+  suite-specific protocol/value types that enforce the exact cases, tools,
+  settings, schedule, identities, and 16-row count. Add no runner or live task.
+- **Checks:** `./gradlew :setaccio-lab:toolCompatibilityTest
+  :setaccio-lab:test --no-daemon` and `git diff --check`.
+- **Stop:** do not change `ToolBenchmarkCases`, the interactive endpoint, or
+  shared evidence schemas to make the new records easier to implement.
+
+### T1.2 — Explicit system-prompt representation
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** T1.1 committed.
+- **Allowed paths:** the two tool-compatibility source sets and dated log.
+- **Deliverable:** implement the locked `tool-system-none` identity, exact empty
+  text digest, constructor validation, JSON round-trip tests, and drift tests.
+- **Checks:** `./gradlew :setaccio-lab:toolCompatibilityTest --no-daemon` and
+  `git diff --check`.
+- **Stop:** do not add the Phase 2 discipline prompt or infer a training-time
+  system prompt from model metadata.
+
+### T1.3 — Invocation and observability boundary
+
+- **Routing:** Terra; Sol is preferred for first-pass review. Not Luna-ready.
+- **Dependency:** T1.1 and T1.2 committed.
+- **Allowed paths:** tool-compatibility source sets and dated log. Existing
+  `main`, chat-matrix, and Tool Search classes are read-only precedents.
+- **Read-only precedents:** `OllamaChatModelFactory`, `ChatMatrixPreflight`,
+  `ToolBenchmarkService`, `RecordingToolCallAdvisor`, and Appendix A1–A8.
+- **Deliverable:** first prove with a fake `ChatModel` and deterministic
+  callbacks which standard-advisor lifecycle stages are observable. Then
+  implement the suite-specific one-attempt invocation boundary, raw tool-call
+  capture, bounded declared-schema validation that accepts and ignores only
+  `description`, `title`, `$schema`, and `default` metadata, callback
+  observations, response metadata, usage, finish metadata, timeout, latency,
+  and classified outcomes.
+- **Checks:** focused observability, schema-coercion, timeout, no-retry, and
+  lifecycle tests through `toolCompatibilityTest`, then `:setaccio-lab:test`.
+- **Stop:** if the standard advisor cannot expose a required stage, record the
+  exact missing signal and stop for plan review. Do not create a lower-level
+  custom execution loop, add a schema dependency, or widen
+  `RecordingToolCallAdvisor` merely to bypass the gate.
+
+### T1.4 — Canonical result row
+
+- **Routing:** Terra; Sol review recommended. Luna-ready only after T1.3 fixes
+  the complete observable field set.
+- **Dependency:** T1.3 committed with no unresolved observability blocker.
+- **Allowed paths:** tool-compatibility source sets and dated log.
+- **Deliverable:** implement the canonical row/result/failure/diagnostic shape,
+  preserving every observed lifecycle dimension separately. Constructor and
+  analyzer tests must reject contradictory states rather than silently repair
+  them.
+- **Checks:** `toolCompatibilityTest`, JSON fixture round trips, unknown-field
+  rejection where the suite uses strict reads, and `git diff --check`.
+- **Stop:** do not duplicate callback output or collapse raw schema validity,
+  binding, execution, callback success, and final contract success.
+
+### T1.5 — Visible reasoning diagnostics
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** T1.4 committed.
+- **Allowed paths:** tool-compatibility source sets and dated log.
+- **Deliverable:** a pure deterministic detector with fixtures for every locked
+  marker and lifecycle location, plus false-positive and null/empty coverage.
+- **Checks:** focused `toolCompatibilityTest` and `git diff --check`.
+- **Stop:** never label markers as private chain-of-thought or make them an
+  automatic row failure without a case-level contract.
+
+### T1.6 — Deterministic analysis
+
+- **Routing:** Terra. Not Luna-ready as one packet; individual report-format
+  tests may be delegated to Luna after the taxonomy is implemented.
+- **Dependency:** T1.4 and T1.5 committed.
+- **Allowed paths:** tool-compatibility source sets and dated log.
+- **Deliverable:** exhaustive integrity validation and multidimensional counts
+  for invocation, selection, raw arguments, callback lifecycle, completion,
+  visible reasoning, usage, and latency. Every failed contract has one primary
+  diagnostic category; integrity failures remain separate.
+- **Checks:** table-driven tests for every category and precedence edge,
+  two-repetition median/range tests, no percentile output, and
+  `toolCompatibilityTest`.
+- **Stop:** do not add an aggregate score, model rank, catch-all `other` bucket,
+  or semantic quality judgment.
+
+### T1.7 — Offline evidence lifecycle and Gradle tasks
+
+- **Routing:** Terra; Sol review recommended for integrity code. Not Luna-ready.
+- **Dependency:** T1.6 committed.
+- **Allowed paths:** tool-compatibility source sets,
+  `setaccio-lab/build.gradle`, new suite-specific task wrappers under
+  `buildSrc/src/main/java/com/setaccio/gradle/`, and dated log.
+- **Read-only precedents:** `ChatMatrixEvidence`, `ChatMatrixPreflight`,
+  `EvidenceFiles`, `EvidenceManifestStore`, and the configuration-safe
+  directory properties on `VisionHumanReviewPrepareTask`.
+- **Deliverable:** the four locked Phase 1 tasks, non-overwriting allocation,
+  exact three-artifact layout, shared-v1 manifest, deterministic summary,
+  standalone offline verification/reanalysis, and configuration-safe Gradle
+  working-directory properties. Do not repeat the deprecated execution-time
+  `Task.project` pattern.
+- **Checks:** task help/configuration-cache tests, fresh write, overwrite/path/
+  symlink/tamper/extra-file/summary-drift tests, `toolCompatibilityTest`, and
+  `:setaccio-lab:build` without running the live matrix.
+- **Stop:** no task may resolve a model, start Spring, or contact Ollama during
+  verify/reanalyze or any default lifecycle.
+
+### T1.8 — Provider-free test completion
+
+- **Routing:** Terra owns suite completeness; Luna-ready for one named missing
+  test group at a time.
+- **Dependency:** T1.1–T1.7 committed.
+- **Allowed paths:** tool-compatibility tests, test resources, and dated log;
+  production fixes only when a failing required test exposes a real defect.
+- **Deliverable:** trace every test requirement in T1.8 to a test method and
+  close all gaps. Add a short requirement-to-test map in the test source or
+  package documentation.
+- **Checks:** `./gradlew :setaccio-lab:test
+  :setaccio-lab:toolCompatibilityTest :setaccio-core:build
+  :setaccio-lab:build :setaccio-testcontainers:build --rerun-tasks --no-daemon`
+  plus `git diff --check`.
+- **Stop:** no live model, network, Docker runtime, ignored evidence, selective
+  retry, or weakening of a test to match an implementation.
+
+### Phase 1 live execution and closeout
+
+- **Routing:** Terra may operate the approved command and draft the bounded
+  report; Sol is optional for review. Luna is not the live-run operator.
+- **Dependency:** T1.8 and the full provider-free verification pass from one
+  clean commit; separate explicit user approval of the exact command and model.
+- **Deliverable:** one immutable 16-row run, offline verify/reanalyze, then a
+  public-safe aggregate closeout with no raw-output publication.
+- **Stop:** any missing model, digest drift, dirty worktree, output collision,
+  required pull, protocol drift, or absent explicit authorization stops before
+  allocation or invocation. A model-behavior failure remains a row and does not
+  trigger a replacement call.
+
+## Phase 2 packets
+
+### T2.1 — Tracked prompt catalog
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** Phase 1 closeout and explicit Phase 2 implementation
+  authorization.
+- **Allowed paths:** tool-compatibility source sets/resources/tests and dated
+  log.
+- **Deliverable:** exactly the two locked prompt conditions, exact UTF-8 bytes,
+  catalog/per-prompt SHA-256, deterministic order, and drift tests.
+- **Checks:** `toolCompatibilityTest` and `git diff --check`.
+- **Stop:** do not revise prompt text, use a derived Ollama tag, or run a model.
+
+### T2.2 — Paired execution protocol
+
+- **Routing:** Terra. Not Luna-ready.
+- **Dependency:** T2.1 committed.
+- **Allowed paths:** tool-compatibility source sets/tests and dated log.
+- **Deliverable:** lock the per-case alternating A/B schedule exactly as stated
+  in T2.2, retain every attempt, record one shared paired-execution schedule
+  identity in both conditions, and prove only system-prompt identity changes.
+- **Checks:** exact order/count, settings parity, one-attempt, failure-retention,
+  and no-provider tests through `toolCompatibilityTest`.
+- **Stop:** do not fall back to whole-condition ordering or silently change the
+  Phase 1 row schema.
+
+### T2.3 — Comparison gate
+
+- **Routing:** Terra; Luna-ready only for additional already-specified mismatch
+  fixtures.
+- **Dependency:** T2.2 committed.
+- **Allowed paths:** tool-compatibility source sets, build task registration and
+  wrapper, tests, and dated log.
+- **Deliverable:** `toolCompatibilityCompare` with strict offline verification
+  first, exact parity rules including one clean shared Git commit and the
+  shared paired-execution schedule identity, prompt-only experimental
+  difference, and no semantic judgment.
+- **Checks:** one valid pair plus independent mismatch/tamper fixtures for every
+  rejected dimension, task help/configuration cache, and
+  `toolCompatibilityTest`.
+- **Stop:** never compare unverified evidence or weaken parity because two runs
+  happen to look similar.
+
+### T2.4 — Deterministic comparison report
+
+- **Routing:** Luna-ready after T2.3; Terra review.
+- **Dependency:** T2.3 committed.
+- **Allowed paths:** tool-compatibility analyzer/report/tests and dated log.
+- **Deliverable:** deterministic paired transitions and deltas listed in T2.4,
+  stable ordering, byte-identical regeneration, and no winner label.
+- **Checks:** golden Markdown fixtures, reversal/unchanged cases, incomplete
+  pair rejection, and `toolCompatibilityTest`.
+- **Stop:** no aggregate score or human adoption decision.
+
+### T2.5 — Human interpretation
+
+- **Routing:** Luna or Terra may prepare a blank worksheet; no LLM may complete
+  the human decision.
+- **Dependency:** separately authorized paired live runs verify and compare.
+- **Allowed paths:** worksheet preparer/tests, private ignored worksheet output,
+  and public-safe closeout docs only after actual human review.
+- **Deliverable:** bind a non-overwriting blank worksheet to both run IDs,
+  catalog digest, comparison digest, and review date; the owner records
+  `adopt`, `revise`, `reject`, or `inconclusive`.
+- **Stop:** an agent-assisted review is not the required human decision and
+  cannot unlock Phase 3 prompt policy.
+
+## Phase 3 packets
+
+### T3.1 — Cohort preflight
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready.
+- **Dependency:** Phase 2 human decision and explicit Phase 3 authorization.
+- **Allowed paths:** tool-compatibility source sets/tests and dated log.
+- **Deliverable:** explicit ordered tags, normalized installed identities, full
+  digests, duplicate-byte detection, safe available metadata, and complete
+  failure-before-allocation behavior.
+- **Checks:** fake model inventory fixtures for every preflight outcome and
+  `toolCompatibilityTest`.
+- **Stop:** cohort membership is not locked until the owner approves exact
+  installed tags; never pull, silently remove, or remotely substitute a model.
+
+### T3.2 — Prompt policy
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** T3.1 and a bound actual-human Phase 2 decision.
+- **Allowed paths:** tool-compatibility protocol/tests and dated log.
+- **Deliverable:** deterministic mapping from the four decision values to the
+  allowed cohort policy, with `revise` blocking execution and `inconclusive`
+  selecting untreated operation plus a limitation.
+- **Checks:** four decision fixtures and digest binding tests.
+- **Stop:** no per-model prompt customization.
+
+### T3.3 — Locked cohort matrix
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready.
+- **Dependency:** T3.1/T3.2 committed and cohort explicitly approved.
+- **Allowed paths:** tool-compatibility source sets, dedicated cohort Gradle
+  tasks/wrappers, tests, and dated log.
+- **Deliverable:** ordered sequential multi-model schedule, immutable identities,
+  all planned rows retained, no cross-model state, and suite-compatible evidence.
+- **Checks:** multi-model fake sessions, order/count, duplicate alias, unsupported
+  seed recording, failure retention, task isolation, and
+  `toolCompatibilityTest`.
+- **Stop:** no live execution, model pull, hidden concurrency, or per-model
+  repair within the implementation packet.
+
+### T3.4 — Cohort analysis
+
+- **Routing:** Terra. Luna-ready only for individual golden-report fixtures.
+- **Dependency:** T3.3 committed.
+- **Allowed paths:** tool-compatibility analyzer/report/tests and dated log.
+- **Deliverable:** per-model multidimensional sections covering every T3.4
+  dimension, no total rank, and explicit incomplete/unsupported observations.
+- **Checks:** one fixture per dimension, deterministic model/case ordering,
+  median/range handling, and no aggregate winner assertions.
+- **Stop:** no universal efficiency score or semantic correctness inference.
+
+### T3.5 — Reference-model comparison
+
+- **Routing:** Luna-ready after T3.4; Terra review.
+- **Dependency:** T3.4 committed and reference identity explicitly approved.
+- **Allowed paths:** tool-compatibility comparison/report/tests and dated log.
+- **Deliverable:** descriptive case overlap/differences and latency/token
+  observations with the reference labeled outside the peer cohort.
+- **Checks:** asymmetric pass fixtures, missing evidence rejection, and
+  deterministic report tests.
+- **Stop:** do not treat reference output as ground truth.
+
+### T3.6 — Optional capability frontier
+
+- **Routing:** Terra; Luna may format a report from an already-approved rule.
+- **Dependency:** verified complete cohort evidence and separate authorization.
+- **Allowed paths:** analyzer/report/tests and closeout docs.
+- **Deliverable:** only the narrow "smallest among tested installed models"
+  statement when every locked condition is demonstrably met.
+- **Stop:** if any identity, planned row, or required case is incomplete, report
+  the frontier as not measurable; do not generalize beyond the cohort.
+
+## Phase 4 packets
+
+### F1 — Fresh two-arm budget experiment implementation
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready.
+- **Dependency:** separate Phase 4 authorization. The historic A5 evidence is
+  contextual only.
+- **Allowed paths:** `setaccio-lab/build.gradle`, dedicated
+  `src/localEvaluationBudget/**`, `src/localEvaluationBudgetTest/**`, new
+  suite-specific build task wrappers, and dated log. Original local-evaluation
+  code is a read-only precedent unless a narrowly reviewed extraction preserves
+  its public and saved contracts.
+- **Deliverable:** dedicated 64/256 protocol and tasks, same-clean-commit guard,
+  original fact-check identities, and no change to the A5 runner.
+- **Checks:** `localEvaluationBudgetTest`, original `localEvaluationTest`,
+  default lab tests, task isolation, and `git diff --check`.
+- **Stop:** no live arm, old evidence reuse, code-baseline mismatch allowance,
+  or original CLI change.
+
+### F2 — Paired evidence lifecycle
+
+- **Routing:** Terra. Luna-ready only for additional integrity fixtures.
+- **Dependency:** F1 committed.
+- **Allowed paths:** budget source sets/tests, build registration/wrappers, and
+  dated log.
+- **Deliverable:** fresh paired run identities, shared evidence operations,
+  standalone verify/reanalyze, and equality of every non-budget protocol field.
+- **Checks:** write/verify/reanalyze/tamper/path/extra-file/commit-drift tests and
+  `localEvaluationBudgetTest`.
+- **Stop:** never accept the historic A5 run as an arm.
+
+### F3 — Offline budget comparison
+
+- **Routing:** Luna-ready after F2; Terra review.
+- **Dependency:** F2 committed.
+- **Allowed paths:** budget comparison/report/tests and task wrapper.
+- **Deliverable:** strict comparison plus all F3 yield, label, repetition,
+  finish-state, token, and latency dimensions; invalid verdict rows stay out of
+  accuracy denominators.
+- **Checks:** valid pair and one mismatch fixture per parity field,
+  deterministic Markdown, and `localEvaluationBudgetTest`.
+- **Stop:** no comparison when commits or any non-budget setting differ.
+
+### F4 — Bounded interpretation
+
+- **Routing:** Terra may draft from verified aggregates; Luna may populate the
+  four outcome template. Human review required before closeout.
+- **Dependency:** separately authorized live arms from one clean commit and a
+  valid F3 comparison.
+- **Allowed paths:** public-safe closeout docs and dated log; raw ignored
+  evidence remains untracked.
+- **Deliverable:** select only a supported Outcome A–D, list limitations, and
+  state whether a separately planned breakpoint study is justified.
+- **Stop:** no judge ranking, general factuality claim, or retroactive repair of
+  A5.
+
+## Phase 5 packets
+
+### R0 — Retrieval contract design
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready for the schema
+  decision. Human privacy sign-off required for corpus approval.
+- **Dependency:** separate Phase 5 authorization.
+- **Allowed paths:** `setaccio-lab/build.gradle`, `src/retrieval/**`,
+  `src/retrievalTest/**`, public-safe retrieval resources, tests, and dated log.
+- **Deliverable:** exact document/catalog schema, stable identity rules,
+  public/private boundary, source sets, and provider-free fixture validation.
+- **Checks:** corpus contract tests, unsafe/private/path/symlink/duplicate/drift
+  rejection, `retrievalFixtureTest`, and `git diff --check`.
+- **Stop:** do not import external articles, personal data, private Setaccio
+  material, embeddings, or answer generation.
+
+### R1 — Query fixture catalog
+
+- **Routing:** Luna-ready after R0; Terra review and human content confirmation.
+- **Dependency:** R0 committed and corpus approved.
+- **Allowed paths:** retrieval resources/tests and dated log.
+- **Deliverable:** stable ordered query fixtures with expected/allowed/forbidden
+  document IDs, no-match cases, digest, and confirmation state.
+- **Checks:** complete ID linkage, balance/no-match, pending-review rejection,
+  strict parse, and `retrievalFixtureTest`.
+- **Stop:** do not encode expected generated answers or call a model.
+
+### R2 — Deterministic lexical baseline
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready for algorithm
+  selection or scoring semantics.
+- **Dependency:** R0/R1 committed.
+- **Allowed paths:** retrieval source sets/tests and dated log.
+- **Deliverable:** one locked plain-Java lexical method with deterministic
+  tokenization, tie-breaking, parameters, scores, and result order. Choose the
+  simplest method that answers the registered retrieval question; document the
+  choice before implementation.
+- **Checks:** hand-calculated ranking fixtures, ties, empty query, no match,
+  repeatability, and `retrievalFixtureTest`.
+- **Stop:** no embedding, vector store, LLM, or undeclared dependency.
+
+### R3 — Retrieval-only evaluation and evidence
+
+- **Routing:** Luna-ready once metrics are locked; Terra review.
+- **Dependency:** R2 committed.
+- **Allowed paths:** retrieval analyzer/evidence/report/tests, dedicated Gradle
+  tasks/wrappers, and dated log.
+- **Deliverable:** expected/top-1/top-3/forbidden/no-match/stability metrics,
+  immutable retrieved document identities, shared-v1 evidence, deterministic
+  summary, and offline verify/reanalyze/compare.
+- **Checks:** metric fixtures, artifact integrity, path safety, summary drift,
+  task isolation, and `retrievalFixtureTest`.
+- **Stop:** no answer generation, AI evaluator, or semantic relevance claim.
+
+### R4 — Embedding retrieval
+
+- **Routing:** Sol preferred; Terra acceptable with Sol or human architecture
+  review. Not Luna-ready.
+- **Dependency:** R3 completed and a separately approved provider/model,
+  chunking, normalization, distance, top-K, and spending/local-run boundary.
+- **Allowed paths:** retrieval source sets/tests, tracked public-safe config,
+  environment/test docs, and dated log. Credentials and vectors remain ignored.
+- **Deliverable:** explicit embedding boundary and identity, recorded-vector or
+  fake-provider tests, and opt-in generation outside default lifecycle.
+- **Checks:** dimensions, deterministic fixtures, provider failure, identity
+  drift, no-default-live-call, and full retrieval tests.
+- **Stop:** no credential lookup, provider call, model pull, or vector generation
+  without separate authorization; do not choose a provider/model autonomously.
+
+### R5 — Answer generation
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready for evidence
+  semantics.
+- **Dependency:** verified retrieval evidence and separate answer-model/live-run
+  authorization.
+- **Allowed paths:** retrieval source sets/tests, environment/test docs, and
+  dated log.
+- **Deliverable:** provider-neutral answer boundary retaining exact retrieved
+  identities/ranks, prompt/model identity, answer, references, unsupported
+  assertions, abstention, usage, and failures separately from retrieval success.
+- **Checks:** fake-model tests for supported, unsupported, abstaining, malformed,
+  empty, timeout, and provider-failure outcomes.
+- **Stop:** no live call, endpoint migration, or merged retrieval/answer score.
+
+### R6 — Relevancy evaluation
+
+- **Routing:** Terra; Luna-ready only for individual contract-defined tests.
+- **Dependency:** R5 committed with actual retrieved documents preserved and
+  separate evaluator authorization for any live judge.
+- **Allowed paths:** retrieval source sets/tests, evaluator prompt/config if
+  public-safe, environment/test docs, and dated log.
+- **Deliverable:** invoke `RelevancyEvaluator` only with actual retrieved
+  documents and preserve deterministic expectation, evaluator outcome, human
+  judgment, and answer correctness as separate fields.
+- **Checks:** fake/recorded evaluator coverage, missing-context rejection,
+  self-evaluation flagging, failure classification, and no-default-live-call.
+- **Stop:** an AI evaluator is not ground truth; no live judge or credential use
+  without separate authorization.
+
+# Appendix A — Spring AI 2.0 Tool-Calling Implementation Notes
+
+## Status
+
+This appendix supplements the implementation guidance in the Small-Model Tool-Calling Compatibility Plan.
+
+It introduces no new research questions, experimental variables, or authorization. It records implementation constraints discovered before coding so that Phase 1 preserves correct evidence boundaries when exercising Spring AI 2.0 tool calling through Ollama.
+
+These notes apply to the existing standard `ToolCallingAdvisor` execution path unless a later phase explicitly authorizes a different execution model.
+
+---
+
+# A1. Tool-call detection precedence
+
+## Background
+
+A successful assistant response requesting tool execution may legitimately contain:
+
+- one or more tool calls,
+- empty assistant text,
+- `null` assistant text,
+- preliminary reasoning-style text,
+- or any combination of the above.
+
+Therefore, assistant text alone must never determine whether the model produced a valid action.
+
+## Required evaluation order
+
+Assistant responses shall be evaluated in the following order:
+
+1. assistant message present;
+2. tool-call presence;
+3. assistant text presence;
+4. finish metadata;
+5. downstream callback outcome.
+
+The existence of one or more tool calls is the primary indicator that the model requested tool execution.
+
+A blank or missing assistant text field shall not by itself classify the row as an empty model response.
+
+## Classification guidance
+
+The following conditions shall remain separate:
+
+```text
+provider invocation succeeded
+
+tool call produced
+
+tool call valid
+
+callback executed
+
+callback succeeded
+
+final assistant response present
+
+final contract passed
+```
+
+A row may therefore legitimately satisfy:
+
+```text
+provider invocation succeeded = true
+
+tool call produced = true
+
+assistant text present = false
+```
+
+without representing a failure.
+
+---
+
+# A2. Finish-reason handling
+
+## Background
+
+Provider finish metadata is provider-specific diagnostic information.
+
+Different Ollama models, GGUF chat templates, or provider adapters may report different finish reasons while still requesting identical tool execution.
+
+The experiment therefore shall not rely on finish reason to determine whether a tool request occurred.
+
+## Required behavior
+
+Tool-call presence shall be the ground truth.
+
+Finish reason shall be retained only as diagnostic metadata.
+
+Possible observations include:
+
+```text
+toolCalls + finishReason=tool_calls
+
+toolCalls + finishReason=stop
+
+toolCalls + finishReason=null
+
+noToolCalls + finishReason=stop
+
+noToolCalls + finishReason=length
+```
+
+No finish-reason value shall override the observed tool-call collection.
+
+---
+
+# A3. Assistant lifecycle boundaries
+
+The recorder shall preserve distinct lifecycle stages.
+
+At minimum, evidence shall distinguish:
+
+```text
+provider invocation
+
+assistant tool request
+
+tool execution
+
+tool callback result
+
+final assistant completion
+```
+
+The implementation shall avoid collapsing these stages into one success flag.
+
+Examples:
+
+A callback may succeed while the final assistant response is empty.
+
+A valid tool request may be followed by malformed final output.
+
+A provider invocation may succeed without producing any tool request.
+
+These represent different compatibility findings.
+
+---
+
+# A4. Tool argument schema fidelity
+
+## Objective
+
+The benchmark measures compatibility with the declared tool contract.
+
+It does not attempt to maximize callback success through permissive coercion, and it must not let ordinary framework coercion inside the Spring AI callback path be mistaken for evidence that the model itself emitted schema-valid arguments.
+
+## Background: callback success does not prove schema-valid output
+
+The existing Spring AI callback path binds tool-call arguments into ordinary Java DTOs. Ordinary Java typing performs implicit coercion. For example, a DTO such as:
+
+```java
+record CountRequest(int count) {}
+```
+
+may accept the model-emitted raw argument JSON:
+
+```json
+{
+  "count": "5"
+}
+```
+
+because the callback binding layer coerces the JSON string `"5"` into the Java `int` `5` before or during invocation. The callback then executes and succeeds. That callback success is real, but it is not evidence that the model emitted an argument value that satisfies the tool's declared JSON Schema, which requires `count` to be a JSON number, not a JSON string.
+
+The benchmark shall not classify this outcome as full schema compliance merely because the framework tolerated it.
+
+## Required behavior
+
+The raw tool-call argument JSON, exactly as returned by the model before any callback binding, shall be captured and preserved as evidence prior to DTO binding.
+
+Where the selected tool exposes a JSON Schema, the raw argument JSON shall be validated against that declared schema independently of, and prior to, callback binding.
+
+The bounded preflight validator shall accept and ignore only the
+non-validation metadata keywords `description`, `title`, `$schema`, and
+`default`. It shall reject any other unsupported constraint or shape, including
+`pattern`, `minimum`, `items`, and composition keywords, with the classified
+unsupported-schema integrity error rather than silently approximating
+validation.
+
+The following dimensions shall be recorded separately and shall not be collapsed into one flag:
+
+```text
+rawArgumentJsonValid
+
+rawArgumentSchemaValid
+
+callbackBindingSucceeded
+
+callbackExecuted
+
+callbackSucceeded
+```
+
+The following outcome is an explicitly allowed and expected compatibility finding, not an error state to be hidden or corrected:
+
+```text
+rawArgumentJsonValid = true
+rawArgumentSchemaValid = false
+callbackBindingSucceeded = true
+callbackSucceeded = true
+```
+
+This outcome shall be reported as a compatibility finding — the model emitted a schema-invalid argument that the framework's ordinary Java typing happened to coerce — rather than being suppressed by, or merged into, a single "callback succeeded" signal.
+
+Tool argument DTOs shall retain ordinary strict typing exactly as Spring AI provides it today. The benchmark shall not introduce a custom lenient or strict `ObjectMapper`, or otherwise modify existing framework coercion behavior, merely to influence pass rates in either direction.
+
+If callback binding fails outright because the generated arguments cannot be bound at all, that failure shall also be preserved as evidence, distinct from the coercion case above.
+
+The guiding principle: observe and record framework coercion; do not confuse it with model schema compliance.
+
+---
+
+# A5. Tool argument failure and diagnostic taxonomy
+
+Where practical, raw-argument and callback outcomes should distinguish their primary cause.
+
+Suggested categories include:
+
+```text
+MALFORMED_JSON
+
+RAW_ARGUMENT_SCHEMA_MISMATCH
+
+SCHEMA_TYPE_MISMATCH
+
+MISSING_REQUIRED_ARGUMENT
+
+UNKNOWN_ARGUMENT
+
+CALLBACK_BINDING_FAILURE
+
+CALLBACK_INVOCATION_FAILURE
+```
+
+`RAW_ARGUMENT_SCHEMA_MISMATCH` records that the raw model-emitted argument JSON failed declared-schema validation, independent of whatever the callback binding layer subsequently did with it. It shall not be assigned automatically whenever a callback fails, and it shall not be withheld automatically whenever a callback succeeds: the two dimensions are evaluated and recorded separately, as described in A4.
+
+The implementation should classify observable failure causes rather than relying on specific exception class names.
+
+---
+
+# A6. Visible reasoning text
+
+Some local models emit observable reasoning-style text before, during, or after tool requests.
+
+Examples include:
+
+```text
+<think>
+
+</think>
+
+Thinking...
+
+Here's a thinking process:
+```
+
+These markers are observable output only.
+
+The benchmark shall not describe them as the model's actual internal reasoning.
+
+Suggested terminology:
+
+```text
+visibleReasoningText
+
+reasoningStyleOutput
+```
+
+rather than:
+
+```text
+chainOfThought
+```
+
+unless future provider documentation explicitly establishes stronger semantics.
+
+Visible reasoning text should remain a diagnostic observation unless a specific case contract explicitly forbids it.
+
+---
+
+# A7. Standard ToolCallingAdvisor observability
+
+Phase 1 intentionally evaluates the existing standard Spring AI `ToolCallingAdvisor` path.
+
+The implementation shall first determine whether the standard advisor exposes sufficient trace information to preserve:
+
+```text
+initial assistant tool request
+
+tool execution
+
+tool callback
+
+final assistant response
+```
+
+If the standard advisor provides adequate observability, no custom execution loop shall be introduced.
+
+If observability is incomplete, the limitation shall be documented rather than immediately replacing the standard execution model.
+
+A custom execution loop using lower-level Spring AI tool-calling APIs remains possible in a future separately authorized phase, but is outside the scope of this plan.
+
+---
+
+# A8. Row-level resilience
+
+The compatibility matrix should continue executing after ordinary model compatibility failures.
+
+Examples include:
+
+- malformed tool arguments,
+- callback binding failures,
+- callback execution failures,
+- unsupported model tool behavior,
+- provider parsing failures,
+- empty assistant responses.
+
+These outcomes shall be retained as row evidence.
+
+By contrast, protocol integrity failures shall terminate execution before or during the run.
+
+Examples include:
+
+- failed preflight validation,
+- unresolved model identity,
+- invalid output directory,
+- evidence corruption,
+- manifest integrity failure,
+- protocol drift,
+- programmer invariant violations.
+
+The implementation shall distinguish between:
+
+```text
+compatibility failure
+```
+
+and
+
+```text
+experimental integrity failure
+```
+
+Only the latter should abort the controlled matrix.
+
+---
+
+# A9. Implementation principle
+
+The compatibility study exists to observe model behavior rather than compensate for it.
+
+Accordingly, the implementation should prefer preserving evidence over silently repairing model output.
+
+Whenever practical:
+
+- record,
+- classify,
+- preserve,
+- verify,
+- and interpret,
+
+rather than automatically correcting or normalizing incompatible model behavior.
+
+This principle is consistent with the existing evidence lifecycle used throughout `setaccio-lab`.

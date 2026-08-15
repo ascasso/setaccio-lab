@@ -1,6 +1,7 @@
 # Deferred Work
 
-Status: current after the completed Phase 3 Anthropic portability proof on 2026-08-05.
+Status: current after the small-model tool-compatibility plan execution hardening
+on 2026-08-15.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -51,12 +52,37 @@ Phase 2 closure does not authorize Anthropic credentials or calls, another
 provider or benchmark surface, an automatic model pull, Docker, spending, a
 release, a tag, or a push.
 
+## Prepared Small-Model Tool-Compatibility Boundary
+
+The tracked
+[Small-Model Tool-Calling Compatibility Plan](SmallModelToolCallingCompatibilityPlan.md)
+is now prepared for slice-by-slice Codex execution. Phase 1 locks one untreated
+already-installed LFM2.5 model, the standard `ToolCallingAdvisor`, all eight
+ordered canonical public-safe cases, two repetitions with seeds `42`/`43`,
+temperature `0.0`, `512` output tokens, `PT2M`, one attempt, no pull, a
+16-row sequential schedule, suite-specific evidence, and standalone offline
+verification/reanalysis. It includes repository-specific execution packets,
+verification commands, model-routing guidance, and stop conditions.
+
+Any later Phase 2 prompt comparison must use conditions from the same clean Git
+commit and bind both runs to one recorded paired-execution schedule identity
+that proves the locked interleaved alternating order. Worktree or commit drift
+between conditions stops the protocol; both conditions must then restart from a
+new clean commit.
+
+This is planning and documentation only. No `toolCompatibility` source set or
+task exists yet, no model was inspected or called, and no provider-free Phase 1
+implementation is authorized by the plan update itself. The next gate is an
+explicit project-owner instruction to implement T1.1 only. Any eventual live
+matrix remains a later, separately reviewed exact command after all Phase 1
+provider-free implementation and tests pass from a clean commit.
+
 ## Deferred From the August Cycle
 
 | Item | Status and reason | Required gate before work begins |
 | --- | --- | --- |
 | Prompt v2 decision | Deferred. The historical paired evidence is unavailable, so no actual-human `adopt`, `revise`, or `reject` decision is claimed. Prompt v1 remains the operational default and Prompt v2 remains experimental. | Separately authorize a new paired protocol with new run names, preserved evidence, and actual human review. Do not treat agent-assisted inspection as that review. |
-| Fact-check output-budget compatibility | Deferred. A5 had ten empty outputs at its explicit `64`-token limit and two valid outputs at two completion tokens. This is an association, not a causal finding. | Pre-register a new experiment that changes only the explicit positive token limit, uses a new ignored evidence directory, and retains the immutable judge digest, prompt, fixtures, order, temperature, seeds, one-attempt policy, and no-pull behavior. |
+| Fact-check output-budget compatibility | Deferred. A5 had ten empty outputs at its explicit `64`-token limit and two valid outputs at two completion tokens. This is an association, not a causal finding; A5 is contextual evidence only and must not serve as one arm of a causal comparison. | Pre-register a new paired experiment, detailed in [SmallModelToolCallingCompatibilityPlan.md](SmallModelToolCallingCompatibilityPlan.md) Phase 4, whose fresh 64- and 256-token arms run from the same clean Git commit, use new ignored evidence directories, and retain the immutable judge digest, prompt, fixtures, order, temperature, seeds, one-attempt policy, and no-pull behavior. If the worktree becomes dirty or the commit changes between arms, stop and restart both arms from a new clean commit. |
 | Testcontainers fact-check path | Deferred. The host-Ollama runner, provenance, and offline verification worked; container provisioning would not answer the observed verdict-yield question. | Establish a distinct service-connection or provisioning question. Keep any typed Ollama dependency, container task, and Docker behavior in `setaccio-testcontainers`, opt-in, and outside normal `test`, `build`, and CI. |
 | Relevancy evaluation and retrieval | Deferred. Ordinary fixture context is not a retrieval flow. | Add a real retrieval path that preserves the retrieved documents and can be evaluated without presenting fixture context as RAG evidence. |
 | Release, tag, and promotion | Deferred. The August feature branch is not a release decision. | Use a separately authorized promotion/release workflow after the appropriate integration review; decide version, changelog release entry, and tag together. |
@@ -107,7 +133,8 @@ explicitly revised:
 - additional model types such as embeddings, image generation, audio
   transcription, text to speech, and moderation;
 - MCP, RAG, vector stores, and other retrieval infrastructure;
-- new Tool Search indexes or a broad tool-calling expansion;
+- new Tool Search indexes or a broad tool-calling expansion beyond the prepared
+  narrow standard-advisor compatibility study;
 - container runtime work other than a separately justified
   `setaccio-testcontainers` slice;
 - automatic model pulls, default-lifecycle live provider calls, or publication
