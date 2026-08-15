@@ -286,6 +286,37 @@ not place a live model call in default tests or CI.
 - Classify failed canonical contracts exhaustively as no search call, zero discovery, incomplete discovery, discovered-not-executed, execution failure, or output-contract failure. Preserve precedence tests and a successful zero-discovery abstention test.
 - Compare post-fix counts to both recorded and corrected July 12 counts, and require the summary to name corrected request construction and Issue #20 discovery normalization as confounders. Do not present Issue #21's chat fix as a tool pass-rate cause.
 
+## Prepared Small-Model Tool Compatibility
+
+- Follow the locked
+  [`SmallModelToolCallingCompatibilityPlan.md`](SmallModelToolCallingCompatibilityPlan.md)
+  one slice at a time. The plan is execution-ready documentation; no
+  `toolCompatibility` source set, task, or live authorization exists yet.
+- Phase 1 must use dedicated `toolCompatibility` and
+  `toolCompatibilityTest` source sets under `com.setaccio.lab.toolcompat`; do
+  not migrate or alter `POST /api/lab/tools`.
+- Lock the untreated matrix at one explicit LFM2.5 tag, standard
+  `ToolCallingAdvisor`, all eight canonical cases in tracked order, all
+  canonical fixture tools, two repetitions, seeds `42`/`43`, temperature
+  `0.0`, `512` output tokens, `PT2M`, one attempt, no pull, and exactly 16
+  sequential rows.
+- Keep raw argument JSON validity, declared-schema validity, callback binding,
+  callback execution, callback success, final response, and case contract as
+  separate signals. Validate the current fixture schema subset before callback
+  binding and fail preflight on unsupported schema shapes rather than silently
+  approximating validation.
+- Keep `toolCompatibilityTest` wholly provider-free. Cover the exact preflight,
+  execution, observability, analysis, evidence-integrity, task-isolation, and
+  deterministic-reanalysis requirements in the plan before any live command is
+  reviewed.
+- Require `toolCompatibilityMatrix`, `toolCompatibilityVerify`, and
+  `toolCompatibilityReanalyze` to stay outside `test`, `check`, `build`,
+  application startup, and CI. Verify/reanalyze must not start Spring, resolve
+  a model, or contact Ollama.
+- Treat incomplete standard-advisor observability as a stop-and-review result.
+  Do not introduce a lower-level custom tool execution loop or widen existing
+  interactive classes to bypass that gate.
+
 ## Testcontainers
 
 - Keep Docker/Testcontainers dependencies isolated in `setaccio-testcontainers`; `setaccio-lab` must not require them.

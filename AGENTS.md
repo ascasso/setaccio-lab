@@ -133,7 +133,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-05)
+## Current State Snapshot (as of 2026-08-15)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -282,6 +282,16 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while
   vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
+- The tracked small-model tool-calling compatibility plan is hardened for
+  slice-by-slice Codex execution. It locks a future untreated LFM2.5 Phase 1
+  protocol at the standard advisor, eight ordered canonical cases, two seeded
+  repetitions, `512` output tokens, `PT2M`, one attempt, no pull, 16 sequential
+  rows, suite-specific evidence, and offline verification/reanalysis. It also
+  records exact repository paths, checks, stop conditions, and Terra/Luna/Sol
+  routing for every formal slice. This remains documentation only: no
+  `toolCompatibility` source set or task exists, provider-free implementation
+  is not yet authorized, and any live matrix requires a later exact-command
+  approval after all offline tests pass.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -428,6 +438,12 @@ Completed:
 
 Pending and separately deferred:
 
+- The next prepared implementation gate is T1.1 in
+  [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md):
+  add only the provider-free protocol/source-set foundation after explicit
+  project-owner authorization. Plan hardening does not authorize T1.1, a live
+  Ollama call, model inspection or pull, Phase 2+, Docker, credentials, push,
+  release, or tag.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing

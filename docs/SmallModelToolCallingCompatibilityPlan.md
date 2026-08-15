@@ -13,6 +13,11 @@ Proposed next work after completion of:
 
 This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete.
 
+Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
+every formal slice has a Codex dispatch packet below. The Phase 0 documentation
+gate is prepared, but the provider-free implementation gate remains open until
+the project owner explicitly authorizes it.
+
 ## Purpose
 
 Evaluate whether small, fast, locally hosted language models can reliably perform constrained tool-calling tasks even when their general factual knowledge and open-ended conversational quality are limited.
@@ -214,27 +219,52 @@ AGENTS.md
 docs/logs/YYYY-MM-DD.md
 ```
 
-### Required decisions
+### Locked Phase 1 decisions
 
-Lock the following before code implementation:
+The following decisions are fixed for the first implementation. An implementing
+agent must not substitute an alternative merely because another existing matrix
+uses it:
 
-- initial model tag;
-- baseline advisor mode;
-- selected existing case IDs;
-- repetition count;
-- temperature;
-- seeds;
-- output-token limit;
-- timeout;
-- one-attempt policy;
-- execution order;
-- raw-result filename;
-- manifest suite ID;
-- summary rules;
-- system-prompt handling;
-- live-run output root.
+| Decision | Locked value |
+| --- | --- |
+| Initial model tag | `hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0` |
+| Provider and advisor | Ollama through the standard Spring AI `ToolCallingAdvisor`; no Tool Search |
+| Ordered case IDs | `arithmetic-add`, `fixed-utc-time`, `fixed-zone-time`, `catalog-lookup`, `catalog-multi-step`, `catalog-no-match`, `no-applicable-domain-tool`, `deterministic-tool-failure` |
+| Exposed tools | Exact ordered names returned by `ToolBenchmarkCases.toolNames()`; no additions or omissions |
+| Repetitions and seeds | Two repetitions; repetition 1 uses `42`, repetition 2 uses `43` |
+| Temperature | `0.0` |
+| Maximum output tokens | `512` |
+| Timeout | `PT2M` per invocation |
+| Attempts | Exactly one; no framework retry, replacement, or fallback |
+| Row schedule | Repetition outer loop, then the eight cases in the order above; exactly 16 rows |
+| Raw result | `tool-compatibility-results.json` |
+| Manifest suite ID | `ollama-tool-compatibility` |
+| Execution engine | `spring-ai-standard-tool-calling-advisor` |
+| Evidence files | Exactly the raw result, `manifest.json`, and deterministic `SUMMARY.md` |
+| Output root | `setaccio-lab/build/tool-compatibility/`; each run is one new dated direct child |
+| Source sets | `toolCompatibility` and `toolCompatibilityTest` |
+| Base package | `com.setaccio.lab.toolcompat` |
+| Untreated system prompt | ID `tool-system-none`, version `1`, empty UTF-8 text, `present=false`, SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| Schema validation | Parse the exact `ToolDefinition.inputSchema()` and validate the current fixture schemas with the locked bounded validator described below; do not add a schema library silently |
 
-### Recommended initial protocol
+The bounded raw-argument schema validator supports the subset exercised by the
+current deterministic fixture tools: a root object, `properties`, `required`,
+`additionalProperties`, and the JSON types `object`, `array`, `string`,
+`number`, `integer`, `boolean`, and `null`. It must reject malformed raw JSON,
+missing required properties, unknown properties when disallowed, and type
+mismatches before callback binding. If a selected tool schema contains a
+keyword or shape outside that subset, preflight must fail with a classified
+unsupported-schema integrity error. Do not approximate validation, treat Java
+DTO coercion as schema validity, or add a third-party validator without a
+separately reviewed dependency change.
+
+The `no-applicable-domain-tool` prompt retains its existing phrase "Use tool
+discovery" because changing a canonical prompt would create a new experimental
+variable. In Phase 1 it is interpreted only as the existing abstention contract
+under the standard advisor. Record that inherited wording as a protocol
+limitation; do not silently rewrite or remove the case.
+
+### Locked initial protocol
 
 ```text
 Model:
@@ -243,8 +273,15 @@ hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0
 Advisor:
 standard ToolCallingAdvisor only
 
-Cases:
-existing public-safe cases, unchanged
+Cases, in order:
+arithmetic-add
+fixed-utc-time
+fixed-zone-time
+catalog-lookup
+catalog-multi-step
+catalog-no-match
+no-applicable-domain-tool
+deterministic-tool-failure
 
 Repetitions:
 2
@@ -273,27 +310,24 @@ never
 
 The `512`-token starting budget is deliberately larger than the fact-checking experiment’s `64` tokens because this model visibly emits substantial reasoning text. It should still be treated as an explicit bounded policy, not as a claim that 512 is optimal.
 
-### Case-selection recommendation
+### Locked case-selection rule
 
-Use all existing canonical cases if their total call count remains modest:
-
-- arithmetic;
-- deterministic time;
-- catalog lookup;
-- multi-step execution;
-- no-match behavior;
-- tool abstention;
-- deterministic callback failure.
-
-If the current standard matrix contains cases added specifically for Tool Search discovery behavior, exclude only those that cannot be interpreted meaningfully in standard mode. Record the exact case IDs and order in a tracked catalog.
+Resolve the eight IDs above directly from `ToolBenchmarkCases.defaults()` and
+fail before output allocation if an ID is missing, duplicated, reordered, or if
+its prompt or expectation bytes drift. Fingerprint the ordered canonical cases
+and ordered tool definitions in the saved protocol. Do not transcribe prompts,
+expectations, or tool schemas into a second hand-maintained catalog.
 
 ### Exit criteria
 
-- The plan is reviewed.
-- Experimental variables are explicit.
+- The plan and locked decisions are reviewed.
+- Experimental variables are explicit and no implementation choice remains
+  described only as "suggested" or "recommended" for Phase 1.
 - No live execution has occurred.
 - Existing deferred-work text is updated to distinguish this narrow compatibility study from a broad tool-calling expansion.
 - Default lifecycle remains provider-free.
+- The project owner explicitly authorizes the provider-free implementation
+  scope; that authorization still does not authorize the live matrix.
 
 ---
 
@@ -309,13 +343,13 @@ No custom system prompt is introduced in this phase.
 
 Create a dedicated source set or package for the controlled matrix, following existing matrix conventions.
 
-Suggested package:
+Required package:
 
 ```text
 com.setaccio.lab.toolcompat
 ```
 
-Suggested source sets:
+Required source sets:
 
 ```text
 toolCompatibility
@@ -328,14 +362,14 @@ Do not alter the interactive `/api/lab/tools` endpoint.
 
 ### Core protocol types
 
-Suggested records or value types:
+Required suite-specific protocol types:
 
 ```java
 ToolCompatibilityProtocol
 ToolCompatibilityCaseSelection
 ToolCompatibilityRunSettings
 ToolCompatibilityModelIdentity
-ToolCompatibilityPromptIdentity
+ToolCompatibilitySystemPromptIdentity
 ToolCompatibilityRow
 ToolCompatibilityResult
 ToolCompatibilityFailure
@@ -348,10 +382,10 @@ Avoid creating generic abstractions unless at least two real consumers already d
 
 Even though Phase 1 uses no custom system prompt, make system-prompt state explicit.
 
-Suggested representation:
+Required representation:
 
 ```java
-record SystemPromptIdentity(
+record ToolCompatibilitySystemPromptIdentity(
     String id,
     int version,
     String sha256,
@@ -363,14 +397,15 @@ record SystemPromptIdentity(
 For the untreated baseline:
 
 ```text
-id: none
-version: 0
+id: tool-system-none
+version: 1
 text: ""
 present: false
-sha256: SHA-256 of zero bytes or a clearly documented sentinel policy
+sha256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 ```
 
-Prefer a real digest policy over `null` so comparability logic remains deterministic.
+This is the SHA-256 of zero bytes. Do not use `null`, an implementation-defined
+sentinel, or a digest of a newline.
 
 Do not infer or extract training-time behavior from model weights.
 
@@ -557,7 +592,7 @@ With two repetitions, do not calculate percentiles.
 
 ## Slice T1.7 — Offline evidence lifecycle
 
-Suggested task names:
+Required task names:
 
 ```bash
 ./gradlew :setaccio-lab:toolCompatibilityTest
@@ -587,7 +622,11 @@ Do not inherit:
 - a token budget;
 - a timeout.
 
-Temperature and seeds may remain protocol constants if locked in code and recorded in evidence.
+Temperature and seeds are protocol constants in `ToolCompatibilityProtocol` and
+must be recorded in evidence; they are not live-task CLI options. Maximum
+output tokens and timeout remain mandatory CLI options so the effective values
+are explicit at invocation while still being checked against the locked Phase 1
+values.
 
 ## Slice T1.8 — Provider-free tests
 
@@ -773,7 +812,9 @@ For each case:
 
 This alternates condition order across repetitions.
 
-Alternatively, execute whole conditions sequentially if existing suite infrastructure requires it, but record and acknowledge that order is not counterbalanced.
+Do not fall back to whole-condition ordering. The alternating per-case order is
+part of the locked Phase 2 protocol and must be proved by provider-free schedule
+tests before either live condition is authorized.
 
 Keep identical:
 
@@ -1491,7 +1532,7 @@ Add a dedicated closeout section stating:
 
 ---
 
-# Suggested Gradle task inventory
+# Locked Gradle task inventory
 
 ## Phase 1 and 2
 
@@ -1505,7 +1546,8 @@ toolCompatibilityCompare
 
 ## Phase 3
 
-The same matrix task may accept multiple explicit models if its protocol remains clear:
+Phase 3 uses dedicated cohort task names so the locked single-model Phase 1/2
+CLI does not change after evidence exists:
 
 ```text
 toolCompatibilityCohort
@@ -1513,13 +1555,15 @@ toolCompatibilityCohortVerify
 toolCompatibilityCohortReanalyze
 ```
 
-Avoid adding separate task names unnecessarily if one strongly validated task can support one or many explicit model tags without ambiguity.
+Use source sets `toolCompatibility` and `toolCompatibilityTest`; the cohort
+tasks reuse those classes and evidence schema with an explicit ordered model
+list. Do not overload `--model` with comma-separated semantics.
 
 ## Phase 4
 
-Existing evaluation tasks may be extended only if request and evidence parity remain clear.
-
-Possible dedicated tasks:
+Use dedicated source sets `localEvaluationBudget` and
+`localEvaluationBudgetTest` and the following tasks. Do not modify the original
+`localEvaluation` CLI or reinterpret its immutable A5 evidence:
 
 ```text
 localEvaluationBudgetMatrix
@@ -1528,7 +1572,8 @@ localEvaluationBudgetReanalyze
 localEvaluationBudgetCompare
 ```
 
-A dedicated task is preferable to overloading the original A5 runner if the original runner’s contract was intentionally fixed.
+The budget source set may compile against `main` and `localEvaluation` output,
+but `localEvaluation` must not depend on it.
 
 ## Phase 5
 
@@ -1539,6 +1584,11 @@ retrievalVerify
 retrievalReanalyze
 retrievalCompare
 ```
+
+Use source sets `retrieval` and `retrievalTest` under package
+`com.setaccio.lab.retrieval`. `retrievalFixtureTest` is the provider-free test
+task for the contract, fixtures, lexical baseline, evidence, and later mocked
+provider boundaries.
 
 Later:
 
@@ -1684,6 +1734,537 @@ The first live execution should occur only after:
 This gives the project one clean answer before introducing prompt interventions or model comparisons:
 
 > Can this specific small model complete this specific existing tool contract, and if not, at which boundary does it fail?
+
+# Codex Execution Runbook
+
+This section turns the research plan into bounded implementation packets. It is
+an execution aid, not standing authorization. A packet may begin only when its
+dependency and authorization lines are satisfied.
+
+## Codex model routing
+
+As of 2026-08-15, the official OpenAI [model guide](https://developers.openai.com/api/docs/models)
+describes Sol as the flagship choice for complex reasoning and coding, Terra as
+the balance of intelligence and cost, and Luna as the cost-sensitive,
+high-volume choice. For this plan:
+
+- **Terra is the default executor.** Use it for one packet at a time, especially
+  when the packet changes protocol, invocation, evidence, or comparison logic.
+- **Luna is eligible only for packets marked `Luna-ready`.** Keep its scope to
+  one mechanical contract at a time and give it the exact packet below.
+- **Sol is an escalation and review option, not the default.** Prefer it for the
+  first pass on the hardest architecture boundaries, for a final review of
+  those boundaries, or after Terra repeats the same blocker twice. Paying for
+  Sol on every fixture, report, or documentation packet is unnecessary.
+- Model choice never authorizes a live provider call, model pull, Docker use,
+  credential use, spending, push, release, or work on a later packet.
+
+The routing labels are workflow guidance, not benchmark results about Codex
+models. A human reviewer remains responsible for authorization, experimental
+decisions, privacy review, and semantic judgments.
+
+## Universal dispatch prompt
+
+Copy this prompt into Codex, replace `<SLICE-ID>`, and append the matching packet
+below:
+
+```text
+Implement only Slice <SLICE-ID> from
+docs/SmallModelToolCallingCompatibilityPlan.md.
+
+Before editing, read AGENTS.md, .gitignore, the plan Status, Non-goals, Shared
+principles, locked Phase 1 decisions, the complete target slice, its matching
+Codex execution packet, and the relevant Appendix A sections. Inspect every
+listed repository precedent directly. Confirm the dependency gate from tracked
+source and Git history; do not infer it from this prompt.
+
+Stay inside the packet's allowed paths and preserve unrelated worktree changes.
+Do not implement a later slice. Do not make a live Ollama or remote-provider
+call, pull a model, use Docker, read credentials, publish ignored evidence,
+push, release, or tag unless the packet and a separate current user instruction
+explicitly authorize that exact action.
+
+Implement the smallest suite-specific design satisfying the locked contract.
+Do not widen existing main-code visibility or create generic abstractions just
+to reuse code. Run the packet checks plus git diff --check. If a stop condition
+occurs, stop without inventing a workaround and report the exact evidence.
+
+When the slice is complete, update the dated public-safe log and any other docs
+named by the packet, verify them, and commit only the in-scope paths. Do not
+push.
+```
+
+## Universal completion contract
+
+Every implementation packet must finish with all of the following:
+
+1. Provider-free tests cover the new behavior and its failure boundary.
+2. Existing default tests remain offline; the new live task, if any, is not
+   attached to `test`, `check`, `build`, application startup, or CI.
+3. No ignored output, local model data, credentials, hostname, endpoint,
+   absolute path, or private material is staged.
+4. `git diff --check` passes and the packet's focused Gradle tasks pass.
+5. The dated log distinguishes implementation from execution and lists actions
+   that remain unauthorized.
+6. One focused commit contains only the completed packet. No push occurs.
+
+Phase closeout additionally runs the full provider-free verification command
+recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
+`CHANGELOG.md`, `docs/TEST-PLAN.md`, `docs/ENVIRONMENT.md`,
+`docs/DEFERRED-WORK.md`, and the dated log as applicable.
+
+## Phase 0 and Phase 1 packets
+
+### T0.1 — Documentation and authorization boundary
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** none. This packet does not authorize T1.1.
+- **Allowed paths:** this plan, `AGENTS.md`, `CHANGELOG.md`,
+  `docs/DEFERRED-WORK.md`, `docs/TEST-PLAN.md`, `docs/ENVIRONMENT.md`, and one
+  dated log.
+- **Deliverable:** align those documents with the locked 16-row Phase 1
+  protocol, source sets, tasks, no-pull boundary, and separate live-run gate.
+- **Checks:** tracked Markdown links, stale plan filename search,
+  `git diff --check`, and `git status --short`.
+- **Stop:** leave the implementation gate open unless the project owner
+  explicitly authorizes provider-free Phase 1 code. Documentation hardening is
+  not that authorization.
+
+### T1.1 — Provider-free protocol model
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready for the first pass.
+- **Dependency:** T0.1 closed with explicit provider-free implementation
+  authorization.
+- **Allowed paths:** `setaccio-lab/build.gradle`,
+  `setaccio-lab/src/toolCompatibility/**`,
+  `setaccio-lab/src/toolCompatibilityTest/**`, and the dated log.
+- **Read-only precedents:** `ChatMatrixProtocol`, `ToolSearchMatrixProtocol`,
+  `ToolBenchmarkCases`, and shared classes under `com.setaccio.lab.evidence`.
+- **Deliverable:** register the two locked source sets and implement immutable,
+  suite-specific protocol/value types that enforce the exact cases, tools,
+  settings, schedule, identities, and 16-row count. Add no runner or live task.
+- **Checks:** `./gradlew :setaccio-lab:toolCompatibilityTest
+  :setaccio-lab:test --no-daemon` and `git diff --check`.
+- **Stop:** do not change `ToolBenchmarkCases`, the interactive endpoint, or
+  shared evidence schemas to make the new records easier to implement.
+
+### T1.2 — Explicit system-prompt representation
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** T1.1 committed.
+- **Allowed paths:** the two tool-compatibility source sets and dated log.
+- **Deliverable:** implement the locked `tool-system-none` identity, exact empty
+  text digest, constructor validation, JSON round-trip tests, and drift tests.
+- **Checks:** `./gradlew :setaccio-lab:toolCompatibilityTest --no-daemon` and
+  `git diff --check`.
+- **Stop:** do not add the Phase 2 discipline prompt or infer a training-time
+  system prompt from model metadata.
+
+### T1.3 — Invocation and observability boundary
+
+- **Routing:** Terra; Sol is preferred for first-pass review. Not Luna-ready.
+- **Dependency:** T1.1 and T1.2 committed.
+- **Allowed paths:** tool-compatibility source sets and dated log. Existing
+  `main`, chat-matrix, and Tool Search classes are read-only precedents.
+- **Read-only precedents:** `OllamaChatModelFactory`, `ChatMatrixPreflight`,
+  `ToolBenchmarkService`, `RecordingToolCallAdvisor`, and Appendix A1–A8.
+- **Deliverable:** first prove with a fake `ChatModel` and deterministic
+  callbacks which standard-advisor lifecycle stages are observable. Then
+  implement the suite-specific one-attempt invocation boundary, raw tool-call
+  capture, bounded declared-schema validation, callback observations, response
+  metadata, usage, finish metadata, timeout, latency, and classified outcomes.
+- **Checks:** focused observability, schema-coercion, timeout, no-retry, and
+  lifecycle tests through `toolCompatibilityTest`, then `:setaccio-lab:test`.
+- **Stop:** if the standard advisor cannot expose a required stage, record the
+  exact missing signal and stop for plan review. Do not create a lower-level
+  custom execution loop, add a schema dependency, or widen
+  `RecordingToolCallAdvisor` merely to bypass the gate.
+
+### T1.4 — Canonical result row
+
+- **Routing:** Terra; Sol review recommended. Luna-ready only after T1.3 fixes
+  the complete observable field set.
+- **Dependency:** T1.3 committed with no unresolved observability blocker.
+- **Allowed paths:** tool-compatibility source sets and dated log.
+- **Deliverable:** implement the canonical row/result/failure/diagnostic shape,
+  preserving every observed lifecycle dimension separately. Constructor and
+  analyzer tests must reject contradictory states rather than silently repair
+  them.
+- **Checks:** `toolCompatibilityTest`, JSON fixture round trips, unknown-field
+  rejection where the suite uses strict reads, and `git diff --check`.
+- **Stop:** do not duplicate callback output or collapse raw schema validity,
+  binding, execution, callback success, and final contract success.
+
+### T1.5 — Visible reasoning diagnostics
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** T1.4 committed.
+- **Allowed paths:** tool-compatibility source sets and dated log.
+- **Deliverable:** a pure deterministic detector with fixtures for every locked
+  marker and lifecycle location, plus false-positive and null/empty coverage.
+- **Checks:** focused `toolCompatibilityTest` and `git diff --check`.
+- **Stop:** never label markers as private chain-of-thought or make them an
+  automatic row failure without a case-level contract.
+
+### T1.6 — Deterministic analysis
+
+- **Routing:** Terra. Not Luna-ready as one packet; individual report-format
+  tests may be delegated to Luna after the taxonomy is implemented.
+- **Dependency:** T1.4 and T1.5 committed.
+- **Allowed paths:** tool-compatibility source sets and dated log.
+- **Deliverable:** exhaustive integrity validation and multidimensional counts
+  for invocation, selection, raw arguments, callback lifecycle, completion,
+  visible reasoning, usage, and latency. Every failed contract has one primary
+  diagnostic category; integrity failures remain separate.
+- **Checks:** table-driven tests for every category and precedence edge,
+  two-repetition median/range tests, no percentile output, and
+  `toolCompatibilityTest`.
+- **Stop:** do not add an aggregate score, model rank, catch-all `other` bucket,
+  or semantic quality judgment.
+
+### T1.7 — Offline evidence lifecycle and Gradle tasks
+
+- **Routing:** Terra; Sol review recommended for integrity code. Not Luna-ready.
+- **Dependency:** T1.6 committed.
+- **Allowed paths:** tool-compatibility source sets,
+  `setaccio-lab/build.gradle`, new suite-specific task wrappers under
+  `buildSrc/src/main/java/com/setaccio/gradle/`, and dated log.
+- **Read-only precedents:** `ChatMatrixEvidence`, `ChatMatrixPreflight`,
+  `EvidenceFiles`, `EvidenceManifestStore`, and the configuration-safe
+  directory properties on `VisionHumanReviewPrepareTask`.
+- **Deliverable:** the four locked Phase 1 tasks, non-overwriting allocation,
+  exact three-artifact layout, shared-v1 manifest, deterministic summary,
+  standalone offline verification/reanalysis, and configuration-safe Gradle
+  working-directory properties. Do not repeat the deprecated execution-time
+  `Task.project` pattern.
+- **Checks:** task help/configuration-cache tests, fresh write, overwrite/path/
+  symlink/tamper/extra-file/summary-drift tests, `toolCompatibilityTest`, and
+  `:setaccio-lab:build` without running the live matrix.
+- **Stop:** no task may resolve a model, start Spring, or contact Ollama during
+  verify/reanalyze or any default lifecycle.
+
+### T1.8 — Provider-free test completion
+
+- **Routing:** Terra owns suite completeness; Luna-ready for one named missing
+  test group at a time.
+- **Dependency:** T1.1–T1.7 committed.
+- **Allowed paths:** tool-compatibility tests, test resources, and dated log;
+  production fixes only when a failing required test exposes a real defect.
+- **Deliverable:** trace every test requirement in T1.8 to a test method and
+  close all gaps. Add a short requirement-to-test map in the test source or
+  package documentation.
+- **Checks:** `./gradlew :setaccio-lab:test
+  :setaccio-lab:toolCompatibilityTest :setaccio-core:build
+  :setaccio-lab:build :setaccio-testcontainers:build --rerun-tasks --no-daemon`
+  plus `git diff --check`.
+- **Stop:** no live model, network, Docker runtime, ignored evidence, selective
+  retry, or weakening of a test to match an implementation.
+
+### Phase 1 live execution and closeout
+
+- **Routing:** Terra may operate the approved command and draft the bounded
+  report; Sol is optional for review. Luna is not the live-run operator.
+- **Dependency:** T1.8 and the full provider-free verification pass from one
+  clean commit; separate explicit user approval of the exact command and model.
+- **Deliverable:** one immutable 16-row run, offline verify/reanalyze, then a
+  public-safe aggregate closeout with no raw-output publication.
+- **Stop:** any missing model, digest drift, dirty worktree, output collision,
+  required pull, protocol drift, or absent explicit authorization stops before
+  allocation or invocation. A model-behavior failure remains a row and does not
+  trigger a replacement call.
+
+## Phase 2 packets
+
+### T2.1 — Tracked prompt catalog
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** Phase 1 closeout and explicit Phase 2 implementation
+  authorization.
+- **Allowed paths:** tool-compatibility source sets/resources/tests and dated
+  log.
+- **Deliverable:** exactly the two locked prompt conditions, exact UTF-8 bytes,
+  catalog/per-prompt SHA-256, deterministic order, and drift tests.
+- **Checks:** `toolCompatibilityTest` and `git diff --check`.
+- **Stop:** do not revise prompt text, use a derived Ollama tag, or run a model.
+
+### T2.2 — Paired execution protocol
+
+- **Routing:** Terra. Not Luna-ready.
+- **Dependency:** T2.1 committed.
+- **Allowed paths:** tool-compatibility source sets/tests and dated log.
+- **Deliverable:** lock the per-case alternating A/B schedule exactly as stated
+  in T2.2, retain every attempt, and prove only system-prompt identity changes.
+- **Checks:** exact order/count, settings parity, one-attempt, failure-retention,
+  and no-provider tests through `toolCompatibilityTest`.
+- **Stop:** do not fall back to whole-condition ordering or silently change the
+  Phase 1 row schema.
+
+### T2.3 — Comparison gate
+
+- **Routing:** Terra; Luna-ready only for additional already-specified mismatch
+  fixtures.
+- **Dependency:** T2.2 committed.
+- **Allowed paths:** tool-compatibility source sets, build task registration and
+  wrapper, tests, and dated log.
+- **Deliverable:** `toolCompatibilityCompare` with strict offline verification
+  first, exact parity rules, prompt-only experimental difference, and no
+  semantic judgment.
+- **Checks:** one valid pair plus independent mismatch/tamper fixtures for every
+  rejected dimension, task help/configuration cache, and
+  `toolCompatibilityTest`.
+- **Stop:** never compare unverified evidence or weaken parity because two runs
+  happen to look similar.
+
+### T2.4 — Deterministic comparison report
+
+- **Routing:** Luna-ready after T2.3; Terra review.
+- **Dependency:** T2.3 committed.
+- **Allowed paths:** tool-compatibility analyzer/report/tests and dated log.
+- **Deliverable:** deterministic paired transitions and deltas listed in T2.4,
+  stable ordering, byte-identical regeneration, and no winner label.
+- **Checks:** golden Markdown fixtures, reversal/unchanged cases, incomplete
+  pair rejection, and `toolCompatibilityTest`.
+- **Stop:** no aggregate score or human adoption decision.
+
+### T2.5 — Human interpretation
+
+- **Routing:** Luna or Terra may prepare a blank worksheet; no LLM may complete
+  the human decision.
+- **Dependency:** separately authorized paired live runs verify and compare.
+- **Allowed paths:** worksheet preparer/tests, private ignored worksheet output,
+  and public-safe closeout docs only after actual human review.
+- **Deliverable:** bind a non-overwriting blank worksheet to both run IDs,
+  catalog digest, comparison digest, and review date; the owner records
+  `adopt`, `revise`, `reject`, or `inconclusive`.
+- **Stop:** an agent-assisted review is not the required human decision and
+  cannot unlock Phase 3 prompt policy.
+
+## Phase 3 packets
+
+### T3.1 — Cohort preflight
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready.
+- **Dependency:** Phase 2 human decision and explicit Phase 3 authorization.
+- **Allowed paths:** tool-compatibility source sets/tests and dated log.
+- **Deliverable:** explicit ordered tags, normalized installed identities, full
+  digests, duplicate-byte detection, safe available metadata, and complete
+  failure-before-allocation behavior.
+- **Checks:** fake model inventory fixtures for every preflight outcome and
+  `toolCompatibilityTest`.
+- **Stop:** cohort membership is not locked until the owner approves exact
+  installed tags; never pull, silently remove, or remotely substitute a model.
+
+### T3.2 — Prompt policy
+
+- **Routing:** Luna-ready; Terra review.
+- **Dependency:** T3.1 and a bound actual-human Phase 2 decision.
+- **Allowed paths:** tool-compatibility protocol/tests and dated log.
+- **Deliverable:** deterministic mapping from the four decision values to the
+  allowed cohort policy, with `revise` blocking execution and `inconclusive`
+  selecting untreated operation plus a limitation.
+- **Checks:** four decision fixtures and digest binding tests.
+- **Stop:** no per-model prompt customization.
+
+### T3.3 — Locked cohort matrix
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready.
+- **Dependency:** T3.1/T3.2 committed and cohort explicitly approved.
+- **Allowed paths:** tool-compatibility source sets, dedicated cohort Gradle
+  tasks/wrappers, tests, and dated log.
+- **Deliverable:** ordered sequential multi-model schedule, immutable identities,
+  all planned rows retained, no cross-model state, and suite-compatible evidence.
+- **Checks:** multi-model fake sessions, order/count, duplicate alias, unsupported
+  seed recording, failure retention, task isolation, and
+  `toolCompatibilityTest`.
+- **Stop:** no live execution, model pull, hidden concurrency, or per-model
+  repair within the implementation packet.
+
+### T3.4 — Cohort analysis
+
+- **Routing:** Terra. Luna-ready only for individual golden-report fixtures.
+- **Dependency:** T3.3 committed.
+- **Allowed paths:** tool-compatibility analyzer/report/tests and dated log.
+- **Deliverable:** per-model multidimensional sections covering every T3.4
+  dimension, no total rank, and explicit incomplete/unsupported observations.
+- **Checks:** one fixture per dimension, deterministic model/case ordering,
+  median/range handling, and no aggregate winner assertions.
+- **Stop:** no universal efficiency score or semantic correctness inference.
+
+### T3.5 — Reference-model comparison
+
+- **Routing:** Luna-ready after T3.4; Terra review.
+- **Dependency:** T3.4 committed and reference identity explicitly approved.
+- **Allowed paths:** tool-compatibility comparison/report/tests and dated log.
+- **Deliverable:** descriptive case overlap/differences and latency/token
+  observations with the reference labeled outside the peer cohort.
+- **Checks:** asymmetric pass fixtures, missing evidence rejection, and
+  deterministic report tests.
+- **Stop:** do not treat reference output as ground truth.
+
+### T3.6 — Optional capability frontier
+
+- **Routing:** Terra; Luna may format a report from an already-approved rule.
+- **Dependency:** verified complete cohort evidence and separate authorization.
+- **Allowed paths:** analyzer/report/tests and closeout docs.
+- **Deliverable:** only the narrow "smallest among tested installed models"
+  statement when every locked condition is demonstrably met.
+- **Stop:** if any identity, planned row, or required case is incomplete, report
+  the frontier as not measurable; do not generalize beyond the cohort.
+
+## Phase 4 packets
+
+### F1 — Fresh two-arm budget experiment implementation
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready.
+- **Dependency:** separate Phase 4 authorization. The historic A5 evidence is
+  contextual only.
+- **Allowed paths:** `setaccio-lab/build.gradle`, dedicated
+  `src/localEvaluationBudget/**`, `src/localEvaluationBudgetTest/**`, new
+  suite-specific build task wrappers, and dated log. Original local-evaluation
+  code is a read-only precedent unless a narrowly reviewed extraction preserves
+  its public and saved contracts.
+- **Deliverable:** dedicated 64/256 protocol and tasks, same-clean-commit guard,
+  original fact-check identities, and no change to the A5 runner.
+- **Checks:** `localEvaluationBudgetTest`, original `localEvaluationTest`,
+  default lab tests, task isolation, and `git diff --check`.
+- **Stop:** no live arm, old evidence reuse, code-baseline mismatch allowance,
+  or original CLI change.
+
+### F2 — Paired evidence lifecycle
+
+- **Routing:** Terra. Luna-ready only for additional integrity fixtures.
+- **Dependency:** F1 committed.
+- **Allowed paths:** budget source sets/tests, build registration/wrappers, and
+  dated log.
+- **Deliverable:** fresh paired run identities, shared evidence operations,
+  standalone verify/reanalyze, and equality of every non-budget protocol field.
+- **Checks:** write/verify/reanalyze/tamper/path/extra-file/commit-drift tests and
+  `localEvaluationBudgetTest`.
+- **Stop:** never accept the historic A5 run as an arm.
+
+### F3 — Offline budget comparison
+
+- **Routing:** Luna-ready after F2; Terra review.
+- **Dependency:** F2 committed.
+- **Allowed paths:** budget comparison/report/tests and task wrapper.
+- **Deliverable:** strict comparison plus all F3 yield, label, repetition,
+  finish-state, token, and latency dimensions; invalid verdict rows stay out of
+  accuracy denominators.
+- **Checks:** valid pair and one mismatch fixture per parity field,
+  deterministic Markdown, and `localEvaluationBudgetTest`.
+- **Stop:** no comparison when commits or any non-budget setting differ.
+
+### F4 — Bounded interpretation
+
+- **Routing:** Terra may draft from verified aggregates; Luna may populate the
+  four outcome template. Human review required before closeout.
+- **Dependency:** separately authorized live arms from one clean commit and a
+  valid F3 comparison.
+- **Allowed paths:** public-safe closeout docs and dated log; raw ignored
+  evidence remains untracked.
+- **Deliverable:** select only a supported Outcome A–D, list limitations, and
+  state whether a separately planned breakpoint study is justified.
+- **Stop:** no judge ranking, general factuality claim, or retroactive repair of
+  A5.
+
+## Phase 5 packets
+
+### R0 — Retrieval contract design
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready for the schema
+  decision. Human privacy sign-off required for corpus approval.
+- **Dependency:** separate Phase 5 authorization.
+- **Allowed paths:** `setaccio-lab/build.gradle`, `src/retrieval/**`,
+  `src/retrievalTest/**`, public-safe retrieval resources, tests, and dated log.
+- **Deliverable:** exact document/catalog schema, stable identity rules,
+  public/private boundary, source sets, and provider-free fixture validation.
+- **Checks:** corpus contract tests, unsafe/private/path/symlink/duplicate/drift
+  rejection, `retrievalFixtureTest`, and `git diff --check`.
+- **Stop:** do not import external articles, personal data, private Setaccio
+  material, embeddings, or answer generation.
+
+### R1 — Query fixture catalog
+
+- **Routing:** Luna-ready after R0; Terra review and human content confirmation.
+- **Dependency:** R0 committed and corpus approved.
+- **Allowed paths:** retrieval resources/tests and dated log.
+- **Deliverable:** stable ordered query fixtures with expected/allowed/forbidden
+  document IDs, no-match cases, digest, and confirmation state.
+- **Checks:** complete ID linkage, balance/no-match, pending-review rejection,
+  strict parse, and `retrievalFixtureTest`.
+- **Stop:** do not encode expected generated answers or call a model.
+
+### R2 — Deterministic lexical baseline
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready for algorithm
+  selection or scoring semantics.
+- **Dependency:** R0/R1 committed.
+- **Allowed paths:** retrieval source sets/tests and dated log.
+- **Deliverable:** one locked plain-Java lexical method with deterministic
+  tokenization, tie-breaking, parameters, scores, and result order. Choose the
+  simplest method that answers the registered retrieval question; document the
+  choice before implementation.
+- **Checks:** hand-calculated ranking fixtures, ties, empty query, no match,
+  repeatability, and `retrievalFixtureTest`.
+- **Stop:** no embedding, vector store, LLM, or undeclared dependency.
+
+### R3 — Retrieval-only evaluation and evidence
+
+- **Routing:** Luna-ready once metrics are locked; Terra review.
+- **Dependency:** R2 committed.
+- **Allowed paths:** retrieval analyzer/evidence/report/tests, dedicated Gradle
+  tasks/wrappers, and dated log.
+- **Deliverable:** expected/top-1/top-3/forbidden/no-match/stability metrics,
+  immutable retrieved document identities, shared-v1 evidence, deterministic
+  summary, and offline verify/reanalyze/compare.
+- **Checks:** metric fixtures, artifact integrity, path safety, summary drift,
+  task isolation, and `retrievalFixtureTest`.
+- **Stop:** no answer generation, AI evaluator, or semantic relevance claim.
+
+### R4 — Embedding retrieval
+
+- **Routing:** Sol preferred; Terra acceptable with Sol or human architecture
+  review. Not Luna-ready.
+- **Dependency:** R3 completed and a separately approved provider/model,
+  chunking, normalization, distance, top-K, and spending/local-run boundary.
+- **Allowed paths:** retrieval source sets/tests, tracked public-safe config,
+  environment/test docs, and dated log. Credentials and vectors remain ignored.
+- **Deliverable:** explicit embedding boundary and identity, recorded-vector or
+  fake-provider tests, and opt-in generation outside default lifecycle.
+- **Checks:** dimensions, deterministic fixtures, provider failure, identity
+  drift, no-default-live-call, and full retrieval tests.
+- **Stop:** no credential lookup, provider call, model pull, or vector generation
+  without separate authorization; do not choose a provider/model autonomously.
+
+### R5 — Answer generation
+
+- **Routing:** Terra; Sol review recommended. Not Luna-ready for evidence
+  semantics.
+- **Dependency:** verified retrieval evidence and separate answer-model/live-run
+  authorization.
+- **Allowed paths:** retrieval source sets/tests, environment/test docs, and
+  dated log.
+- **Deliverable:** provider-neutral answer boundary retaining exact retrieved
+  identities/ranks, prompt/model identity, answer, references, unsupported
+  assertions, abstention, usage, and failures separately from retrieval success.
+- **Checks:** fake-model tests for supported, unsupported, abstaining, malformed,
+  empty, timeout, and provider-failure outcomes.
+- **Stop:** no live call, endpoint migration, or merged retrieval/answer score.
+
+### R6 — Relevancy evaluation
+
+- **Routing:** Terra; Luna-ready only for individual contract-defined tests.
+- **Dependency:** R5 committed with actual retrieved documents preserved and
+  separate evaluator authorization for any live judge.
+- **Allowed paths:** retrieval source sets/tests, evaluator prompt/config if
+  public-safe, environment/test docs, and dated log.
+- **Deliverable:** invoke `RelevancyEvaluator` only with actual retrieved
+  documents and preserve deterministic expectation, evaluator outcome, human
+  judgment, and answer correctness as separate fields.
+- **Checks:** fake/recorded evaluator coverage, missing-context rejection,
+  self-evaluation flagging, failure classification, and no-default-live-call.
+- **Stop:** an AI evaluator is not ground truth; no live judge or credential use
+  without separate authorization.
 
 # Appendix A 
  Spring AI 2.0 Tool-Calling Implementation Notes

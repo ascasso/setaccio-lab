@@ -9,6 +9,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Hardened the proposed small-model tool-calling compatibility plan for
+  slice-by-slice Codex execution. Phase 1 now locks the exact 16-row untreated
+  LFM2.5 protocol, canonical case/tool identities, empty-system-prompt digest,
+  bounded raw-argument schema validation, suite/task/source-set names, and
+  evidence layout. A Codex runbook supplies repository paths, dependencies,
+  deliverables, checks, stop conditions, and Terra/Luna/Sol routing for every
+  formal slice while preserving separate authorization for implementation,
+  live Ollama calls, later phases, pushes, releases, and tags. This is a
+  documentation-only change; no compatibility code, task, model inspection, or
+  provider call was added.
 - Revised the proposed [Small-Model Tool-Calling Compatibility
   Plan](docs/SmallModelToolCallingCompatibilityPlan.md) to address three PR
   review findings: corrected the Phase 0 filename reference to the actual

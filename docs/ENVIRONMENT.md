@@ -638,6 +638,56 @@ The endpoint writes one `*-tool-calling-comparison.json` file containing both re
 
 No new credentials are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
 
+## Prepared Small-Model Tool-Compatibility Matrix
+
+The tracked
+[Small-Model Tool-Calling Compatibility Plan](SmallModelToolCallingCompatibilityPlan.md)
+defines a future dedicated matrix, but no `toolCompatibility` source set or
+Gradle task exists yet. The plan update does not authorize implementation or a
+live model call.
+
+The future Phase 1 task contract is intentionally explicit and does not inherit
+application defaults or environment model selection:
+
+```bash
+./gradlew :setaccio-lab:toolCompatibilityMatrix \
+  --ollama-base-url=http://localhost:11434 \
+  --model=hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0 \
+  --max-tokens=512 \
+  --timeout=PT2M \
+  --output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline
+```
+
+That task must reject missing or extra options, non-loopback or structured
+endpoints, a missing/incompletely identified model, a model that would need a
+pull, and a reused or unsafe output path before allocation. Its protocol locks:
+
+- standard `ToolCallingAdvisor` only, with no Tool Search;
+- all eight ordered cases from `ToolBenchmarkCases.defaults()` and every tool
+  from `ToolBenchmarkCases.toolNames()`;
+- two repetitions with seeds `42` and `43`;
+- temperature `0.0`, `512` output tokens, `PT2M`, and one attempt;
+- exactly 16 sequential rows and pull strategy `never`;
+- one new direct child under ignored `build/tool-compatibility/` containing
+  `tool-compatibility-results.json`, `manifest.json`, and `SUMMARY.md`.
+
+The planned provider-free and offline commands are:
+
+```bash
+./gradlew :setaccio-lab:toolCompatibilityTest
+./gradlew :setaccio-lab:toolCompatibilityVerify \
+  --run-dir=build/tool-compatibility/<saved-run>
+./gradlew :setaccio-lab:toolCompatibilityReanalyze \
+  --run-dir=build/tool-compatibility/<saved-run>
+```
+
+These command names document the locked future interface; they will fail as
+unknown tasks until the corresponding slices are explicitly authorized and
+implemented. Even after implementation, the live matrix requires a separate
+review of the exact command from a clean commit. It must never read
+`OLLAMA_MODEL`, auto-pull the LFM model, join a default lifecycle, or publish
+ignored raw output.
+
 ## Opt-In Tool Search Smoke Automation
 
 The `toolSearchSmoke` Gradle task provides a narrow live diagnostic for the Tool Search wrapper produced by the installed Spring AI version. It starts a non-web Spring context, runs one deterministic paired standard-versus-Tool-Search repetition, and compares each raw Tool Search response with the normalized discovery trace. It recognizes the array, textual-singleton, and object `toolReferences` representations covered by the offline parser; any other shape is malformed. It is not part of `test`, `check`, `build`, or default CI.

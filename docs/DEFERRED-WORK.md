@@ -1,6 +1,7 @@
 # Deferred Work
 
-Status: current after the completed Phase 3 Anthropic portability proof on 2026-08-05.
+Status: current after the small-model tool-compatibility plan execution hardening
+on 2026-08-15.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -50,6 +51,25 @@ opt-in task outside `test`, `check`, `build`, application startup, and CI.
 Phase 2 closure does not authorize Anthropic credentials or calls, another
 provider or benchmark surface, an automatic model pull, Docker, spending, a
 release, a tag, or a push.
+
+## Prepared Small-Model Tool-Compatibility Boundary
+
+The tracked
+[Small-Model Tool-Calling Compatibility Plan](SmallModelToolCallingCompatibilityPlan.md)
+is now prepared for slice-by-slice Codex execution. Phase 1 locks one untreated
+already-installed LFM2.5 model, the standard `ToolCallingAdvisor`, all eight
+ordered canonical public-safe cases, two repetitions with seeds `42`/`43`,
+temperature `0.0`, `512` output tokens, `PT2M`, one attempt, no pull, a
+16-row sequential schedule, suite-specific evidence, and standalone offline
+verification/reanalysis. It includes repository-specific execution packets,
+verification commands, model-routing guidance, and stop conditions.
+
+This is planning and documentation only. No `toolCompatibility` source set or
+task exists yet, no model was inspected or called, and no provider-free Phase 1
+implementation is authorized by the plan update itself. The next gate is an
+explicit project-owner instruction to implement T1.1 only. Any eventual live
+matrix remains a later, separately reviewed exact command after all Phase 1
+provider-free implementation and tests pass from a clean commit.
 
 ## Deferred From the August Cycle
 
@@ -107,7 +127,8 @@ explicitly revised:
 - additional model types such as embeddings, image generation, audio
   transcription, text to speech, and moderation;
 - MCP, RAG, vector stores, and other retrieval infrastructure;
-- new Tool Search indexes or a broad tool-calling expansion;
+- new Tool Search indexes or a broad tool-calling expansion beyond the prepared
+  narrow standard-advisor compatibility study;
 - container runtime work other than a separately justified
   `setaccio-testcontainers` slice;
 - automatic model pulls, default-lifecycle live provider calls, or publication
