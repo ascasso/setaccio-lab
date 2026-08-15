@@ -303,8 +303,9 @@ not place a live model call in default tests or CI.
 - Keep raw argument JSON validity, declared-schema validity, callback binding,
   callback execution, callback success, final response, and case contract as
   separate signals. Validate the current fixture schema subset before callback
-  binding and fail preflight on unsupported schema shapes rather than silently
-  approximating validation.
+  binding; accept and ignore only `description`, `title`, `$schema`, and
+  `default` metadata, and fail preflight on any other unsupported schema
+  keyword or shape rather than silently approximating validation.
 - Keep `toolCompatibilityTest` wholly provider-free. Cover the exact preflight,
   execution, observability, analysis, evidence-integrity, task-isolation, and
   deterministic-reanalysis requirements in the plan before any live command is
@@ -316,6 +317,11 @@ not place a live model call in default tests or CI.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.
+- Before any Phase 2 comparison, require both prompt conditions to originate
+  from the same clean Git commit and carry an identical paired-execution
+  schedule identity that proves the locked interleaved alternating order. Stop
+  and restart both conditions from a new clean commit if either worktree is
+  dirty or the commit changes between conditions.
 
 ## Testcontainers
 

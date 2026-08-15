@@ -64,6 +64,12 @@ temperature `0.0`, `512` output tokens, `PT2M`, one attempt, no pull, a
 verification/reanalysis. It includes repository-specific execution packets,
 verification commands, model-routing guidance, and stop conditions.
 
+Any later Phase 2 prompt comparison must use conditions from the same clean Git
+commit and bind both runs to one recorded paired-execution schedule identity
+that proves the locked interleaved alternating order. Worktree or commit drift
+between conditions stops the protocol; both conditions must then restart from a
+new clean commit.
+
 This is planning and documentation only. No `toolCompatibility` source set or
 task exists yet, no model was inspected or called, and no provider-free Phase 1
 implementation is authorized by the plan update itself. The next gate is an

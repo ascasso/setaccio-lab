@@ -250,10 +250,13 @@ uses it:
 The bounded raw-argument schema validator supports the subset exercised by the
 current deterministic fixture tools: a root object, `properties`, `required`,
 `additionalProperties`, and the JSON types `object`, `array`, `string`,
-`number`, `integer`, `boolean`, and `null`. It must reject malformed raw JSON,
-missing required properties, unknown properties when disallowed, and type
-mismatches before callback binding. If a selected tool schema contains a
-keyword or shape outside that subset, preflight must fail with a classified
+`number`, `integer`, `boolean`, and `null`. It must accept and ignore the
+non-validation metadata keywords `description`, `title`, `$schema`, and
+`default`, which Spring AI may generate from tool metadata such as
+`@ToolParam(description = ...)`. It must reject malformed raw JSON, missing
+required properties, unknown properties when disallowed, and type mismatches
+before callback binding. If a selected tool schema contains any other keyword
+or shape outside that subset, preflight must fail with a classified
 unsupported-schema integrity error. Do not approximate validation, treat Java
 DTO coercion as schema validity, or add a third-party validator without a
 separately reviewed dependency change.
@@ -831,6 +834,12 @@ Keep identical:
 - Spring AI version;
 - execution engine.
 
+Record one shared paired-execution schedule identity in both condition runs.
+It must bind the complete interleaved A/B order above, including every case,
+repetition, sequence position, and condition, so an offline comparison can
+prove that it is comparing the paired execution rather than independently run
+conditions.
+
 ## Slice T2.3 — Comparison gate
 
 Add:
@@ -858,10 +867,15 @@ The comparison must reject mismatches in:
 - framework versions;
 - execution engine.
 
+The comparison must also reject runs that do not share the same clean Git
+commit, or that do not carry the identical paired-execution schedule identity.
+The paired runs must stop before allocation if either worktree is dirty; if
+the commit or worktree changes between conditions, restart both conditions
+from a new clean commit.
+
 Permit differences only in:
 
 - system-prompt identity;
-- Git commit;
 - generated timestamp;
 - output-directory identity.
 
@@ -1871,8 +1885,10 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Deliverable:** first prove with a fake `ChatModel` and deterministic
   callbacks which standard-advisor lifecycle stages are observable. Then
   implement the suite-specific one-attempt invocation boundary, raw tool-call
-  capture, bounded declared-schema validation, callback observations, response
-  metadata, usage, finish metadata, timeout, latency, and classified outcomes.
+  capture, bounded declared-schema validation that accepts and ignores only
+  `description`, `title`, `$schema`, and `default` metadata, callback
+  observations, response metadata, usage, finish metadata, timeout, latency,
+  and classified outcomes.
 - **Checks:** focused observability, schema-coercion, timeout, no-retry, and
   lifecycle tests through `toolCompatibilityTest`, then `:setaccio-lab:test`.
 - **Stop:** if the standard advisor cannot expose a required stage, record the
@@ -1993,7 +2009,8 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Dependency:** T2.1 committed.
 - **Allowed paths:** tool-compatibility source sets/tests and dated log.
 - **Deliverable:** lock the per-case alternating A/B schedule exactly as stated
-  in T2.2, retain every attempt, and prove only system-prompt identity changes.
+  in T2.2, retain every attempt, record one shared paired-execution schedule
+  identity in both conditions, and prove only system-prompt identity changes.
 - **Checks:** exact order/count, settings parity, one-attempt, failure-retention,
   and no-provider tests through `toolCompatibilityTest`.
 - **Stop:** do not fall back to whole-condition ordering or silently change the
@@ -2007,8 +2024,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Allowed paths:** tool-compatibility source sets, build task registration and
   wrapper, tests, and dated log.
 - **Deliverable:** `toolCompatibilityCompare` with strict offline verification
-  first, exact parity rules, prompt-only experimental difference, and no
-  semantic judgment.
+  first, exact parity rules including one clean shared Git commit and the
+  shared paired-execution schedule identity, prompt-only experimental
+  difference, and no semantic judgment.
 - **Checks:** one valid pair plus independent mismatch/tamper fixtures for every
   rejected dimension, task help/configuration cache, and
   `toolCompatibilityTest`.
@@ -2266,8 +2284,7 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Stop:** an AI evaluator is not ground truth; no live judge or credential use
   without separate authorization.
 
-# Appendix A 
- Spring AI 2.0 Tool-Calling Implementation Notes
+# Appendix A — Spring AI 2.0 Tool-Calling Implementation Notes
 
 ## Status
 
@@ -2440,6 +2457,13 @@ The benchmark shall not classify this outcome as full schema compliance merely b
 The raw tool-call argument JSON, exactly as returned by the model before any callback binding, shall be captured and preserved as evidence prior to DTO binding.
 
 Where the selected tool exposes a JSON Schema, the raw argument JSON shall be validated against that declared schema independently of, and prior to, callback binding.
+
+The bounded preflight validator shall accept and ignore only the
+non-validation metadata keywords `description`, `title`, `$schema`, and
+`default`. It shall reject any other unsupported constraint or shape, including
+`pattern`, `minimum`, `items`, and composition keywords, with the classified
+unsupported-schema integrity error rather than silently approximating
+validation.
 
 The following dimensions shall be recorded separately and shall not be collapsed into one flag:
 
