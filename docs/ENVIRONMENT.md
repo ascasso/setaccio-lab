@@ -666,7 +666,10 @@ pull, and a reused or unsafe output path before allocation. Its protocol locks:
 - all eight ordered cases from `ToolBenchmarkCases.defaults()` and every tool
   from `ToolBenchmarkCases.toolNames()`;
 - two repetitions with seeds `42` and `43`;
-- temperature `0.0`, `512` output tokens, `PT2M`, and one attempt;
+- temperature `0.0`, `512` output tokens on every provider turn, one `PT2M`
+  deadline around the complete logical row attempt, and no retry or turn replay;
+- ordered per-turn/per-call evidence plus the plan's exact
+  `tool-case-oracle` semantic call/argument contract;
 - exactly 16 sequential rows and pull strategy `never`;
 - one new direct child under ignored `build/tool-compatibility/` containing
   `tool-compatibility-results.json`, `manifest.json`, and `SUMMARY.md`.
@@ -681,7 +684,34 @@ The planned provider-free and offline commands are:
   --run-dir=build/tool-compatibility/<saved-run>
 ```
 
-These command names document the locked future interface; they will fail as
+The later Phase 2 prompt intervention has a separate locked paired-runner
+interface so the Phase 1 CLI does not change:
+
+```bash
+./gradlew :setaccio-lab:toolCompatibilityPromptMatrix \
+  --ollama-base-url=http://localhost:11434 \
+  --model=hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0 \
+  --max-tokens=512 \
+  --timeout=PT2M \
+  --baseline-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline \
+  --candidate-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
+```
+
+That future task must preflight both fresh direct-child output paths before
+allocation and execute both 16-row conditions in one 32-attempt interleaved
+process. It must re-check the original commit and clean-worktree state before
+every row and before finalizing either manifest, aborting both runs as
+incomplete on drift. It may run only after Phase 1 closeout, Phase 2 provider-free
+implementation, and separate approval of the exact command. Each output is then
+verified with `toolCompatibilityVerify` before the offline comparison:
+
+```bash
+./gradlew :setaccio-lab:toolCompatibilityCompare \
+  --baseline-run=build/tool-compatibility/YYYY-MM-DD-lfm-baseline \
+  --candidate-run=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
+```
+
+These command names document locked future interfaces; they will fail as
 unknown tasks until the corresponding slices are explicitly authorized and
 implemented. Even after implementation, the live matrix requires a separate
 review of the exact command from a clean commit. It must never read

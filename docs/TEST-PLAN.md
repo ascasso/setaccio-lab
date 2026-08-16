@@ -298,8 +298,13 @@ not place a live model call in default tests or CI.
 - Lock the untreated matrix at one explicit LFM2.5 tag, standard
   `ToolCallingAdvisor`, all eight canonical cases in tracked order, all
   canonical fixture tools, two repetitions, seeds `42`/`43`, temperature
-  `0.0`, `512` output tokens, `PT2M`, one attempt, no pull, and exactly 16
-  sequential rows.
+  `0.0`, `512` output tokens per provider turn, one `PT2M` whole-row deadline,
+  one logical attempt with ordered recursive provider turns, no pull, and
+  exactly 16 sequential rows.
+- Bind the canonical cases to the plan's exact versioned semantic call oracle.
+  Check exact ordered calls and JSON-typed argument values independently of raw
+  JSON validity, declared-schema validity, callback coercion, callback success,
+  and final-output assertions; reject oracle drift before output allocation.
 - Keep raw argument JSON validity, declared-schema validity, callback binding,
   callback execution, callback success, final response, and case contract as
   separate signals. Validate the current fixture schema subset before callback
@@ -307,13 +312,16 @@ not place a live model call in default tests or CI.
   `default` metadata, and fail preflight on any other unsupported schema
   keyword or shape rather than silently approximating validation.
 - Keep `toolCompatibilityTest` wholly provider-free. Cover the exact preflight,
+  multi-turn ordering/linkage, semantic argument, row-timeout/no-overlap,
   execution, observability, analysis, evidence-integrity, task-isolation, and
   deterministic-reanalysis requirements in the plan before any live command is
-  reviewed.
-- Require `toolCompatibilityMatrix`, `toolCompatibilityVerify`, and
-  `toolCompatibilityReanalyze` to stay outside `test`, `check`, `build`,
-  application startup, and CI. Verify/reanalyze must not start Spring, resolve
-  a model, or contact Ollama.
+  reviewed. Do not lock the final row schema before the standard-advisor
+  observability proof succeeds.
+- Require `toolCompatibilityMatrix`, `toolCompatibilityPromptMatrix`,
+  `toolCompatibilityVerify`, `toolCompatibilityReanalyze`, and
+  `toolCompatibilityCompare` to stay outside `test`, `check`, `build`,
+  application startup, and CI. Verify/reanalyze/compare must not start Spring,
+  resolve a model, or contact Ollama.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.
@@ -322,6 +330,14 @@ not place a live model call in default tests or CI.
   schedule identity that proves the locked interleaved alternating order. Stop
   and restart both conditions from a new clean commit if either worktree is
   dirty or the commit changes between conditions.
+- Implement Phase 2 live execution only as the dedicated
+  `toolCompatibilityPromptMatrix` task. One invocation must preflight both fresh
+  outputs before allocation, execute all 32 logical attempts in the locked
+  interleaved order, and write two independently verifiable 16-row runs with one
+  shared schedule identity. Re-check the original commit and clean-worktree
+  state before every row and before manifest finalization; drift aborts both
+  runs as incomplete. Never substitute two whole-condition commands or change
+  the Phase 1 matrix CLI.
 
 ## Testcontainers
 

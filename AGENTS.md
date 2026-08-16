@@ -133,7 +133,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-15)
+## Current State Snapshot (as of 2026-08-16)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -285,10 +285,15 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 - The tracked small-model tool-calling compatibility plan is hardened for
   slice-by-slice Codex execution. It locks a future untreated LFM2.5 Phase 1
   protocol at the standard advisor, eight ordered canonical cases, two seeded
-  repetitions, `512` output tokens, `PT2M`, one attempt, no pull, 16 sequential
-  rows, suite-specific evidence, and offline verification/reanalysis. It also
-  records exact repository paths, checks, stop conditions, and Terra/Luna/Sol
-  routing for every formal slice. This remains documentation only: no
+  repetitions, `512` output tokens per provider turn, one `PT2M` whole-row
+  deadline, one logical attempt with ordered provider-turn/per-call evidence,
+  no pull, 16 sequential rows, an exact suite-owned semantic call/argument
+  oracle, suite-specific evidence, and offline verification/reanalysis. The
+  final row schema waits for a standard-advisor observability proof. A later
+  Phase 2 prompt comparison has one dedicated paired-runner contract that must
+  execute both conditions in a single interleaved process. The plan also records
+  exact repository paths, checks, stop conditions, and Terra/Luna/Sol routing
+  for every formal slice. This remains documentation only: no
   `toolCompatibility` source set or task exists, provider-free implementation
   is not yet authorized, and any live matrix requires a later exact-command
   approval after all offline tests pass.
@@ -440,10 +445,12 @@ Pending and separately deferred:
 
 - The next prepared implementation gate is T1.1 in
   [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md):
-  add only the provider-free protocol/source-set foundation after explicit
-  project-owner authorization. Plan hardening does not authorize T1.1, a live
-  Ollama call, model inspection or pull, Phase 2+, Docker, credentials, push,
-  release, or tag.
+  add only the provider-free protocol/source-set foundation and exact semantic
+  call-oracle resource after explicit project-owner authorization. T1.1 must
+  not prematurely define the final result-row schema; that waits for T1.3
+  observability. Plan hardening does not authorize T1.1, a live Ollama call,
+  model inspection or pull, Phase 2+, Docker, credentials, push, release, or
+  tag.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing
@@ -569,7 +576,14 @@ Tool-calling phase:
 - Maintain explicit required/forbidden tool, output-term, and tool-response-term assertions for public-safe cases.
 - Preserve normalized Tool Search query/discovery observations together with raw selected calls and executed responses.
 - Keep comparison repetitions paired and sequential; record effective seeds and execution order so latency and reliability results remain interpretable.
-- Add argument-validity checks and more distractor tools only through bounded deterministic fixture slices.
+- For the prepared compatibility matrix, preserve ordered provider turns and
+  per-call linkage; apply `512` tokens per provider turn and `PT2M` to the whole
+  logical row attempt, and never let timed-out work overlap a later row.
+- Keep raw JSON validity, declared-schema validity, exact call sequence,
+  semantic argument agreement, callback lifecycle, and final-output assertions
+  separate. The suite-owned oracle adds only missing call/argument expectations;
+  it must not duplicate canonical prompts, existing expectations, or schemas.
+- Add more distractor tools only through bounded deterministic fixture slices.
 - Use controlled opt-in local model matrices to decide whether another index or provider path is justified.
 
 MCP phase:
