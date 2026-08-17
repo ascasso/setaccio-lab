@@ -54,6 +54,10 @@ final class ToolCompatibilityProtocol {
         return ToolCompatibilityCaseOracle.loadLocked();
     }
 
+    static ToolCompatibilitySystemPromptIdentity systemPromptIdentity() {
+        return ToolCompatibilitySystemPromptIdentity.untreated();
+    }
+
     static List<ToolCompatibilityCaseSelection.ScheduledCase> schedule(
             ToolCompatibilityCaseSelection selection,
             ToolCompatibilityRunSettings settings) {
