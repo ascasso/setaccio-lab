@@ -24,26 +24,56 @@ import org.springframework.ai.tool.ToolCallback;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
 class ToolCompatibilityInvocationBoundaryTest {
 
     @Test
     void buildsTheLockedNoPullOllamaModelWithoutContactingTheProvider() {
         OllamaApi api = ToolCompatibilityInvocationBoundary.createControlledOllamaApi("http://localhost:11434");
-        ChatModel model = ToolCompatibilityInvocationBoundary.createControlledOllamaModel(
+        ToolCompatibilityControlledOllamaModel controlledModel =
+                ToolCompatibilityInvocationBoundary.createControlledOllamaModel(
                 api,
-                new ToolCompatibilityModelIdentity(
-                        ToolCompatibilityProtocol.INITIAL_MODEL,
-                        ToolCompatibilityProtocol.INITIAL_MODEL,
-                        "a".repeat(64)),
+                installedModels(model(ToolCompatibilityProtocol.INITIAL_MODEL, "a".repeat(64))),
                 42);
+        ChatModel model = controlledModel.chatModel();
 
+        assertThat(controlledModel.modelIdentity()).isEqualTo(new ToolCompatibilityModelIdentity(
+                ToolCompatibilityProtocol.INITIAL_MODEL,
+                ToolCompatibilityProtocol.INITIAL_MODEL,
+                "a".repeat(64)));
         assertThat(model.getOptions()).isInstanceOf(OllamaChatOptions.class);
         OllamaChatOptions options = (OllamaChatOptions) model.getOptions();
         assertThat(options.getModel()).isEqualTo(ToolCompatibilityProtocol.INITIAL_MODEL);
         assertThat(options.getTemperature()).isZero();
         assertThat(options.getSeed()).isEqualTo(42);
         assertThat(options.getNumPredict()).isEqualTo(512);
+    }
+
+    @Test
+    void refusesMissingIncompleteOrAmbiguousInstalledModelIdentity() {
+        OllamaApi api = ToolCompatibilityInvocationBoundary.createControlledOllamaApi("http://localhost:11434");
+
+        assertThatThrownBy(() -> ToolCompatibilityInvocationBoundary.createControlledOllamaModel(
+                api,
+                installedModels(),
+                42))
+                .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
+                .hasMessageContaining("not installed");
+        assertThatThrownBy(() -> ToolCompatibilityInvocationBoundary.createControlledOllamaModel(
+                api,
+                installedModels(model(ToolCompatibilityProtocol.INITIAL_MODEL, "short")),
+                42))
+                .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
+                .hasMessageContaining("complete immutable digest");
+        assertThatThrownBy(() -> ToolCompatibilityInvocationBoundary.createControlledOllamaModel(
+                api,
+                installedModels(
+                        model(ToolCompatibilityProtocol.INITIAL_MODEL, "a".repeat(64)),
+                        model(ToolCompatibilityProtocol.INITIAL_MODEL, "b".repeat(64))),
+                42))
+                .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
+                .hasMessageContaining("duplicate normalized tag");
     }
 
     @Test
@@ -191,6 +221,74 @@ class ToolCompatibilityInvocationBoundaryTest {
     }
 
     @Test
+    void retainsSchemaInvalidCoercionSeparatelyFromInvocationFailure() {
+        AtomicInteger calls = new AtomicInteger();
+        ScriptedChatModel model = new ScriptedChatModel(prompt -> switch (calls.getAndIncrement()) {
+            case 0 -> response(AssistantMessage.builder().content("").toolCalls(List.of(toolCall(
+                    "call-zone", "lab_fixed_time_for_zone", "{\"zoneId\":123}"))).build(),
+                    "tool_calls", 3, 2, "coerced-failure-1");
+            case 1 -> {
+                assertThat(toolResponses(prompt)).singleElement();
+                yield response(new AssistantMessage("The coerced zone identifier was invalid."),
+                        "stop", 7, 4, "coerced-failure-2");
+            }
+            default -> throw new AssertionError("No provider retry is permitted");
+        });
+
+        ToolCompatibilityInvocationTrace trace = new ToolCompatibilityInvocationBoundary().invoke(
+                model,
+                scheduled("fixed-zone-time"),
+                ToolCompatibilityCallbackCatalog.canonicalCallbacks());
+
+        assertThat(calls).hasValue(2);
+        assertThat(trace.status()).isEqualTo(ToolCompatibilityInvocationStatus.COMPLETED);
+        assertThat(trace.toolCalls()).singleElement().satisfies(call -> {
+            assertThat(call.rawArgumentSchemaValid()).isFalse();
+            assertThat(call.callbackBindingSucceeded()).isTrue();
+            assertThat(call.callbackExecuted()).isTrue();
+            assertThat(call.callbackSucceeded()).isFalse();
+            assertThat(call.callbackFailureKind())
+                    .isEqualTo(ToolCompatibilityCallbackFailureKind.CALLBACK_INVOCATION_FAILURE);
+        });
+    }
+
+    @Test
+    void classifiesAnUnresolvableModelSelectedToolWithoutCallingItAProviderFailure() {
+        ScriptedChatModel model = new ScriptedChatModel(prompt -> response(
+                AssistantMessage.builder().content("").toolCalls(List.of(toolCall(
+                        "call-unknown", "lab_unknown_tool", "{}"))).build(),
+                "tool_calls", 3, 2, "unknown-tool"));
+
+        ToolCompatibilityInvocationTrace trace = new ToolCompatibilityInvocationBoundary().invoke(
+                model,
+                scheduled("no-applicable-domain-tool"),
+                ToolCompatibilityCallbackCatalog.canonicalCallbacks());
+
+        assertThat(trace.status()).isEqualTo(ToolCompatibilityInvocationStatus.CALLBACK_FAILURE);
+        assertThat(trace.toolCalls()).singleElement().satisfies(call -> {
+            assertThat(call.callbackExecuted()).isFalse();
+            assertThat(call.callbackBindingSucceeded()).isNull();
+            assertThat(call.callbackSucceeded()).isFalse();
+            assertThat(call.callbackFailureKind())
+                    .isEqualTo(ToolCompatibilityCallbackFailureKind.CALLBACK_RESOLUTION_FAILURE);
+        });
+    }
+
+    @Test
+    void propagatesProtocolIntegrityFailureInsteadOfFlatteningItIntoProviderEvidence() {
+        ScriptedChatModel model = new ScriptedChatModel(prompt -> {
+            throw new ToolCompatibilityProtocolIntegrityException("deliberate linkage failure");
+        });
+
+        assertThatThrownBy(() -> new ToolCompatibilityInvocationBoundary().invoke(
+                model,
+                scheduled("no-applicable-domain-tool"),
+                ToolCompatibilityCallbackCatalog.canonicalCallbacks()))
+                .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
+                .hasMessageContaining("deliberate linkage failure");
+    }
+
+    @Test
     void retainsAProviderFailureOnALaterTurnWithoutAReplay() {
         AtomicInteger calls = new AtomicInteger();
         ScriptedChatModel model = new ScriptedChatModel(prompt -> switch (calls.getAndIncrement()) {
@@ -293,14 +391,19 @@ class ToolCompatibilityInvocationBoundaryTest {
                 Duration.ofMillis(30), Duration.ofMillis(40));
 
         try {
-            ToolCompatibilityInvocationTrace trace = boundary.invoke(
-                    uninterruptibleModel,
-                    scheduled("no-applicable-domain-tool"),
-                    ToolCompatibilityCallbackCatalog.canonicalCallbacks());
+            ToolCompatibilityProtocolIntegrityException failure = catchThrowableOfType(
+                    () -> boundary.invoke(
+                            uninterruptibleModel,
+                            scheduled("no-applicable-domain-tool"),
+                            ToolCompatibilityCallbackCatalog.canonicalCallbacks()),
+                    ToolCompatibilityProtocolIntegrityException.class);
 
             assertThat(blockedCallStarted.await(1, TimeUnit.SECONDS)).isTrue();
-            assertThat(trace.status()).isEqualTo(ToolCompatibilityInvocationStatus.TIMEOUT_WORK_NOT_STOPPED);
-            assertThat(trace.safeForNextSequentialAttempt()).isFalse();
+            assertThat(failure).hasMessageContaining("could not be confirmed stopped");
+            assertThat(failure.invocationTrace()).isNotNull();
+            assertThat(failure.invocationTrace().status())
+                    .isEqualTo(ToolCompatibilityInvocationStatus.TIMEOUT_WORK_NOT_STOPPED);
+            assertThat(failure.invocationTrace().safeForNextSequentialAttempt()).isFalse();
             assertThatThrownBy(() -> boundary.invoke(
                     twoTurnModel(toolCall("unused", "lab_add_numbers", "{\"left\":1,\"right\":2}"), "unused"),
                     scheduled("arithmetic-add"),
@@ -310,6 +413,14 @@ class ToolCompatibilityInvocationBoundaryTest {
         } finally {
             releaseBlockedCall.countDown();
         }
+    }
+
+    private static OllamaApi.ListModelResponse installedModels(OllamaApi.Model... models) {
+        return new OllamaApi.ListModelResponse(List.of(models));
+    }
+
+    private static OllamaApi.Model model(String name, String digest) {
+        return new OllamaApi.Model(name, name, null, null, digest, null);
     }
 
     private static ToolCompatibilityCaseSelection.ScheduledCase scheduled(String caseId) {

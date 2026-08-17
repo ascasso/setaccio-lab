@@ -2,7 +2,6 @@ package com.setaccio.lab.toolcompat;
 
 import com.setaccio.lab.chat.OllamaChatModelFactory;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
-import com.setaccio.lab.tool.FailureBenchmarkTools;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -38,6 +37,9 @@ import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.ai.ollama.api.OllamaApi;
 import org.springframework.ai.tool.ToolCallback;
 import org.springframework.ai.tool.definition.ToolDefinition;
+import org.springframework.ai.tool.execution.ToolExecutionException;
+import org.springframework.ai.tool.method.MethodToolCallback;
+import tools.jackson.core.JacksonException;
 
 /**
  * One logical, standard-advisor tool-calling attempt. It observes recursive provider
@@ -60,16 +62,18 @@ final class ToolCompatibilityInvocationBoundary {
         return new OllamaChatModelFactory().createApi(loopbackBaseUrl, ToolCompatibilityProtocol.ROW_TIMEOUT);
     }
 
-    static ChatModel createControlledOllamaModel(
+    static ToolCompatibilityControlledOllamaModel createControlledOllamaModel(
             OllamaApi ollamaApi,
-            ToolCompatibilityModelIdentity modelIdentity,
+            OllamaApi.ListModelResponse installedModels,
             int seed
     ) {
         Objects.requireNonNull(ollamaApi, "ollamaApi must not be null");
-        Objects.requireNonNull(modelIdentity, "modelIdentity must not be null");
         if (!ToolCompatibilityProtocol.SEEDS.contains(seed)) {
             throw new IllegalArgumentException("seed must be one of the locked protocol seeds");
         }
+        ToolCompatibilityModelIdentity modelIdentity = ToolCompatibilityModelInventory.requireInstalled(
+                installedModels,
+                ToolCompatibilityProtocol.INITIAL_MODEL);
         ToolCompatibilityRunSettings settings = ToolCompatibilityProtocol.runSettings();
         OllamaChatOptions options = OllamaChatOptions.builder()
                 .model(modelIdentity.requestedModel())
@@ -77,11 +81,13 @@ final class ToolCompatibilityInvocationBoundary {
                 .seed(seed)
                 .numPredict(settings.maxOutputTokensPerProviderTurn())
                 .build();
-        return OllamaChatModelFactory.createNoPullModel(
-                ollamaApi,
-                options,
-                ToolCompatibilityProtocol.ROW_TIMEOUT,
-                ToolCompatibilityProtocol.LOGICAL_ROW_ATTEMPTS);
+        return new ToolCompatibilityControlledOllamaModel(
+                OllamaChatModelFactory.createNoPullModel(
+                        ollamaApi,
+                        options,
+                        ToolCompatibilityProtocol.ROW_TIMEOUT,
+                        ToolCompatibilityProtocol.LOGICAL_ROW_ATTEMPTS),
+                modelIdentity);
     }
 
     static ToolCompatibilityInvocationBoundary forProviderFreeDeadlineTest(
@@ -137,8 +143,12 @@ final class ToolCompatibilityInvocationBoundary {
             if (!stopped) {
                 recorder.timedOutWorkDidNotStop();
                 nextSequentialAttemptAllowed = false;
+                ToolCompatibilityInvocationTrace trace = recorder.snapshot(false);
+                throw new ToolCompatibilityProtocolIntegrityException(
+                        "Timed-out tool compatibility work could not be confirmed stopped",
+                        trace);
             }
-            return recorder.snapshot(stopped);
+            return recorder.snapshot(true);
         } catch (InterruptedException exception) {
             future.cancel(true);
             executor.shutdownNow();
@@ -146,10 +156,26 @@ final class ToolCompatibilityInvocationBoundary {
             Thread.currentThread().interrupt();
             throw new IllegalStateException("Interrupted while waiting for tool compatibility attempt", exception);
         } catch (ExecutionException exception) {
-            recorder.unattributedFailure(safeMessage(exception.getCause()));
             executor.shutdownNow();
             awaitTermination(executor, stopConfirmationTimeout);
-            return recorder.snapshot(true);
+            Throwable cause = exception.getCause();
+            if (cause instanceof ToolCompatibilityProtocolIntegrityException integrityException) {
+                throw integrityException;
+            }
+            if (cause instanceof Error error) {
+                throw error;
+            }
+            if (recorder.hasProviderFailure()) {
+                return recorder.snapshot(true);
+            }
+            if (recorder.recordTerminalCallbackFailure(cause)) {
+                return recorder.snapshot(true);
+            }
+            ToolCompatibilityInvocationTrace trace = recorder.snapshot(true);
+            throw new ToolCompatibilityProtocolIntegrityException(
+                    "Standard tool-calling advisor failed outside an observed provider or callback stage",
+                    cause == null ? exception : cause,
+                    trace);
         } finally {
             executor.shutdownNow();
         }
@@ -241,6 +267,8 @@ final class ToolCompatibilityInvocationBoundary {
                 ChatClientResponse response = chain.nextCall(request);
                 recorder.completeProviderTurn(turn, response.chatResponse(), elapsedMillis(started));
                 return response;
+            } catch (ToolCompatibilityProtocolIntegrityException exception) {
+                throw exception;
             } catch (RuntimeException exception) {
                 recorder.failProviderTurn(turn, elapsedMillis(started), safeMessage(exception));
                 throw exception;
@@ -296,10 +324,10 @@ final class ToolCompatibilityInvocationBoundary {
                 recorder.callbackSucceeded(toolCall, response);
                 return response;
             } catch (RuntimeException exception) {
-                recorder.callbackFailed(toolCall, safeMessage(exception));
+                recorder.callbackFailed(toolCall, delegate, exception);
                 throw exception;
             } catch (Exception exception) {
-                recorder.callbackFailed(toolCall, safeMessage(exception));
+                recorder.callbackFailed(toolCall, delegate, exception);
                 throw new IllegalStateException("Tool callback failed", exception);
             }
         }
@@ -388,19 +416,20 @@ final class ToolCompatibilityInvocationBoundary {
             toolCall.callbackResponse = response;
         }
 
-        private synchronized void callbackFailed(MutableToolCall toolCall, String failure) {
-            boolean schemaValid = Boolean.TRUE.equals(toolCall.rawArgumentSchemaValid);
+        private synchronized void callbackFailed(
+                MutableToolCall toolCall,
+                ToolCallback callback,
+                Throwable failure
+        ) {
             toolCall.callbackSucceeded = false;
-            if (!schemaValid) {
+            ToolCompatibilityCallbackFailureKind failureKind = classifyCallbackFailure(callback, failure);
+            if (failureKind == ToolCompatibilityCallbackFailureKind.CALLBACK_BINDING_FAILURE) {
                 toolCall.callbackBindingSucceeded = false;
-                toolCall.callbackFailureKind = ToolCompatibilityCallbackFailureKind.CALLBACK_BINDING_FAILURE;
-            } else if (FailureBenchmarkTools.FAILURE_MARKER.equals(failure)) {
-                // The canonical failure fixture's public marker is direct evidence that
-                // Spring AI reached the target method after binding its valid arguments.
+            } else if (failureKind == ToolCompatibilityCallbackFailureKind.CALLBACK_INVOCATION_FAILURE) {
                 toolCall.callbackBindingSucceeded = true;
-                toolCall.callbackFailureKind = ToolCompatibilityCallbackFailureKind.CALLBACK_INVOCATION_FAILURE;
             }
-            toolCall.callbackFailure = failure;
+            toolCall.callbackFailureKind = failureKind;
+            toolCall.callbackFailure = safeMessage(failure);
         }
 
         private synchronized void complete() {
@@ -409,11 +438,30 @@ final class ToolCompatibilityInvocationBoundary {
             }
         }
 
-        private synchronized void unattributedFailure(String failure) {
-            if (status == ToolCompatibilityInvocationStatus.COMPLETED) {
-                status = ToolCompatibilityInvocationStatus.PROVIDER_FAILURE;
-                terminalMessage = failure;
+        private synchronized boolean hasProviderFailure() {
+            return status == ToolCompatibilityInvocationStatus.PROVIDER_FAILURE;
+        }
+
+        private synchronized boolean recordTerminalCallbackFailure(Throwable failure) {
+            String failureMessage = safeMessage(failure);
+            for (int index = toolCalls.size() - 1; index >= 0; index--) {
+                MutableToolCall toolCall = toolCalls.get(index);
+                if (!toolCall.callbackExecuted && !callbacksByName.containsKey(toolCall.toolName)) {
+                    toolCall.callbackSucceeded = false;
+                    toolCall.callbackFailureKind =
+                            ToolCompatibilityCallbackFailureKind.CALLBACK_RESOLUTION_FAILURE;
+                    toolCall.callbackFailure = failureMessage;
+                    status = ToolCompatibilityInvocationStatus.CALLBACK_FAILURE;
+                    terminalMessage = failureMessage;
+                    return true;
+                }
+                if (toolCall.callbackExecuted && Boolean.FALSE.equals(toolCall.callbackSucceeded)) {
+                    status = ToolCompatibilityInvocationStatus.CALLBACK_FAILURE;
+                    terminalMessage = failureMessage;
+                    return true;
+                }
             }
+            return false;
         }
 
         private synchronized void rowTimedOut() {
@@ -433,6 +481,29 @@ final class ToolCompatibilityInvocationBoundary {
                     toolCalls.stream().map(MutableToolCall::snapshot).toList(),
                     terminalMessage,
                     safeForNextAttempt);
+        }
+
+        private static ToolCompatibilityCallbackFailureKind classifyCallbackFailure(
+                ToolCallback callback,
+                Throwable failure
+        ) {
+            if (!(callback instanceof MethodToolCallback) || !(failure instanceof ToolExecutionException)) {
+                return null;
+            }
+            return hasCause(failure, JacksonException.class)
+                    ? ToolCompatibilityCallbackFailureKind.CALLBACK_BINDING_FAILURE
+                    : ToolCompatibilityCallbackFailureKind.CALLBACK_INVOCATION_FAILURE;
+        }
+
+        private static boolean hasCause(Throwable failure, Class<? extends Throwable> expectedType) {
+            Throwable current = failure;
+            while (current != null) {
+                if (expectedType.isInstance(current)) {
+                    return true;
+                }
+                current = current.getCause();
+            }
+            return false;
         }
 
         private void recordToolResponses(ChatClientRequest request) {
