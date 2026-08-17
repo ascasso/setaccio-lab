@@ -26,6 +26,14 @@ standard-advisor observability probe succeeds. Phase 2 now has one explicit
 paired live-task contract for its locked interleaved A/B schedule. These
 documentation changes do not authorize implementation or execution.
 
+Phase 3 inventory planning was refreshed on 2026-08-17 from the project owner's
+reported installed-model list. `qwen3.8:27b-mlx` is now the provisional
+higher-capability reference candidate, the absent `dolphin-phi:latest` peer was
+removed rather than pulled or silently replaced, and future cohort evidence
+must distinguish model identity from artifact/runtime format. This remains
+planning only: it does not lock the Phase 3 cohort or authorize model inspection
+or execution.
+
 ## Purpose
 
 Evaluate whether small, fast, locally hosted language models can reliably perform constrained tool-calling tasks even when their general factual knowledge and open-ended conversational quality are limited.
@@ -1216,24 +1224,31 @@ granite4.1:3b
 ministral-3:3b
 gemma4:e2b
 qwen3.5:0.8b
-dolphin-phi:latest
 ```
 
-Reference model:
+Provisional higher-capability reference candidate, subject to the T3.1 lock:
 
 ```text
-qwen3.6:latest
+qwen3.8:27b-mlx
 ```
 
-The reference model is not grouped as a size peer. It provides a higher-capability local comparison point.
+The reference candidate is not grouped as a size peer. It provides a
+higher-capability local comparison point for the exact installed artifact. The
+project owner must approve the final reference tag and full digest when T3.1 is
+authorized; do not replace it with a mutable `:latest` alias. This provisional
+nomination neither claims that the artifact works through Spring AI's standard
+tool-calling path nor authorizes model inspection or execution.
 
 Before locking the cohort, inspect each installed model’s:
 
 - architecture;
+- base checkpoint or model-family provenance where reliably available;
 - tool-calling support;
-- chat template;
+- chat template and a stable template fingerprint where metadata exposes it;
 - default system prompt;
-- reasoning-output behavior;
+- reasoning-output behavior and default/effective thinking-mode metadata;
+- artifact/runtime format and quantization or precision where reliably
+  available;
 - immutable digest.
 
 Models that cannot express Spring AI/Ollama tool calls should not be silently removed. They may remain as compatibility failures if the protocol question includes unsupported models.
@@ -1247,7 +1262,17 @@ Resolve each to:
 - normalized installed identity;
 - full digest;
 - size metadata if reliably available;
-- template/tool capability metadata where available.
+- base checkpoint or model-family provenance where reliably available;
+- artifact/runtime format and quantization or precision where reliably
+  available;
+- template/tool capability metadata where available;
+- default/effective thinking-mode metadata where available.
+
+Resolve and record the Ollama server/runtime version once for the complete
+cohort. Optional metadata that the installed artifact or Ollama does not expose
+must be recorded as unavailable rather than guessed. Do not lock a mutable
+`:latest` alias when a versioned installed tag is available; every selected tag
+still requires its full immutable digest.
 
 Reject:
 
@@ -1300,6 +1325,13 @@ Logical row attempts:
 
 Advisor:
 standard ToolCallingAdvisor
+
+Thinking-mode request:
+no per-model override; retain the installed artifact's unmodified behavior and
+record default/effective metadata where exposed
+
+Runtime:
+one recorded Ollama server/runtime version for the complete cohort
 
 Order:
 sequential
@@ -1369,6 +1401,13 @@ Produce per-model sections without a total rank.
 
 “Tokens per passing row” may be reported descriptively but must not become a universal efficiency score.
 
+Because the exact installed tags may use different artifact formats or
+acceleration paths, including MLX and non-MLX variants, latency and token-use
+observations describe the deployed tag, immutable digest, artifact/runtime
+format, and recorded Ollama version under this protocol. Do not attribute those
+differences solely to model weights, architecture, or family, and do not claim
+backend-normalized performance.
+
 ## Slice T3.5 — Reference-model comparison
 
 Compare each small model with the reference model only descriptively.
@@ -1393,7 +1432,7 @@ This must be phrased narrowly.
 
 Allowed:
 
-> “Among the six tested installed models, model X was the smallest model that passed all locked cases in both repetitions.”
+> “Among the tested installed models, model X was the smallest model that passed all locked cases in both repetitions.”
 
 Not allowed:
 
@@ -1402,6 +1441,7 @@ Not allowed:
 ## Phase 3 exit criteria
 
 - Cohort identities and digests are locked.
+- Reference identity, artifact/runtime format, and Ollama version are explicit.
 - All planned rows are retained.
 - Evidence verifies and reanalyzes offline.
 - Results remain multidimensional.
@@ -2380,11 +2420,16 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Routing:** Terra; Sol review recommended. Not Luna-ready.
 - **Dependency:** Phase 2 human decision and explicit Phase 3 authorization.
 - **Allowed paths:** tool-compatibility source sets/tests and dated log.
-- **Deliverable:** explicit ordered tags, normalized installed identities, full
-  digests, duplicate-byte detection, safe available metadata, and complete
-  failure-before-allocation behavior.
+- **Deliverable:** explicit ordered peer tags plus a separately labeled
+  reference, normalized installed identities, full digests, duplicate-byte
+  detection, Ollama runtime version, model-family provenance, artifact/runtime
+  format, quantization or precision, template/tool metadata, thinking-mode
+  metadata where exposed, explicit unavailable values, and complete
+  failure-before-allocation behavior. The provisional `qwen3.8:27b-mlx`
+  nomination is not final until the owner approves its resolved identity.
 - **Checks:** fake model inventory fixtures for every preflight outcome and
-  `toolCompatibilityTest`.
+  `toolCompatibilityTest`, including mutable-alias, missing-runtime-version,
+  missing-optional-metadata, and mixed-artifact-format fixtures.
 - **Stop:** cohort membership is not locked until the owner approves exact
   installed tags; never pull, silently remove, or remotely substitute a model.
 
@@ -2406,10 +2451,11 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Allowed paths:** tool-compatibility source sets, dedicated cohort Gradle
   tasks/wrappers, tests, and dated log.
 - **Deliverable:** ordered sequential multi-model schedule, immutable identities,
-  all planned rows retained, no cross-model state, and suite-compatible evidence.
+  one recorded Ollama runtime version, no per-model thinking-mode override, all
+  planned rows retained, no cross-model state, and suite-compatible evidence.
 - **Checks:** multi-model fake sessions, order/count, duplicate alias, unsupported
-  seed recording, failure retention, task isolation, and
-  `toolCompatibilityTest`.
+  seed recording, effective-thinking metadata, runtime-version drift,
+  failure retention, task isolation, and `toolCompatibilityTest`.
 - **Stop:** no live execution, model pull, hidden concurrency, or per-model
   repair within the implementation packet.
 
@@ -2419,10 +2465,13 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Dependency:** T3.3 committed.
 - **Allowed paths:** tool-compatibility analyzer/report/tests and dated log.
 - **Deliverable:** per-model multidimensional sections covering every T3.4
-  dimension, no total rank, and explicit incomplete/unsupported observations.
+  dimension, no total rank, explicit incomplete/unsupported observations, and
+  deployment-specific labeling for mixed artifact/runtime formats.
 - **Checks:** one fixture per dimension, deterministic model/case ordering,
-  median/range handling, and no aggregate winner assertions.
-- **Stop:** no universal efficiency score or semantic correctness inference.
+  median/range handling, mixed-format caveats, and no aggregate winner
+  assertions.
+- **Stop:** no universal efficiency score, backend-normalized performance
+  claim, or semantic correctness inference.
 
 ### T3.5 — Reference-model comparison
 
@@ -2430,10 +2479,12 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Dependency:** T3.4 committed and reference identity explicitly approved.
 - **Allowed paths:** tool-compatibility comparison/report/tests and dated log.
 - **Deliverable:** descriptive case overlap/differences and latency/token
-  observations with the reference labeled outside the peer cohort.
+  observations with the reference labeled outside the peer cohort and its exact
+  artifact/runtime format visible.
 - **Checks:** asymmetric pass fixtures, missing evidence rejection, and
   deterministic report tests.
-- **Stop:** do not treat reference output as ground truth.
+- **Stop:** do not treat reference output as ground truth or attribute an
+  MLX/non-MLX difference solely to model weights.
 
 ### T3.6 — Optional capability frontier
 
