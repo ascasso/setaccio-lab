@@ -290,8 +290,9 @@ not place a live model call in default tests or CI.
 
 - Follow the locked
   [`SmallModelToolCallingCompatibilityPlan.md`](SmallModelToolCallingCompatibilityPlan.md)
-  one slice at a time. The plan is execution-ready documentation; no
-  `toolCompatibility` source set, task, or live authorization exists yet.
+  one slice at a time. Its T0.1 documentation packet is complete, but no
+  `toolCompatibility` source set, task, provider-free implementation
+  authorization, or live authorization exists yet.
 - Phase 1 must use dedicated `toolCompatibility` and
   `toolCompatibilityTest` source sets under `com.setaccio.lab.toolcompat`; do
   not migrate or alter `POST /api/lab/tools`.
