@@ -330,6 +330,12 @@ not place a live model call in default tests or CI.
   schedule identity that proves the locked interleaved alternating order. Stop
   and restart both conditions from a new clean commit if either worktree is
   dirty or the commit changes between conditions.
+- In the Phase 2 comparator, treat `globalPairSequence` and
+  `conditionExecutionPosition` as schedule-derived per-condition values rather
+  than direct-equality fields. Accept their expected baseline/candidate
+  differences only when each row matches the shared schedule for its condition,
+  case, and repetition; reject missing, swapped, equal, or otherwise
+  schedule-inconsistent values.
 - Implement Phase 2 live execution only as the dedicated
   `toolCompatibilityPromptMatrix` task. One invocation must preflight both fresh
   outputs before allocation, execute all 32 logical attempts in the locked

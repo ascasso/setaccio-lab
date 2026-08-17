@@ -1064,10 +1064,10 @@ both fresh direct-child output paths before allocating either directory or
 calling the provider. It then executes all 32 logical row attempts through one
 process in the exact interleaved order: 16 untreated and 16 prompted. Each
 condition writes its own exact three-artifact run and every row retains the
-global pair sequence and its first/second condition execution position so the
-shared schedule can be reconstructed offline. A compatibility failure remains
-a row; an integrity failure aborts the pair. Failure after allocation must not
-cause either partial directory to be reused as a later run.
+`globalPairSequence` and `conditionExecutionPosition` (`first` or `second`) so
+the shared schedule can be reconstructed offline. A compatibility failure
+remains a row; an integrity failure aborts the pair. Failure after allocation
+must not cause either partial directory to be reused as a later run.
 
 The task must re-check the original commit and clean-worktree state immediately
 before every logical row attempt and again before finalizing either manifest.
@@ -1115,12 +1115,22 @@ The paired runs must stop before allocation if either worktree is dirty; if
 the commit or worktree changes between conditions, restart both conditions
 from a new clean commit.
 
+For each baseline/candidate pair matched by case and repetition, the comparator
+must resolve each row's condition to its corresponding shared-schedule entry and
+verify `globalPairSequence` and `conditionExecutionPosition`. Those fields are
+expected to differ between the baseline and candidate rows; they are not
+direct-equality fields. Missing, swapped, equal, or otherwise
+schedule-inconsistent positions reject the pair.
+
 Permit differences only in:
 
 - system-prompt identity;
 - run identity;
 - generated timestamp;
 - output-directory identity;
+- `globalPairSequence` and `conditionExecutionPosition`, but only when each
+  value exactly matches its condition's entry in the shared paired-execution
+  schedule;
 - observed provider-turn, tool-call, callback, final-output, usage, latency, and
   classified diagnostic outcomes.
 
@@ -2312,10 +2322,13 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Deliverable:** `toolCompatibilityCompare` with strict offline verification
   first, exact parity rules including one clean shared Git commit and the
   shared paired-execution schedule and semantic-oracle identities, prompt-only
-  experimental protocol difference, explicitly permitted observed outcome
+  experimental protocol difference, schedule-derived comparison of the distinct
+  per-condition execution positions, explicitly permitted observed outcome
   differences, and no semantic judgment.
 - **Checks:** one valid pair plus independent mismatch/tamper fixtures for every
-  rejected dimension, task help/configuration cache, and
+  rejected dimension, including the expected baseline/candidate position
+  differences and swapped or schedule-inconsistent positions, task
+  help/configuration cache, and
   `toolCompatibilityTest`.
 - **Stop:** never compare unverified evidence or weaken parity because two runs
   happen to look similar.

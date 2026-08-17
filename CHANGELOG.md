@@ -9,6 +9,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Corrected the proposed Phase 2 tool-compatibility comparator contract: paired
+  row `globalPairSequence` and `conditionExecutionPosition` values are expected
+  to differ across baseline and candidate, but are accepted only when each
+  matches the identical shared paired-execution schedule. This remains
+  documentation only; no compatibility code or live execution was added.
 - Strengthened the proposed small-model tool-calling compatibility protocol
   after focused review. Phase 1 now records ordered provider turns and per-call
   lifecycle evidence inside each single logical row attempt, applies the
