@@ -59,16 +59,24 @@ The tracked
 is now prepared for slice-by-slice Codex execution. Phase 1 locks one untreated
 already-installed LFM2.5 model, the standard `ToolCallingAdvisor`, all eight
 ordered canonical public-safe cases, two repetitions with seeds `42`/`43`,
-temperature `0.0`, `512` output tokens, `PT2M`, one attempt, no pull, a
-16-row sequential schedule, suite-specific evidence, and standalone offline
-verification/reanalysis. It includes repository-specific execution packets,
-verification commands, model-routing guidance, and stop conditions.
+temperature `0.0`, `512` output tokens per provider turn, one `PT2M` whole-row
+deadline, one logical attempt with ordered provider turns, no pull, a 16-row
+sequential schedule, the exact `tool-case-oracle` call/argument contract,
+suite-specific evidence, and standalone offline verification/reanalysis. The
+final row schema is intentionally deferred until the standard-advisor
+observability proof succeeds. The plan includes repository-specific execution
+packets, verification commands, model-routing guidance, and stop conditions.
 
 Any later Phase 2 prompt comparison must use conditions from the same clean Git
 commit and bind both runs to one recorded paired-execution schedule identity
 that proves the locked interleaved alternating order. Worktree or commit drift
 between conditions stops the protocol; both conditions must then restart from a
-new clean commit.
+new clean commit. The only planned live interface is one dedicated
+`toolCompatibilityPromptMatrix` invocation that preflights both fresh outputs
+and executes all 32 logical attempts in one interleaved process. It re-checks
+the original clean commit before every row and manifest finalization, aborting
+both runs as incomplete on drift; two independent whole-condition commands are
+not an acceptable substitute.
 
 This is planning and documentation only. No `toolCompatibility` source set or
 task exists yet, no model was inspected or called, and no provider-free Phase 1

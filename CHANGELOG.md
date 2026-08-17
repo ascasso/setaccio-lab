@@ -9,6 +9,21 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Corrected the proposed Phase 2 tool-compatibility comparator contract: paired
+  row `globalPairSequence` and `conditionExecutionPosition` values are expected
+  to differ across baseline and candidate, but are accepted only when each
+  matches the identical shared paired-execution schedule. This remains
+  documentation only; no compatibility code or live execution was added.
+- Strengthened the proposed small-model tool-calling compatibility protocol
+  after focused review. Phase 1 now records ordered provider turns and per-call
+  lifecycle evidence inside each single logical row attempt, applies the
+  `512`-token cap per turn and the `PT2M` deadline to the whole row, defers the
+  final row schema until observability is proved, and adds an exact versioned
+  semantic call/argument oracle so wrong values cannot pass through final-output
+  substrings alone. Phase 2 now has one dedicated paired runner contract that
+  produces both conditions in the locked interleaved order without changing the
+  Phase 1 CLI. This is documentation only; no source set, task, model inspection,
+  live call, credential access, Docker use, or push occurred.
 - Hardened the proposed small-model tool-calling compatibility plan for
   slice-by-slice Codex execution. Phase 1 now locks the exact 16-row untreated
   LFM2.5 protocol, canonical case/tool identities, empty-system-prompt digest,

@@ -18,6 +18,14 @@ every formal slice has a Codex dispatch packet below. The Phase 0 documentation
 gate is prepared, but the provider-free implementation gate remains open until
 the project owner explicitly authorizes it.
 
+Post-review protocol hardening completed on 2026-08-16: Phase 1 now distinguishes
+one logical row attempt from the ordered provider turns inside Spring AI's
+recursive tool loop, binds semantic call/argument expectations through one
+versioned suite oracle, and defers the final evidence-row shape until the
+standard-advisor observability probe succeeds. Phase 2 now has one explicit
+paired live-task contract for its locked interleaved A/B schedule. These
+documentation changes do not authorize implementation or execution.
+
 ## Purpose
 
 Evaluate whether small, fast, locally hosted language models can reliably perform constrained tool-calling tasks even when their general factual knowledge and open-ended conversational quality are limited.
@@ -120,19 +128,38 @@ Missing models, incomplete digests, and duplicate aliases resolving to identical
 
 No task may pull a model.
 
-## One attempt
+## One row attempt and ordered provider turns
 
-Every row receives exactly one model invocation attempt.
+Every scheduled row receives exactly one logical row attempt. One call through
+Spring AI's standard `ToolCallingAdvisor` is one row attempt even though the
+advisor may make several ordered provider calls while it executes tools and
+continues toward a final assistant response.
+
+A provider turn is one request/response interaction with the model inside that
+row attempt. Provider turns are expected protocol steps, not retries. Every
+observable turn must retain its sequence, assistant text, tool calls, finish
+metadata, usage, output-limit state, latency, and classified failure before the
+row is reduced to aggregate findings.
+
+The `512` maximum-output-token setting applies independently to every provider
+turn because it is a model-request option. The `PT2M` timeout is the wall-clock
+deadline for the complete row attempt, including every provider turn and
+callback. Provider I/O may use the same value as its request timeout, but it
+must not extend the row beyond the row deadline. After a timeout, the next row
+must not begin until the previous provider work is confirmed stopped; if that
+cannot be guaranteed, abort the matrix as an experimental-integrity failure
+rather than introduce hidden overlap.
 
 There are no:
 
 - framework retries;
 - SDK retries;
+- replay of a failed provider turn;
 - replacement rows;
 - selective reruns;
 - fallback models.
 
-A failed attempt remains part of the evidence.
+A failed logical row attempt remains part of the evidence.
 
 ## Sequential execution
 
@@ -174,12 +201,15 @@ The analysis must not collapse distinct outcomes into one score.
 
 At minimum, retain separately:
 
-- provider invocation success;
+- logical row-attempt completion;
+- ordered provider-turn completion and failure;
+- provider-turn invocation success;
 - valid tool-call production;
 - correct tool selection;
 - forbidden-tool avoidance;
 - raw argument JSON validity;
 - raw argument declared-schema validity (kept distinct from callback binding/execution outcomes, since Java DTO coercion can mask schema-invalid model output);
+- expected tool-call sequence and semantic argument-value agreement;
 - callback binding success;
 - callback execution;
 - callback result correctness;
@@ -233,9 +263,9 @@ uses it:
 | Exposed tools | Exact ordered names returned by `ToolBenchmarkCases.toolNames()`; no additions or omissions |
 | Repetitions and seeds | Two repetitions; repetition 1 uses `42`, repetition 2 uses `43` |
 | Temperature | `0.0` |
-| Maximum output tokens | `512` |
-| Timeout | `PT2M` per invocation |
-| Attempts | Exactly one; no framework retry, replacement, or fallback |
+| Maximum output tokens | `512` per provider turn; retain per-turn state and deterministic row aggregates |
+| Timeout | `PT2M` wall-clock deadline for the complete logical row attempt, including all provider turns and callbacks |
+| Attempts | Exactly one logical row attempt; advisor-driven provider turns are ordered protocol steps, not retries; no replay, replacement, or fallback |
 | Row schedule | Repetition outer loop, then the eight cases in the order above; exactly 16 rows |
 | Raw result | `tool-compatibility-results.json` |
 | Manifest suite ID | `ollama-tool-compatibility` |
@@ -246,6 +276,7 @@ uses it:
 | Base package | `com.setaccio.lab.toolcompat` |
 | Untreated system prompt | ID `tool-system-none`, version `1`, empty UTF-8 text, `present=false`, SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 | Schema validation | Parse the exact `ToolDefinition.inputSchema()` and validate the current fixture schemas with the locked bounded validator described below; do not add a schema library silently |
+| Semantic call oracle | ID `tool-case-oracle`, version `1`, exact UTF-8 bytes and SHA-256 locked below; exact ordered calls and JSON-typed argument values supplement rather than copy the canonical case expectations |
 
 The bounded raw-argument schema validator supports the subset exercised by the
 current deterministic fixture tools: a root object, `properties`, `required`,
@@ -260,6 +291,122 @@ or shape outside that subset, preflight must fail with a classified
 unsupported-schema integrity error. Do not approximate validation, treat Java
 DTO coercion as schema validity, or add a third-party validator without a
 separately reviewed dependency change.
+
+The Phase 1 semantic call oracle is the following pretty-printed UTF-8 JSON with
+two-space indentation and exactly one terminal LF. Its SHA-256 is
+`9ccd612ace107b37a6f5a5c30e0cc77e80236a54afcb728566750c18035c1af4`:
+
+```json
+{
+  "id": "tool-case-oracle",
+  "version": 1,
+  "cases": [
+    {
+      "caseId": "arithmetic-add",
+      "calls": [
+        {
+          "tool": "lab_add_numbers",
+          "arguments": {
+            "left": 17.25,
+            "right": 4.75
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "fixed-utc-time",
+      "calls": [
+        {
+          "tool": "lab_fixed_utc_now",
+          "arguments": {}
+        }
+      ]
+    },
+    {
+      "caseId": "fixed-zone-time",
+      "calls": [
+        {
+          "tool": "lab_fixed_time_for_zone",
+          "arguments": {
+            "zoneId": "America/Los_Angeles"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "catalog-lookup",
+      "calls": [
+        {
+          "tool": "lab_lookup_catalog_item",
+          "arguments": {
+            "itemId": "fixture-policy-faq"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "catalog-multi-step",
+      "calls": [
+        {
+          "tool": "lab_lookup_catalog_item",
+          "arguments": {
+            "itemId": "fixture-invoice-sample"
+          }
+        },
+        {
+          "tool": "lab_list_catalog_items",
+          "arguments": {
+            "category": "document"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "catalog-no-match",
+      "calls": [
+        {
+          "tool": "lab_lookup_catalog_item",
+          "arguments": {
+            "itemId": "fixture-does-not-exist"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "no-applicable-domain-tool",
+      "calls": []
+    },
+    {
+      "caseId": "deterministic-tool-failure",
+      "calls": [
+        {
+          "tool": "lab_fail_fixture",
+          "arguments": {}
+        }
+      ]
+    }
+  ]
+}
+```
+
+T1.1 must track those exact bytes at
+`setaccio-lab/src/toolCompatibility/resources/tool-compatibility/case-oracle-v1.json`
+rather than copying canonical prompt text, existing output assertions, or tool
+schemas. The oracle adds only the missing expected call sequence and arguments.
+Preflight must bind every oracle entry one-to-one and in order with the eight
+selected canonical case IDs and must reject any ID, byte, digest, tool-name, or
+count drift before output allocation.
+
+Semantic argument comparison operates on the raw parsed JSON before callback
+binding. Object-property order is irrelevant; JSON types must match; strings
+compare exactly; and JSON numbers compare by mathematical value so harmless
+lexical-scale differences such as `17.250` versus `17.25` do not create a
+mismatch. Missing, additional, or differently typed values fail the semantic
+argument assertion independently of declared-schema validity. Each row records
+per-call argument agreement and exact ordered-call-sequence agreement. The
+suite's `caseContractPassed` requires both the existing canonical assertions and
+this oracle; schema, oracle, binding, callback, and final-output outcomes remain
+separate evidence dimensions.
 
 The `no-applicable-domain-tool` prompt retains its existing phrase "Use tool
 discovery" because changing a canonical prompt would create a new experimental
@@ -295,14 +442,14 @@ Temperature:
 Seeds:
 42 and 43
 
-Maximum output tokens:
+Maximum output tokens per provider turn:
 512
 
-Timeout:
-PT2M
+Logical row-attempt deadline:
+PT2M, including all provider turns and callbacks
 
-Attempts:
-1
+Logical row attempts:
+1; ordered advisor-driven provider turns are retained separately
 
 Execution:
 strictly sequential
@@ -311,15 +458,22 @@ Pull strategy:
 never
 ```
 
-The `512`-token starting budget is deliberately larger than the fact-checking experiment’s `64` tokens because this model visibly emits substantial reasoning text. It should still be treated as an explicit bounded policy, not as a claim that 512 is optimal.
+The `512`-token starting budget is deliberately larger than the fact-checking
+experiment's `64` tokens because this model visibly emits substantial reasoning
+text. It is a per-provider-turn limit under the standard advisor and should
+still be treated as an explicit bounded policy, not as a claim that 512 is
+optimal. The `PT2M` deadline bounds the whole row rather than granting each turn
+another two minutes.
 
 ### Locked case-selection rule
 
 Resolve the eight IDs above directly from `ToolBenchmarkCases.defaults()` and
 fail before output allocation if an ID is missing, duplicated, reordered, or if
 its prompt or expectation bytes drift. Fingerprint the ordered canonical cases
-and ordered tool definitions in the saved protocol. Do not transcribe prompts,
-expectations, or tool schemas into a second hand-maintained catalog.
+and ordered tool definitions in the saved protocol, and bind them to the locked
+semantic call-oracle identity. Do not transcribe prompts, existing expectations,
+or tool schemas into a second hand-maintained catalog; the suite oracle contains
+only the missing ordered-call and argument-value contract above.
 
 ### Exit criteria
 
@@ -365,7 +519,7 @@ Do not alter the interactive `/api/lab/tools` endpoint.
 
 ### Core protocol types
 
-Required suite-specific protocol types:
+Required T1.1 suite-specific protocol types:
 
 ```java
 ToolCompatibilityProtocol
@@ -373,11 +527,15 @@ ToolCompatibilityCaseSelection
 ToolCompatibilityRunSettings
 ToolCompatibilityModelIdentity
 ToolCompatibilitySystemPromptIdentity
-ToolCompatibilityRow
-ToolCompatibilityResult
-ToolCompatibilityFailure
-ToolCompatibilityDiagnostic
+ToolCompatibilityCaseOracle
+ToolCompatibilityExpectedCall
 ```
+
+Do not define `ToolCompatibilityRow`, `ToolCompatibilityResult`,
+`ToolCompatibilityFailure`, or `ToolCompatibilityDiagnostic` in T1.1. Their
+field set depends on the T1.3 standard-advisor observability proof and is locked
+only in T1.4. This prevents the protocol foundation from prematurely collapsing
+multiple provider turns or per-call outcomes into row-level fields.
 
 Avoid creating generic abstractions unless at least two real consumers already demonstrate identical semantics.
 
@@ -424,31 +582,49 @@ Reuse the existing Ollama construction rules:
 - full installed digest resolution;
 - temperature `0.0`;
 - seed per repetition;
-- explicit maximum output tokens;
-- explicit timeout;
+- explicit `512` maximum output tokens on every provider turn;
+- explicit `PT2M` wall-clock deadline around the complete row attempt;
 - retries disabled;
-- exactly one attempt.
+- exactly one logical row attempt, with no replay of a failed provider turn.
 
 Use the existing Spring AI standard tool-calling path without Tool Search.
 
-The runner must retain:
+Before fixing an evidence schema, prove with a fake `ChatModel` and deterministic
+callbacks that an advisor after the standard `ToolCallingAdvisor` observes each
+recursive provider turn in order, including an initial tool request, a second
+tool request after one callback, and the final assistant completion. The proof
+must also cover a callback-binding failure, callback-invocation failure,
+provider failure on a later turn, and the row-level timeout path.
 
-- raw assistant response;
-- tool-call requests;
-- tool-call arguments;
-- callback outputs;
-- final assistant response;
-- response metadata;
-- token usage when available;
-- finish reason when available;
-- latency;
-- classified failure.
+For every observable provider turn, retain:
+
+- one-based turn sequence within the row;
+- assistant text, including blank or `null` state;
+- the ordered tool-call IDs emitted on that turn;
+- response and finish metadata when available;
+- prompt, completion, and total usage when available;
+- whether that turn reached its `512`-token output limit;
+- turn latency;
+- classified provider-turn failure.
+
+For every tool call, retain and correlate by call ID:
+
+- global call sequence and originating provider-turn sequence;
+- type, tool name, and exact raw argument JSON;
+- raw JSON validity and declared-schema validity;
+- expected call-sequence position and semantic argument-value agreement;
+- callback binding, execution, success, and response or failure evidence.
+
+The row deadline must preserve all observations completed before `PT2M`. The
+runner must prove that timed-out work cannot continue into the next sequential
+row. If the standard advisor cannot expose a required stage or a timed-out loop
+cannot be stopped safely, record the exact limitation and stop for plan review;
+do not invent values, flatten turns, or introduce a custom lower-level tool loop.
 
 ## Slice T1.4 — Canonical result row
 
-Each row should retain enough evidence to distinguish tool routing from final-answer generation.
-
-Suggested shape:
+Only after T1.3 proves the observable lifecycle, define the suite-specific
+evidence types. The minimum row shape is:
 
 ```java
 record ToolCompatibilityRow(
@@ -467,37 +643,29 @@ record ToolCompatibilityRow(
     String systemPromptSha256,
 
     double temperature,
-    int maxOutputTokens,
-    Duration timeout,
+    int maxOutputTokensPerProviderTurn,
+    Duration rowAttemptDeadline,
     int attemptCount,
 
-    boolean providerInvocationSucceeded,
-    boolean toolCallProduced,
-    boolean toolCallValid,
-    boolean requiredToolSelected,
-    boolean forbiddenToolSelected,
-    String rawArgumentJson,
-    boolean rawArgumentJsonValid,
-    boolean rawArgumentSchemaValid,
-    boolean callbackBindingSucceeded,
-    boolean callbackExecuted,
-    boolean callbackSucceeded,
+    List<ToolCompatibilityProviderTurnEvidence> providerTurns,
+    List<ToolCompatibilityToolCallEvidence> toolCalls,
+    List<ToolCompatibilityToolResponseEvidence> toolResponses,
+    List<NamedAssertionResult> assertions,
+
+    boolean rowAttemptCompleted,
+    boolean exactCallSequenceMatched,
+    boolean allExpectedArgumentsMatched,
     boolean finalResponsePresent,
     boolean caseContractPassed,
 
-    List<ToolCallEvidence> toolCalls,
-    List<ToolResponseEvidence> toolResponses,
-    List<NamedAssertionResult> assertions,
-
-    String rawAssistantOutput,
     String finalAssistantOutput,
 
     boolean thinkTagDetected,
     boolean reasoningMarkerDetected,
-    boolean outputLimitReached,
+    boolean anyProviderTurnReachedOutputLimit,
 
-    TokenUsageEvidence usage,
-    Duration latency,
+    TokenUsageEvidence aggregateUsage,
+    Duration rowLatency,
 
     String failureCategory,
     String diagnosticCategory,
@@ -505,9 +673,22 @@ record ToolCompatibilityRow(
 ) {}
 ```
 
-Reuse existing tool trace and assertion types if their semantics already match.
+The provider-turn and tool-call records are the authoritative evidence. They
+must distinguish `not reached`, `unobservable`, `succeeded`, and `failed` where
+a boolean would conflate those states. Row booleans and aggregate usage are
+deterministic projections over those records: `exactCallSequenceMatched`
+requires exactly the oracle's calls in order with no extra call;
+`allExpectedArgumentsMatched` requires every expected call's raw parsed JSON to
+match the oracle; `anyProviderTurnReachedOutputLimit` is true when any turn is
+classified as limit-ended; and `finalAssistantOutput` is the last no-tool-call
+assistant completion rather than a second copy of arbitrary raw output.
 
-Do not duplicate raw callback data into multiple fields unless needed for verification.
+Reuse existing tool trace and assertion types only if their semantics already
+match this per-turn and per-call contract. Do not retain singular
+`rawArgumentJson`, raw-schema, callback, finish-reason, or output-limit fields at
+row level, because multi-step rows can contain different outcomes across calls
+and turns. Do not duplicate raw callback or assistant data outside the
+authoritative ordered evidence unless required for integrity verification.
 
 ## Slice T1.5 — Reasoning-leakage diagnostics
 
@@ -541,12 +722,13 @@ The summary should include counts for:
 ### Invocation
 
 - planned rows;
-- completed attempts;
-- provider successes;
-- provider failures;
-- timeouts;
+- completed logical row attempts;
+- timed-out logical row attempts;
+- observed provider turns;
+- successful provider turns;
+- failed provider turns, including the turn sequence;
 - unavailable models;
-- empty provider responses.
+- empty provider turns that contained no tool call.
 
 ### Tool selection
 
@@ -554,14 +736,22 @@ The summary should include counts for:
 - required tool missing;
 - forbidden tool selected;
 - unnecessary tool use;
-- valid abstentions.
+- valid abstentions;
+- exact expected call sequence matched;
+- missing, additional, reordered, and duplicate calls.
+
+### Tool arguments
+
+- raw argument JSON validity per call;
+- raw argument declared-schema validity per call;
+- semantic expected-argument agreement per call;
+- rows where all expected arguments matched;
+- callback-coerced calls whose raw schema or semantic oracle did not match.
 
 ### Tool execution
 
 - valid tool call;
 - malformed tool call;
-- raw argument JSON validity;
-- raw argument declared-schema validity;
 - callback binding success (including cases where the framework coerces a schema-invalid raw argument into a bound value);
 - callback success;
 - callback failure;
@@ -573,7 +763,8 @@ The summary should include counts for:
 - final response empty;
 - final contract pass;
 - tool succeeded but final answer failed;
-- output limit reached.
+- provider turns that reached the per-turn output limit;
+- rows where any provider turn reached the output limit.
 
 ### Reasoning-style output
 
@@ -584,10 +775,9 @@ The summary should include counts for:
 
 ### Usage and latency
 
-- rows with complete usage;
-- prompt tokens;
-- completion tokens;
-- total tokens;
+- provider turns with complete, partial, or absent usage;
+- per-turn prompt, completion, and total tokens;
+- deterministic per-row token aggregates without discarding per-turn values;
 - successful-row median latency;
 - observed successful-row latency range.
 
@@ -629,7 +819,9 @@ Temperature and seeds are protocol constants in `ToolCompatibilityProtocol` and
 must be recorded in evidence; they are not live-task CLI options. Maximum
 output tokens and timeout remain mandatory CLI options so the effective values
 are explicit at invocation while still being checked against the locked Phase 1
-values.
+values. `--max-tokens=512` configures every provider turn;
+`--timeout=PT2M` configures the complete logical row-attempt deadline and may
+also bound provider I/O without becoming a fresh allowance for every turn.
 
 ## Slice T1.8 — Provider-free tests
 
@@ -649,6 +841,7 @@ Tests must cover:
 - reused output directory;
 - output path outside required root;
 - symbolic-link output path;
+- semantic call-oracle byte/digest, case-ID, tool-name, and count drift;
 - invalid token bounds;
 - invalid timeout bounds.
 
@@ -659,21 +852,27 @@ Using fake model and deterministic tools:
 - exact row count;
 - exact row order;
 - seeds 42 and 43;
-- one attempt per row;
+- one logical attempt per row with multiple ordered provider turns;
+- initial, continuation-tool, and final-completion turn ordering;
+- per-turn finish, usage, output-limit, latency, and failure retention;
+- per-call correlation to its originating turn and callback response;
 - no replacement after failure;
 - successful single-step tool;
 - successful multi-step tool;
 - abstention;
 - no-match;
-- invalid arguments;
+- exact call-sequence agreement and missing/additional/reordered/duplicate calls;
+- exact JSON-typed semantic argument agreement, including numeric scale equivalence;
+- schema-valid but semantically wrong arguments;
+- schema-invalid framework-coerced arguments;
 - callback failure;
 - tool success followed by empty final response;
-- output-limit completion;
+- one intermediate turn reaching its output limit;
 - visible reasoning marker;
-- usage present;
-- usage absent;
-- timeout;
-- provider failure.
+- per-turn complete, partial, and absent usage plus deterministic row aggregation;
+- row deadline reached after retained earlier turns;
+- proof that timed-out work cannot overlap the next row;
+- provider failure on an initial and a later turn.
 
 ### Evidence
 
@@ -689,6 +888,9 @@ Using fake model and deterministic tools:
 - path traversal rejection;
 - symlink rejection;
 - row-order drift rejection;
+- provider-turn order/linkage drift rejection;
+- tool-call turn/response linkage drift rejection;
+- semantic call-oracle identity and assertion drift rejection;
 - attempt-count drift rejection;
 - summary drift rejection;
 - deterministic reanalysis.
@@ -715,7 +917,7 @@ Allowed examples:
 - “The model produced valid tool calls in N of M rows.”
 - “Tool execution succeeded, but final responses were empty in N rows.”
 - “Visible `<think>` output appeared before the tool call in N rows.”
-- “The model reached the explicit output limit in N rows.”
+- “One or more provider turns reached the explicit output limit in N rows.”
 
 Not allowed:
 
@@ -730,7 +932,10 @@ Not allowed:
 - One clean or explicitly diagnostic baseline run completes.
 - Raw evidence verifies offline.
 - Reanalysis reproduces `SUMMARY.md`.
-- Failure locations are distinguishable.
+- Ordered provider turns and per-call lifecycle evidence make failure locations
+  distinguishable.
+- Exact call sequence and semantic argument agreement are measured against the
+  locked oracle rather than inferred from final-output substrings.
 - No prompt intervention has been introduced.
 - A bounded interpretation is committed.
 - Phase 2 is either authorized or explicitly deferred based on the evidence.
@@ -801,7 +1006,7 @@ Do not use an Ollama-derived model tag to encode the prompt.
 
 ## Slice T2.2 — Paired execution protocol
 
-Recommended order:
+Locked order:
 
 ```text
 For each case:
@@ -840,6 +1045,41 @@ repetition, sequence position, and condition, so an offline comparison can
 prove that it is comparing the paired execution rather than independently run
 conditions.
 
+Add one dedicated paired live task without changing the locked Phase 1
+`toolCompatibilityMatrix` CLI:
+
+```bash
+./gradlew :setaccio-lab:toolCompatibilityPromptMatrix \
+  --ollama-base-url=http://localhost:11434 \
+  --model=hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0 \
+  --max-tokens=512 \
+  --timeout=PT2M \
+  --baseline-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline \
+  --candidate-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
+```
+
+The task must preflight the complete protocol, clean Git state, installed model
+identity, prompt catalog, semantic call oracle, schemas, shared schedule, and
+both fresh direct-child output paths before allocating either directory or
+calling the provider. It then executes all 32 logical row attempts through one
+process in the exact interleaved order: 16 untreated and 16 prompted. Each
+condition writes its own exact three-artifact run and every row retains the
+`globalPairSequence` and `conditionExecutionPosition` (`first` or `second`) so
+the shared schedule can be reconstructed offline. A compatibility failure
+remains a row; an integrity failure aborts the pair. Failure after allocation
+must not cause either partial directory to be reused as a later run.
+
+The task must re-check the original commit and clean-worktree state immediately
+before every logical row attempt and again before finalizing either manifest.
+Any drift aborts the pair as an integrity failure and leaves both allocated
+directories incomplete and ineligible for later verification or reuse.
+
+`--max-tokens=512` remains per provider turn and `--timeout=PT2M` remains per
+complete logical row attempt. The prompt identities and order are locked
+protocol constants rather than CLI choices. One separately approved exact
+command authorizes both interleaved conditions; it does not authorize an
+independent condition run or a fallback to two whole-condition commands.
+
 ## Slice T2.3 — Comparison gate
 
 Add:
@@ -864,6 +1104,8 @@ The comparison must reject mismatches in:
 - attempts;
 - advisor mode;
 - tool catalog identity;
+- semantic call-oracle identity;
+- provider-turn, per-turn token-limit, and row-deadline policy;
 - framework versions;
 - execution engine.
 
@@ -873,11 +1115,24 @@ The paired runs must stop before allocation if either worktree is dirty; if
 the commit or worktree changes between conditions, restart both conditions
 from a new clean commit.
 
+For each baseline/candidate pair matched by case and repetition, the comparator
+must resolve each row's condition to its corresponding shared-schedule entry and
+verify `globalPairSequence` and `conditionExecutionPosition`. Those fields are
+expected to differ between the baseline and candidate rows; they are not
+direct-equality fields. Missing, swapped, equal, or otherwise
+schedule-inconsistent positions reject the pair.
+
 Permit differences only in:
 
 - system-prompt identity;
+- run identity;
 - generated timestamp;
-- output-directory identity.
+- output-directory identity;
+- `globalPairSequence` and `conditionExecutionPosition`, but only when each
+  value exactly matches its condition's entry in the shared paired-execution
+  schedule;
+- observed provider-turn, tool-call, callback, final-output, usage, latency, and
+  classified diagnostic outcomes.
 
 ## Slice T2.4 — Deterministic comparison report
 
@@ -890,11 +1145,14 @@ Report paired changes by case and repetition:
 - required tool newly selected;
 - required tool newly missed;
 - forbidden tool newly selected;
+- exact call sequence newly matched or newly mismatched;
+- semantic argument agreement newly matched or newly mismatched per call;
 - final response newly present;
 - final response newly empty;
 - visible reasoning marker removed;
 - visible reasoning marker introduced;
-- output-limit state changed;
+- provider-turn count or later-turn failure changed;
+- per-turn or row-aggregate output-limit state changed;
 - completion-token delta;
 - latency delta.
 
@@ -931,6 +1189,8 @@ Bind the human decision to:
 ## Phase 2 exit criteria
 
 - Paired runs verify offline.
+- One `toolCompatibilityPromptMatrix` invocation produced both conditions in
+  the locked interleaved order.
 - Comparison preconditions pass.
 - Deterministic comparison is reproducible.
 - Human decision is recorded separately from deterministic analysis.
@@ -1029,14 +1289,14 @@ Seeds:
 Temperature:
 0.0
 
-Maximum output tokens:
+Maximum output tokens per provider turn:
 512
 
-Timeout:
+Logical row-attempt deadline:
 PT2M
 
-Attempts:
-1
+Logical row attempts:
+1, with ordered provider turns retained
 
 Advisor:
 standard ToolCallingAdvisor
@@ -1055,7 +1315,7 @@ Produce per-model sections without a total rank.
 
 ### Compatibility
 
-- provider invocation yield;
+- logical row-attempt and provider-turn yield;
 - valid tool-call yield;
 - callback execution yield;
 - final-answer yield.
@@ -1071,7 +1331,7 @@ Produce per-model sections without a total rank.
 ### Arguments
 
 - schema validity;
-- expected argument values;
+- locked-oracle call-sequence and expected argument values;
 - omitted required values;
 - invented values.
 
@@ -1553,10 +1813,15 @@ Add a dedicated closeout section stating:
 ```text
 toolCompatibilityTest
 toolCompatibilityMatrix
+toolCompatibilityPromptMatrix
 toolCompatibilityVerify
 toolCompatibilityReanalyze
 toolCompatibilityCompare
 ```
+
+`toolCompatibilityPromptMatrix` is Phase 2's only paired live runner. It writes
+the two condition runs from one interleaved process and must not alter or
+overload the locked Phase 1 `toolCompatibilityMatrix` interface.
 
 ## Phase 3
 
@@ -1621,12 +1886,17 @@ retrievalEvaluationMatrix
 - Untreated LFM model runs through existing standard tool cases.
 - Full digest is recorded.
 - No prompt customization occurs.
-- Tool and final-answer failures are distinguishable.
+- Provider-turn, tool-call, argument, callback, and final-answer failures are
+  distinguishable.
+- Exact call sequence and semantic argument values are checked against the
+  locked suite oracle.
 - Evidence verifies offline.
 
 ## Phase 2
 
 - Exactly one explicit prompt intervention is tested.
+- Both conditions execute through one dedicated paired task in the locked
+  interleaved order.
 - Model digest and all non-prompt settings match.
 - Comparison is deterministic.
 - Human adoption decision is separate.
@@ -1737,6 +2007,10 @@ The first authorized implementation scope should be:
 
 > Add a provider-free, offline-verifiable standard tool-calling compatibility matrix for one already-installed LFM2.5 Ollama model, reusing the existing canonical public-safe tool cases without changing the interactive endpoint, tool catalog, Tool Search implementation, or default Gradle lifecycle.
 
+That scope includes the locked suite-only semantic call oracle and the
+provider-turn observability proof. It does not permit a row-only approximation
+that infers argument correctness from final-output substrings.
+
 The first live execution should occur only after:
 
 - the protocol is locked;
@@ -1837,7 +2111,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   `docs/DEFERRED-WORK.md`, `docs/TEST-PLAN.md`, `docs/ENVIRONMENT.md`, and one
   dated log.
 - **Deliverable:** align those documents with the locked 16-row Phase 1
-  protocol, source sets, tasks, no-pull boundary, and separate live-run gate.
+  protocol, row-attempt/provider-turn semantics, semantic call oracle, source
+  sets, tasks, no-pull boundary, dedicated Phase 2 paired runner, and separate
+  live-run gates.
 - **Checks:** tracked Markdown links, stale plan filename search,
   `git diff --check`, and `git status --short`.
 - **Stop:** leave the implementation gate open unless the project owner
@@ -1856,7 +2132,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   `ToolBenchmarkCases`, and shared classes under `com.setaccio.lab.evidence`.
 - **Deliverable:** register the two locked source sets and implement immutable,
   suite-specific protocol/value types that enforce the exact cases, tools,
-  settings, schedule, identities, and 16-row count. Add no runner or live task.
+  settings, schedule, identities, exact semantic call-oracle bytes/digest, and
+  16-row count. Do not define final row/result/failure/diagnostic records before
+  T1.3, and add no runner or live task.
 - **Checks:** `./gradlew :setaccio-lab:toolCompatibilityTest
   :setaccio-lab:test --no-daemon` and `git diff --check`.
 - **Stop:** do not change `ToolBenchmarkCases`, the interactive endpoint, or
@@ -1883,18 +2161,21 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Read-only precedents:** `OllamaChatModelFactory`, `ChatMatrixPreflight`,
   `ToolBenchmarkService`, `RecordingToolCallAdvisor`, and Appendix A1–A8.
 - **Deliverable:** first prove with a fake `ChatModel` and deterministic
-  callbacks which standard-advisor lifecycle stages are observable. Then
-  implement the suite-specific one-attempt invocation boundary, raw tool-call
-  capture, bounded declared-schema validation that accepts and ignores only
-  `description`, `title`, `$schema`, and `default` metadata, callback
-  observations, response metadata, usage, finish metadata, timeout, latency,
-  and classified outcomes.
-- **Checks:** focused observability, schema-coercion, timeout, no-retry, and
+  callbacks which ordered standard-advisor provider turns and per-call stages
+  are observable. Then implement the suite-specific one-row-attempt boundary,
+  per-turn assistant/finish/usage/output-limit/latency capture, per-call raw
+  arguments and semantic-oracle comparison, bounded declared-schema validation
+  that accepts and ignores only `description`, `title`, `$schema`, and `default`
+  metadata, callback observations, the `PT2M` row deadline, and classified
+  outcomes.
+- **Checks:** focused multi-turn ordering/linkage, semantic-argument,
+  schema-coercion, later-turn failure, row-timeout/no-overlap, no-retry, and
   lifecycle tests through `toolCompatibilityTest`, then `:setaccio-lab:test`.
-- **Stop:** if the standard advisor cannot expose a required stage, record the
-  exact missing signal and stop for plan review. Do not create a lower-level
-  custom execution loop, add a schema dependency, or widen
-  `RecordingToolCallAdvisor` merely to bypass the gate.
+- **Stop:** if the standard advisor cannot expose a required stage or timed-out
+  work cannot be stopped before the next row, record the exact missing signal
+  and stop for plan review. Do not create a lower-level custom execution loop,
+  add a schema dependency, or widen `RecordingToolCallAdvisor` merely to bypass
+  the gate.
 
 ### T1.4 — Canonical result row
 
@@ -1902,14 +2183,17 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   the complete observable field set.
 - **Dependency:** T1.3 committed with no unresolved observability blocker.
 - **Allowed paths:** tool-compatibility source sets and dated log.
-- **Deliverable:** implement the canonical row/result/failure/diagnostic shape,
-  preserving every observed lifecycle dimension separately. Constructor and
-  analyzer tests must reject contradictory states rather than silently repair
-  them.
+- **Deliverable:** implement provider-turn, per-call, response,
+  row/result/failure/diagnostic records from the proven T1.3 field set. Preserve
+  ordered authoritative evidence and derive row aggregates deterministically.
+  Constructor and analyzer tests must reject contradictory state, broken
+  turn/call/response linkage, or singular multi-call shortcuts rather than
+  silently repair them.
 - **Checks:** `toolCompatibilityTest`, JSON fixture round trips, unknown-field
   rejection where the suite uses strict reads, and `git diff --check`.
-- **Stop:** do not duplicate callback output or collapse raw schema validity,
-  binding, execution, callback success, and final contract success.
+- **Stop:** do not duplicate callback or assistant output or collapse provider
+  turns, raw schema validity, semantic argument agreement, binding, execution,
+  callback success, and final contract success.
 
 ### T1.5 — Visible reasoning diagnostics
 
@@ -1929,8 +2213,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Dependency:** T1.4 and T1.5 committed.
 - **Allowed paths:** tool-compatibility source sets and dated log.
 - **Deliverable:** exhaustive integrity validation and multidimensional counts
-  for invocation, selection, raw arguments, callback lifecycle, completion,
-  visible reasoning, usage, and latency. Every failed contract has one primary
+  for logical attempts, provider turns, selection, exact call sequences, raw
+  and semantic arguments, callback lifecycle, completion, visible reasoning,
+  per-turn/aggregate usage, and latency. Every failed contract has one primary
   diagnostic category; integrity failures remain separate.
 - **Checks:** table-driven tests for every category and precedence edge,
   two-repetition median/range tests, no percentile output, and
@@ -1967,8 +2252,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Allowed paths:** tool-compatibility tests, test resources, and dated log;
   production fixes only when a failing required test exposes a real defect.
 - **Deliverable:** trace every test requirement in T1.8 to a test method and
-  close all gaps. Add a short requirement-to-test map in the test source or
-  package documentation.
+  close all gaps, including multi-turn/linkage, semantic-oracle, and timeout
+  non-overlap coverage. Add a short requirement-to-test map in the test source
+  or package documentation.
 - **Checks:** `./gradlew :setaccio-lab:test
   :setaccio-lab:toolCompatibilityTest :setaccio-core:build
   :setaccio-lab:build :setaccio-testcontainers:build --rerun-tasks --no-daemon`
@@ -1982,8 +2268,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   report; Sol is optional for review. Luna is not the live-run operator.
 - **Dependency:** T1.8 and the full provider-free verification pass from one
   clean commit; separate explicit user approval of the exact command and model.
-- **Deliverable:** one immutable 16-row run, offline verify/reanalyze, then a
-  public-safe aggregate closeout with no raw-output publication.
+- **Deliverable:** one immutable 16-logical-row run with every observed provider
+  turn and call retained, offline verify/reanalyze, then a public-safe aggregate
+  closeout with no raw-output publication.
 - **Stop:** any missing model, digest drift, dirty worktree, output collision,
   required pull, protocol drift, or absent explicit authorization stops before
   allocation or invocation. A model-behavior failure remains a row and does not
@@ -2007,14 +2294,23 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 
 - **Routing:** Terra. Not Luna-ready.
 - **Dependency:** T2.1 committed.
-- **Allowed paths:** tool-compatibility source sets/tests and dated log.
+- **Allowed paths:** tool-compatibility source sets/tests,
+  `setaccio-lab/build.gradle`, one new suite-specific paired task wrapper under
+  `buildSrc/src/main/java/com/setaccio/gradle/`, and dated log.
 - **Deliverable:** lock the per-case alternating A/B schedule exactly as stated
-  in T2.2, retain every attempt, record one shared paired-execution schedule
-  identity in both conditions, and prove only system-prompt identity changes.
-- **Checks:** exact order/count, settings parity, one-attempt, failure-retention,
-  and no-provider tests through `toolCompatibilityTest`.
-- **Stop:** do not fall back to whole-condition ordering or silently change the
-  Phase 1 row schema.
+  in T2.2; add `toolCompatibilityPromptMatrix`; preflight both outputs before
+  allocation; retain all 32 logical attempts; record one shared
+  paired-execution schedule identity in both 16-row condition runs; and prove
+  only system-prompt identity changes among protocol fields. Re-check the
+  original clean commit before every row and before finalizing either manifest.
+- **Checks:** exact global and per-condition order/count, dual-output preflight,
+  settings parity, one-attempt, failure-retention, simulated repository drift
+  before a row and before manifest finalization, incomplete-run rejection, task
+  help/configuration cache, task isolation, and no-provider tests through
+  `toolCompatibilityTest`.
+- **Stop:** do not run a provider, fall back to whole-condition ordering, add
+  prompt selection as a CLI variable, continue after repository drift, or
+  silently change the Phase 1 matrix CLI or evidence schema.
 
 ### T2.3 — Comparison gate
 
@@ -2025,10 +2321,14 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   wrapper, tests, and dated log.
 - **Deliverable:** `toolCompatibilityCompare` with strict offline verification
   first, exact parity rules including one clean shared Git commit and the
-  shared paired-execution schedule identity, prompt-only experimental
-  difference, and no semantic judgment.
+  shared paired-execution schedule and semantic-oracle identities, prompt-only
+  experimental protocol difference, schedule-derived comparison of the distinct
+  per-condition execution positions, explicitly permitted observed outcome
+  differences, and no semantic judgment.
 - **Checks:** one valid pair plus independent mismatch/tamper fixtures for every
-  rejected dimension, task help/configuration cache, and
+  rejected dimension, including the expected baseline/candidate position
+  differences and swapped or schedule-inconsistent positions, task
+  help/configuration cache, and
   `toolCompatibilityTest`.
 - **Stop:** never compare unverified evidence or weaken parity because two runs
   happen to look similar.
@@ -2044,11 +2344,27 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   pair rejection, and `toolCompatibilityTest`.
 - **Stop:** no aggregate score or human adoption decision.
 
+### Phase 2 paired live execution and deterministic closeout
+
+- **Routing:** Terra may operate the approved command and deterministic offline
+  tasks; Sol is optional for review. Luna is not the live-run operator.
+- **Dependency:** T2.1–T2.4 committed, the full provider-free verification pass
+  from one clean commit, and separate explicit user approval of the exact
+  `toolCompatibilityPromptMatrix` command, model, and both fresh output paths.
+- **Deliverable:** one interleaved 32-attempt execution producing two immutable
+  16-row condition runs, offline verification of each, strict comparison, and a
+  deterministic comparison report. Human interpretation remains T2.5.
+- **Stop:** any missing model, digest or prompt/oracle drift, dirty worktree,
+  either output collision, required pull, schedule drift, or absent exact
+  authorization stops before allocation or invocation. Never substitute two
+  independent whole-condition commands.
+
 ### T2.5 — Human interpretation
 
 - **Routing:** Luna or Terra may prepare a blank worksheet; no LLM may complete
   the human decision.
-- **Dependency:** separately authorized paired live runs verify and compare.
+- **Dependency:** the separately authorized paired live task produced both runs,
+  and both runs verify and compare.
 - **Allowed paths:** worksheet preparer/tests, private ignored worksheet output,
   and public-safe closeout docs only after actual human review.
 - **Deliverable:** bind a non-overwriting blank worksheet to both run IDs,
@@ -2329,7 +2645,7 @@ A blank or missing assistant text field shall not by itself classify the row as 
 The following conditions shall remain separate:
 
 ```text
-provider invocation succeeded
+provider-turn invocation succeeded
 
 tool call produced
 
@@ -2347,7 +2663,7 @@ final contract passed
 A row may therefore legitimately satisfy:
 
 ```text
-provider invocation succeeded = true
+provider-turn invocation succeeded = true
 
 tool call produced = true
 
@@ -2394,12 +2710,16 @@ No finish-reason value shall override the observed tool-call collection.
 
 # A3. Assistant lifecycle boundaries
 
-The recorder shall preserve distinct lifecycle stages.
+The recorder shall preserve one logical row attempt as an ordered sequence of
+provider turns and tool-call lifecycle stages. A recursive provider turn is not
+a retry merely because it occurs inside the same `ToolCallingAdvisor` call.
 
 At minimum, evidence shall distinguish:
 
 ```text
-provider invocation
+logical row attempt
+
+provider turn 1
 
 assistant tool request
 
@@ -2407,10 +2727,16 @@ tool execution
 
 tool callback result
 
+provider turn 2 or later continuation
+
 final assistant completion
 ```
 
-The implementation shall avoid collapsing these stages into one success flag.
+The implementation shall avoid collapsing these stages into one success flag or
+one unsequenced bag of calls. Every tool call must link to its originating turn
+and callback response. Finish metadata, usage, output-limit state, and latency
+belong first to the provider turn; row-level values are deterministic
+aggregates.
 
 Examples:
 
@@ -2418,7 +2744,7 @@ A callback may succeed while the final assistant response is empty.
 
 A valid tool request may be followed by malformed final output.
 
-A provider invocation may succeed without producing any tool request.
+A provider turn may succeed without producing any tool request.
 
 These represent different compatibility findings.
 
@@ -2458,6 +2784,12 @@ The raw tool-call argument JSON, exactly as returned by the model before any cal
 
 Where the selected tool exposes a JSON Schema, the raw argument JSON shall be validated against that declared schema independently of, and prior to, callback binding.
 
+The same parsed raw JSON shall be compared independently with the locked
+semantic call oracle. Declared-schema validity answers whether the emitted JSON
+satisfies the tool contract's shape and types; oracle agreement answers whether
+the model selected the expected ordered call and supplied the expected values
+for this fixture. Neither result implies the other.
+
 The bounded preflight validator shall accept and ignore only the
 non-validation metadata keywords `description`, `title`, `$schema`, and
 `default`. It shall reject any other unsupported constraint or shape, including
@@ -2472,6 +2804,10 @@ rawArgumentJsonValid
 
 rawArgumentSchemaValid
 
+expectedCallAtSequence
+
+expectedArgumentsMatched
+
 callbackBindingSucceeded
 
 callbackExecuted
@@ -2484,6 +2820,7 @@ The following outcome is an explicitly allowed and expected compatibility findin
 ```text
 rawArgumentJsonValid = true
 rawArgumentSchemaValid = false
+expectedArgumentsMatched = false
 callbackBindingSucceeded = true
 callbackSucceeded = true
 ```
@@ -2509,6 +2846,10 @@ MALFORMED_JSON
 
 RAW_ARGUMENT_SCHEMA_MISMATCH
 
+EXPECTED_CALL_SEQUENCE_MISMATCH
+
+EXPECTED_ARGUMENT_MISMATCH
+
 SCHEMA_TYPE_MISMATCH
 
 MISSING_REQUIRED_ARGUMENT
@@ -2521,6 +2862,11 @@ CALLBACK_INVOCATION_FAILURE
 ```
 
 `RAW_ARGUMENT_SCHEMA_MISMATCH` records that the raw model-emitted argument JSON failed declared-schema validation, independent of whatever the callback binding layer subsequently did with it. It shall not be assigned automatically whenever a callback fails, and it shall not be withheld automatically whenever a callback succeeds: the two dimensions are evaluated and recorded separately, as described in A4.
+
+`EXPECTED_CALL_SEQUENCE_MISMATCH` and `EXPECTED_ARGUMENT_MISMATCH` are
+suite-oracle diagnostics. They do not replace malformed-JSON, schema, binding,
+execution, or callback findings and must remain attributable to the exact call
+and provider turn.
 
 The implementation should classify observable failure causes rather than relying on specific exception class names.
 
@@ -2579,8 +2925,15 @@ tool execution
 
 tool callback
 
+later assistant tool request after a callback
+
 final assistant response
 ```
+
+The proof must preserve each provider response separately rather than relying
+on accumulated tool-call lists or summed usage alone. It must also demonstrate
+that the `PT2M` deadline applies to the complete row and that a timed-out
+recursive loop cannot overlap the next sequential row.
 
 If the standard advisor provides adequate observability, no custom execution loop shall be introduced.
 
@@ -2601,7 +2954,9 @@ Examples include:
 - callback execution failures,
 - unsupported model tool behavior,
 - provider parsing failures,
-- empty assistant responses.
+- empty assistant responses,
+- a failed later provider turn,
+- a row-level timeout whose work is confirmed stopped.
 
 These outcomes shall be retained as row evidence.
 
@@ -2615,6 +2970,9 @@ Examples include:
 - evidence corruption,
 - manifest integrity failure,
 - protocol drift,
+- broken provider-turn/tool-call/callback linkage,
+- semantic call-oracle drift,
+- timed-out provider work that cannot be confirmed stopped,
 - programmer invariant violations.
 
 The implementation shall distinguish between:
