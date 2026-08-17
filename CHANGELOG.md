@@ -9,6 +9,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Refreshed the proposed Phase 3 small-model cohort from the project owner's
+  reported installed-model list. `qwen3.8:27b-mlx` is now the provisional
+  higher-capability reference candidate, the absent `dolphin-phi:latest` peer
+  was removed without replacement or pull, mutable `:latest` reference aliases
+  are disallowed when a versioned tag is available, and cohort evidence must
+  record artifact/runtime format, thinking-mode metadata where exposed, and the
+  Ollama version. Comparisons of MLX and non-MLX latency and token use are
+  explicitly deployment-specific rather than weight-only observations. The
+  untreated LFM2.5 model remains locked for Phase 1; this documentation change
+  adds no model inspection, implementation, or live execution.
 - Corrected the proposed Phase 2 tool-compatibility comparator contract: paired
   row `globalPairSequence` and `conditionExecutionPosition` values are expected
   to differ across baseline and candidate, but are accepted only when each
