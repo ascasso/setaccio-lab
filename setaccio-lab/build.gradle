@@ -96,6 +96,16 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.chatMatrix.output
         runtimeClasspath += output + compileClasspath
     }
+    toolCompatibility {
+        java.srcDir 'src/toolCompatibility/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    toolCompatibilityTest {
+        java.srcDir 'src/toolCompatibilityTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.toolCompatibility.output
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
 configurations {
@@ -115,6 +125,10 @@ configurations {
     chatMatrixRuntimeOnly.extendsFrom runtimeOnly
     chatMatrixTestImplementation.extendsFrom testImplementation, chatMatrixImplementation
     chatMatrixTestRuntimeOnly.extendsFrom testRuntimeOnly, chatMatrixRuntimeOnly
+    toolCompatibilityImplementation.extendsFrom implementation
+    toolCompatibilityRuntimeOnly.extendsFrom runtimeOnly
+    toolCompatibilityTestImplementation.extendsFrom testImplementation, toolCompatibilityImplementation
+    toolCompatibilityTestRuntimeOnly.extendsFrom testRuntimeOnly, toolCompatibilityRuntimeOnly
 }
 
 tasks.register('chatMatrix', ChatMatrixTask) {
@@ -184,6 +198,15 @@ tasks.register('chatMatrixTest', Test) {
     group = 'verification'
     testClassesDirs = sourceSets.chatMatrixTest.output.classesDirs
     classpath = sourceSets.chatMatrixTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.register('toolCompatibilityTest', Test) {
+    description = 'Runs provider-free tests for the small-model tool-calling compatibility protocol.'
+    group = 'verification'
+    testClassesDirs = sourceSets.toolCompatibilityTest.output.classesDirs
+    classpath = sourceSets.toolCompatibilityTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('test')
 }
