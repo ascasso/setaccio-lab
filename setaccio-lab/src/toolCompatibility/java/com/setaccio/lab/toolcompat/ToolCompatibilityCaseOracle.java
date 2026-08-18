@@ -47,7 +47,13 @@ final class ToolCompatibilityCaseOracle {
     }
 
     static ToolCompatibilityCaseOracle loadLocked() {
-        byte[] bytes = readResource();
+        return parseLocked(readResource());
+    }
+
+    static ToolCompatibilityCaseOracle parseLocked(byte[] bytes) {
+        if (bytes == null) {
+            throw new IllegalArgumentException("Tracked tool compatibility case oracle bytes are missing");
+        }
         String sha256 = EvidenceIntegrity.sha256(bytes);
         if (!SHA256.equals(sha256)) {
             throw new IllegalArgumentException("Tracked tool compatibility case oracle digest drifted");

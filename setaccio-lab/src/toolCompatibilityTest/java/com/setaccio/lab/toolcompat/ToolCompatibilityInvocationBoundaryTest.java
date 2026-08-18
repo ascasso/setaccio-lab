@@ -74,6 +74,14 @@ class ToolCompatibilityInvocationBoundaryTest {
                 42))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("duplicate normalized tag");
+        assertThatThrownBy(() -> ToolCompatibilityInvocationBoundary.createControlledOllamaModel(
+                api,
+                installedModels(
+                        model(ToolCompatibilityProtocol.INITIAL_MODEL, "a".repeat(64)),
+                        model("duplicate-alias:latest", "a".repeat(64))),
+                42))
+                .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
+                .hasMessageContaining("duplicate alias");
     }
 
     @Test
@@ -159,6 +167,27 @@ class ToolCompatibilityInvocationBoundaryTest {
             assertThat(call.callbackExecuted()).isTrue();
             assertThat(call.callbackSucceeded()).isTrue();
             assertThat(call.callbackResponse()).contains("22.00");
+        });
+    }
+
+    @Test
+    void retainsSchemaValidButSemanticallyWrongArgumentsBeforeCallbackBinding() {
+        ScriptedChatModel model = twoTurnModel(
+                toolCall("call-add", "lab_add_numbers", "{\"left\":18,\"right\":4}"),
+                "22");
+
+        ToolCompatibilityInvocationTrace trace = new ToolCompatibilityInvocationBoundary().invoke(
+                model,
+                scheduled("arithmetic-add"),
+                ToolCompatibilityCallbackCatalog.canonicalCallbacks());
+
+        assertThat(trace.status()).isEqualTo(ToolCompatibilityInvocationStatus.COMPLETED);
+        assertThat(trace.toolCalls()).singleElement().satisfies(call -> {
+            assertThat(call.rawArgumentJsonValid()).isTrue();
+            assertThat(call.rawArgumentSchemaValid()).isTrue();
+            assertThat(call.expectedArgumentsMatched()).isFalse();
+            assertThat(call.callbackBindingSucceeded()).isTrue();
+            assertThat(call.callbackSucceeded()).isTrue();
         });
     }
 

@@ -6,6 +6,8 @@ import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -73,6 +75,45 @@ class ToolCompatibilityPreflightTest {
         assertThat(sessions).hasValue(0);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "http://example.com:11434",
+            "http://192.168.1.12:11434"
+    })
+    void rejectsNonLoopbackEndpointsBeforeCreatingAProviderSession(String baseUrl) throws Exception {
+        rejectsEndpoint(baseUrl);
+    }
+
+    @Test
+    void rejectsEndpointUserInfoBeforeCreatingAProviderSession() throws Exception {
+        rejectsEndpoint("http://user:password@localhost:11434");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "http://localhost:11434/api",
+            "http://localhost:11434?mode=test",
+            "http://localhost:11434#fragment"
+    })
+    void rejectsEndpointPathQueryAndFragmentBeforeCreatingAProviderSession(String baseUrl)
+            throws Exception {
+        rejectsEndpoint(baseUrl);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"-1", "0", "511", "513", "not-an-integer"})
+    void rejectsInvalidTokenBounds(String maxTokens) {
+        assertThatThrownBy(() -> ToolCompatibilityPreflight.parseMaxTokens(maxTokens))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"-PT1S", "PT0S", "PT1M", "PT2M1S", "not-a-duration"})
+    void rejectsInvalidTimeoutBounds(String timeout) {
+        assertThatThrownBy(() -> ToolCompatibilityPreflight.parseTimeout(timeout))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
     @Test
     void allocatesOneFreshDatedDirectChildAndNeverReusesIt() throws Exception {
         Path project = Files.createDirectory(temporaryDirectory.resolve("allocation-project"));
@@ -131,6 +172,24 @@ class ToolCompatibilityPreflightTest {
                 "512",
                 "PT2M",
                 output);
+    }
+
+    private void rejectsEndpoint(String baseUrl) throws Exception {
+        Path project = Files.createDirectory(temporaryDirectory.resolve(
+                "endpoint-project-" + Integer.toUnsignedString(baseUrl.hashCode())));
+        assertThatThrownBy(() -> new ToolCompatibilityPreflight().prepare(
+                new ToolCompatibilityPreflight.Input(
+                        project,
+                        baseUrl,
+                        ToolCompatibilityProtocol.INITIAL_MODEL,
+                        "512",
+                        "PT2M",
+                        "build/tool-compatibility/2026-08-18-invalid-endpoint"),
+                (ignoredBaseUrl, ignoredTimeout) -> {
+                    throw new AssertionError("Invalid endpoints must fail before session creation");
+                }))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("loopback");
     }
 
     private static ToolCompatibilityPreflight.Session session() {

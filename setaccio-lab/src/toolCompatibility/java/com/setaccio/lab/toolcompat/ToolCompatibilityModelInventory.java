@@ -35,8 +35,9 @@ final class ToolCompatibilityModelInventory {
             throw new ToolCompatibilityProtocolIntegrityException(
                     "Requested Ollama tool compatibility model is not installed: " + normalizedRequested);
         }
+        ToolCompatibilityModelIdentity identity;
         try {
-            return new ToolCompatibilityModelIdentity(
+            identity = new ToolCompatibilityModelIdentity(
                     requestedModel,
                     normalizedRequested,
                     resolved.digest());
@@ -46,6 +47,14 @@ final class ToolCompatibilityModelInventory {
                             + normalizedRequested,
                     exception);
         }
+        boolean duplicateAlias = installed.entrySet().stream()
+                .anyMatch(entry -> !entry.getKey().equals(normalizedRequested)
+                        && identity.digest().equals(entry.getValue().digest()));
+        if (duplicateAlias) {
+            throw new ToolCompatibilityProtocolIntegrityException(
+                    "Installed Ollama model inventory contains a duplicate alias for the selected digest");
+        }
+        return identity;
     }
 
     private static String normalizeModelTag(String model) {

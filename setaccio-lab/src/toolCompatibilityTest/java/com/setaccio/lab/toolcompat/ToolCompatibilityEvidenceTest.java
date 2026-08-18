@@ -149,7 +149,8 @@ class ToolCompatibilityEvidenceTest {
         Fixture settingsDrift = writeFixture("2026-08-18-settings-drift");
         ObjectNode manifest = (ObjectNode) OBJECT_MAPPER
                 .readTree(settingsDrift.manifest().toFile());
-        ((ObjectNode) manifest.path("settings")).put("caseOracleSha256", "f".repeat(64));
+        ((ObjectNode) manifest.path("settings").path("runSettings"))
+                .put("maxOutputTokensPerProviderTurn", 511);
         OBJECT_MAPPER.writerWithDefaultPrettyPrinter()
                 .writeValue(settingsDrift.manifest().toFile(), manifest);
         assertThat(evidence.verify(settingsDrift.runDirectory()).failures())

@@ -2,13 +2,19 @@ package com.setaccio.lab.toolcompat;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.setaccio.lab.evidence.EvidenceIntegrity;
 import com.setaccio.lab.fixture.ToolBenchmarkCases;
+import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ToolCompatibilityProtocolTest {
 
@@ -95,5 +101,60 @@ class ToolCompatibilityProtocolTest {
         ObjectNode mutableCopy = (ObjectNode) arithmetic.arguments();
         mutableCopy.put("left", 99);
         assertThat(arithmetic.arguments()).isEqualTo(expectedArguments);
+    }
+
+    @Test
+    void rejectsCaseOracleByteAndDigestDrift() throws Exception {
+        byte[] locked = lockedOracleBytes();
+        byte[] byteDrift = Arrays.copyOf(locked, locked.length + 1);
+        byteDrift[byteDrift.length - 1] = ' ';
+
+        assertThat(EvidenceIntegrity.sha256(locked)).isEqualTo(ToolCompatibilityCaseOracle.SHA256);
+        assertThat(ToolCompatibilityCaseOracle.parseLocked(locked).sha256())
+                .isEqualTo(ToolCompatibilityCaseOracle.SHA256);
+        assertThatThrownBy(() -> ToolCompatibilityCaseOracle.parseLocked(byteDrift))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("digest drifted");
+    }
+
+    @Test
+    void rejectsCaseOracleCaseIdToolNameAndCountDrift()
+            throws Exception {
+        byte[] caseIdDrift = mutatedOracle(root ->
+                ((ObjectNode) root.path("cases").get(0)).put("caseId", "changed-case"));
+        assertThatThrownBy(() -> ToolCompatibilityCaseOracle.parseLocked(caseIdDrift))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("digest drifted");
+
+        byte[] toolNameDrift = mutatedOracle(root ->
+                ((ObjectNode) root.path("cases").get(0).path("calls").get(0))
+                        .put("tool", "lab_unknown_tool"));
+        assertThatThrownBy(() -> ToolCompatibilityCaseOracle.parseLocked(toolNameDrift))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("digest drifted");
+
+        byte[] countDrift = mutatedOracle(root -> {
+            ArrayNode cases = (ArrayNode) root.path("cases");
+            cases.remove(cases.size() - 1);
+        });
+        assertThatThrownBy(() -> ToolCompatibilityCaseOracle.parseLocked(countDrift))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("digest drifted");
+    }
+
+    private byte[] mutatedOracle(Consumer<ObjectNode> mutation) throws Exception {
+        ObjectNode root = (ObjectNode) objectMapper.readTree(lockedOracleBytes());
+        mutation.accept(root);
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(root);
+    }
+
+    private static byte[] lockedOracleBytes() throws Exception {
+        try (InputStream input = ToolCompatibilityProtocolTest.class.getClassLoader()
+                .getResourceAsStream(ToolCompatibilityCaseOracle.RESOURCE)) {
+            if (input == null) {
+                throw new AssertionError("Locked tool compatibility oracle resource is missing");
+            }
+            return input.readAllBytes();
+        }
     }
 }
