@@ -28,6 +28,8 @@ class ToolCompatibilityVisibleReasoningDetectorTest {
                 List.of());
 
         assertThat(evidence.markerDetectedAnywhere()).isTrue();
+        assertThat(evidence.otherReasoningMarkerDetected())
+                .isEqualTo(!marker.startsWith("<"));
         assertThat(evidence.visibleReasoningTextInFinalOutput()).isTrue();
         assertThat(evidence.markerDetectedBeforeFirstToolCall()).isFalse();
         assertThat(evidence.markerDetectedAfterToolExecution()).isFalse();
@@ -108,7 +110,7 @@ class ToolCompatibilityVisibleReasoningDetectorTest {
     }
 
     private static ToolCompatibilityVisibleReasoningEvidence none() {
-        return new ToolCompatibilityVisibleReasoningEvidence(false, false, false, false, false);
+        return new ToolCompatibilityVisibleReasoningEvidence(false, false, false, false, false, false);
     }
 
     private static ToolCompatibilityProviderTurnEvidence turn(

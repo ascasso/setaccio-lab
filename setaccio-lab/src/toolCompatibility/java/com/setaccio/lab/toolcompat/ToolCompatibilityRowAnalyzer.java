@@ -114,9 +114,7 @@ final class ToolCompatibilityRowAnalyzer {
                 projection.aggregateUsage(),
                 Duration.ofMillis(trace.rowLatencyMillis()),
                 failure == null ? null : failure.category(),
-                visibleReasoning.markerDetectedAnywhere()
-                        ? ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT
-                        : null,
+                projection.diagnosticCategory(),
                 failure == null ? null : failure.safeMessage());
     }
 
@@ -156,6 +154,17 @@ final class ToolCompatibilityRowAnalyzer {
         boolean caseContractPassed = exactCallSequenceMatched
                 && allExpectedArgumentsMatched
                 && assertions.stream().allMatch(ToolBenchmarkAssertion::passed);
+        String diagnosticCategory = new ToolCompatibilityDiagnosticClassifier().classify(
+                new ToolCompatibilityDiagnosticClassifier.ClassificationInput(
+                        caseId,
+                        caseContractPassed,
+                        exactCallSequenceMatched,
+                        finalResponsePresent,
+                        failureCategory,
+                        toolCalls,
+                        toolResponses,
+                        assertions,
+                        visibleReasoning));
         return new Projection(
                 assertions,
                 rowAttemptCompleted,
@@ -165,6 +174,7 @@ final class ToolCompatibilityRowAnalyzer {
                 caseContractPassed,
                 finalAssistantOutput,
                 visibleReasoning,
+                diagnosticCategory,
                 anyProviderTurnReachedOutputLimit,
                 aggregateUsage);
     }
@@ -694,6 +704,7 @@ final class ToolCompatibilityRowAnalyzer {
             boolean caseContractPassed,
             String finalAssistantOutput,
             ToolCompatibilityVisibleReasoningEvidence visibleReasoning,
+            String diagnosticCategory,
             boolean anyProviderTurnReachedOutputLimit,
             ToolCompatibilityTokenUsageEvidence aggregateUsage
     ) {}

@@ -124,6 +124,8 @@ class ToolCompatibilityRowTest {
         assertThat(row.rowAttemptCompleted()).isFalse();
         assertThat(row.failureCategory())
                 .isEqualTo(ToolCompatibilityFailure.CALLBACK_RESOLUTION_FAILURE);
+        assertThat(row.diagnosticCategory())
+                .isEqualTo(ToolCompatibilityDiagnostic.CALLBACK_RESOLUTION_FAILURE);
         assertThat(row.safeErrorMessage()).isEqualTo("Model-selected tool could not be resolved");
         assertThat(row.safeErrorMessage()).doesNotContain("raw framework error");
         assertThat(row.toolCalls()).singleElement().satisfies(call -> {
@@ -326,6 +328,8 @@ class ToolCompatibilityRowTest {
                         .isEqualTo(ToolCompatibilityFailure.CALLBACK_BINDING_FAILURE));
         assertThat(bindingRow.rowAttemptCompleted()).isTrue();
         assertThat(bindingRow.caseContractPassed()).isFalse();
+        assertThat(bindingRow.diagnosticCategory())
+                .isEqualTo(ToolCompatibilityDiagnostic.SCHEMA_TYPE_MISMATCH);
 
         ToolCompatibilityInvocationTrace invocationTrace = new ToolCompatibilityInvocationTrace(
                 ToolCompatibilityInvocationStatus.COMPLETED,
@@ -366,6 +370,7 @@ class ToolCompatibilityRowTest {
                         .isEqualTo(ToolCompatibilityFailure.CALLBACK_INVOCATION_FAILURE));
         assertThat(invocationRow.rowAttemptCompleted()).isTrue();
         assertThat(invocationRow.caseContractPassed()).isTrue();
+        assertThat(invocationRow.diagnosticCategory()).isNull();
     }
 
     private ToolCompatibilityRow strictRead(JsonNode json, Class<ToolCompatibilityRow> type) throws Exception {

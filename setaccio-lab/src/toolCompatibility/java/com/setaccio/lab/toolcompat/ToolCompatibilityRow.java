@@ -100,9 +100,6 @@ record ToolCompatibilityRow(
                 failureCategory,
                 safeErrorMessage);
         ToolCompatibilityVisibleReasoningEvidence visibleReasoning = projection.visibleReasoning();
-        String expectedDiagnosticCategory = visibleReasoning.markerDetectedAnywhere()
-                ? ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT
-                : null;
         if (!assertions.equals(projection.assertions())
                 || rowAttemptCompleted != projection.rowAttemptCompleted()
                 || exactCallSequenceMatched != projection.exactCallSequenceMatched()
@@ -121,7 +118,7 @@ record ToolCompatibilityRow(
                 || anyProviderTurnReachedOutputLimit
                         != projection.anyProviderTurnReachedOutputLimit()
                 || !aggregateUsage.equals(projection.aggregateUsage())
-                || !Objects.equals(diagnosticCategory, expectedDiagnosticCategory)) {
+                || !Objects.equals(diagnosticCategory, projection.diagnosticCategory())) {
             throw new IllegalArgumentException(
                     "row aggregates must be exact deterministic projections of authoritative evidence");
         }

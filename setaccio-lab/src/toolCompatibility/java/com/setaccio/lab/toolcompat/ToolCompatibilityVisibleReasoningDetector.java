@@ -40,12 +40,14 @@ final class ToolCompatibilityVisibleReasoningDetector {
 
         boolean thinkTagDetected = false;
         boolean markerDetectedAnywhere = false;
+        boolean otherReasoningMarkerDetected = false;
         boolean markerDetectedBeforeFirstToolCall = false;
         boolean markerDetectedAfterToolExecution = false;
         boolean visibleReasoningTextInFinalOutput = false;
         for (ToolCompatibilityProviderTurnEvidence turn : providerTurns) {
             TextDetection textDetection = detectText(turn.assistantText());
             thinkTagDetected |= textDetection.thinkTagDetected();
+            otherReasoningMarkerDetected |= textDetection.otherReasoningMarkerDetected();
             if (!textDetection.markerDetected()) {
                 continue;
             }
@@ -60,6 +62,7 @@ final class ToolCompatibilityVisibleReasoningDetector {
         return new ToolCompatibilityVisibleReasoningEvidence(
                 thinkTagDetected,
                 markerDetectedAnywhere,
+                otherReasoningMarkerDetected,
                 markerDetectedBeforeFirstToolCall,
                 markerDetectedAfterToolExecution,
                 visibleReasoningTextInFinalOutput);
@@ -72,16 +75,18 @@ final class ToolCompatibilityVisibleReasoningDetector {
 
     private static TextDetection detectText(String text) {
         if (text == null || text.isEmpty()) {
-            return new TextDetection(false, false);
+            return new TextDetection(false, false, false);
         }
         String normalized = text.toLowerCase(Locale.ROOT);
         boolean thinkTagDetected = normalized.contains(OPEN_THINK_TAG)
                 || normalized.contains(CLOSE_THINK_TAG);
-        boolean markerDetected = thinkTagDetected
-                || containsAtWordBoundary(normalized, THINKING_PREFIX)
+        boolean otherReasoningMarkerDetected = containsAtWordBoundary(normalized, THINKING_PREFIX)
                 || normalized.contains(DONE_THINKING)
                 || containsAtWordBoundary(normalized, THINKING_PROCESS);
-        return new TextDetection(thinkTagDetected, markerDetected);
+        return new TextDetection(
+                thinkTagDetected,
+                thinkTagDetected || otherReasoningMarkerDetected,
+                otherReasoningMarkerDetected);
     }
 
     private static boolean containsAtWordBoundary(String text, String marker) {
@@ -99,5 +104,9 @@ final class ToolCompatibilityVisibleReasoningDetector {
         return Character.isLetterOrDigit(value) || value == '_';
     }
 
-    private record TextDetection(boolean thinkTagDetected, boolean markerDetected) {}
+    private record TextDetection(
+            boolean thinkTagDetected,
+            boolean markerDetected,
+            boolean otherReasoningMarkerDetected
+    ) {}
 }

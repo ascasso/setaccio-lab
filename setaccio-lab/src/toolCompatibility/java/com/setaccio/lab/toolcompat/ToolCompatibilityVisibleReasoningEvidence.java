@@ -4,6 +4,7 @@ package com.setaccio.lab.toolcompat;
 record ToolCompatibilityVisibleReasoningEvidence(
         boolean thinkTagDetected,
         boolean markerDetectedAnywhere,
+        boolean otherReasoningMarkerDetected,
         boolean markerDetectedBeforeFirstToolCall,
         boolean markerDetectedAfterToolExecution,
         boolean visibleReasoningTextInFinalOutput
@@ -13,7 +14,8 @@ record ToolCompatibilityVisibleReasoningEvidence(
         if (thinkTagDetected && !markerDetectedAnywhere) {
             throw new IllegalArgumentException("a think tag is also a visible reasoning marker");
         }
-        if ((markerDetectedBeforeFirstToolCall
+        if ((otherReasoningMarkerDetected
+                        || markerDetectedBeforeFirstToolCall
                         || markerDetectedAfterToolExecution
                         || visibleReasoningTextInFinalOutput)
                 && !markerDetectedAnywhere) {
