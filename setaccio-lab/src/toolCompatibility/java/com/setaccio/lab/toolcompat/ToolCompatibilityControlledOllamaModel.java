@@ -3,10 +3,7 @@ package com.setaccio.lab.toolcompat;
 import java.util.Objects;
 import org.springframework.ai.chat.model.ChatModel;
 
-/**
- * Temporary T1.3 construction result that keeps the verified installed identity
- * attached to the controlled model without defining a persisted result row.
- */
+/** Keeps the verified installed identity attached to one controlled seeded model. */
 record ToolCompatibilityControlledOllamaModel(
         ChatModel chatModel,
         ToolCompatibilityModelIdentity modelIdentity

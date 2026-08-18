@@ -1,5 +1,6 @@
 package com.setaccio.lab.toolcompat;
 
+import com.setaccio.lab.evidence.EvidenceCodeBaseline;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ToolCompatibilityReportTest {
 
+    private static final EvidenceCodeBaseline CODE_BASELINE =
+            new EvidenceCodeBaseline("a".repeat(40), false);
+    private static final String RAW_SHA256 = "b".repeat(64);
+
     private final ToolCompatibilityAnalyzer analyzer = new ToolCompatibilityAnalyzer();
     private final ToolCompatibilityReport report = new ToolCompatibilityReport();
 
@@ -17,12 +22,13 @@ class ToolCompatibilityReportTest {
         ToolCompatibilityResult result = ToolCompatibilityAnalysisTestFixtures.successfulResult();
         ToolCompatibilityAnalysis analysis = analyzer.analyze(result);
 
-        String rendered = report.render(result, analysis);
+        String rendered = render(result, analysis);
 
         assertThat(rendered)
                 .startsWith("# Tool Compatibility Deterministic Summary\n")
                 .contains(
                         "## Invocation",
+                        "## Evidence",
                         "## Tool Selection",
                         "## Tool Arguments",
                         "## Tool Execution",
@@ -33,6 +39,8 @@ class ToolCompatibilityReportTest {
                         "### Failed Contract Primary Categories",
                         "### Per-Turn Usage",
                         "### Per-Row Aggregate Usage",
+                        "- Raw result: `tool-compatibility-results.json`",
+                        "- Git commit: `" + "a".repeat(40) + "`",
                         "- Median successful-row latency: `85.0 ms`",
                         "- Observed successful-row latency range: `10-160 ms`",
                         "| 1 | 1 | `PARTIAL` | 3 | - | - | 1 |",
@@ -45,7 +53,7 @@ class ToolCompatibilityReportTest {
                         "p99",
                         "chain of thought")
                 .doesNotContain("- OTHER:", "- Aggregate score:", "- Model rank:");
-        assertThat(report.render(result, analysis)).isEqualTo(rendered);
+        assertThat(render(result, analysis)).isEqualTo(rendered);
     }
 
     @Test
@@ -57,7 +65,7 @@ class ToolCompatibilityReportTest {
         rows.set(0, ToolCompatibilityAnalysisTestFixtures.providerFailureRow(first, 10));
         ToolCompatibilityResult result = ToolCompatibilityAnalysisTestFixtures.result(rows);
 
-        String rendered = report.render(result, analyzer.analyze(result));
+        String rendered = render(result, analyzer.analyze(result));
 
         assertThat(rendered)
                 .contains("- Failed provider-turn sequences: `row 1/turn 1`")
@@ -69,10 +77,20 @@ class ToolCompatibilityReportTest {
         ToolCompatibilityResult result = ToolCompatibilityAnalysisTestFixtures.successfulResult();
         ToolCompatibilityAnalysis analysis = analyzer.analyze(result);
 
-        assertThatThrownBy(() -> report.render(null, analysis))
+        assertThatThrownBy(() -> report.render(
+                null,
+                analysis,
+                ToolCompatibilityProtocol.RAW_FILENAME,
+                RAW_SHA256,
+                CODE_BASELINE))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("required");
-        assertThatThrownBy(() -> report.render(result, null))
+        assertThatThrownBy(() -> report.render(
+                result,
+                null,
+                ToolCompatibilityProtocol.RAW_FILENAME,
+                RAW_SHA256,
+                CODE_BASELINE))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("required");
     }
@@ -95,8 +113,20 @@ class ToolCompatibilityReportTest {
         ToolCompatibilityAnalysis changedAnalysis = analyzer.analyze(
                 ToolCompatibilityAnalysisTestFixtures.result(changedRows));
 
-        assertThatThrownBy(() -> report.render(result, changedAnalysis))
+        assertThatThrownBy(() -> render(result, changedAnalysis))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("does not match");
+    }
+
+    private String render(
+            ToolCompatibilityResult result,
+            ToolCompatibilityAnalysis analysis
+    ) {
+        return report.render(
+                result,
+                analysis,
+                ToolCompatibilityProtocol.RAW_FILENAME,
+                RAW_SHA256,
+                CODE_BASELINE);
     }
 }

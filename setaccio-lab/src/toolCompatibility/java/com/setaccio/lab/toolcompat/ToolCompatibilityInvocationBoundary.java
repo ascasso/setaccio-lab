@@ -43,7 +43,7 @@ import tools.jackson.core.JacksonException;
 
 /**
  * One logical, standard-advisor tool-calling attempt. It observes recursive provider
- * turns but does not replace Spring AI's tool loop or define the final evidence schema.
+ * turns without replacing Spring AI's tool loop.
  */
 final class ToolCompatibilityInvocationBoundary {
 

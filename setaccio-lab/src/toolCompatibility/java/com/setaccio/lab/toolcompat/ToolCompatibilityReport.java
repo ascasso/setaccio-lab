@@ -1,14 +1,27 @@
 package com.setaccio.lab.toolcompat;
 
+import com.setaccio.lab.evidence.EvidenceCodeBaseline;
 import java.time.Duration;
 import java.util.Locale;
 
-/** Deterministic Markdown projection used by the later offline evidence slice. */
+/** Deterministic Markdown projection used by the offline evidence lifecycle. */
 final class ToolCompatibilityReport {
 
-    String render(ToolCompatibilityResult result, ToolCompatibilityAnalysis analysis) {
-        if (result == null || analysis == null) {
-            throw new IllegalArgumentException("result and analysis are required");
+    String render(
+            ToolCompatibilityResult result,
+            ToolCompatibilityAnalysis analysis,
+            String rawPath,
+            String rawSha256,
+            EvidenceCodeBaseline codeBaseline
+    ) {
+        if (result == null || analysis == null || codeBaseline == null) {
+            throw new IllegalArgumentException("result, analysis, and codeBaseline are required");
+        }
+        if (!ToolCompatibilityProtocol.RAW_FILENAME.equals(rawPath)
+                || rawSha256 == null
+                || !rawSha256.matches("[0-9a-f]{64}")) {
+            throw new IllegalArgumentException(
+                    "raw evidence identity must use the locked relative filename and SHA-256");
         }
         ToolCompatibilityAnalysis expectedAnalysis = new ToolCompatibilityAnalyzer().analyze(result);
         if (!expectedAnalysis.equals(analysis)) {
@@ -18,6 +31,7 @@ final class ToolCompatibilityReport {
         StringBuilder report = new StringBuilder();
         report.append("# Tool Compatibility Deterministic Summary\n\n");
         protocol(report, result);
+        evidence(report, rawPath, rawSha256, codeBaseline);
         invocation(report, analysis.invocation());
         selection(report, analysis.toolSelection());
         arguments(report, analysis.toolArguments());
@@ -33,6 +47,22 @@ final class ToolCompatibilityReport {
                 .append("does not combine dimensions into a score or model ordering. Successful-row ")
                 .append("latency uses only the median and observed range.\n");
         return report.toString();
+    }
+
+    private static void evidence(
+            StringBuilder report,
+            String rawPath,
+            String rawSha256,
+            EvidenceCodeBaseline codeBaseline
+    ) {
+        report.append("\n## Evidence\n\n");
+        line(report, "Raw result", rawPath);
+        line(report, "Raw result SHA-256", rawSha256);
+        line(report, "Git commit", codeBaseline.gitCommit());
+        line(report, "Working tree dirty", codeBaseline.workingTreeDirty());
+        line(report, "Evidence status", codeBaseline.workingTreeDirty()
+                ? "diagnostic/non-final"
+                : "clean-baseline candidate");
     }
 
     private static void protocol(StringBuilder report, ToolCompatibilityResult result) {

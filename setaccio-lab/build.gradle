@@ -7,6 +7,8 @@ plugins {
 import com.setaccio.gradle.ToolSearchSmokeTask
 import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 import com.setaccio.gradle.ToolSearchMatrixOfflineTask
+import com.setaccio.gradle.ToolCompatibilityMatrixTask
+import com.setaccio.gradle.ToolCompatibilityOfflineTask
 import com.setaccio.gradle.ChatMatrixOfflineTask
 import com.setaccio.gradle.ChatMatrixTask
 import com.setaccio.gradle.AnthropicChatMatrixTask
@@ -209,6 +211,40 @@ tasks.register('toolCompatibilityTest', Test) {
     classpath = sourceSets.toolCompatibilityTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('test')
+}
+
+tasks.register('toolCompatibilityMatrix', ToolCompatibilityMatrixTask) {
+    dependsOn tasks.named('toolCompatibilityClasses')
+    classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityMatrixRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+    workingDirectory.set(layout.projectDirectory)
+}
+
+tasks.register('toolCompatibilityVerify', ToolCompatibilityOfflineTask) {
+    description = 'Verifies saved tool compatibility evidence without starting Spring or calling a model provider.'
+    dependsOn tasks.named('toolCompatibilityClasses')
+    classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+    workingDirectory.set(layout.projectDirectory)
+}
+
+tasks.register('toolCompatibilityReanalyze', ToolCompatibilityOfflineTask) {
+    description = 'Regenerates and verifies a saved tool compatibility summary without starting Spring or calling a model provider.'
+    dependsOn tasks.named('toolCompatibilityClasses')
+    classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+    workingDirectory.set(layout.projectDirectory)
 }
 
 tasks.register('localEvaluationVerify', LocalEvaluationOfflineTask) {

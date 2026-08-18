@@ -2,7 +2,10 @@ package com.setaccio.lab.toolcompat;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 final class ToolCompatibilityProtocol {
 
@@ -56,6 +59,30 @@ final class ToolCompatibilityProtocol {
 
     static ToolCompatibilitySystemPromptIdentity systemPromptIdentity() {
         return ToolCompatibilitySystemPromptIdentity.untreated();
+    }
+
+    static Map<String, Object> manifestSettings(ToolCompatibilityResult result) {
+        if (result == null) {
+            throw new IllegalArgumentException("result must not be null");
+        }
+        LinkedHashMap<String, Object> settings = new LinkedHashMap<>();
+        settings.put("protocolVersion", result.protocolVersion());
+        settings.put("provider", result.provider());
+        settings.put("executionStrategy", result.executionStrategy());
+        settings.put("pullModelStrategy", result.pullModelStrategy());
+        settings.put("runSettings", result.runSettings());
+        settings.put("modelIdentity", result.modelIdentity());
+        settings.put("systemPromptIdentity", result.systemPromptIdentity());
+        settings.put("caseOracleId", result.caseOracleId());
+        settings.put("caseOracleVersion", result.caseOracleVersion());
+        settings.put("caseOracleSha256", result.caseOracleSha256());
+        settings.put("orderedCaseIds", result.orderedCaseIds());
+        settings.put("canonicalCasesSha256", result.canonicalCasesSha256());
+        settings.put("orderedToolNames", result.orderedToolNames());
+        settings.put("toolNamesSha256", result.toolNamesSha256());
+        settings.put("toolDefinitionsSha256", result.toolDefinitionsSha256());
+        settings.put("orderedSchedule", result.orderedSchedule());
+        return Collections.unmodifiableMap(settings);
     }
 
     static List<ToolCompatibilityCaseSelection.ScheduledCase> schedule(
