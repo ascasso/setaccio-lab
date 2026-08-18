@@ -1,7 +1,9 @@
 package com.setaccio.lab.toolcompat;
 
-/** Typed holder for the primary deterministic category populated by later analysis slices. */
+/** Typed holder for a deterministic diagnostic category. */
 record ToolCompatibilityDiagnostic(String category) {
+
+    static final String VISIBLE_REASONING_TEXT = "VISIBLE_REASONING_TEXT";
 
     ToolCompatibilityDiagnostic {
         if (category == null

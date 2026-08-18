@@ -17,8 +17,9 @@ import java.util.Set;
 import org.springframework.ai.tool.ToolCallback;
 
 /**
- * Converts the proven T1.3 lifecycle into the canonical T1.4 row and verifies
- * every row-level projection. Matrix-wide classification remains in T1.6.
+ * Converts the proven T1.3 lifecycle into the canonical row and verifies every
+ * row-level projection, including T1.5 visible-reasoning diagnostics.
+ * Matrix-wide classification remains in T1.6.
  */
 final class ToolCompatibilityRowAnalyzer {
 
@@ -77,6 +78,7 @@ final class ToolCompatibilityRowAnalyzer {
                 failure == null ? null : failure.safeMessage());
         ToolCompatibilitySystemPromptIdentity systemPrompt = ToolCompatibilityProtocol.systemPromptIdentity();
         ToolCompatibilityRunSettings settings = ToolCompatibilityProtocol.runSettings();
+        ToolCompatibilityVisibleReasoningEvidence visibleReasoning = projection.visibleReasoning();
         return new ToolCompatibilityRow(
                 scheduledCase.sequence(),
                 scheduledCase.caseId(),
@@ -103,13 +105,18 @@ final class ToolCompatibilityRowAnalyzer {
                 projection.finalResponsePresent(),
                 projection.caseContractPassed(),
                 projection.finalAssistantOutput(),
-                false,
-                false,
+                visibleReasoning.thinkTagDetected(),
+                visibleReasoning.markerDetectedAnywhere(),
+                visibleReasoning.markerDetectedBeforeFirstToolCall(),
+                visibleReasoning.markerDetectedAfterToolExecution(),
+                visibleReasoning.visibleReasoningTextInFinalOutput(),
                 projection.anyProviderTurnReachedOutputLimit(),
                 projection.aggregateUsage(),
                 Duration.ofMillis(trace.rowLatencyMillis()),
                 failure == null ? null : failure.category(),
-                null,
+                visibleReasoning.markerDetectedAnywhere()
+                        ? ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT
+                        : null,
                 failure == null ? null : failure.safeMessage());
     }
 
@@ -137,6 +144,8 @@ final class ToolCompatibilityRowAnalyzer {
         boolean finalResponsePresent = finalAssistantOutput != null && !finalAssistantOutput.isBlank();
         boolean anyProviderTurnReachedOutputLimit = providerTurns.stream()
                 .anyMatch(turn -> turn.outputLimitState() == ToolCompatibilityOutputLimitState.REACHED);
+        ToolCompatibilityVisibleReasoningEvidence visibleReasoning =
+                new ToolCompatibilityVisibleReasoningDetector().detect(providerTurns, toolCalls);
         ToolCompatibilityTokenUsageEvidence aggregateUsage = aggregateUsage(providerTurns);
         List<ToolBenchmarkAssertion> assertions = assertions(
                 caseId,
@@ -155,6 +164,7 @@ final class ToolCompatibilityRowAnalyzer {
                 finalResponsePresent,
                 caseContractPassed,
                 finalAssistantOutput,
+                visibleReasoning,
                 anyProviderTurnReachedOutputLimit,
                 aggregateUsage);
     }
@@ -683,6 +693,7 @@ final class ToolCompatibilityRowAnalyzer {
             boolean finalResponsePresent,
             boolean caseContractPassed,
             String finalAssistantOutput,
+            ToolCompatibilityVisibleReasoningEvidence visibleReasoning,
             boolean anyProviderTurnReachedOutputLimit,
             ToolCompatibilityTokenUsageEvidence aggregateUsage
     ) {}

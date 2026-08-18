@@ -41,6 +41,9 @@ record ToolCompatibilityRow(
 
         boolean thinkTagDetected,
         boolean reasoningMarkerDetected,
+        boolean reasoningMarkerDetectedBeforeFirstToolCall,
+        boolean reasoningMarkerDetectedAfterToolExecution,
+        boolean visibleReasoningTextInFinalOutput,
         boolean anyProviderTurnReachedOutputLimit,
 
         ToolCompatibilityTokenUsageEvidence aggregateUsage,
@@ -89,11 +92,6 @@ record ToolCompatibilityRow(
             throw new IllegalArgumentException(
                     "row latency cannot be shorter than its ordered provider-turn latency");
         }
-        if (thinkTagDetected || reasoningMarkerDetected || diagnosticCategory != null) {
-            throw new IllegalArgumentException(
-                    "visible-reasoning diagnostics remain unset until the T1.5 detector is applied");
-        }
-
         ToolCompatibilityRowAnalyzer.Projection projection = ToolCompatibilityRowAnalyzer.project(
                 caseId,
                 providerTurns,
@@ -101,6 +99,10 @@ record ToolCompatibilityRow(
                 toolResponses,
                 failureCategory,
                 safeErrorMessage);
+        ToolCompatibilityVisibleReasoningEvidence visibleReasoning = projection.visibleReasoning();
+        String expectedDiagnosticCategory = visibleReasoning.markerDetectedAnywhere()
+                ? ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT
+                : null;
         if (!assertions.equals(projection.assertions())
                 || rowAttemptCompleted != projection.rowAttemptCompleted()
                 || exactCallSequenceMatched != projection.exactCallSequenceMatched()
@@ -108,9 +110,18 @@ record ToolCompatibilityRow(
                 || finalResponsePresent != projection.finalResponsePresent()
                 || caseContractPassed != projection.caseContractPassed()
                 || !Objects.equals(finalAssistantOutput, projection.finalAssistantOutput())
+                || thinkTagDetected != visibleReasoning.thinkTagDetected()
+                || reasoningMarkerDetected != visibleReasoning.markerDetectedAnywhere()
+                || reasoningMarkerDetectedBeforeFirstToolCall
+                        != visibleReasoning.markerDetectedBeforeFirstToolCall()
+                || reasoningMarkerDetectedAfterToolExecution
+                        != visibleReasoning.markerDetectedAfterToolExecution()
+                || visibleReasoningTextInFinalOutput
+                        != visibleReasoning.visibleReasoningTextInFinalOutput()
                 || anyProviderTurnReachedOutputLimit
                         != projection.anyProviderTurnReachedOutputLimit()
-                || !aggregateUsage.equals(projection.aggregateUsage())) {
+                || !aggregateUsage.equals(projection.aggregateUsage())
+                || !Objects.equals(diagnosticCategory, expectedDiagnosticCategory)) {
             throw new IllegalArgumentException(
                     "row aggregates must be exact deterministic projections of authoritative evidence");
         }

@@ -176,6 +176,14 @@ class ToolCompatibilityRowTest {
                 .rootCause()
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("deterministic projections");
+
+        ObjectNode contradictoryReasoning = objectMapper.valueToTree(successfulMultiStepRow());
+        contradictoryReasoning.put("reasoningMarkerDetected", true);
+        contradictoryReasoning.put("diagnosticCategory", ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT);
+        assertThatThrownBy(() -> strictRead(contradictoryReasoning, ToolCompatibilityRow.class))
+                .rootCause()
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("deterministic projections");
     }
 
     @Test
@@ -231,6 +239,50 @@ class ToolCompatibilityRowTest {
         assertThat(row.exactCallSequenceMatched()).isTrue();
         assertThat(row.allExpectedArgumentsMatched()).isTrue();
         assertThat(row.caseContractPassed()).isTrue();
+    }
+
+    @Test
+    void keepsVisibleReasoningMarkersDiagnosticWithoutFailingTheCaseContract() throws Exception {
+        ToolCompatibilityInvocationTrace trace = new ToolCompatibilityInvocationTrace(
+                ToolCompatibilityInvocationStatus.COMPLETED,
+                List.of(
+                        turn(1, "Thinking... selecting arithmetic", List.of("call-add"), 3, 2, 5, false, 5),
+                        turn(2, "<think>checking</think>\n22", List.of(), 5, 4, 9, false, 5)),
+                List.of(new ToolCompatibilityObservedToolCall(
+                        1,
+                        1,
+                        "call-add",
+                        "function",
+                        "lab_add_numbers",
+                        "{\"left\":17.25,\"right\":4.75}",
+                        true,
+                        true,
+                        null,
+                        1,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        "22.00",
+                        null,
+                        null)),
+                null,
+                true,
+                12);
+
+        ToolCompatibilityRow row = new ToolCompatibilityRowAnalyzer().analyze(
+                scheduled("arithmetic-add", 1), MODEL_IDENTITY, trace);
+
+        assertThat(row.thinkTagDetected()).isTrue();
+        assertThat(row.reasoningMarkerDetected()).isTrue();
+        assertThat(row.reasoningMarkerDetectedBeforeFirstToolCall()).isTrue();
+        assertThat(row.reasoningMarkerDetectedAfterToolExecution()).isTrue();
+        assertThat(row.visibleReasoningTextInFinalOutput()).isTrue();
+        assertThat(row.diagnosticCategory())
+                .isEqualTo(ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT);
+        assertThat(row.caseContractPassed()).isTrue();
+        assertThat(strictRead(objectMapper.valueToTree(row), ToolCompatibilityRow.class)).isEqualTo(row);
     }
 
     @Test
