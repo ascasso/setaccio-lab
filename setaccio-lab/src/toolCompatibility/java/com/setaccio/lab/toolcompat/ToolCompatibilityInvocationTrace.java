@@ -12,11 +12,12 @@ record ToolCompatibilityInvocationTrace(
         List<ToolCompatibilityObservedProviderTurn> providerTurns,
         List<ToolCompatibilityObservedToolCall> toolCalls,
         String terminalMessage,
-        boolean safeForNextSequentialAttempt
+        boolean safeForNextSequentialAttempt,
+        long rowLatencyMillis
 ) {
     ToolCompatibilityInvocationTrace {
-        if (status == null) {
-            throw new IllegalArgumentException("status must not be null");
+        if (status == null || rowLatencyMillis < 0) {
+            throw new IllegalArgumentException("status and non-negative rowLatencyMillis are required");
         }
         providerTurns = List.copyOf(providerTurns == null ? List.of() : providerTurns);
         toolCalls = List.copyOf(toolCalls == null ? List.of() : toolCalls);

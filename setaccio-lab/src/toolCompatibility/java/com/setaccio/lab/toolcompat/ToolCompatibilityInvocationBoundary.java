@@ -128,13 +128,14 @@ final class ToolCompatibilityInvocationBoundary {
                 .toList();
 
         ExecutorService executor = newSingleWorker();
+        long attemptStarted = System.nanoTime();
         Future<Void> future = executor.submit(invokeTask(
                 chatModel, prompt, scheduledCase.seed(), settings, observedCallbacks, observingAdvisor));
         try {
             future.get(rowDeadline.toNanos(), TimeUnit.NANOSECONDS);
             recorder.complete();
             executor.shutdown();
-            return recorder.snapshot(true);
+            return recorder.snapshot(true, elapsedMillis(attemptStarted));
         } catch (TimeoutException exception) {
             recorder.rowTimedOut();
             future.cancel(true);
@@ -143,12 +144,13 @@ final class ToolCompatibilityInvocationBoundary {
             if (!stopped) {
                 recorder.timedOutWorkDidNotStop();
                 nextSequentialAttemptAllowed = false;
-                ToolCompatibilityInvocationTrace trace = recorder.snapshot(false);
+                ToolCompatibilityInvocationTrace trace = recorder.snapshot(
+                        false, elapsedMillis(attemptStarted));
                 throw new ToolCompatibilityProtocolIntegrityException(
                         "Timed-out tool compatibility work could not be confirmed stopped",
                         trace);
             }
-            return recorder.snapshot(true);
+            return recorder.snapshot(true, elapsedMillis(attemptStarted));
         } catch (InterruptedException exception) {
             future.cancel(true);
             executor.shutdownNow();
@@ -166,12 +168,13 @@ final class ToolCompatibilityInvocationBoundary {
                 throw error;
             }
             if (recorder.hasProviderFailure()) {
-                return recorder.snapshot(true);
+                return recorder.snapshot(true, elapsedMillis(attemptStarted));
             }
             if (recorder.recordTerminalCallbackFailure(cause)) {
-                return recorder.snapshot(true);
+                return recorder.snapshot(true, elapsedMillis(attemptStarted));
             }
-            ToolCompatibilityInvocationTrace trace = recorder.snapshot(true);
+            ToolCompatibilityInvocationTrace trace = recorder.snapshot(
+                    true, elapsedMillis(attemptStarted));
             throw new ToolCompatibilityProtocolIntegrityException(
                     "Standard tool-calling advisor failed outside an observed provider or callback stage",
                     cause == null ? exception : cause,
@@ -474,13 +477,17 @@ final class ToolCompatibilityInvocationBoundary {
             terminalMessage = "Timed-out tool compatibility work did not stop before the confirmation deadline";
         }
 
-        private synchronized ToolCompatibilityInvocationTrace snapshot(boolean safeForNextAttempt) {
+        private synchronized ToolCompatibilityInvocationTrace snapshot(
+                boolean safeForNextAttempt,
+                long rowLatencyMillis
+        ) {
             return new ToolCompatibilityInvocationTrace(
                     status,
                     providerTurns.stream().map(MutableProviderTurn::snapshot).toList(),
                     toolCalls.stream().map(MutableToolCall::snapshot).toList(),
                     terminalMessage,
-                    safeForNextAttempt);
+                    safeForNextAttempt,
+                    rowLatencyMillis);
         }
 
         private static ToolCompatibilityCallbackFailureKind classifyCallbackFailure(
@@ -539,7 +546,8 @@ final class ToolCompatibilityInvocationBoundary {
                     : expected.toolName().equals(toolCall.name());
             Boolean expectedArgumentsMatched = expected == null || validation.parsedArguments() == null
                     ? Boolean.FALSE
-                    : expected.arguments().equals(validation.parsedArguments());
+                    : ToolCompatibilityJsonSemantics.equals(
+                            expected.arguments(), validation.parsedArguments());
             return new MutableToolCall(
                     sequence,
                     providerTurnSequence,

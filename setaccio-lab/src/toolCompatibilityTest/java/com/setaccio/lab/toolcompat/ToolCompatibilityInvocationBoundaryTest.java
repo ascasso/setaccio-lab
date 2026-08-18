@@ -116,6 +116,9 @@ class ToolCompatibilityInvocationBoundaryTest {
         assertThat(trace.providerTurns().get(0).responseMetadata()).containsEntry("provider", "fake");
         assertThat(trace.providerTurns().get(0).completionTokens()).isEqualTo(512);
         assertThat(trace.providerTurns().get(0).outputTokenLimitReached()).isTrue();
+        assertThat(trace.rowLatencyMillis()).isGreaterThanOrEqualTo(trace.providerTurns().stream()
+                .mapToLong(ToolCompatibilityObservedProviderTurn::latencyMillis)
+                .sum());
         assertThat(trace.toolCalls()).hasSize(2);
         assertThat(trace.toolCalls())
                 .extracting(
