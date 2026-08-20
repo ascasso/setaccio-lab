@@ -642,8 +642,9 @@ No new credentials are required for this path. It reuses `OLLAMA_BASE_URL` / `OL
 
 The tracked
 [Small-Model Tool-Calling Compatibility Plan](SmallModelToolCallingCompatibilityPlan.md)
-defines a future dedicated matrix, but no `toolCompatibility` source set or
-Gradle task exists yet. The plan update does not authorize implementation or a
+defines a future dedicated matrix. Its T0.1 documentation packet is complete,
+but no `toolCompatibility` source set or Gradle task exists yet. That
+documentation completion does not authorize provider-free implementation or a
 live model call.
 
 The future Phase 1 task contract is intentionally explicit and does not inherit

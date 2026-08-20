@@ -282,21 +282,21 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while
   vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
-- The tracked small-model tool-calling compatibility plan is hardened for
-  slice-by-slice Codex execution. It locks a future untreated LFM2.5 Phase 1
-  protocol at the standard advisor, eight ordered canonical cases, two seeded
-  repetitions, `512` output tokens per provider turn, one `PT2M` whole-row
-  deadline, one logical attempt with ordered provider-turn/per-call evidence,
-  no pull, 16 sequential rows, an exact suite-owned semantic call/argument
-  oracle, suite-specific evidence, and offline verification/reanalysis. The
-  final row schema waits for a standard-advisor observability proof. A later
-  Phase 2 prompt comparison has one dedicated paired-runner contract that must
-  execute both conditions in a single interleaved process. The plan also records
-  exact repository paths, checks, stop conditions, and Terra/Luna/Sol routing
-  for every formal slice. This remains documentation only: no
-  `toolCompatibility` source set or task exists, provider-free implementation
-  is not yet authorized, and any live matrix requires a later exact-command
-  approval after all offline tests pass.
+- The T0.1 documentation packet for the tracked small-model tool-calling
+  compatibility plan completed on 2026-08-17. The plan locks a future untreated
+  LFM2.5 Phase 1 protocol at the standard advisor, eight ordered canonical
+  cases, two seeded repetitions, `512` output tokens per provider turn, one
+  `PT2M` whole-row deadline, one logical attempt with ordered provider-turn/per-
+  call evidence, no pull, 16 sequential rows, an exact suite-owned semantic
+  call/argument oracle, suite-specific evidence, and offline
+  verification/reanalysis. The final row schema waits for a standard-advisor
+  observability proof. A later Phase 2 prompt comparison has one dedicated
+  paired-runner contract that must execute both conditions in a single
+  interleaved process. The plan also records exact repository paths, checks,
+  stop conditions, and Terra/Luna/Sol routing for every formal slice. T0.1 is
+  documentation only: no `toolCompatibility` source set or task exists,
+  provider-free implementation is not yet authorized, and any live matrix
+  requires a later exact-command approval after all offline tests pass.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,

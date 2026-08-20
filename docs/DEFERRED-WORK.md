@@ -1,7 +1,7 @@
 # Deferred Work
 
-Status: current after the small-model tool-compatibility plan execution hardening
-on 2026-08-15.
+Status: current after completion of the T0.1 small-model tool-compatibility
+documentation packet on 2026-08-17.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -52,12 +52,13 @@ Phase 2 closure does not authorize Anthropic credentials or calls, another
 provider or benchmark surface, an automatic model pull, Docker, spending, a
 release, a tag, or a push.
 
-## Prepared Small-Model Tool-Compatibility Boundary
+## Small-Model Tool-Compatibility Gate
 
-The tracked
+The T0.1 documentation packet for the tracked
 [Small-Model Tool-Calling Compatibility Plan](SmallModelToolCallingCompatibilityPlan.md)
-is now prepared for slice-by-slice Codex execution. Phase 1 locks one untreated
-already-installed LFM2.5 model, the standard `ToolCallingAdvisor`, all eight
+is complete. It aligns the locked protocol and its authorization boundaries
+across the repository without authorizing implementation. Phase 1 locks one
+untreated already-installed LFM2.5 model, the standard `ToolCallingAdvisor`, all eight
 ordered canonical public-safe cases, two repetitions with seeds `42`/`43`,
 temperature `0.0`, `512` output tokens per provider turn, one `PT2M` whole-row
 deadline, one logical attempt with ordered provider turns, no pull, a 16-row

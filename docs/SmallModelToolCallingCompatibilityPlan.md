@@ -14,9 +14,10 @@ Proposed next work after completion of:
 This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
-every formal slice has a Codex dispatch packet below. The Phase 0 documentation
-gate is prepared, but the provider-free implementation gate remains open until
-the project owner explicitly authorizes it.
+every formal slice has a Codex dispatch packet below. The T0.1 documentation
+packet completed on 2026-08-17; its cross-document alignment does not close the
+provider-free implementation gate, which remains open until the project owner
+explicitly authorizes T1.1.
 
 Post-review protocol hardening completed on 2026-08-16: Phase 1 now distinguishes
 one logical row attempt from the ordered provider turns inside Spring AI's

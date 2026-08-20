@@ -7,8 +7,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Updated the Gradle Wrapper from 9.6.1 to 9.7.1.
+
 ### Added
 
+- Completed the T0.1 small-model tool-compatibility documentation packet. The
+  locked 16-row Phase 1 protocol and its authorization boundaries are now
+  aligned across the plan, repository guide, deferred-work index, test plan,
+  environment guide, and dated log. This is documentation only: T1.1
+  provider-free implementation and every live matrix remain separately
+  unauthorized.
 - Refreshed the proposed Phase 3 small-model cohort from the project owner's
   reported installed-model list. `qwen3.8:27b-mlx` is now the provisional
   higher-capability reference candidate, the absent `dolphin-phi:latest` peer
