@@ -7,6 +7,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Updated the Gradle Wrapper from 9.6.1 to 9.7.1.
+
 ### Added
 
 - Completed the T0.1 small-model tool-compatibility documentation packet. The
