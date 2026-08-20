@@ -1,0 +1,90 @@
+{
+  "id": "tool-case-oracle",
+  "version": 1,
+  "cases": [
+    {
+      "caseId": "arithmetic-add",
+      "calls": [
+        {
+          "tool": "lab_add_numbers",
+          "arguments": {
+            "left": 17.25,
+            "right": 4.75
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "fixed-utc-time",
+      "calls": [
+        {
+          "tool": "lab_fixed_utc_now",
+          "arguments": {}
+        }
+      ]
+    },
+    {
+      "caseId": "fixed-zone-time",
+      "calls": [
+        {
+          "tool": "lab_fixed_time_for_zone",
+          "arguments": {
+            "zoneId": "America/Los_Angeles"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "catalog-lookup",
+      "calls": [
+        {
+          "tool": "lab_lookup_catalog_item",
+          "arguments": {
+            "itemId": "fixture-policy-faq"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "catalog-multi-step",
+      "calls": [
+        {
+          "tool": "lab_lookup_catalog_item",
+          "arguments": {
+            "itemId": "fixture-invoice-sample"
+          }
+        },
+        {
+          "tool": "lab_list_catalog_items",
+          "arguments": {
+            "category": "document"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "catalog-no-match",
+      "calls": [
+        {
+          "tool": "lab_lookup_catalog_item",
+          "arguments": {
+            "itemId": "fixture-does-not-exist"
+          }
+        }
+      ]
+    },
+    {
+      "caseId": "no-applicable-domain-tool",
+      "calls": []
+    },
+    {
+      "caseId": "deterministic-tool-failure",
+      "calls": [
+        {
+          "tool": "lab_fail_fixture",
+          "arguments": {}
+        }
+      ]
+    }
+  ]
+}

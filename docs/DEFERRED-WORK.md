@@ -1,7 +1,7 @@
 # Deferred Work
 
-Status: current after the small-model tool-compatibility plan execution hardening
-on 2026-08-15.
+Status: current after Phase 1 small-model tool-compatibility closeout on
+2026-08-20.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -52,20 +52,35 @@ Phase 2 closure does not authorize Anthropic credentials or calls, another
 provider or benchmark surface, an automatic model pull, Docker, spending, a
 release, a tag, or a push.
 
-## Prepared Small-Model Tool-Compatibility Boundary
+## Completed Phase 1 Small-Model Tool-Compatibility Boundary
 
-The tracked
-[Small-Model Tool-Calling Compatibility Plan](SmallModelToolCallingCompatibilityPlan.md)
-is now prepared for slice-by-slice Codex execution. Phase 1 locks one untreated
-already-installed LFM2.5 model, the standard `ToolCallingAdvisor`, all eight
-ordered canonical public-safe cases, two repetitions with seeds `42`/`43`,
-temperature `0.0`, `512` output tokens per provider turn, one `PT2M` whole-row
-deadline, one logical attempt with ordered provider turns, no pull, a 16-row
-sequential schedule, the exact `tool-case-oracle` call/argument contract,
-suite-specific evidence, and standalone offline verification/reanalysis. The
-final row schema is intentionally deferred until the standard-advisor
-observability proof succeeds. The plan includes repository-specific execution
-packets, verification commands, model-routing guidance, and stop conditions.
+The T0.1 documentation packet and provider-free T1.1-T1.8 implementation for
+the tracked [Small-Model Tool-Calling Compatibility
+Plan](SmallModelToolCallingCompatibilityPlan.md) are complete. Phase 1 locks
+one untreated already-installed LFM2.5 model, the standard
+`ToolCallingAdvisor`, all eight ordered canonical public-safe cases, two
+repetitions with seeds `42`/`43`, temperature `0.0`, `512` output tokens per
+provider turn, one `PT2M` whole-row deadline, one logical attempt with ordered
+provider turns, no pull, a 16-row sequential schedule, the exact
+`tool-case-oracle` call/argument contract, suite-specific evidence, and
+standalone offline verification/reanalysis.
+
+The clean baseline run completed on 2026-08-20 from commit `62181fb` with
+requested and effective model
+`hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0` and full digest
+`2c88e114a368b8500aabb7cf32e8a16c274d2265b640c601198a784a559bc5ed`. Its
+ignored run directory is
+`setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/`. All 16
+planned logical row attempts were executed without a timeout or retry. No
+logical row attempt completed successfully. Each first provider turn was
+classified `PROVIDER_FAILURE`; no tool call, callback, final response, usage,
+output-limit, or visible-reasoning evidence was observed. The raw evidence
+verified and deterministic reanalysis reproduced `SUMMARY.md`.
+
+This closes Phase 1 as a bounded provider-turn compatibility observation. It
+does not establish tool-calling quality, reliability, production suitability,
+or a model ranking, and the safe evidence does not identify the underlying
+provider failure cause.
 
 Any later Phase 2 prompt comparison must use conditions from the same clean Git
 commit and bind both runs to one recorded paired-execution schedule identity
@@ -78,18 +93,18 @@ the original clean commit before every row and manifest finalization, aborting
 both runs as incomplete on drift; two independent whole-condition commands are
 not an acceptable substitute.
 
-This is planning and documentation only. No `toolCompatibility` source set or
-task exists yet, no model was inspected or called, and no provider-free Phase 1
-implementation is authorized by the plan update itself. The next gate is an
-explicit project-owner instruction to implement T1.1 only. Any eventual live
-matrix remains a later, separately reviewed exact command after all Phase 1
-provider-free implementation and tests pass from a clean commit.
+Phase 1 is closed. The dedicated source sets and tasks remain provider-free by
+default, and the saved live evidence remains ignored. Phase 2 prompt
+intervention is deferred: its two-condition catalog, paired interleaved runner,
+live execution, and human interpretation require separate implementation and
+exact-command authorization. Phase 3 cohort work remains deferred as well.
 
 ## Deferred From the August Cycle
 
 | Item | Status and reason | Required gate before work begins |
 | --- | --- | --- |
 | Prompt v2 decision | Deferred. The historical paired evidence is unavailable, so no actual-human `adopt`, `revise`, or `reject` decision is claimed. Prompt v1 remains the operational default and Prompt v2 remains experimental. | Separately authorize a new paired protocol with new run names, preserved evidence, and actual human review. Do not treat agent-assisted inspection as that review. |
+| Phase 2 tool-discipline prompt comparison | Deferred. Phase 1 produced provider-turn failures for all 16 rows, so no prompt effect can be estimated from this untreated baseline alone. | Implement and provider-free test the locked paired interleaved runner, then separately authorize its exact command and fresh evidence directories. |
 | Fact-check output-budget compatibility | Deferred. A5 had ten empty outputs at its explicit `64`-token limit and two valid outputs at two completion tokens. This is an association, not a causal finding; A5 is contextual evidence only and must not serve as one arm of a causal comparison. | Pre-register a new paired experiment, detailed in [SmallModelToolCallingCompatibilityPlan.md](SmallModelToolCallingCompatibilityPlan.md) Phase 4, whose fresh 64- and 256-token arms run from the same clean Git commit, use new ignored evidence directories, and retain the immutable judge digest, prompt, fixtures, order, temperature, seeds, one-attempt policy, and no-pull behavior. If the worktree becomes dirty or the commit changes between arms, stop and restart both arms from a new clean commit. |
 | Testcontainers fact-check path | Deferred. The host-Ollama runner, provenance, and offline verification worked; container provisioning would not answer the observed verdict-yield question. | Establish a distinct service-connection or provisioning question. Keep any typed Ollama dependency, container task, and Docker behavior in `setaccio-testcontainers`, opt-in, and outside normal `test`, `build`, and CI. |
 | Relevancy evaluation and retrieval | Deferred. Ordinary fixture context is not a retrieval flow. | Add a real retrieval path that preserves the retrieved documents and can be evaluated without presenting fixture context as RAG evidence. |
