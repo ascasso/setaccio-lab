@@ -10,6 +10,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Updated the Gradle Wrapper from 9.6.1 to 9.7.1.
+- Closed the bounded Phase 1 small-model tool-compatibility baseline. The
+  clean 16-row untreated LFM2.5 run completed with offline verification and
+  deterministic reanalysis; all first provider turns were classified as
+  `PROVIDER_FAILURE`, with no observed tool calls or final responses. This is
+  a provider-turn compatibility observation only, not a quality, reliability,
+  production, or model-ranking claim. Phase 2 prompt comparison remains
+  deferred.
 
 ### Added
 
