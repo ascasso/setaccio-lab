@@ -11,13 +11,12 @@ Proposed next work after completion of:
 - the bounded Anthropic architecture-portability proof;
 - the existing standard-versus-regex Tool Search baseline.
 
-This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete.
+This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20; Phase 2 and later phases remain separately gated.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
-packet completed on 2026-08-17; its cross-document alignment does not close the
-provider-free implementation gate, which remains open until the project owner
-explicitly authorizes T1.1.
+packet completed on 2026-08-17, and provider-free T1.1-T1.8 implementation was
+completed before the separately authorized live baseline.
 
 Post-review protocol hardening completed on 2026-08-16: Phase 1 now distinguishes
 one logical row attempt from the ordered provider turns inside Spring AI's
@@ -34,6 +33,17 @@ removed rather than pulled or silently replaced, and future cohort evidence
 must distinguish model identity from artifact/runtime format. This remains
 planning only: it does not lock the Phase 3 cohort or authorize model inspection
 or execution.
+
+Phase 1 closeout completed on 2026-08-20 from clean commit `62181fb`. The
+installed LFM2.5 tag resolved to full digest
+`2c88e114a368b8500aabb7cf32e8a16c274d2265b640c601198a784a559bc5ed`. The
+locked 16-row, no-pull run executed all planned attempts without retry or
+replacement; no logical row attempt completed successfully, and each first
+turn was classified `PROVIDER_FAILURE`. No tool call, final response, usage,
+output-limit, or visible reasoning observation was retained. Offline
+verification and deterministic reanalysis passed. The evidence supports only a
+bounded provider-turn compatibility result. Phase 2 prompt intervention is
+explicitly deferred.
 
 ## Purpose
 

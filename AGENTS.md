@@ -133,7 +133,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-16)
+## Current State Snapshot (as of 2026-08-20)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -282,21 +282,30 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while
   vision verification accepts v1 evidence only.
 - The default Ollama model is `gemma4:e2b`.
-- The T0.1 documentation packet for the tracked small-model tool-calling
-  compatibility plan completed on 2026-08-17. The plan locks a future untreated
-  LFM2.5 Phase 1 protocol at the standard advisor, eight ordered canonical
-  cases, two seeded repetitions, `512` output tokens per provider turn, one
-  `PT2M` whole-row deadline, one logical attempt with ordered provider-turn/per-
-  call evidence, no pull, 16 sequential rows, an exact suite-owned semantic
-  call/argument oracle, suite-specific evidence, and offline
-  verification/reanalysis. The final row schema waits for a standard-advisor
-  observability proof. A later Phase 2 prompt comparison has one dedicated
-  paired-runner contract that must execute both conditions in a single
-  interleaved process. The plan also records exact repository paths, checks,
-  stop conditions, and Terra/Luna/Sol routing for every formal slice. T0.1 is
-  documentation only: no `toolCompatibility` source set or task exists,
-  provider-free implementation is not yet authorized, and any live matrix
-  requires a later exact-command approval after all offline tests pass.
+- The T0.1 documentation packet and provider-free T1.1-T1.8 implementation for
+  the tracked small-model tool-calling compatibility plan are complete. The
+  dedicated `toolCompatibility` and `toolCompatibilityTest` source sets lock
+  the untreated LFM2.5 protocol at the standard advisor, eight ordered
+  canonical cases, two seeded repetitions, `512` output tokens per provider
+  turn, one `PT2M` whole-row deadline, one logical attempt with ordered
+  provider-turn/per-call evidence, no pull, 16 sequential rows, and the exact
+  suite-owned semantic call/argument oracle. The opt-in matrix, verify, and
+  reanalyze tasks remain outside the default lifecycle.
+- A clean Phase 1 baseline run completed on 2026-08-20 from commit `62181fb`
+  using the installed model
+  `hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0` with full
+  digest
+  `2c88e114a368b8500aabb7cf32e8a16c274d2265b640c601198a784a559bc5ed`.
+  All 16 planned logical row attempts were executed; none timed out and none
+  was retried or replaced. No logical row attempt completed successfully;
+  every first provider turn was classified `PROVIDER_FAILURE`, with no observed
+  tool calls, final responses, usage, output-limit state, or visible reasoning markers. The
+  ignored evidence verified and reanalyzed offline. This is a bounded
+  provider-turn compatibility result, not a quality, reliability, or model
+  ranking claim.
+- Phase 2 prompt intervention remains separately deferred. Its paired
+  interleaved runner, prompt catalog, live execution, and any Phase 3 cohort
+  work require their own implementation and exact-command authorization.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -443,14 +452,11 @@ Completed:
 
 Pending and separately deferred:
 
-- The next prepared implementation gate is T1.1 in
-  [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md):
-  add only the provider-free protocol/source-set foundation and exact semantic
-  call-oracle resource after explicit project-owner authorization. T1.1 must
-  not prematurely define the final result-row schema; that waits for T1.3
-  observability. Plan hardening does not authorize T1.1, a live Ollama call,
-  model inspection or pull, Phase 2+, Docker, credentials, push, release, or
-  tag.
+- Phase 1 of
+  [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
+  is closed through one bounded clean baseline, offline verification and
+  reanalysis, and the dated public-safe interpretation. No Phase 2 prompt
+  intervention or Phase 3 cohort work is authorized by that closeout.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing

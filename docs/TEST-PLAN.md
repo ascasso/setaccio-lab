@@ -286,13 +286,12 @@ not place a live model call in default tests or CI.
 - Classify failed canonical contracts exhaustively as no search call, zero discovery, incomplete discovery, discovered-not-executed, execution failure, or output-contract failure. Preserve precedence tests and a successful zero-discovery abstention test.
 - Compare post-fix counts to both recorded and corrected July 12 counts, and require the summary to name corrected request construction and Issue #20 discovery normalization as confounders. Do not present Issue #21's chat fix as a tool pass-rate cause.
 
-## Prepared Small-Model Tool Compatibility
+## Small-Model Tool Compatibility
 
 - Follow the locked
   [`SmallModelToolCallingCompatibilityPlan.md`](SmallModelToolCallingCompatibilityPlan.md)
-  one slice at a time. Its T0.1 documentation packet is complete, but no
-  `toolCompatibility` source set, task, provider-free implementation
-  authorization, or live authorization exists yet.
+  one slice at a time. T0.1 and provider-free T1.1-T1.8 are complete, and the
+  Phase 1 live baseline has been verified and reanalyzed offline.
 - Phase 1 must use dedicated `toolCompatibility` and
   `toolCompatibilityTest` source sets under `com.setaccio.lab.toolcompat`; do
   not migrate or alter `POST /api/lab/tools`.
@@ -323,6 +322,11 @@ not place a live model call in default tests or CI.
   `toolCompatibilityCompare` to stay outside `test`, `check`, `build`,
   application startup, and CI. Verify/reanalyze/compare must not start Spring,
   resolve a model, or contact Ollama.
+- The completed Phase 1 baseline is recorded under the ignored
+  `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory.
+  Its public-safe interpretation is limited to the observed provider-turn
+  failure boundary; no quality, reliability, production, or ranking claim is
+  allowed. Phase 2 remains separately deferred and unauthorized.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.

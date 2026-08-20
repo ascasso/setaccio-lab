@@ -638,16 +638,15 @@ The endpoint writes one `*-tool-calling-comparison.json` file containing both re
 
 No new credentials are required for this path. It reuses `OLLAMA_BASE_URL` / `OLLAMA_API_BASE`, `SETACCIO_LAB_OUTPUT_DIR`, and `SETACCIO_LAB_TOOL_FIXTURE_INSTANT`.
 
-## Prepared Small-Model Tool-Compatibility Matrix
+## Small-Model Tool-Compatibility Matrix
 
 The tracked
 [Small-Model Tool-Calling Compatibility Plan](SmallModelToolCallingCompatibilityPlan.md)
-defines a future dedicated matrix. Its T0.1 documentation packet is complete,
-but no `toolCompatibility` source set or Gradle task exists yet. That
-documentation completion does not authorize provider-free implementation or a
-live model call.
+defines the dedicated Phase 1 matrix. Its T0.1 documentation packet and
+provider-free T1.1-T1.8 implementation are complete. The task is opt-in and
+remains outside the default lifecycle; saved outputs remain ignored.
 
-The future Phase 1 task contract is intentionally explicit and does not inherit
+The Phase 1 task contract is intentionally explicit and does not inherit
 application defaults or environment model selection:
 
 ```bash
@@ -712,10 +711,16 @@ verified with `toolCompatibilityVerify` before the offline comparison:
   --candidate-run=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
 ```
 
-These command names document locked future interfaces; they will fail as
-unknown tasks until the corresponding slices are explicitly authorized and
-implemented. Even after implementation, the live matrix requires a separate
-review of the exact command from a clean commit. It must never read
+Phase 1 completed on 2026-08-20 from clean commit `62181fb` with the installed
+LFM2.5 model digest
+`2c88e114a368b8500aabb7cf32e8a16c274d2265b640c601198a784a559bc5ed`. The
+16-row run verified and reanalyzed offline. Every row reached one provider
+turn classified as `PROVIDER_FAILURE`; no tool calls, final responses, usage,
+output-limit state, or visible reasoning markers were observed. This is a
+bounded compatibility observation, not a quality or reliability claim.
+
+The Phase 2 command remains a future interface and requires separate
+implementation and exact-command authorization. It must never read
 `OLLAMA_MODEL`, auto-pull the LFM model, join a default lifecycle, or publish
 ignored raw output.
 
