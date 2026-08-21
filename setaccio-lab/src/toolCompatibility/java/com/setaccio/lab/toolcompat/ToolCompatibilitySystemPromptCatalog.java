@@ -124,6 +124,15 @@ final class ToolCompatibilitySystemPromptCatalog {
                 .orElseThrow(() -> new IllegalArgumentException("Unknown tool compatibility system prompt: " + requestedPromptId));
     }
 
+    void requirePrompt(ToolCompatibilitySystemPromptIdentity identity) {
+        if (identity == null) {
+            throw new IllegalArgumentException("system-prompt identity must not be null");
+        }
+        if (!requirePrompt(identity.id()).equals(identity)) {
+            throw new IllegalArgumentException("system-prompt identity drifted from the locked catalog");
+        }
+    }
+
     private void requireLocked() {
         if (!ID.equals(id) || VERSION != version || !SHA256.equals(sha256)) {
             throw new IllegalArgumentException("Tracked tool compatibility system-prompt catalog identity drifted");

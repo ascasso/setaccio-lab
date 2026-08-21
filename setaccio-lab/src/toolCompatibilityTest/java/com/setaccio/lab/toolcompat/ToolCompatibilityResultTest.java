@@ -54,6 +54,26 @@ class ToolCompatibilityResultTest {
                 .hasMessageContaining("complete locked ordered schedule");
     }
 
+    @Test
+    void keepsPhaseOneRowsFreeOfThePhaseTwoPairedExecutionFields() {
+        ToolCompatibilityResult result = completeTimeoutResult();
+        ObjectNode serialized = objectMapper.valueToTree(result);
+        assertThat(serialized.path("rows").get(0).has("globalPairSequence")).isFalse();
+        assertThat(serialized.path("rows").get(0).has("conditionExecutionPosition")).isFalse();
+
+        ToolCompatibilityPairedSchedule.Entry pair = ToolCompatibilityPairedSchedule.locked()
+                .requireEntry(ToolCompatibilityPromptCondition.UNTREATED, 1);
+        List<ToolCompatibilityRow> pairedRows = new java.util.ArrayList<>(result.rows());
+        pairedRows.set(0, ToolCompatibilityPromptMatrixTestFixtures.withPromptAndPair(
+                pairedRows.getFirst(),
+                ToolCompatibilityProtocol.systemPromptIdentity(),
+                pair));
+        assertThatThrownBy(() -> ToolCompatibilityResult.create(
+                result.startedAt(), result.finishedAt(), result.modelIdentity(), pairedRows))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not contain paired-execution metadata");
+    }
+
     private ToolCompatibilityResult strictRead(JsonNode json) throws Exception {
         return objectMapper.readerFor(ToolCompatibilityResult.class)
                 .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)

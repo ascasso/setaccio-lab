@@ -49,6 +49,47 @@ final class ToolCompatibilityReport {
         return report.toString();
     }
 
+    String renderPromptMatrix(
+            ToolCompatibilityPromptMatrixResult result,
+            ToolCompatibilityAnalysis analysis,
+            String rawPath,
+            String rawSha256,
+            EvidenceCodeBaseline codeBaseline
+    ) {
+        if (result == null || analysis == null || codeBaseline == null) {
+            throw new IllegalArgumentException("result, analysis, and codeBaseline are required");
+        }
+        if (!ToolCompatibilityPromptMatrixResult.RAW_FILENAME.equals(rawPath)
+                || rawSha256 == null
+                || !rawSha256.matches("[0-9a-f]{64}")) {
+            throw new IllegalArgumentException(
+                    "raw evidence identity must use the locked prompt-matrix filename and SHA-256");
+        }
+        ToolCompatibilityAnalysis expectedAnalysis = new ToolCompatibilityAnalyzer().analyzePromptMatrix(result);
+        if (!expectedAnalysis.equals(analysis)) {
+            throw new ToolCompatibilityProtocolIntegrityException(
+                    "Tool compatibility prompt-matrix report analysis does not match its canonical result");
+        }
+        StringBuilder report = new StringBuilder();
+        report.append("# Tool Compatibility Prompt-Matrix Deterministic Summary\n\n");
+        protocol(report, result);
+        evidence(report, rawPath, rawSha256, codeBaseline);
+        invocation(report, analysis.invocation());
+        selection(report, analysis.toolSelection());
+        arguments(report, analysis.toolArguments());
+        execution(report, analysis.toolExecution());
+        completion(report, analysis.completion());
+        reasoning(report, analysis.reasoningStyleOutput());
+        usage(report, analysis.usageAndLatency());
+        diagnostics(report, analysis);
+        report.append("\n## Interpretation Boundary\n\n")
+                .append("This report is a deterministic summary of one paired-execution prompt condition. ")
+                .append("It makes no comparison, semantic quality judgment, prompt decision, model ranking, ")
+                .append("or combined score. The shared schedule identity records pairing for later strict ")
+                .append("offline comparison only.\n");
+        return report.toString();
+    }
+
     private static void evidence(
             StringBuilder report,
             String rawPath,
@@ -81,6 +122,38 @@ final class ToolCompatibilityReport {
         line(report, "System prompt", result.systemPromptIdentity().id()
                 + " v" + result.systemPromptIdentity().version());
         line(report, "System prompt SHA-256", result.systemPromptIdentity().sha256());
+        line(report, "Temperature", Double.toString(result.runSettings().temperature()));
+        line(report, "Seeds", result.runSettings().seeds().toString());
+        line(report, "Maximum output tokens per provider turn",
+                Integer.toString(result.runSettings().maxOutputTokensPerProviderTurn()));
+        line(report, "Logical row deadline",
+                Duration.ofMillis(result.runSettings().rowTimeoutMillis()).toString());
+        line(report, "Attempts per logical row", Integer.toString(result.runSettings().logicalRowAttempts()));
+        line(report, "Started", result.startedAt().toString());
+        line(report, "Finished", result.finishedAt().toString());
+    }
+
+    private static void protocol(StringBuilder report, ToolCompatibilityPromptMatrixResult result) {
+        report.append("## Protocol\n\n");
+        line(report, "Suite", result.suite());
+        line(report, "Protocol version", Integer.toString(result.protocolVersion()));
+        line(report, "Provider", result.provider());
+        line(report, "Execution engine", result.executionEngine());
+        line(report, "Execution strategy", result.executionStrategy());
+        line(report, "Pull strategy", result.pullModelStrategy());
+        line(report, "Prompt condition", result.promptCondition().wireValue());
+        line(report, "Requested model", result.modelIdentity().requestedModel());
+        line(report, "Effective model", result.modelIdentity().effectiveModel());
+        line(report, "Model digest", result.modelIdentity().digest());
+        line(report, "Case oracle", result.caseOracleId() + " v" + result.caseOracleVersion());
+        line(report, "Case oracle SHA-256", result.caseOracleSha256());
+        line(report, "System prompt", result.systemPromptIdentity().id()
+                + " v" + result.systemPromptIdentity().version());
+        line(report, "System prompt SHA-256", result.systemPromptIdentity().sha256());
+        line(report, "Paired schedule", result.pairedExecutionSchedule().id()
+                + " v" + result.pairedExecutionSchedule().version());
+        line(report, "Paired schedule SHA-256", result.pairedExecutionSchedule().sha256());
+        line(report, "Prompt catalog SHA-256", result.pairedExecutionSchedule().promptCatalogSha256());
         line(report, "Temperature", Double.toString(result.runSettings().temperature()));
         line(report, "Seeds", result.runSettings().seeds().toString());
         line(report, "Maximum output tokens per provider turn",

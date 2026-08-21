@@ -1,6 +1,7 @@
 package com.setaccio.lab.toolcompat;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.setaccio.lab.model.ToolBenchmarkAssertion;
 import java.time.Duration;
 import java.util.List;
@@ -20,6 +21,11 @@ record ToolCompatibilityRow(
         String systemPromptId,
         int systemPromptVersion,
         String systemPromptSha256,
+
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        Integer globalPairSequence,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
+        ToolCompatibilityConditionExecutionPosition conditionExecutionPosition,
 
         double temperature,
         int maxOutputTokensPerProviderTurn,
@@ -65,11 +71,19 @@ record ToolCompatibilityRow(
             throw new IllegalArgumentException("provider must equal the locked Ollama provider");
         }
         new ToolCompatibilityModelIdentity(requestedModel, effectiveModel, modelDigest);
-        ToolCompatibilitySystemPromptIdentity systemPrompt = ToolCompatibilityProtocol.systemPromptIdentity();
+        ToolCompatibilitySystemPromptIdentity systemPrompt = ToolCompatibilityProtocol.systemPromptCatalog()
+                .requirePrompt(systemPromptId);
         if (!systemPrompt.id().equals(systemPromptId)
                 || systemPrompt.version() != systemPromptVersion
                 || !systemPrompt.sha256().equals(systemPromptSha256)) {
-            throw new IllegalArgumentException("row system-prompt identity must equal the untreated baseline");
+            throw new IllegalArgumentException("row system-prompt identity must equal a locked catalog condition");
+        }
+        if ((globalPairSequence == null) != (conditionExecutionPosition == null)) {
+            throw new IllegalArgumentException(
+                    "paired global sequence and condition execution position must be present together");
+        }
+        if (globalPairSequence != null && globalPairSequence < 1) {
+            throw new IllegalArgumentException("paired global sequence must be positive");
         }
         ToolCompatibilityRunSettings settings = ToolCompatibilityProtocol.runSettings();
         if (Double.compare(temperature, settings.temperature()) != 0

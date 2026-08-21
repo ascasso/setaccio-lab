@@ -79,6 +79,10 @@ record ToolCompatibilityResult(
         if (!expectedSchedule.equals(orderedSchedule) || rows.size() != orderedSchedule.size()) {
             throw new IllegalArgumentException("result must contain the complete locked ordered schedule");
         }
+        if (rows.stream().anyMatch(row -> row.globalPairSequence() != null
+                || row.conditionExecutionPosition() != null)) {
+            throw new IllegalArgumentException("Phase 1 result rows must not contain paired-execution metadata");
+        }
         for (int index = 0; index < rows.size(); index++) {
             ToolCompatibilityCaseSelection.ScheduledCase scheduledCase = orderedSchedule.get(index);
             ToolCompatibilityRow row = rows.get(index);
