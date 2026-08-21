@@ -20,9 +20,11 @@ import java.util.Objects;
 final class ToolCompatibilityPromptMatrixComparison {
 
     private final ToolCompatibilityPromptMatrixEvidence evidence;
+    private final ToolCompatibilityPromptMatrixComparisonReport report;
 
     ToolCompatibilityPromptMatrixComparison(ObjectMapper objectMapper) {
         evidence = new ToolCompatibilityPromptMatrixEvidence(objectMapper);
+        report = new ToolCompatibilityPromptMatrixComparisonReport();
     }
 
     ComparisonResult compare(Path baselineDirectory, Path candidateDirectory) {
@@ -35,7 +37,8 @@ final class ToolCompatibilityPromptMatrixComparison {
                 baseline.manifest().runId(),
                 candidate.manifest().runId(),
                 baseline.result().pairedExecutionSchedule().sha256(),
-                baseline.result().rows().size());
+                baseline.result().rows().size(),
+                report.render(baseline, candidate));
     }
 
     private static void validateComparable(
@@ -319,12 +322,14 @@ final class ToolCompatibilityPromptMatrixComparison {
             String baselineRunId,
             String candidateRunId,
             String pairedScheduleSha256,
-            int pairedRowCount
+            int pairedRowCount,
+            String report
     ) {
 
         ComparisonResult {
             if (baselineRunId == null || candidateRunId == null || pairedScheduleSha256 == null
-                    || pairedRowCount != ToolCompatibilityProtocol.ROW_COUNT) {
+                    || pairedRowCount != ToolCompatibilityProtocol.ROW_COUNT
+                    || report == null || report.isBlank()) {
                 throw new IllegalArgumentException("complete verified paired comparison identity is required");
             }
         }

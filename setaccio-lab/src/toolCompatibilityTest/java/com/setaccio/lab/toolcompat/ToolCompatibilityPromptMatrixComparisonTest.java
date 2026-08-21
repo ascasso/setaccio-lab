@@ -11,11 +11,15 @@ import com.setaccio.lab.evidence.EvidenceFrameworkVersions;
 import com.setaccio.lab.evidence.EvidenceIntegrity;
 import com.setaccio.lab.evidence.EvidenceManifest;
 import com.setaccio.lab.evidence.EvidenceManifestStore;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -73,6 +77,59 @@ class ToolCompatibilityPromptMatrixComparisonTest {
         assertThat(result.candidateRunId()).isEqualTo(pair.candidate().directory().getFileName().toString());
         assertThat(result.pairedScheduleSha256()).isEqualTo(ToolCompatibilityPairedSchedule.SHA256);
         assertThat(result.pairedRowCount()).isEqualTo(ToolCompatibilityProtocol.ROW_COUNT);
+    }
+
+    @Test
+    void rendersAllPairedTransitionsAndDeltasInStableCaseThenRepetitionOrder() throws Exception {
+        Pair pair = writePair(
+                "report",
+                reportResult(ToolCompatibilityPromptCondition.UNTREATED, this::reportBaselineRow),
+                reportResult(ToolCompatibilityPromptCondition.PROMPTED, this::reportCandidateRow),
+                CLEAN_BASELINE,
+                CLEAN_BASELINE);
+
+        String first = comparison.compare(pair.baseline().directory(), pair.candidate().directory()).report();
+        String second = comparison.compare(pair.baseline().directory(), pair.candidate().directory()).report();
+
+        assertThat(first).isEqualTo(second);
+        assertThat(first)
+                .contains("| `arithmetic-add` | 1 | fail → pass | newly selected `lab_add_numbers`")
+                .contains("| `fixed-utc-time` | 1 | pass → fail | newly missed `lab_fixed_utc_now`")
+                .contains("| `fixed-zone-time` | 1 | pass → fail | none |")
+                .contains("| `catalog-lookup` | 1 | unchanged fail |")
+                .contains("newly matched")
+                .contains("newly mismatched")
+                .contains("unchanged matched")
+                .contains("not reached → not reached")
+                .contains("newly present")
+                .contains("newly empty")
+                .contains("introduced")
+                .contains("removed")
+                .contains("newly selected `lab_add_numbers`")
+                .contains("later failures none → #2")
+                .contains("row aggregate reached → not reached")
+                .contains("516 → 2 (delta -514)")
+                .contains("50 ms → 55 ms (+5 ms)")
+                .contains("does not declare an overall winner, aggregate score, prompt-adoption decision, or human interpretation")
+                .doesNotContain(
+                        temporaryDirectory.toString(),
+                        "synthetic provider detail",
+                        "Thinking... selecting the required tool",
+                        "Here's a thinking process");
+        assertThat(first)
+                .isEqualTo(readComparisonGolden("tool-compatibility/prompt-matrix-comparison-v1.md"));
+    }
+
+    @Test
+    void rejectsIncompleteCandidateEvidenceBeforeRenderingAReport() throws Exception {
+        Pair baseline = writePair("complete");
+        Path incompleteCandidate = Files.createDirectory(temporaryDirectory.resolve("incomplete-candidate"));
+
+        assertThatThrownBy(() -> comparison.compare(
+                baseline.baseline().directory(), incompleteCandidate))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("The candidate run did not verify")
+                .hasMessageContaining("manifest");
     }
 
     @Test
@@ -297,6 +354,160 @@ class ToolCompatibilityPromptMatrixComparisonTest {
                 ToolCompatibilityPromptCondition.PROMPTED,
                 pairedSchedule,
                 rows);
+    }
+
+    private ToolCompatibilityPromptMatrixResult reportResult(
+            ToolCompatibilityPromptCondition condition,
+            Function<ToolCompatibilityCaseSelection.ScheduledCase, ToolCompatibilityRow> sourceRows
+    ) {
+        ToolCompatibilityPairedSchedule pairedSchedule = ToolCompatibilityPairedSchedule.locked();
+        ToolCompatibilitySystemPromptIdentity prompt = condition.prompt(
+                ToolCompatibilityProtocol.systemPromptCatalog());
+        List<ToolCompatibilityRow> rows = ToolCompatibilityAnalysisTestFixtures.schedule().stream()
+                .map(scheduled -> ToolCompatibilityPromptMatrixTestFixtures.withPromptAndPair(
+                        sourceRows.apply(scheduled),
+                        prompt,
+                        pairedSchedule.requireEntry(condition, scheduled.sequence())))
+                .toList();
+        return ToolCompatibilityPromptMatrixResult.create(
+                Instant.parse("2026-08-21T14:00:00Z"),
+                Instant.parse("2026-08-21T15:00:00Z"),
+                ToolCompatibilityAnalysisTestFixtures.MODEL_IDENTITY,
+                condition,
+                pairedSchedule,
+                rows);
+    }
+
+    private ToolCompatibilityRow reportBaselineRow(
+            ToolCompatibilityCaseSelection.ScheduledCase scheduled
+    ) {
+        return switch (scheduled.sequence()) {
+            case 1 -> ToolCompatibilityAnalysisTestFixtures.providerFailureRow(scheduled, 35);
+            case 4 -> ToolCompatibilityAnalysisTestFixtures.providerFailureRow(scheduled, 45);
+            default -> ToolCompatibilityAnalysisTestFixtures.successfulRow(
+                    scheduled, scheduled.sequence() * 10L);
+        };
+    }
+
+    private ToolCompatibilityRow reportCandidateRow(
+            ToolCompatibilityCaseSelection.ScheduledCase scheduled
+    ) {
+        return switch (scheduled.sequence()) {
+            case 1 -> ToolCompatibilityAnalysisTestFixtures.successfulRow(scheduled, 10);
+            case 2 -> ToolCompatibilityAnalysisTestFixtures.providerFailureRow(scheduled, 45);
+            case 3 -> semanticArgumentMismatchRow(scheduled);
+            case 4 -> ToolCompatibilityAnalysisTestFixtures.providerFailureRow(scheduled, 45);
+            case 5 -> laterProviderFailureRow(scheduled);
+            case 7 -> forbiddenToolSelectedRow(scheduled);
+            default -> ToolCompatibilityAnalysisTestFixtures.successfulRow(
+                    scheduled, scheduled.sequence() * 10L);
+        };
+    }
+
+    private ToolCompatibilityRow semanticArgumentMismatchRow(
+            ToolCompatibilityCaseSelection.ScheduledCase scheduled
+    ) {
+        ToolCompatibilityExpectedCall expected = ToolCompatibilityProtocol.caseOracle()
+                .requireCase(scheduled.caseId())
+                .calls()
+                .getFirst();
+        return ToolCompatibilityAnalysisTestFixtures.row(
+                scheduled,
+                List.of(new ToolCompatibilityAnalysisTestFixtures.CallSpec(
+                        expected.toolName(), "{\"zoneId\":\"UTC\"}")),
+                List.of("", ToolCompatibilityAnalysisTestFixtures.finalText(scheduled.caseId())),
+                33);
+    }
+
+    private ToolCompatibilityRow forbiddenToolSelectedRow(
+            ToolCompatibilityCaseSelection.ScheduledCase scheduled
+    ) {
+        ToolCompatibilityExpectedCall arithmetic = ToolCompatibilityProtocol.caseOracle()
+                .requireCase("arithmetic-add")
+                .calls()
+                .getFirst();
+        return ToolCompatibilityAnalysisTestFixtures.row(
+                scheduled,
+                List.of(new ToolCompatibilityAnalysisTestFixtures.CallSpec(
+                        arithmetic.toolName(), arithmetic.arguments().toString())),
+                List.of("", ToolCompatibilityAnalysisTestFixtures.finalText(scheduled.caseId())),
+                75);
+    }
+
+    private ToolCompatibilityRow laterProviderFailureRow(
+            ToolCompatibilityCaseSelection.ScheduledCase scheduled
+    ) {
+        ToolCompatibilityExpectedCall firstExpectedCall = ToolCompatibilityProtocol.caseOracle()
+                .requireCase(scheduled.caseId())
+                .calls()
+                .getFirst();
+        String callId = "later-" + scheduled.sequence() + "-call-1";
+        ToolCompatibilityInvocationTrace trace = new ToolCompatibilityInvocationTrace(
+                ToolCompatibilityInvocationStatus.PROVIDER_FAILURE,
+                List.of(
+                        new ToolCompatibilityObservedProviderTurn(
+                                1,
+                                "",
+                                List.of(callId),
+                                "later-" + scheduled.sequence() + "-turn-1",
+                                "fake-model",
+                                Map.of("provider", "fixture"),
+                                "tool_calls",
+                                4,
+                                2,
+                                6,
+                                false,
+                                2,
+                                ToolCompatibilityProviderTurnState.COMPLETED,
+                                null),
+                        new ToolCompatibilityObservedProviderTurn(
+                                2,
+                                null,
+                                List.of(),
+                                null,
+                                null,
+                                Map.of(),
+                                null,
+                                null,
+                                null,
+                                null,
+                                null,
+                                3,
+                                ToolCompatibilityProviderTurnState.PROVIDER_FAILURE,
+                                "synthetic later provider detail")),
+                List.of(new ToolCompatibilityObservedToolCall(
+                        1,
+                        1,
+                        callId,
+                        "function",
+                        firstExpectedCall.toolName(),
+                        firstExpectedCall.arguments().toString(),
+                        true,
+                        true,
+                        null,
+                        1,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        "synthetic callback response",
+                        null,
+                        null)),
+                "synthetic later provider detail",
+                true,
+                55);
+        return new ToolCompatibilityRowAnalyzer().analyze(
+                scheduled, ToolCompatibilityAnalysisTestFixtures.MODEL_IDENTITY, trace);
+    }
+
+    private static String readComparisonGolden(String resource) throws Exception {
+        try (InputStream input = ToolCompatibilityPromptMatrixComparisonTest.class
+                .getClassLoader()
+                .getResourceAsStream(resource)) {
+            assertThat(input).as("golden comparison report resource").isNotNull();
+            return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
     private EvidenceManifest readManifest(Run run) {

@@ -21,11 +21,7 @@ public final class ToolCompatibilityPromptMatrixComparisonRunner {
                         JsonMapper.builder().findAndAddModules().build())
                         .compare(baseline, candidate);
 
-        System.out.println("Tool compatibility prompt-matrix comparison gate passed:");
-        System.out.println("  Baseline: " + comparison.baselineRunId());
-        System.out.println("  Candidate: " + comparison.candidateRunId());
-        System.out.println("  Paired schedule SHA-256: " + comparison.pairedScheduleSha256());
-        System.out.println("  Paired rows: " + comparison.pairedRowCount());
+        System.out.print(comparison.report());
     }
 
     record Arguments(String baselineRun, String candidateRun) {
