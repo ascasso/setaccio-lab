@@ -74,6 +74,22 @@ class ToolCompatibilityResultTest {
                 .hasMessageContaining("must not contain paired-execution metadata");
     }
 
+    @Test
+    void strictResultReadRejectsPromptedRowsWithoutPairedExecutionFields() {
+        ObjectNode serialized = objectMapper.valueToTree(completeTimeoutResult());
+        ObjectNode row = (ObjectNode) serialized.path("rows").get(0);
+        ToolCompatibilitySystemPromptIdentity prompted = ToolCompatibilityPromptCondition.PROMPTED.prompt(
+                ToolCompatibilityProtocol.systemPromptCatalog());
+        row.put("systemPromptId", prompted.id());
+        row.put("systemPromptVersion", prompted.version());
+        row.put("systemPromptSha256", prompted.sha256());
+
+        assertThatThrownBy(() -> strictRead(serialized))
+                .rootCause()
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("system-prompt");
+    }
+
     private ToolCompatibilityResult strictRead(JsonNode json) throws Exception {
         return objectMapper.readerFor(ToolCompatibilityResult.class)
                 .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
