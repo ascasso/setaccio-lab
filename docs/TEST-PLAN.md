@@ -326,7 +326,12 @@ not place a live model call in default tests or CI.
   `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory.
   Its public-safe interpretation is limited to the observed provider-turn
   failure boundary; no quality, reliability, production, or ranking claim is
-  allowed. Phase 2 remains separately deferred and unauthorized.
+  allowed. The authorized Phase 2 paired run is recorded under the two ignored
+  `2026-08-21-lfm-prompt-untreated` and `2026-08-21-lfm-prompted` directories;
+  both verify and reanalyze offline, and `toolCompatibilityCompare` passes.
+  Both conditions reached the same first `PROVIDER_FAILURE` boundary on every
+  row, so no prompt-effect or quality conclusion is permitted. The T2.5 human
+  decision worksheet remains blank and Phase 3 is still gated.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.

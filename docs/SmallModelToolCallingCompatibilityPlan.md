@@ -11,7 +11,7 @@ Proposed next work after completion of:
 - the bounded Anthropic architecture-portability proof;
 - the existing standard-versus-regex Tool Search baseline.
 
-This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20; Phase 2 and later phases remain separately gated.
+This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21; its T2.5 human decision remains open, and Phase 3 remains separately gated.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
@@ -42,8 +42,20 @@ replacement; no logical row attempt completed successfully, and each first
 turn was classified `PROVIDER_FAILURE`. No tool call, final response, usage,
 output-limit, or visible reasoning observation was retained. Offline
 verification and deterministic reanalysis passed. The evidence supports only a
-bounded provider-turn compatibility result. Phase 2 prompt intervention is
-explicitly deferred.
+bounded provider-turn compatibility result. At that point Phase 2 prompt
+intervention was explicitly deferred.
+
+Phase 2 execution and deterministic closeout completed on 2026-08-21 from
+clean commit `80bc122514938e746cef7ed2c75b921b3a7876f9`. One interleaved
+32-attempt run produced the untreated and prompted 16-row conditions for the
+same installed model digest and locked settings. Both conditions verified and
+reanalyzed offline, and the strict paired comparison reproduced
+deterministically. Every row in both conditions stopped at the same first
+`PROVIDER_FAILURE` boundary, so the evidence supports no prompt-effect,
+quality, reliability, or ranking conclusion. The ignored T2.5 worksheet is
+prepared but still blank: only the project owner may record `adopt`, `revise`,
+`reject`, or `inconclusive`. Until that decision is recorded, Phase 3 remains
+blocked.
 
 ## Purpose
 

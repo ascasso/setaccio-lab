@@ -1,7 +1,7 @@
 # Deferred Work
 
-Status: current after Phase 1 small-model tool-compatibility closeout on
-2026-08-20.
+Status: current after Phase 2 small-model tool-compatibility evidence closeout
+on 2026-08-21.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -82,29 +82,21 @@ does not establish tool-calling quality, reliability, production suitability,
 or a model ranking, and the safe evidence does not identify the underlying
 provider failure cause.
 
-Any later Phase 2 prompt comparison must use conditions from the same clean Git
-commit and bind both runs to one recorded paired-execution schedule identity
-that proves the locked interleaved alternating order. Worktree or commit drift
-between conditions stops the protocol; both conditions must then restart from a
-new clean commit. The only planned live interface is one dedicated
-`toolCompatibilityPromptMatrix` invocation that preflights both fresh outputs
-and executes all 32 logical attempts in one interleaved process. It re-checks
-the original clean commit before every row and manifest finalization, aborting
-both runs as incomplete on drift; two independent whole-condition commands are
-not an acceptable substitute.
-
 Phase 1 is closed. The dedicated source sets and tasks remain provider-free by
-default, and the saved live evidence remains ignored. Phase 2 prompt
-intervention is deferred: its two-condition catalog, paired interleaved runner,
-live execution, and human interpretation require separate implementation and
-exact-command authorization. Phase 3 cohort work remains deferred as well.
+default, and the saved live evidence remains ignored. Phase 2 execution and
+deterministic closeout are also complete: both conditions were verified,
+reanalyzed, and strictly compared from one interleaved run. Every row reached
+the same first `PROVIDER_FAILURE` boundary, so no prompt-effect conclusion is
+claimed. The ignored T2.5 worksheet is prepared but its owner-only human
+decision is still pending; Phase 3 cohort work remains deferred until that
+decision and separate authorization.
 
 ## Deferred From the August Cycle
 
 | Item | Status and reason | Required gate before work begins |
 | --- | --- | --- |
 | Prompt v2 decision | Deferred. The historical paired evidence is unavailable, so no actual-human `adopt`, `revise`, or `reject` decision is claimed. Prompt v1 remains the operational default and Prompt v2 remains experimental. | Separately authorize a new paired protocol with new run names, preserved evidence, and actual human review. Do not treat agent-assisted inspection as that review. |
-| Phase 2 tool-discipline prompt comparison | Deferred. Phase 1 produced provider-turn failures for all 16 rows, so no prompt effect can be estimated from this untreated baseline alone. | Implement and provider-free test the locked paired interleaved runner, then separately authorize its exact command and fresh evidence directories. |
+| Phase 2 human interpretation | Pending. The paired 32-attempt run, offline verification/reanalysis, and strict deterministic comparison completed, but the owner has not yet recorded `adopt`, `revise`, `reject`, or `inconclusive` in the ignored T2.5 worksheet. Both conditions reached the same first provider-failure boundary, so no prompt effect is claimed. | Record the owner-only decision against both run identities, the prompt catalog, and comparison report. Do not start Phase 3 before the decision and separate Phase 3 authorization. |
 | Fact-check output-budget compatibility | Deferred. A5 had ten empty outputs at its explicit `64`-token limit and two valid outputs at two completion tokens. This is an association, not a causal finding; A5 is contextual evidence only and must not serve as one arm of a causal comparison. | Pre-register a new paired experiment, detailed in [SmallModelToolCallingCompatibilityPlan.md](SmallModelToolCallingCompatibilityPlan.md) Phase 4, whose fresh 64- and 256-token arms run from the same clean Git commit, use new ignored evidence directories, and retain the immutable judge digest, prompt, fixtures, order, temperature, seeds, one-attempt policy, and no-pull behavior. If the worktree becomes dirty or the commit changes between arms, stop and restart both arms from a new clean commit. |
 | Testcontainers fact-check path | Deferred. The host-Ollama runner, provenance, and offline verification worked; container provisioning would not answer the observed verdict-yield question. | Establish a distinct service-connection or provisioning question. Keep any typed Ollama dependency, container task, and Docker behavior in `setaccio-testcontainers`, opt-in, and outside normal `test`, `build`, and CI. |
 | Relevancy evaluation and retrieval | Deferred. Ordinary fixture context is not a retrieval flow. | Add a real retrieval path that preserves the retrieved documents and can be evaluated without presenting fixture context as RAG evidence. |

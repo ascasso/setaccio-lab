@@ -303,9 +303,12 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   ignored evidence verified and reanalyzed offline. This is a bounded
   provider-turn compatibility result, not a quality, reliability, or model
   ranking claim.
-- Phase 2 prompt intervention remains separately deferred. Its paired
-  interleaved runner, prompt catalog, live execution, and any Phase 3 cohort
-  work require their own implementation and exact-command authorization.
+- Phase 2 prompt intervention completed its authorized paired execution and
+  deterministic closeout on 2026-08-21 from clean commit `80bc122`. The two
+  ignored 16-row conditions verify, reanalyze, and compare successfully, but
+  every row reached the same first `PROVIDER_FAILURE` boundary. This supports
+  no prompt-effect, quality, reliability, or ranking claim. The owner-only T2.5
+  human decision remains pending, and Phase 3 cohort work is still gated.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -455,8 +458,10 @@ Pending and separately deferred:
 - Phase 1 of
   [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
   is closed through one bounded clean baseline, offline verification and
-  reanalysis, and the dated public-safe interpretation. No Phase 2 prompt
-  intervention or Phase 3 cohort work is authorized by that closeout.
+  reanalysis, and the dated public-safe interpretation. Phase 2's paired
+  execution and deterministic comparison are complete, but its owner-only
+  human decision is still pending; Phase 3 cohort work is not authorized by
+  that evidence closeout.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing
