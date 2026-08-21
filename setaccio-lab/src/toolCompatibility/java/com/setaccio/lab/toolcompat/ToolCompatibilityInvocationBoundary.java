@@ -105,8 +105,18 @@ final class ToolCompatibilityInvocationBoundary {
             ToolCompatibilityCaseSelection.ScheduledCase scheduledCase,
             List<ToolCallback> callbacks
     ) {
+        return invoke(chatModel, scheduledCase, callbacks, ToolCompatibilityProtocol.systemPromptIdentity());
+    }
+
+    synchronized ToolCompatibilityInvocationTrace invoke(
+            ChatModel chatModel,
+            ToolCompatibilityCaseSelection.ScheduledCase scheduledCase,
+            List<ToolCallback> callbacks,
+            ToolCompatibilitySystemPromptIdentity systemPrompt
+    ) {
         Objects.requireNonNull(chatModel, "chatModel must not be null");
         Objects.requireNonNull(scheduledCase, "scheduledCase must not be null");
+        ToolCompatibilityProtocol.systemPromptCatalog().requirePrompt(systemPrompt);
         if (!nextSequentialAttemptAllowed) {
             throw new ToolCompatibilityProtocolIntegrityException(
                     "A previous timed-out tool compatibility attempt did not stop safely");
@@ -130,7 +140,13 @@ final class ToolCompatibilityInvocationBoundary {
         ExecutorService executor = newSingleWorker();
         long attemptStarted = System.nanoTime();
         Future<Void> future = executor.submit(invokeTask(
-                chatModel, prompt, scheduledCase.seed(), settings, observedCallbacks, observingAdvisor));
+                chatModel,
+                prompt,
+                scheduledCase.seed(),
+                settings,
+                observedCallbacks,
+                observingAdvisor,
+                systemPrompt));
         try {
             future.get(rowDeadline.toNanos(), TimeUnit.NANOSECONDS);
             recorder.complete();
@@ -190,7 +206,8 @@ final class ToolCompatibilityInvocationBoundary {
             int seed,
             ToolCompatibilityRunSettings settings,
             List<ToolCallback> callbacks,
-            ObservingAdvisor observingAdvisor
+            ObservingAdvisor observingAdvisor,
+            ToolCompatibilitySystemPromptIdentity systemPrompt
     ) {
         return () -> {
             OllamaChatOptions options = OllamaChatOptions.builder()
@@ -202,10 +219,14 @@ final class ToolCompatibilityInvocationBoundary {
             ToolCallingAdvisor toolCallingAdvisor = ToolCallingAdvisor.builder()
                     .toolCallingManager(ToolCallingManager.builder().build())
                     .build();
-            ChatClient.builder(chatModel)
+            ChatClient.ChatClientRequestSpec request = ChatClient.builder(chatModel)
                     .defaultAdvisors(toolCallingAdvisor, observingAdvisor)
                     .build()
-                    .prompt(prompt.text())
+                    .prompt();
+            if (systemPrompt.present()) {
+                request.system(systemPrompt.text());
+            }
+            request.user(prompt.text())
                     .options(options.mutate())
                     .tools(callbacks)
                     .call()

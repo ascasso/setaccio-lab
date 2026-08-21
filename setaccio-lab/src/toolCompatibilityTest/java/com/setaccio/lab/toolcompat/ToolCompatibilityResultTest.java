@@ -54,6 +54,42 @@ class ToolCompatibilityResultTest {
                 .hasMessageContaining("complete locked ordered schedule");
     }
 
+    @Test
+    void keepsPhaseOneRowsFreeOfThePhaseTwoPairedExecutionFields() {
+        ToolCompatibilityResult result = completeTimeoutResult();
+        ObjectNode serialized = objectMapper.valueToTree(result);
+        assertThat(serialized.path("rows").get(0).has("globalPairSequence")).isFalse();
+        assertThat(serialized.path("rows").get(0).has("conditionExecutionPosition")).isFalse();
+
+        ToolCompatibilityPairedSchedule.Entry pair = ToolCompatibilityPairedSchedule.locked()
+                .requireEntry(ToolCompatibilityPromptCondition.UNTREATED, 1);
+        List<ToolCompatibilityRow> pairedRows = new java.util.ArrayList<>(result.rows());
+        pairedRows.set(0, ToolCompatibilityPromptMatrixTestFixtures.withPromptAndPair(
+                pairedRows.getFirst(),
+                ToolCompatibilityProtocol.systemPromptIdentity(),
+                pair));
+        assertThatThrownBy(() -> ToolCompatibilityResult.create(
+                result.startedAt(), result.finishedAt(), result.modelIdentity(), pairedRows))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not contain paired-execution metadata");
+    }
+
+    @Test
+    void strictResultReadRejectsPromptedRowsWithoutPairedExecutionFields() {
+        ObjectNode serialized = objectMapper.valueToTree(completeTimeoutResult());
+        ObjectNode row = (ObjectNode) serialized.path("rows").get(0);
+        ToolCompatibilitySystemPromptIdentity prompted = ToolCompatibilityPromptCondition.PROMPTED.prompt(
+                ToolCompatibilityProtocol.systemPromptCatalog());
+        row.put("systemPromptId", prompted.id());
+        row.put("systemPromptVersion", prompted.version());
+        row.put("systemPromptSha256", prompted.sha256());
+
+        assertThatThrownBy(() -> strictRead(serialized))
+                .rootCause()
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("system-prompt");
+    }
+
     private ToolCompatibilityResult strictRead(JsonNode json) throws Exception {
         return objectMapper.readerFor(ToolCompatibilityResult.class)
                 .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)

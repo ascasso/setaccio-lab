@@ -1,5 +1,17 @@
 /**
- * Provider-free T1.8 requirement-to-test map.
+ * Provider-free tool-compatibility requirement-to-test map.
+ *
+ * <p>Prompt catalog:</p>
+ * <ul>
+ *   <li>Exactly two ordered conditions, their catalog and per-prompt SHA-256 identities, and
+ *       exact UTF-8 tool-discipline bytes:
+ *       {@code ToolCompatibilitySystemPromptCatalogTest#locksExactlyTwoOrderedPromptConditionsWithExactUtf8Bytes}.</li>
+ *   <li>Catalog byte, text, and condition-order drift:
+ *       {@code ToolCompatibilitySystemPromptCatalogTest#rejectsCatalogByteTextAndConditionOrderDrift}.</li>
+ *   <li>Phase 2's exact case-major 32-row alternating schedule and schedule-content drift:
+ *       {@code ToolCompatibilityPairedScheduleTest#locksTheExactCaseMajorAlternatingThirtyTwoRowOrder}
+ *       and {@code #rejectsScheduleContentDriftEvenWhenItsDigestIsRecomputed}.</li>
+ * </ul>
  *
  * <p>Preflight:</p>
  * <ul>
@@ -21,6 +33,10 @@
  *   <li>Invalid token and timeout bounds:
  *       {@code ToolCompatibilityPreflightTest#rejectsInvalidTokenBounds} and
  *       {@code #rejectsInvalidTimeoutBounds}.</li>
+ *   <li>Paired fresh-output preflight, clean Git baseline, and drift before or between allocation:
+ *       {@code ToolCompatibilityPromptMatrixPreflightTest#preflightsBothFreshOutputsAndTheCleanProtocolBeforeAnyAllocation},
+ *       {@code #refusesRepositoryDriftBeforeEitherOutputIsAllocated}, and
+ *       {@code #leavesTheFirstAllocatedDirectoryIncompleteWhenRepositoryDriftPreventsTheSecond}.</li>
  * </ul>
  *
  * <p>Execution:</p>
@@ -53,6 +69,13 @@
  *   <li>Retained turns at the row deadline and proof of no timeout overlap:
  *       {@code ToolCompatibilityInvocationBoundaryTest#preservesCompletedObservationsAndPreventsOverlapAfterAnInterruptedRowTimeout}
  *       and {@code #refusesTheNextSequentialAttemptWhenTimedOutProviderWorkIgnoresInterruption}.</li>
+ *   <li>Exact paired interleaving, only prompted system-message injection, one-attempt failure
+ *       retention, and repository drift before a row or either manifest finalization:
+ *       {@code ToolCompatibilityPromptMatrixExecutorTest#executesTheExactInterleavedScheduleAndInjectsOnlyThePromptedSystemMessage},
+ *       {@code #retainsOneProviderFailureWithoutReplacingTheLogicalRowOrChangingTheSchedule},
+ *       {@code #abortsBeforeTheNextLogicalRowWhenTheRepositoryDrifts}, and
+ *       {@code #leavesBothConditionRunsIncompleteWhenTheRepositoryDriftsBeforeManifestFinalization}
+ *       and {@code #invalidatesTheFirstManifestWhenRepositoryDriftPreventsTheSecondFinalization}.</li>
  * </ul>
  *
  * <p>Evidence:</p>
@@ -81,6 +104,29 @@
  *   <li>Summary drift and deterministic byte-identical reanalysis:
  *       {@code ToolCompatibilityEvidenceTest#rejectsManifestSettingsDriftAndRepairsOnlySummaryDriftByteForByte}
  *       and {@code #standaloneRunnerVerifiesAndReanalyzesWithoutStartingSpring}.</li>
+ *   <li>Paired condition three-artifact evidence, shared schedule metadata, and incomplete-run
+ *       rejection:
+ *       {@code ToolCompatibilityPromptMatrixEvidenceTest#writesAndVerifiesOneExactThreeArtifactConditionRunWithTheSharedSchedule}
+ *       and {@code #rejectsIncompleteEvidenceAndRegeneratesOnlyADriftedSummary}.</li>
+ *   <li>Phase 1 schema isolation from paired row fields:
+ *       {@code ToolCompatibilityResultTest#keepsPhaseOneRowsFreeOfThePhaseTwoPairedExecutionFields}.</li>
+ * </ul>
+ *
+ * <p>Phase 2 comparison gate:</p>
+ * <ul>
+ *   <li>One fully verified untreated/prompted pair accepts the schedule-derived, intentionally
+ *       different execution positions and permits changed observed outcomes:
+ *       {@code ToolCompatibilityPromptMatrixComparisonTest#acceptsOneVerifiedPairWithExpectedDifferentPositionsAndObservedOutcomes}.</li>
+ *   <li>Model identity, framework, clean shared Git commit, dirty-worktree, and prompt-role
+ *       mismatches:
+ *       {@code ToolCompatibilityPromptMatrixComparisonTest#rejectsValidModelFrameworkAndGitParityMismatches}
+ *       and {@code #rejectsReversedPromptRolesBeforeAnySemanticComparison}.</li>
+ *   <li>Raw protocol, schedule, missing/equal/inconsistent paired-position, tool-catalog,
+ *       semantic-oracle, setting, and policy tampering is rejected during strict offline
+ *       verification before comparison:
+ *       {@code ToolCompatibilityPromptMatrixComparisonTest#rejectsEveryLockedRawProtocolTamperBeforeComparison}.</li>
+ *   <li>Exactly one baseline and one candidate CLI option:
+ *       {@code ToolCompatibilityPromptMatrixComparisonRunnerArgumentsTest#requiresBothSavedRunsExactlyOnce}.</li>
  * </ul>
  */
 package com.setaccio.lab.toolcompat;

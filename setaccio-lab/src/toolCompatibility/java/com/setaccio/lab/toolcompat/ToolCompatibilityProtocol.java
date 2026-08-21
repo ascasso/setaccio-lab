@@ -61,6 +61,10 @@ final class ToolCompatibilityProtocol {
         return ToolCompatibilitySystemPromptIdentity.untreated();
     }
 
+    static ToolCompatibilitySystemPromptCatalog systemPromptCatalog() {
+        return ToolCompatibilitySystemPromptCatalog.loadLocked();
+    }
+
     static Map<String, Object> manifestSettings(ToolCompatibilityResult result) {
         if (result == null) {
             throw new IllegalArgumentException("result must not be null");

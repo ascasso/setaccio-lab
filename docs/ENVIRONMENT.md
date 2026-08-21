@@ -684,8 +684,11 @@ The planned provider-free and offline commands are:
   --run-dir=build/tool-compatibility/<saved-run>
 ```
 
-The later Phase 2 prompt intervention has a separate locked paired-runner
-interface so the Phase 1 CLI does not change:
+Phase 2 uses a separate locked paired-runner interface so the Phase 1 CLI does
+not change. The completed 2026-08-21 run used the same clean commit, model
+digest, and settings for both conditions and wrote these ignored directories:
+`build/tool-compatibility/2026-08-21-lfm-prompt-untreated` and
+`build/tool-compatibility/2026-08-21-lfm-prompted`.
 
 ```bash
 ./gradlew :setaccio-lab:toolCompatibilityPromptMatrix \
@@ -697,13 +700,14 @@ interface so the Phase 1 CLI does not change:
   --candidate-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
 ```
 
-That future task must preflight both fresh direct-child output paths before
-allocation and execute both 16-row conditions in one 32-attempt interleaved
-process. It must re-check the original commit and clean-worktree state before
+The task preflights both fresh direct-child output paths before
+allocation and executes both 16-row conditions in one 32-attempt interleaved
+process. It re-checks the original commit and clean-worktree state before
 every row and before finalizing either manifest, aborting both runs as
-incomplete on drift. It may run only after Phase 1 closeout, Phase 2 provider-free
-implementation, and separate approval of the exact command. Each output is then
-verified with `toolCompatibilityVerify` before the offline comparison:
+incomplete on drift. It ran only after Phase 1 closeout, Phase 2 provider-free
+implementation, and separate approval of the exact command. Each output was
+verified with `toolCompatibilityVerify` and reanalyzed offline before the
+comparison:
 
 ```bash
 ./gradlew :setaccio-lab:toolCompatibilityCompare \
@@ -719,10 +723,12 @@ turn classified as `PROVIDER_FAILURE`; no tool calls, final responses, usage,
 output-limit state, or visible reasoning markers were observed. This is a
 bounded compatibility observation, not a quality or reliability claim.
 
-The Phase 2 command remains a future interface and requires separate
-implementation and exact-command authorization. It must never read
-`OLLAMA_MODEL`, auto-pull the LFM model, join a default lifecycle, or publish
-ignored raw output.
+Both conditions reached the same first `PROVIDER_FAILURE` boundary on all 16
+rows. This is a bounded provider-turn observation, not a prompt-effect,
+quality, reliability, or ranking result. The T2.5 worksheet is ignored and
+requires the owner's human decision before any Phase 3 cohort work. The task
+must never read `OLLAMA_MODEL`, auto-pull the LFM model, join a default
+lifecycle, or publish ignored raw output.
 
 ## Opt-In Tool Search Smoke Automation
 

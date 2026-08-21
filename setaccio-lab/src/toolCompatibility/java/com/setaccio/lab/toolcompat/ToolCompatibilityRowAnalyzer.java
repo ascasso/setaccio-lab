@@ -30,9 +30,27 @@ final class ToolCompatibilityRowAnalyzer {
             ToolCompatibilityModelIdentity modelIdentity,
             ToolCompatibilityInvocationTrace trace
     ) {
+        return analyze(
+                scheduledCase,
+                modelIdentity,
+                trace,
+                ToolCompatibilityProtocol.systemPromptIdentity(),
+                null,
+                null);
+    }
+
+    ToolCompatibilityRow analyze(
+            ToolCompatibilityCaseSelection.ScheduledCase scheduledCase,
+            ToolCompatibilityModelIdentity modelIdentity,
+            ToolCompatibilityInvocationTrace trace,
+            ToolCompatibilitySystemPromptIdentity systemPrompt,
+            Integer globalPairSequence,
+            ToolCompatibilityConditionExecutionPosition conditionExecutionPosition
+    ) {
         Objects.requireNonNull(scheduledCase, "scheduledCase must not be null");
         Objects.requireNonNull(modelIdentity, "modelIdentity must not be null");
         Objects.requireNonNull(trace, "trace must not be null");
+        ToolCompatibilityProtocol.systemPromptCatalog().requirePrompt(systemPrompt);
         if (!trace.safeForNextSequentialAttempt()
                 || trace.status() == ToolCompatibilityInvocationStatus.TIMEOUT_WORK_NOT_STOPPED) {
             throw new ToolCompatibilityProtocolIntegrityException(
@@ -76,7 +94,6 @@ final class ToolCompatibilityRowAnalyzer {
                 toolResponses,
                 failure == null ? null : failure.category(),
                 failure == null ? null : failure.safeMessage());
-        ToolCompatibilitySystemPromptIdentity systemPrompt = ToolCompatibilityProtocol.systemPromptIdentity();
         ToolCompatibilityRunSettings settings = ToolCompatibilityProtocol.runSettings();
         ToolCompatibilityVisibleReasoningEvidence visibleReasoning = projection.visibleReasoning();
         return new ToolCompatibilityRow(
@@ -91,6 +108,8 @@ final class ToolCompatibilityRowAnalyzer {
                 systemPrompt.id(),
                 systemPrompt.version(),
                 systemPrompt.sha256(),
+                globalPairSequence,
+                conditionExecutionPosition,
                 settings.temperature(),
                 settings.maxOutputTokensPerProviderTurn(),
                 Duration.ofMillis(settings.rowTimeoutMillis()),

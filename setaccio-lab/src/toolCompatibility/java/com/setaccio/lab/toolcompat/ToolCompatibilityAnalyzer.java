@@ -15,7 +15,15 @@ final class ToolCompatibilityAnalyzer {
 
     ToolCompatibilityAnalysis analyze(ToolCompatibilityResult result) {
         requireIntegrity(result);
-        List<ToolCompatibilityRow> rows = result.rows();
+        return analyzeRows(result.rows());
+    }
+
+    ToolCompatibilityAnalysis analyzePromptMatrix(ToolCompatibilityPromptMatrixResult result) {
+        requireIntegrity(result);
+        return analyzeRows(result.rows());
+    }
+
+    private static ToolCompatibilityAnalysis analyzeRows(List<ToolCompatibilityRow> rows) {
         return new ToolCompatibilityAnalysis(
                 invocation(rows),
                 selection(rows),
@@ -43,39 +51,70 @@ final class ToolCompatibilityAnalyzer {
                 throw new ToolCompatibilityProtocolIntegrityException(
                         "Tool compatibility result identity drifted from the locked protocol");
             }
-            for (ToolCompatibilityRow row : result.rows()) {
-                ToolCompatibilityRowAnalyzer.Projection projection = ToolCompatibilityRowAnalyzer.project(
-                        row.caseId(),
-                        row.providerTurns(),
-                        row.toolCalls(),
-                        row.toolResponses(),
-                        row.failureCategory(),
-                        row.safeErrorMessage());
-                if (!Objects.equals(row.diagnosticCategory(), projection.diagnosticCategory())) {
-                    throw new ToolCompatibilityProtocolIntegrityException(
-                            "Tool compatibility row diagnostic drifted at sequence " + row.sequence());
-                }
-                if (!row.caseContractPassed()
-                        && (row.diagnosticCategory() == null
-                                || ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT.equals(
-                                        row.diagnosticCategory()))) {
-                    throw new ToolCompatibilityProtocolIntegrityException(
-                            "Failed contract lacks one primary diagnostic at sequence " + row.sequence());
-                }
-                if (row.caseContractPassed()
-                        && row.diagnosticCategory() != null
-                        && !ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT.equals(
-                                row.diagnosticCategory())) {
-                    throw new ToolCompatibilityProtocolIntegrityException(
-                            "Passing contract contains a failure diagnostic at sequence " + row.sequence());
-                }
-            }
+            requireRowDiagnostics(result.rows());
         } catch (ToolCompatibilityProtocolIntegrityException exception) {
             throw exception;
         } catch (RuntimeException exception) {
             throw new ToolCompatibilityProtocolIntegrityException(
                     "Tool compatibility result failed deterministic integrity validation",
                     exception);
+        }
+    }
+
+    private static void requireIntegrity(ToolCompatibilityPromptMatrixResult result) {
+        if (result == null) {
+            throw new ToolCompatibilityProtocolIntegrityException(
+                    "Tool compatibility prompt-matrix result must not be null");
+        }
+        try {
+            ToolCompatibilityPromptMatrixResult canonical = ToolCompatibilityPromptMatrixResult.create(
+                    result.startedAt(),
+                    result.finishedAt(),
+                    result.modelIdentity(),
+                    result.promptCondition(),
+                    result.pairedExecutionSchedule(),
+                    result.rows());
+            if (!canonical.equals(result)) {
+                throw new ToolCompatibilityProtocolIntegrityException(
+                        "Tool compatibility prompt-matrix result identity drifted from the locked protocol");
+            }
+            requireRowDiagnostics(result.rows());
+        } catch (ToolCompatibilityProtocolIntegrityException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new ToolCompatibilityProtocolIntegrityException(
+                    "Tool compatibility prompt-matrix result failed deterministic integrity validation",
+                    exception);
+        }
+    }
+
+    private static void requireRowDiagnostics(List<ToolCompatibilityRow> rows) {
+        for (ToolCompatibilityRow row : rows) {
+            ToolCompatibilityRowAnalyzer.Projection projection = ToolCompatibilityRowAnalyzer.project(
+                    row.caseId(),
+                    row.providerTurns(),
+                    row.toolCalls(),
+                    row.toolResponses(),
+                    row.failureCategory(),
+                    row.safeErrorMessage());
+            if (!Objects.equals(row.diagnosticCategory(), projection.diagnosticCategory())) {
+                throw new ToolCompatibilityProtocolIntegrityException(
+                        "Tool compatibility row diagnostic drifted at sequence " + row.sequence());
+            }
+            if (!row.caseContractPassed()
+                    && (row.diagnosticCategory() == null
+                            || ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT.equals(
+                                    row.diagnosticCategory()))) {
+                throw new ToolCompatibilityProtocolIntegrityException(
+                        "Failed contract lacks one primary diagnostic at sequence " + row.sequence());
+            }
+            if (row.caseContractPassed()
+                    && row.diagnosticCategory() != null
+                    && !ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT.equals(
+                            row.diagnosticCategory())) {
+                throw new ToolCompatibilityProtocolIntegrityException(
+                        "Passing contract contains a failure diagnostic at sequence " + row.sequence());
+            }
         }
     }
 

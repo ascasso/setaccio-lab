@@ -33,6 +33,9 @@ build/
 outputs/
 plan/
 
+# Local blog drafts
+/docs/blog/
+
 # Private local vision corpus
 /setaccio-lab/local/vision-corpus/
 

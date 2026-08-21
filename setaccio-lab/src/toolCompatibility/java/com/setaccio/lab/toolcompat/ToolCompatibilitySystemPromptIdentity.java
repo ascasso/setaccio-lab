@@ -16,6 +16,10 @@ record ToolCompatibilitySystemPromptIdentity(
     static final String UNTREATED_TEXT = "";
     static final boolean UNTREATED_PRESENT = false;
     static final String UNTREATED_SHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+    static final String DISCIPLINE_ID = "tool-system-discipline";
+    static final int DISCIPLINE_VERSION = 1;
+    static final boolean DISCIPLINE_PRESENT = true;
+    static final String DISCIPLINE_SHA256 = "fcc115e73a44ed2fcd76ba11ee0937a54d308465e16a929d781d8de27e04cd71";
 
     ToolCompatibilitySystemPromptIdentity {
         id = requireText(id, "id");
@@ -54,6 +58,15 @@ record ToolCompatibilitySystemPromptIdentity(
                 || !UNTREATED_TEXT.equals(text)
                 || UNTREATED_PRESENT != present) {
             throw new IllegalArgumentException("System prompt identity must equal the locked untreated baseline");
+        }
+    }
+
+    void requireToolDiscipline() {
+        if (!DISCIPLINE_ID.equals(id)
+                || DISCIPLINE_VERSION != version
+                || !DISCIPLINE_SHA256.equals(sha256)
+                || DISCIPLINE_PRESENT != present) {
+            throw new IllegalArgumentException("System prompt identity must equal the locked tool-discipline prompt");
         }
     }
 
