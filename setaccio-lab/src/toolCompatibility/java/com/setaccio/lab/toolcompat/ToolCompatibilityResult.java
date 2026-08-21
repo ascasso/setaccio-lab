@@ -93,8 +93,12 @@ record ToolCompatibilityResult(
                     || !provider.equals(row.provider())
                     || !modelIdentity.requestedModel().equals(row.requestedModel())
                     || !modelIdentity.effectiveModel().equals(row.effectiveModel())
-                    || !modelIdentity.digest().equals(row.modelDigest())) {
-                throw new IllegalArgumentException("result row does not match its schedule or model identity");
+                    || !modelIdentity.digest().equals(row.modelDigest())
+                    || !systemPromptIdentity.id().equals(row.systemPromptId())
+                    || systemPromptIdentity.version() != row.systemPromptVersion()
+                    || !systemPromptIdentity.sha256().equals(row.systemPromptSha256())) {
+                throw new IllegalArgumentException(
+                        "result row does not match its schedule, system-prompt, or model identity");
             }
         }
         Duration observedRowTime = rows.stream()

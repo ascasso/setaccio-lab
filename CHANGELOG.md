@@ -7,6 +7,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Hardened Phase 1 tool-compatibility evidence validation so every saved row
+  must match the result's locked untreated system-prompt identity. Prompt-matrix
+  evidence remains condition-specific and continues to validate each row
+  against its declared prompt condition.
+
 ### Changed
 
 - Updated the Gradle Wrapper from 9.6.1 to 9.7.1.

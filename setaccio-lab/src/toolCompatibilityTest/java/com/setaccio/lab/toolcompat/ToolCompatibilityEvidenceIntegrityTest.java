@@ -65,6 +65,17 @@ class ToolCompatibilityEvidenceIntegrityTest {
                 ((ObjectNode) raw.path("systemPromptIdentity")).put("id", "different-system-prompt"));
         assertRawProtocolRejected(systemPrompt);
 
+        Fixture rowSystemPrompt = writeFixture("2026-08-18-row-system-prompt-drift");
+        ToolCompatibilitySystemPromptIdentity prompted = ToolCompatibilityPromptCondition.PROMPTED.prompt(
+                ToolCompatibilityProtocol.systemPromptCatalog());
+        rewriteRawAndRefreshArtifact(rowSystemPrompt, raw -> {
+            ObjectNode row = firstRow(raw);
+            row.put("systemPromptId", prompted.id());
+            row.put("systemPromptVersion", prompted.version());
+            row.put("systemPromptSha256", prompted.sha256());
+        });
+        assertRawProtocolRejected(rowSystemPrompt);
+
         Fixture modelDigest = writeFixture("2026-08-18-model-digest-drift");
         rewriteRawAndRefreshArtifact(modelDigest, raw ->
                 ((ObjectNode) raw.path("modelIdentity")).put("digest", "incomplete"));
