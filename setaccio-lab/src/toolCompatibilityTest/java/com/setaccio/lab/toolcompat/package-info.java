@@ -1,5 +1,14 @@
 /**
- * Provider-free T1.8 requirement-to-test map.
+ * Provider-free tool-compatibility requirement-to-test map.
+ *
+ * <p>Prompt catalog:</p>
+ * <ul>
+ *   <li>Exactly two ordered conditions, their catalog and per-prompt SHA-256 identities, and
+ *       exact UTF-8 tool-discipline bytes:
+ *       {@code ToolCompatibilitySystemPromptCatalogTest#locksExactlyTwoOrderedPromptConditionsWithExactUtf8Bytes}.</li>
+ *   <li>Catalog byte, text, and condition-order drift:
+ *       {@code ToolCompatibilitySystemPromptCatalogTest#rejectsCatalogByteTextAndConditionOrderDrift}.</li>
+ * </ul>
  *
  * <p>Preflight:</p>
  * <ul>
