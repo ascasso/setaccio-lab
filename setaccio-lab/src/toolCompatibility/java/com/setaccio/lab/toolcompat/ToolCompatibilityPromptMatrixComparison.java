@@ -11,7 +11,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Strictly gates an offline Phase 2 prompt comparison before a later slice renders any deltas.
+ * Strictly gates an offline Phase 2 prompt comparison before rendering deltas or preparing human
+ * review material.
  *
  * <p>The gate intentionally compares protocol identity only. Provider, tool, callback, output,
  * usage, latency, and diagnostic observations remain available to the later deterministic report
@@ -38,7 +39,9 @@ final class ToolCompatibilityPromptMatrixComparison {
                 candidate.manifest().runId(),
                 baseline.result().pairedExecutionSchedule().sha256(),
                 baseline.result().rows().size(),
-                report.render(baseline, candidate));
+                report.render(baseline, candidate),
+                baseline,
+                candidate);
     }
 
     private static void validateComparable(
@@ -323,14 +326,25 @@ final class ToolCompatibilityPromptMatrixComparison {
             String candidateRunId,
             String pairedScheduleSha256,
             int pairedRowCount,
-            String report
+            String report,
+            ToolCompatibilityPromptMatrixEvidence.VerifiedCondition baselineCondition,
+            ToolCompatibilityPromptMatrixEvidence.VerifiedCondition candidateCondition
     ) {
 
         ComparisonResult {
             if (baselineRunId == null || candidateRunId == null || pairedScheduleSha256 == null
                     || pairedRowCount != ToolCompatibilityProtocol.ROW_COUNT
-                    || report == null || report.isBlank()) {
+                    || report == null || report.isBlank()
+                    || baselineCondition == null || candidateCondition == null) {
                 throw new IllegalArgumentException("complete verified paired comparison identity is required");
+            }
+            if (!baselineRunId.equals(baselineCondition.manifest().runId())
+                    || !candidateRunId.equals(candidateCondition.manifest().runId())
+                    || !pairedScheduleSha256.equals(
+                            baselineCondition.result().pairedExecutionSchedule().sha256())
+                    || !pairedScheduleSha256.equals(
+                            candidateCondition.result().pairedExecutionSchedule().sha256())) {
+                throw new IllegalArgumentException("comparison identity must match verified paired conditions");
             }
         }
     }

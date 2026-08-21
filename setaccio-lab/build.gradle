@@ -10,6 +10,7 @@ import com.setaccio.gradle.ToolSearchMatrixOfflineTask
 import com.setaccio.gradle.ToolCompatibilityMatrixTask
 import com.setaccio.gradle.ToolCompatibilityPromptMatrixTask
 import com.setaccio.gradle.ToolCompatibilityComparisonTask
+import com.setaccio.gradle.ToolCompatibilityHumanReviewPrepareTask
 import com.setaccio.gradle.ToolCompatibilityOfflineTask
 import com.setaccio.gradle.ChatMatrixOfflineTask
 import com.setaccio.gradle.ChatMatrixTask
@@ -243,6 +244,17 @@ tasks.register('toolCompatibilityCompare', ToolCompatibilityComparisonTask) {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })
     workingDirectory.set(layout.projectDirectory)
+}
+
+tasks.register('toolCompatibilityHumanReviewPrepare', ToolCompatibilityHumanReviewPrepareTask) {
+    dependsOn tasks.named('toolCompatibilityClasses')
+    classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityHumanReviewPrepareRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+    workingDirectory.set(layout.projectDirectory)
+    reviewRoot.set(layout.projectDirectory.dir('build/tool-compatibility-human-review'))
 }
 
 tasks.register('toolCompatibilityVerify', ToolCompatibilityOfflineTask) {
