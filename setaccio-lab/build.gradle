@@ -9,6 +9,7 @@ import com.setaccio.gradle.ToolSearchMatrixBaselineTask
 import com.setaccio.gradle.ToolSearchMatrixOfflineTask
 import com.setaccio.gradle.ToolCompatibilityMatrixTask
 import com.setaccio.gradle.ToolCompatibilityPromptMatrixTask
+import com.setaccio.gradle.ToolCompatibilityComparisonTask
 import com.setaccio.gradle.ToolCompatibilityOfflineTask
 import com.setaccio.gradle.ChatMatrixOfflineTask
 import com.setaccio.gradle.ChatMatrixTask
@@ -228,6 +229,16 @@ tasks.register('toolCompatibilityPromptMatrix', ToolCompatibilityPromptMatrixTas
     dependsOn tasks.named('toolCompatibilityClasses')
     classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
     mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityPromptMatrixRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+    workingDirectory.set(layout.projectDirectory)
+}
+
+tasks.register('toolCompatibilityCompare', ToolCompatibilityComparisonTask) {
+    dependsOn tasks.named('toolCompatibilityClasses')
+    classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityPromptMatrixComparisonRunner')
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

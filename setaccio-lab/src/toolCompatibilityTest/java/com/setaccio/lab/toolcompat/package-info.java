@@ -111,5 +111,22 @@
  *   <li>Phase 1 schema isolation from paired row fields:
  *       {@code ToolCompatibilityResultTest#keepsPhaseOneRowsFreeOfThePhaseTwoPairedExecutionFields}.</li>
  * </ul>
+ *
+ * <p>Phase 2 comparison gate:</p>
+ * <ul>
+ *   <li>One fully verified untreated/prompted pair accepts the schedule-derived, intentionally
+ *       different execution positions and permits changed observed outcomes:
+ *       {@code ToolCompatibilityPromptMatrixComparisonTest#acceptsOneVerifiedPairWithExpectedDifferentPositionsAndObservedOutcomes}.</li>
+ *   <li>Model identity, framework, clean shared Git commit, dirty-worktree, and prompt-role
+ *       mismatches:
+ *       {@code ToolCompatibilityPromptMatrixComparisonTest#rejectsValidModelFrameworkAndGitParityMismatches}
+ *       and {@code #rejectsReversedPromptRolesBeforeAnySemanticComparison}.</li>
+ *   <li>Raw protocol, schedule, missing/equal/inconsistent paired-position, tool-catalog,
+ *       semantic-oracle, setting, and policy tampering is rejected during strict offline
+ *       verification before comparison:
+ *       {@code ToolCompatibilityPromptMatrixComparisonTest#rejectsEveryLockedRawProtocolTamperBeforeComparison}.</li>
+ *   <li>Exactly one baseline and one candidate CLI option:
+ *       {@code ToolCompatibilityPromptMatrixComparisonRunnerArgumentsTest#requiresBothSavedRunsExactlyOnce}.</li>
+ * </ul>
  */
 package com.setaccio.lab.toolcompat;

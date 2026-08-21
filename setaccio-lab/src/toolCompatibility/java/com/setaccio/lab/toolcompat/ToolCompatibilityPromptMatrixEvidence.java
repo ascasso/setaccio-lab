@@ -155,7 +155,27 @@ final class ToolCompatibilityPromptMatrixEvidence {
     }
 
     OfflineResult verify(Path runDirectory) {
+        return verify(inspectInputs(runDirectory));
+    }
+
+    VerifiedCondition requireVerified(Path runDirectory, String label) {
+        if (label == null || label.isBlank() || !label.equals(label.strip())) {
+            throw new IllegalArgumentException("comparison run label must be nonblank and trimmed");
+        }
         Inspection inspection = inspectInputs(runDirectory);
+        OfflineResult verification = verify(inspection);
+        if (!verification.valid()) {
+            throw new IllegalArgumentException("The " + label + " run did not verify: "
+                    + String.join(" ", verification.failures()));
+        }
+        if (inspection.root() == null || inspection.manifest() == null || inspection.result() == null) {
+            throw new IllegalStateException(
+                    "Verified tool compatibility prompt-matrix evidence was missing required comparison data");
+        }
+        return new VerifiedCondition(inspection.root(), inspection.manifest(), inspection.result());
+    }
+
+    private OfflineResult verify(Inspection inspection) {
         LinkedHashSet<String> failures = new LinkedHashSet<>(inspection.failures());
         if (inspection.root() != null && inspection.manifest() != null) {
             EvidenceVerification verification = verifier.verify(
@@ -283,6 +303,7 @@ final class ToolCompatibilityPromptMatrixEvidence {
         return new Inspection(
                 root,
                 manifest,
+                result,
                 summaryPath,
                 expectedSummary,
                 List.copyOf(new LinkedHashSet<>(failures)));
@@ -370,16 +391,30 @@ final class ToolCompatibilityPromptMatrixEvidence {
         }
     }
 
+    record VerifiedCondition(
+            Path root,
+            EvidenceManifest manifest,
+            ToolCompatibilityPromptMatrixResult result
+    ) {
+
+        VerifiedCondition {
+            if (root == null || manifest == null || result == null) {
+                throw new IllegalArgumentException("verified prompt-matrix condition data is required");
+            }
+        }
+    }
+
     private record Inspection(
             Path root,
             EvidenceManifest manifest,
+            ToolCompatibilityPromptMatrixResult result,
             Path summaryPath,
             String expectedSummary,
             List<String> failures
     ) {
 
         private static Inspection invalid(List<String> failures) {
-            return new Inspection(null, null, null, null, List.copyOf(failures));
+            return new Inspection(null, null, null, null, null, List.copyOf(failures));
         }
     }
 }
