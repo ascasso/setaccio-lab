@@ -1,7 +1,9 @@
 package com.setaccio.lab.toolcompat;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.setaccio.lab.evidence.EvidenceManifestStore;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -17,19 +19,52 @@ public final class ToolCompatibilityOfflineRunner {
         Arguments parsed = Arguments.parse(args);
         Path runDirectory = resolveRunDirectory(Path.of(""), parsed.runDirectory());
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
-        ToolCompatibilityEvidence evidence = new ToolCompatibilityEvidence(objectMapper);
-        ToolCompatibilityEvidence.OfflineResult result = parsed.mode() == Mode.VERIFY
-                ? evidence.verify(runDirectory)
-                : evidence.reanalyze(runDirectory);
-
+        OfflineResult result = inspect(runDirectory, parsed.mode(), objectMapper);
         if (!result.valid()) {
             result.failures().forEach(failure -> System.err.println("EVIDENCE: " + failure));
             throw new IllegalStateException(
-                    "Tool compatibility evidence " + parsed.mode().label + " failed with "
+                    "Tool compatibility " + result.label() + " " + parsed.mode().label
+                            + " failed with "
                             + result.failures().size() + " issue(s).");
         }
-        System.out.println("Tool compatibility evidence " + parsed.mode().label + " complete: "
+        System.out.println("Tool compatibility " + result.label() + " " + parsed.mode().label + " complete: "
                 + runDirectory.resolve(ToolCompatibilityEvidence.SUMMARY_FILENAME));
+    }
+
+    private static OfflineResult inspect(Path runDirectory, Mode mode, ObjectMapper objectMapper) {
+        if (runDirectory == null || mode == null || objectMapper == null) {
+            throw new IllegalArgumentException("runDirectory, mode, and objectMapper are required");
+        }
+        if (isPromptMatrixEvidence(runDirectory, objectMapper)) {
+            ToolCompatibilityPromptMatrixEvidence evidence =
+                    new ToolCompatibilityPromptMatrixEvidence(objectMapper);
+            ToolCompatibilityPromptMatrixEvidence.OfflineResult result = mode == Mode.VERIFY
+                    ? evidence.verify(runDirectory)
+                    : evidence.reanalyze(runDirectory);
+            return new OfflineResult("prompt-matrix evidence", result.failures());
+        }
+        ToolCompatibilityEvidence evidence = new ToolCompatibilityEvidence(objectMapper);
+        ToolCompatibilityEvidence.OfflineResult result = mode == Mode.VERIFY
+                ? evidence.verify(runDirectory)
+                : evidence.reanalyze(runDirectory);
+        return new OfflineResult("evidence", result.failures());
+    }
+
+    private static boolean isPromptMatrixEvidence(Path runDirectory, ObjectMapper objectMapper) {
+        Path manifestPath = runDirectory.resolve(EvidenceManifestStore.MANIFEST_FILENAME);
+        if (Files.isRegularFile(manifestPath, LinkOption.NOFOLLOW_LINKS)) {
+            try {
+                JsonNode manifest = objectMapper.readTree(manifestPath.toFile());
+                if (ToolCompatibilityPromptMatrixResult.SUITE.equals(manifest.path("suite").asText())) {
+                    return true;
+                }
+            } catch (Exception ignored) {
+                // The selected evidence verifier will report malformed manifest content.
+            }
+        }
+        Path promptMatrixRaw = runDirectory.resolve(ToolCompatibilityPromptMatrixResult.RAW_FILENAME);
+        return Files.exists(promptMatrixRaw, LinkOption.NOFOLLOW_LINKS)
+                || Files.isSymbolicLink(promptMatrixRaw);
     }
 
     static Path resolveRunDirectory(Path projectDirectory, String value) {
@@ -70,6 +105,20 @@ public final class ToolCompatibilityOfflineRunner {
                 case "reanalyze" -> REANALYZE;
                 default -> throw usage();
             };
+        }
+    }
+
+    private record OfflineResult(String label, List<String> failures) {
+
+        OfflineResult {
+            if (label == null || label.isBlank()) {
+                throw new IllegalArgumentException("offline evidence label is required");
+            }
+            failures = failures == null ? List.of() : List.copyOf(failures);
+        }
+
+        boolean valid() {
+            return failures.isEmpty();
         }
     }
 

@@ -7,6 +7,8 @@ import com.setaccio.lab.evidence.EvidenceManifestStore;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -89,6 +91,43 @@ class ToolCompatibilityPromptMatrixEvidenceTest {
         assertThat(Files.readString(fixture.summary(), StandardCharsets.UTF_8)).isEqualTo(expectedSummary);
     }
 
+    @Test
+    void standaloneRunnerRoutesPromptMatrixEvidenceForVerificationAndReanalysis() throws Exception {
+        Path project = Path.of("").toAbsolutePath().normalize();
+        Path root = project.resolve("build/tool-compatibility");
+        Files.createDirectories(root);
+        Path run = Files.createDirectory(root.resolve("prompt-matrix-offline-test-" + UUID.randomUUID()));
+        try {
+            evidence.write(
+                    run,
+                    ToolCompatibilityPromptMatrixTestFixtures.result(
+                            ToolCompatibilityPromptCondition.UNTREATED),
+                    CLEAN_BASELINE);
+            String expectedSummary = Files.readString(
+                    run.resolve(ToolCompatibilityPromptMatrixEvidence.SUMMARY_FILENAME),
+                    StandardCharsets.UTF_8);
+            String relative = project.relativize(run).toString();
+
+            ToolCompatibilityOfflineRunner.main(new String[] {
+                    "--mode", "verify", "--run-dir", relative
+            });
+            Files.writeString(
+                    run.resolve(ToolCompatibilityPromptMatrixEvidence.SUMMARY_FILENAME),
+                    "drifted",
+                    StandardCharsets.UTF_8);
+            ToolCompatibilityOfflineRunner.main(new String[] {
+                    "--mode", "reanalyze", "--run-dir", relative
+            });
+
+            assertThat(evidence.verify(run).valid()).isTrue();
+            assertThat(Files.readString(
+                    run.resolve(ToolCompatibilityPromptMatrixEvidence.SUMMARY_FILENAME),
+                    StandardCharsets.UTF_8)).isEqualTo(expectedSummary);
+        } finally {
+            deleteRecursively(run);
+        }
+    }
+
     private Fixture writeFixture(String runId, ToolCompatibilityPromptCondition condition) throws Exception {
         Path run = Files.createDirectory(temporaryDirectory.resolve(runId));
         Path manifest = evidence.write(
@@ -100,6 +139,17 @@ class ToolCompatibilityPromptMatrixEvidenceTest {
                 run.resolve(ToolCompatibilityPromptMatrixResult.RAW_FILENAME),
                 run.resolve(ToolCompatibilityPromptMatrixEvidence.SUMMARY_FILENAME),
                 manifest);
+    }
+
+    private static void deleteRecursively(Path root) throws Exception {
+        if (!Files.exists(root)) {
+            return;
+        }
+        try (var paths = Files.walk(root)) {
+            for (Path path : paths.sorted(Comparator.reverseOrder()).toList()) {
+                Files.deleteIfExists(path);
+            }
+        }
     }
 
     private record Fixture(
