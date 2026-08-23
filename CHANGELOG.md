@@ -39,11 +39,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
   operation with a limitation. The provider-free T3.3 core adds one immutable
   model-major schedule, explicit supported/unsupported seed semantics, a fresh
   standard-advisor boundary per fake model, complete row/failure retention,
-  strict shared-v1 cohort evidence, deterministic structural reporting, and
-  dedicated offline verify/reanalyze tasks. Read-only inspection found all
-  provisional tags installed under Ollama `0.32.15`, but no owner decision,
-  cohort lock, live cohort task, model invocation, pull, or evidence run
-  occurred.
+  strict shared-v1 cohort evidence, and dedicated offline verify/reanalyze
+  tasks. The provider-free T3.4 layer expands the deterministic cohort report
+  into ordered per-model compatibility, discipline, arguments, multi-step,
+  failure-recovery, output, and efficiency sections; records incomplete usage
+  and metadata explicitly; limits response-format and recovery observations to
+  named lexical markers; reports tokens per passing row only with complete
+  passing-row usage; and carries a mixed-artifact deployed-system caveat with
+  no total rank. Read-only inspection found all provisional tags installed
+  under Ollama `0.32.15`, but no owner decision, cohort lock, live cohort task,
+  model invocation, pull, or evidence run occurred.
 
 - Completed the authorized Phase 2 small-model prompt comparison from clean
   commit `80bc122`. One locked interleaved 32-attempt run produced two

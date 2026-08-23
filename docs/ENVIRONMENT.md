@@ -746,8 +746,14 @@ The provider-free cohort evidence tasks are available without a live runner:
 ```
 
 They share the strict offline runner, do not start Spring, and do not contact
-Ollama. No `toolCompatibilityCohort` live task exists until T2.5 and exact
-identity approval are complete.
+Ollama. Their deterministic summary contains ordered per-model T3.4 sections
+for compatibility, discipline, arguments, multi-step behavior, failure
+recovery, output behavior, efficiency, and incomplete/unsupported
+observations. Token totals include provider-turn coverage, tokens per passing
+row appears only when every passing row has complete usage, and mixed
+artifact/runtime formats remain labelled as deployed-system observations. No
+`toolCompatibilityCohort` live task exists until T2.5 and exact identity
+approval are complete.
 
 ## Opt-In Tool Search Smoke Automation
 

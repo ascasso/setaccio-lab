@@ -311,9 +311,11 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   human decision remains pending. Separately authorized dependency-independent
   Phase 3 preparation now has provider-free cohort preflight and prompt-policy
   foundations, a model-major fake-session executor, strict cohort evidence,
-  offline verify/reanalyze tasks, and one read-only installed-model inventory
-  observation. No cohort identities or prompt policy are locked, and no live
-  cohort task or model invocation is authorized by that preparation.
+  offline verify/reanalyze tasks, a complete synthetic-fixture T3.4
+  multidimensional analysis/reporting layer, and one read-only installed-model
+  inventory observation. No cohort identities or prompt policy are locked, no
+  real cohort evidence has been analyzed, and no live cohort task or model
+  invocation is authorized by that preparation.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -468,9 +470,10 @@ Pending and separately deferred:
   human decision is still pending. The owner separately authorized
   dependency-independent Phase 3 provider-free work and read-only inventory
   inspection on 2026-08-23, including the provider-free T3.3 executor/evidence
-  core and offline tasks; the evidence closeout itself still does not authorize
-  a prompt-policy selection, final cohort lock, model invocation, or live
-  cohort run.
+  core, offline tasks, and synthetic-fixture T3.4 analysis/reporting layer; the
+  evidence closeout itself still does not authorize a prompt-policy selection,
+  final cohort lock, model invocation, live cohort run, or evidence-based model
+  comparison.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing

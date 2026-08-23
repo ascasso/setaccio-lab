@@ -27,6 +27,15 @@ final class ToolCompatibilityCohortTestFixtures {
     private ToolCompatibilityCohortTestFixtures() {}
 
     static ToolCompatibilityCohortResult result() {
+        List<ToolCompatibilityRow> successful =
+                ToolCompatibilityAnalysisTestFixtures.successfulResult().rows();
+        return result(successful, successful);
+    }
+
+    static ToolCompatibilityCohortResult result(
+            List<ToolCompatibilityRow> peerRows,
+            List<ToolCompatibilityRow> referenceRows
+    ) {
         ToolCompatibilityCohortPreflight.Prepared preflight = prepared();
         ToolCompatibilityHumanDecision decision = new ToolCompatibilityHumanDecision(
                 ToolCompatibilityHumanDecision.Decision.INCONCLUSIVE,
@@ -34,10 +43,10 @@ final class ToolCompatibilityCohortTestFixtures {
         ToolCompatibilityCohortExecutionPlan plan =
                 ToolCompatibilityCohortExecutionPlan.create(preflight, decision, BINDING);
         List<ToolCompatibilityCohortModelRun> runs = new ArrayList<>();
-        for (ToolCompatibilityCohortModelIdentity identity : preflight.orderedModels()) {
-            List<ToolCompatibilityRow> rows = ToolCompatibilityAnalysisTestFixtures.successfulResult()
-                    .rows()
-                    .stream()
+        List<List<ToolCompatibilityRow>> rowsByModel = List.of(peerRows, referenceRows);
+        for (int index = 0; index < preflight.orderedModels().size(); index++) {
+            ToolCompatibilityCohortModelIdentity identity = preflight.orderedModels().get(index);
+            List<ToolCompatibilityRow> rows = List.copyOf(rowsByModel.get(index)).stream()
                     .map(row -> rowFor(identity, row))
                     .toList();
             runs.add(ToolCompatibilityCohortModelRun.create(
@@ -48,6 +57,15 @@ final class ToolCompatibilityCohortTestFixtures {
                     rows));
         }
         return ToolCompatibilityCohortResult.create(STARTED, FINISHED, plan, runs);
+    }
+
+    static ToolCompatibilityCohortResult completeUsageResult() {
+        List<ToolCompatibilityRow> rows = ToolCompatibilityAnalysisTestFixtures.successfulResult()
+                .rows()
+                .stream()
+                .map(ToolCompatibilityCohortTestFixtures::withCompleteUsage)
+                .toList();
+        return result(rows, rows);
     }
 
     static ToolCompatibilityCohortPreflight.Prepared prepared() {
@@ -115,6 +133,35 @@ final class ToolCompatibilityCohortTestFixtures {
             return OBJECT_MAPPER.treeToValue(row, ToolCompatibilityRow.class);
         } catch (Exception exception) {
             throw new IllegalStateException("Failed to create cohort row fixture", exception);
+        }
+    }
+
+    private static ToolCompatibilityRow withCompleteUsage(ToolCompatibilityRow source) {
+        try {
+            ObjectNode row = OBJECT_MAPPER.valueToTree(source);
+            int turns = row.withArray("providerTurns").size();
+            row.withArray("providerTurns").forEach(turn -> {
+                ObjectNode object = (ObjectNode) turn;
+                object.set(
+                        "usage",
+                        OBJECT_MAPPER.valueToTree(new ToolCompatibilityTokenUsageEvidence(
+                                ToolCompatibilityUsageAvailability.COMPLETE,
+                                4,
+                                2,
+                                6)));
+                object.put("outputLimitState", ToolCompatibilityOutputLimitState.NOT_REACHED.name());
+            });
+            row.set(
+                    "aggregateUsage",
+                    OBJECT_MAPPER.valueToTree(new ToolCompatibilityTokenUsageEvidence(
+                            ToolCompatibilityUsageAvailability.COMPLETE,
+                            Math.multiplyExact(turns, 4),
+                            Math.multiplyExact(turns, 2),
+                            Math.multiplyExact(turns, 6))));
+            row.put("anyProviderTurnReachedOutputLimit", false);
+            return OBJECT_MAPPER.treeToValue(row, ToolCompatibilityRow.class);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to create complete-usage cohort row", exception);
         }
     }
 }

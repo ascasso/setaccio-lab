@@ -75,10 +75,16 @@ semantics, and one runtime version; executes fake multi-model sessions with a
 fresh advisor boundary per model; retains every row and classified provider
 failure; and writes strict shared-v1 evidence with standalone cohort
 verify/reanalyze tasks. Unsupported seed semantics omit the option rather than
-simulating it, and no thinking override is introduced. No live cohort task,
-model invocation, output allocation, pull, or Phase 3 evidence run occurred.
-Completing T3.3 still requires the completed T2.5 binding, explicit approval of
-the resolved identities, and the separately reviewed live runner boundary.
+simulating it, and no thinking override is introduced. The provider-free T3.4
+analysis layer is also implemented against synthetic cohort fixtures. It emits
+ordered per-model sections for every planned dimension, explicit unavailable
+metadata and token coverage, lexical-only output/recovery observations,
+complete-usage-gated tokens per passing row, and mixed-artifact caveats without
+a rank or winner. No live cohort task, model invocation, output allocation,
+pull, or Phase 3 evidence run occurred. Completing T3.3 still requires the
+completed T2.5 binding, explicit approval of the resolved identities, and the
+separately reviewed live runner boundary; T3.4 remains unexercised against real
+cohort evidence.
 
 ## Purpose
 
@@ -1446,6 +1452,14 @@ Produce per-model sections without a total rank.
 - tokens per passing row.
 
 “Tokens per passing row” may be reported descriptively but must not become a universal efficiency score.
+
+Provider-free implementation status as of 2026-08-23: the cohort analyzer and
+deterministic evidence summary cover all dimensions above using canonical fake
+rows, anomaly fixtures, complete/incomplete usage fixtures, mixed GGUF/MLX
+metadata, and a golden report digest. Error-reporting, success-claim, and
+response-format observations are explicitly lexical; they are not semantic
+judgments. This implementation milestone does not satisfy the live-evidence
+dependency or authorize T3.5.
 
 Because the exact installed tags may use different artifact formats or
 acceleration paths, including MLX and non-MLX variants, latency and token-use

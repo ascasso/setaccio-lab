@@ -344,6 +344,14 @@ not place a live model call in default tests or CI.
   advisor state, supported and unsupported seed recording, no thinking
   override, runtime drift, retained provider failures, strict evidence layout,
   tampering, offline verification/reanalysis, and default-lifecycle isolation.
+  T3.4 provider-free tests must cover every per-model analysis dimension,
+  deterministic model/case order, omitted/unknown/incorrect arguments,
+  multi-step continuation/order/premature-final/duplicate observations,
+  deterministic failure retention plus bounded lexical recovery markers,
+  response-format markers and final-response length, successful-row
+  median/range, complete and incomplete token coverage, tokens-per-passing-row
+  gating, mixed artifact formats, a golden report digest, and the absence of a
+  winner/ranking/leaderboard section.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.

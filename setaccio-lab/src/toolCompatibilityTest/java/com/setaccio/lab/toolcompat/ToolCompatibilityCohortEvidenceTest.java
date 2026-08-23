@@ -60,11 +60,11 @@ class ToolCompatibilityCohortEvidenceTest {
                 .contains("\"thinkingMode\"")
                 .doesNotContain("http://", "https://", "localhost", temporaryDirectory.toString());
         assertThat(summary)
-                .contains("# Tool Compatibility Cohort Structural Summary")
-                .contains("## Ordered Model Segments")
+                .contains("# Tool Compatibility Cohort Multidimensional Summary")
+                .contains("## Ordered Per-Model Analysis")
                 .contains("fixture-peer:1b")
                 .contains("fixture-reference:27b-mlx")
-                .contains("It does not produce an aggregate score")
+                .contains("This report produces no aggregate score")
                 .doesNotContain("http://", "https://", "localhost", temporaryDirectory.toString());
     }
 
