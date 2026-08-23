@@ -726,9 +726,14 @@ bounded compatibility observation, not a quality or reliability claim.
 Both conditions reached the same first `PROVIDER_FAILURE` boundary on all 16
 rows. This is a bounded provider-turn observation, not a prompt-effect,
 quality, reliability, or ranking result. The T2.5 worksheet is ignored and
-requires the owner's human decision before any Phase 3 cohort work. The task
-must never read `OLLAMA_MODEL`, auto-pull the LFM model, join a default
-lifecycle, or publish ignored raw output.
+requires the owner's human decision before Phase 3 can select a prompt policy
+or execute a cohort. Dependency-independent provider-free preflight work and
+read-only installed-model inspection were separately authorized on 2026-08-23;
+they do not lock the provisional cohort or authorize model invocation. Any
+future cohort task must use explicit ordered peer tags and a separately
+labelled reference, record one Ollama runtime version and full model digests,
+fail before allocation on identity drift, and never read `OLLAMA_MODEL`, pull a
+model, join a default lifecycle, or publish ignored raw output.
 
 ## Opt-In Tool Search Smoke Automation
 

@@ -11,7 +11,7 @@ Proposed next work after completion of:
 - the bounded Anthropic architecture-portability proof;
 - the existing standard-versus-regex Tool Search baseline.
 
-This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21; its T2.5 human decision remains open, and Phase 3 remains separately gated.
+This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21; its T2.5 human decision remains open. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection while completing T2.5. Cohort identity approval and any live cohort execution remain separately gated.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
@@ -55,7 +55,23 @@ deterministically. Every row in both conditions stopped at the same first
 quality, reliability, or ranking conclusion. The ignored T2.5 worksheet is
 prepared but still blank: only the project owner may record `adopt`, `revise`,
 `reject`, or `inconclusive`. Until that decision is recorded, Phase 3 remains
-blocked.
+blocked from selecting its executable prompt policy or running the cohort.
+
+Dependency-independent Phase 3 preparation began on 2026-08-23 under separate
+owner authorization. The provider-free foundation resolves explicit ordered
+peer tags plus one separately labelled reference from a fake/read-only
+inventory; requires full digests and one Ollama runtime version; records model
+family, artifact/runtime format, precision, template, system-prompt, tool, and
+thinking metadata as explicitly available or unavailable; rejects remote,
+missing, mutable-alias, duplicate-tag, and duplicate-byte identities; and
+validates a fresh output path without allocating it. A deterministic T3.2
+mapping covers all four future owner decisions and rejects evidence-binding
+drift, but no decision has been selected or read from the ignored worksheet.
+Read-only inspection found every provisional peer and `qwen3.8:27b-mlx`
+installed under Ollama `0.32.15`; that observation does not lock the cohort or
+approve the reference digest. No model invocation, output allocation, cohort
+task, pull, or Phase 3 evidence run occurred. T3.3 and later work still require
+the completed T2.5 binding and explicit approval of the resolved identities.
 
 ## Purpose
 

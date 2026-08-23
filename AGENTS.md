@@ -308,7 +308,11 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   ignored 16-row conditions verify, reanalyze, and compare successfully, but
   every row reached the same first `PROVIDER_FAILURE` boundary. This supports
   no prompt-effect, quality, reliability, or ranking claim. The owner-only T2.5
-  human decision remains pending, and Phase 3 cohort work is still gated.
+  human decision remains pending. Separately authorized dependency-independent
+  Phase 3 preparation now has provider-free cohort preflight and prompt-policy
+  foundations plus one read-only installed-model inventory observation. No
+  cohort identities or prompt policy are locked, and no model invocation or
+  cohort task is authorized by that preparation.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -460,8 +464,11 @@ Pending and separately deferred:
   is closed through one bounded clean baseline, offline verification and
   reanalysis, and the dated public-safe interpretation. Phase 2's paired
   execution and deterministic comparison are complete, but its owner-only
-  human decision is still pending; Phase 3 cohort work is not authorized by
-  that evidence closeout.
+  human decision is still pending. The owner separately authorized
+  dependency-independent Phase 3 provider-free work and read-only inventory
+  inspection on 2026-08-23; the evidence closeout itself still does not
+  authorize a prompt-policy selection, final cohort lock, model invocation, or
+  live cohort run.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing

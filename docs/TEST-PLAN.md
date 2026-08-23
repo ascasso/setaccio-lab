@@ -331,7 +331,13 @@ not place a live model call in default tests or CI.
   both verify and reanalyze offline, and `toolCompatibilityCompare` passes.
   Both conditions reached the same first `PROVIDER_FAILURE` boundary on every
   row, so no prompt-effect or quality conclusion is permitted. The T2.5 human
-  decision worksheet remains blank and Phase 3 is still gated.
+  decision worksheet remains blank. Separately authorized provider-free Phase
+  3 preparation must cover ordered peer/reference resolution, full digest and
+  runtime-version checks, duplicate tags/bytes and mutable aliases, local-only
+  execution, explicit unavailable metadata, mixed artifact formats, and
+  failure before output allocation. Its prompt-policy tests must cover all four
+  owner decisions and reject decision-binding drift. No test may select the
+  owner's actual decision, contact Ollama, or execute a cohort model.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.

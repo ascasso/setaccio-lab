@@ -27,14 +27,27 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Began the separately authorized dependency-independent Phase 3 small-model
+  cohort preparation. Provider-free code now resolves explicit ordered peers
+  plus one separately labelled reference from fake/read-only inventories,
+  requires full digests and one Ollama runtime version, preserves optional
+  model/runtime metadata as explicitly available or unavailable, rejects
+  remote, missing, mutable-alias, duplicate-tag, and duplicate-byte identities,
+  and fails before output allocation. The four T2.5 decision values now map
+  deterministically to one cohort-wide prompt policy with strict evidence
+  binding; `revise` blocks execution and `inconclusive` selects untreated
+  operation with a limitation. Read-only inspection found all provisional tags
+  installed under Ollama `0.32.15`, but no owner decision, cohort lock, model
+  invocation, task, pull, or evidence run occurred.
+
 - Completed the authorized Phase 2 small-model prompt comparison from clean
   commit `80bc122`. One locked interleaved 32-attempt run produced two
   independently verified and reanalyzed 16-row conditions, and the strict
   deterministic comparison passed. Both conditions reached the same first
   `PROVIDER_FAILURE` boundary on all rows, so this is not evidence of a prompt
   effect, quality, reliability, or model ranking. The ignored T2.5 worksheet
-  is prepared for the owner's human decision; Phase 3 remains gated until it
-  is recorded.
+  is prepared for the owner's human decision; Phase 3 prompt selection and
+  cohort execution remain gated until it is recorded.
 
 - Completed the T0.1 small-model tool-compatibility documentation packet. The
   locked 16-row Phase 1 protocol and its authorization boundaries are now
