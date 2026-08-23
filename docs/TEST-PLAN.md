@@ -320,7 +320,9 @@ not place a live model call in default tests or CI.
 - Require `toolCompatibilityMatrix`, `toolCompatibilityPromptMatrix`,
   `toolCompatibilityVerify`, `toolCompatibilityReanalyze`, and
   `toolCompatibilityCompare` to stay outside `test`, `check`, `build`,
-  application startup, and CI. Verify/reanalyze/compare must not start Spring,
+  application startup, and CI. The provider-free
+  `toolCompatibilityCohortVerify` and `toolCompatibilityCohortReanalyze` tasks
+  must remain equally isolated. Verify/reanalyze/compare must not start Spring,
   resolve a model, or contact Ollama.
 - The completed Phase 1 baseline is recorded under the ignored
   `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory.
@@ -330,8 +332,28 @@ not place a live model call in default tests or CI.
   `2026-08-21-lfm-prompt-untreated` and `2026-08-21-lfm-prompted` directories;
   both verify and reanalyze offline, and `toolCompatibilityCompare` passes.
   Both conditions reached the same first `PROVIDER_FAILURE` boundary on every
-  row, so no prompt-effect or quality conclusion is permitted. The T2.5 human
-  decision worksheet remains blank and Phase 3 is still gated.
+  row, so no prompt-effect or quality conclusion is permitted. On 2026-08-23
+  the owner completed the ignored T2.5 worksheet with `inconclusive`; the
+  bound policy is untreated operation with the limitation recorded. Tests must
+  not read or modify that private worksheet. Separately authorized
+  provider-free Phase 3 preparation must cover ordered peer/reference
+  resolution, full-digest and runtime-version checks, duplicate tags/bytes and
+  mutable aliases, local-only execution, explicit unavailable metadata, mixed
+  artifact formats, and failure before output allocation. Its prompt-policy
+  tests must cover all four decision values and reject decision-binding drift.
+  No test may contact Ollama or execute a live cohort model. T3.3
+  provider-free tests must cover exact model-major order/count, no cross-model
+  advisor state, supported and unsupported seed recording, no thinking
+  override, runtime drift, retained provider failures, strict evidence layout,
+  tampering, offline verification/reanalysis, and default-lifecycle isolation.
+  T3.4 provider-free tests must cover every per-model analysis dimension,
+  deterministic model/case order, omitted/unknown/incorrect arguments,
+  multi-step continuation/order/premature-final/duplicate observations,
+  deterministic failure retention plus bounded lexical recovery markers,
+  response-format markers and final-response length, successful-row
+  median/range, complete and incomplete token coverage, tokens-per-passing-row
+  gating, mixed artifact formats, a golden report digest, and the absence of a
+  winner/ranking/leaderboard section.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.

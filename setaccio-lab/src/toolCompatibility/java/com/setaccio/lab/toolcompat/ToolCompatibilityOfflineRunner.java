@@ -43,6 +43,14 @@ public final class ToolCompatibilityOfflineRunner {
                     : evidence.reanalyze(runDirectory);
             return new OfflineResult("prompt-matrix evidence", result.failures());
         }
+        if (isCohortEvidence(runDirectory, objectMapper)) {
+            ToolCompatibilityCohortEvidence evidence =
+                    new ToolCompatibilityCohortEvidence(objectMapper);
+            ToolCompatibilityCohortEvidence.OfflineResult result = mode == Mode.VERIFY
+                    ? evidence.verify(runDirectory)
+                    : evidence.reanalyze(runDirectory);
+            return new OfflineResult("cohort evidence", result.failures());
+        }
         ToolCompatibilityEvidence evidence = new ToolCompatibilityEvidence(objectMapper);
         ToolCompatibilityEvidence.OfflineResult result = mode == Mode.VERIFY
                 ? evidence.verify(runDirectory)
@@ -65,6 +73,24 @@ public final class ToolCompatibilityOfflineRunner {
         Path promptMatrixRaw = runDirectory.resolve(ToolCompatibilityPromptMatrixResult.RAW_FILENAME);
         return Files.exists(promptMatrixRaw, LinkOption.NOFOLLOW_LINKS)
                 || Files.isSymbolicLink(promptMatrixRaw);
+    }
+
+    private static boolean isCohortEvidence(Path runDirectory, ObjectMapper objectMapper) {
+        Path manifestPath = runDirectory.resolve(EvidenceManifestStore.MANIFEST_FILENAME);
+        if (Files.isRegularFile(manifestPath, LinkOption.NOFOLLOW_LINKS)) {
+            try {
+                JsonNode manifest = objectMapper.readTree(manifestPath.toFile());
+                if (ToolCompatibilityCohortResult.SUITE.equals(
+                        manifest.path("suite").asText())) {
+                    return true;
+                }
+            } catch (Exception ignored) {
+                // The cohort evidence verifier will report malformed manifest content.
+            }
+        }
+        Path cohortRaw = runDirectory.resolve(ToolCompatibilityCohortResult.RAW_FILENAME);
+        return Files.exists(cohortRaw, LinkOption.NOFOLLOW_LINKS)
+                || Files.isSymbolicLink(cohortRaw);
     }
 
     static Path resolveRunDirectory(Path projectDirectory, String value) {
