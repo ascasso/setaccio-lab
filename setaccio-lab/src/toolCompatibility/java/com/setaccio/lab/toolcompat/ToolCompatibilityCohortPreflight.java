@@ -13,6 +13,20 @@ import java.util.Set;
 /** Resolves an ordered Phase 3 cohort completely before any evidence allocation. */
 final class ToolCompatibilityCohortPreflight {
 
+    Prepared prepareApproved(
+            Path projectDirectory,
+            String ollamaBaseUrl,
+            String outputDirectory,
+            InventorySource inventorySource
+    ) {
+        Prepared prepared = prepare(
+                ToolCompatibilityCohortLock.input(
+                        projectDirectory, ollamaBaseUrl, outputDirectory),
+                inventorySource);
+        ToolCompatibilityCohortLock.requireMatches(prepared);
+        return prepared;
+    }
+
     Prepared prepare(Input input, InventorySource inventorySource) {
         if (input == null || inventorySource == null) {
             throw new IllegalArgumentException("cohort preflight dependencies are required");
