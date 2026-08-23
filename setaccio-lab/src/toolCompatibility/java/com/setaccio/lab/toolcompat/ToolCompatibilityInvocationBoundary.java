@@ -114,15 +114,39 @@ final class ToolCompatibilityInvocationBoundary {
             List<ToolCallback> callbacks,
             ToolCompatibilitySystemPromptIdentity systemPrompt
     ) {
+        return invoke(
+                chatModel,
+                scheduledCase,
+                callbacks,
+                systemPrompt,
+                ToolCompatibilityProtocol.INITIAL_MODEL,
+                scheduledCase.seed());
+    }
+
+    synchronized ToolCompatibilityInvocationTrace invoke(
+            ChatModel chatModel,
+            ToolCompatibilityCaseSelection.ScheduledCase scheduledCase,
+            List<ToolCallback> callbacks,
+            ToolCompatibilitySystemPromptIdentity systemPrompt,
+            String requestedModel,
+            Integer effectiveSeed
+    ) {
         Objects.requireNonNull(chatModel, "chatModel must not be null");
         Objects.requireNonNull(scheduledCase, "scheduledCase must not be null");
+        if (requestedModel == null
+                || requestedModel.isBlank()
+                || !requestedModel.equals(requestedModel.strip())) {
+            throw new IllegalArgumentException("requestedModel must be nonblank and trimmed");
+        }
         ToolCompatibilityProtocol.systemPromptCatalog().requirePrompt(systemPrompt);
         if (!nextSequentialAttemptAllowed) {
             throw new ToolCompatibilityProtocolIntegrityException(
                     "A previous timed-out tool compatibility attempt did not stop safely");
         }
         ToolCompatibilityRunSettings settings = ToolCompatibilityProtocol.runSettings();
-        if (!ToolCompatibilityProtocol.SEEDS.contains(scheduledCase.seed())) {
+        if (!ToolCompatibilityProtocol.SEEDS.contains(scheduledCase.seed())
+                || (effectiveSeed != null
+                        && !Objects.equals(scheduledCase.seed(), effectiveSeed))) {
             throw new IllegalArgumentException("scheduled case seed must be one of the locked protocol seeds");
         }
         ToolBenchmarkPrompt prompt = requireCanonicalPrompt(scheduledCase.caseId());
@@ -142,11 +166,12 @@ final class ToolCompatibilityInvocationBoundary {
         Future<Void> future = executor.submit(invokeTask(
                 chatModel,
                 prompt,
-                scheduledCase.seed(),
                 settings,
                 observedCallbacks,
                 observingAdvisor,
-                systemPrompt));
+                systemPrompt,
+                requestedModel,
+                effectiveSeed));
         try {
             future.get(rowDeadline.toNanos(), TimeUnit.NANOSECONDS);
             recorder.complete();
@@ -203,19 +228,22 @@ final class ToolCompatibilityInvocationBoundary {
     private Callable<Void> invokeTask(
             ChatModel chatModel,
             ToolBenchmarkPrompt prompt,
-            int seed,
             ToolCompatibilityRunSettings settings,
             List<ToolCallback> callbacks,
             ObservingAdvisor observingAdvisor,
-            ToolCompatibilitySystemPromptIdentity systemPrompt
+            ToolCompatibilitySystemPromptIdentity systemPrompt,
+            String requestedModel,
+            Integer effectiveSeed
     ) {
         return () -> {
-            OllamaChatOptions options = OllamaChatOptions.builder()
-                    .model(settings.requestedModel())
+            var optionsBuilder = OllamaChatOptions.builder()
+                    .model(requestedModel)
                     .temperature(settings.temperature())
-                    .seed(seed)
-                    .numPredict(settings.maxOutputTokensPerProviderTurn())
-                    .build();
+                    .numPredict(settings.maxOutputTokensPerProviderTurn());
+            if (effectiveSeed != null) {
+                optionsBuilder.seed(effectiveSeed);
+            }
+            OllamaChatOptions options = optionsBuilder.build();
             ToolCallingAdvisor toolCallingAdvisor = ToolCallingAdvisor.builder()
                     .toolCallingManager(ToolCallingManager.builder().build())
                     .build();

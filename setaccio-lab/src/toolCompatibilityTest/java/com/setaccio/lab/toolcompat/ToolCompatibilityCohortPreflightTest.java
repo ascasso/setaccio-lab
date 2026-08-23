@@ -128,6 +128,7 @@ class ToolCompatibilityCohortPreflightTest {
                                 REFERENCE,
                                 "c".repeat(64),
                                 ToolCompatibilityCohortInventoryModel.ExecutionLocation.REMOTE,
+                                ToolCompatibilityCohortSeedSemantics.SUPPORTED,
                                 ToolCompatibilityCohortModelMetadata.unavailable()))))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("execute locally");
@@ -185,6 +186,7 @@ class ToolCompatibilityCohortPreflightTest {
                 PEER_ONE,
                 "short-digest",
                 ToolCompatibilityCohortInventoryModel.ExecutionLocation.LOCAL,
+                ToolCompatibilityCohortSeedSemantics.SUPPORTED,
                 ToolCompatibilityCohortModelMetadata.unavailable()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("full lowercase SHA-256");
@@ -258,6 +260,7 @@ class ToolCompatibilityCohortPreflightTest {
                 tag,
                 digest,
                 ToolCompatibilityCohortInventoryModel.ExecutionLocation.LOCAL,
+                ToolCompatibilityCohortSeedSemantics.SUPPORTED,
                 metadata);
     }
 

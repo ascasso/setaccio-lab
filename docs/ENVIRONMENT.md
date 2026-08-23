@@ -735,6 +735,20 @@ labelled reference, record one Ollama runtime version and full model digests,
 fail before allocation on identity drift, and never read `OLLAMA_MODEL`, pull a
 model, join a default lifecycle, or publish ignored raw output.
 
+The provider-free cohort evidence tasks are available without a live runner:
+
+```bash
+./gradlew :setaccio-lab:toolCompatibilityCohortVerify \
+  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+
+./gradlew :setaccio-lab:toolCompatibilityCohortReanalyze \
+  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+```
+
+They share the strict offline runner, do not start Spring, and do not contact
+Ollama. No `toolCompatibilityCohort` live task exists until T2.5 and exact
+identity approval are complete.
+
 ## Opt-In Tool Search Smoke Automation
 
 The `toolSearchSmoke` Gradle task provides a narrow live diagnostic for the Tool Search wrapper produced by the installed Spring AI version. It starts a non-web Spring context, runs one deterministic paired standard-versus-Tool-Search repetition, and compares each raw Tool Search response with the normalized discovery trace. It recognizes the array, textual-singleton, and object `toolReferences` representations covered by the offline parser; any other shape is malformed. It is not part of `test`, `check`, `build`, or default CI.

@@ -320,7 +320,9 @@ not place a live model call in default tests or CI.
 - Require `toolCompatibilityMatrix`, `toolCompatibilityPromptMatrix`,
   `toolCompatibilityVerify`, `toolCompatibilityReanalyze`, and
   `toolCompatibilityCompare` to stay outside `test`, `check`, `build`,
-  application startup, and CI. Verify/reanalyze/compare must not start Spring,
+  application startup, and CI. The provider-free
+  `toolCompatibilityCohortVerify` and `toolCompatibilityCohortReanalyze` tasks
+  must remain equally isolated. Verify/reanalyze/compare must not start Spring,
   resolve a model, or contact Ollama.
 - The completed Phase 1 baseline is recorded under the ignored
   `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory.
@@ -337,7 +339,11 @@ not place a live model call in default tests or CI.
   execution, explicit unavailable metadata, mixed artifact formats, and
   failure before output allocation. Its prompt-policy tests must cover all four
   owner decisions and reject decision-binding drift. No test may select the
-  owner's actual decision, contact Ollama, or execute a cohort model.
+  owner's actual decision, contact Ollama, or execute a live cohort model. T3.3
+  provider-free tests must cover exact model-major order/count, no cross-model
+  advisor state, supported and unsupported seed recording, no thinking
+  override, runtime drift, retained provider failures, strict evidence layout,
+  tampering, offline verification/reanalysis, and default-lifecycle isolation.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.

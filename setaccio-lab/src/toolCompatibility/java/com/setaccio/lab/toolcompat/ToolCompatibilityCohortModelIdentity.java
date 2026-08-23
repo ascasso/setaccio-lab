@@ -7,29 +7,30 @@ record ToolCompatibilityCohortModelIdentity(
         String requestedTag,
         String effectiveInstalledTag,
         String digest,
+        ToolCompatibilityCohortSeedSemantics seedSemantics,
         ToolCompatibilityCohortModelMetadata metadata
-) {
+) implements ToolCompatibilityResolvedModelIdentity {
 
     ToolCompatibilityCohortModelIdentity {
         if (cohortPosition < 1) {
             throw new IllegalArgumentException("cohortPosition must be positive");
         }
-        if (role == null || metadata == null) {
-            throw new IllegalArgumentException("cohort model role and metadata are required");
-        }
-        requestedTag = requireText(requestedTag, "requestedTag");
-        effectiveInstalledTag = requireText(effectiveInstalledTag, "effectiveInstalledTag");
-        if (digest == null || !digest.matches("[0-9a-f]{64}")) {
+        if (role == null || seedSemantics == null || metadata == null) {
             throw new IllegalArgumentException(
-                    "digest must be one full lowercase SHA-256 digest");
+                    "cohort model role, seed semantics, and metadata are required");
         }
+        ToolCompatibilityResolvedModelIdentity.requireFields(
+                requestedTag, effectiveInstalledTag, digest);
     }
 
-    private static String requireText(String value, String field) {
-        if (value == null || value.isBlank() || !value.equals(value.strip())) {
-            throw new IllegalArgumentException(field + " must be nonblank and trimmed");
-        }
-        return value;
+    @Override
+    public String requestedModel() {
+        return requestedTag;
+    }
+
+    @Override
+    public String effectiveModel() {
+        return effectiveInstalledTag;
     }
 
     enum Role {

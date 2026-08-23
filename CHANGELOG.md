@@ -36,9 +36,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
   and fails before output allocation. The four T2.5 decision values now map
   deterministically to one cohort-wide prompt policy with strict evidence
   binding; `revise` blocks execution and `inconclusive` selects untreated
-  operation with a limitation. Read-only inspection found all provisional tags
-  installed under Ollama `0.32.15`, but no owner decision, cohort lock, model
-  invocation, task, pull, or evidence run occurred.
+  operation with a limitation. The provider-free T3.3 core adds one immutable
+  model-major schedule, explicit supported/unsupported seed semantics, a fresh
+  standard-advisor boundary per fake model, complete row/failure retention,
+  strict shared-v1 cohort evidence, deterministic structural reporting, and
+  dedicated offline verify/reanalyze tasks. Read-only inspection found all
+  provisional tags installed under Ollama `0.32.15`, but no owner decision,
+  cohort lock, live cohort task, model invocation, pull, or evidence run
+  occurred.
 
 - Completed the authorized Phase 2 small-model prompt comparison from clean
   commit `80bc122`. One locked interleaved 32-attempt run produced two

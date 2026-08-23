@@ -69,9 +69,16 @@ mapping covers all four future owner decisions and rejects evidence-binding
 drift, but no decision has been selected or read from the ignored worksheet.
 Read-only inspection found every provisional peer and `qwen3.8:27b-mlx`
 installed under Ollama `0.32.15`; that observation does not lock the cohort or
-approve the reference digest. No model invocation, output allocation, cohort
-task, pull, or Phase 3 evidence run occurred. T3.3 and later work still require
-the completed T2.5 binding and explicit approval of the resolved identities.
+approve the reference digest. The provider-free T3.3 core now creates a dynamic
+model-major schedule bound to ordered full identities, metadata, per-model seed
+semantics, and one runtime version; executes fake multi-model sessions with a
+fresh advisor boundary per model; retains every row and classified provider
+failure; and writes strict shared-v1 evidence with standalone cohort
+verify/reanalyze tasks. Unsupported seed semantics omit the option rather than
+simulating it, and no thinking override is introduced. No live cohort task,
+model invocation, output allocation, pull, or Phase 3 evidence run occurred.
+Completing T3.3 still requires the completed T2.5 binding, explicit approval of
+the resolved identities, and the separately reviewed live runner boundary.
 
 ## Purpose
 

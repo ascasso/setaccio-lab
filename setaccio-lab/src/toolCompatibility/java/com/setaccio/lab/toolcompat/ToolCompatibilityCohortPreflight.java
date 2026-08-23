@@ -171,6 +171,7 @@ final class ToolCompatibilityCohortPreflight {
                 requestedTag,
                 normalizedRequested,
                 selected.digest(),
+                selected.seedSemantics(),
                 selected.metadata());
     }
 
@@ -215,6 +216,9 @@ final class ToolCompatibilityCohortPreflight {
                     || reference.role() != ToolCompatibilityCohortModelIdentity.Role.REFERENCE) {
                 throw new IllegalArgumentException("Prepared cohort roles are inconsistent");
             }
+            List<ToolCompatibilityCohortModelIdentity> ordered = new ArrayList<>(peers);
+            ordered.add(reference);
+            ToolCompatibilityCohortSchedule.requireOrderedModels(ordered);
         }
 
         List<ToolCompatibilityCohortModelIdentity> orderedModels() {

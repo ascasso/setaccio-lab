@@ -27,7 +27,7 @@ final class ToolCompatibilityRowAnalyzer {
 
     ToolCompatibilityRow analyze(
             ToolCompatibilityCaseSelection.ScheduledCase scheduledCase,
-            ToolCompatibilityModelIdentity modelIdentity,
+            ToolCompatibilityResolvedModelIdentity modelIdentity,
             ToolCompatibilityInvocationTrace trace
     ) {
         return analyze(
@@ -41,11 +41,30 @@ final class ToolCompatibilityRowAnalyzer {
 
     ToolCompatibilityRow analyze(
             ToolCompatibilityCaseSelection.ScheduledCase scheduledCase,
-            ToolCompatibilityModelIdentity modelIdentity,
+            ToolCompatibilityResolvedModelIdentity modelIdentity,
             ToolCompatibilityInvocationTrace trace,
             ToolCompatibilitySystemPromptIdentity systemPrompt,
             Integer globalPairSequence,
             ToolCompatibilityConditionExecutionPosition conditionExecutionPosition
+    ) {
+        return analyze(
+                scheduledCase,
+                modelIdentity,
+                trace,
+                systemPrompt,
+                globalPairSequence,
+                conditionExecutionPosition,
+                scheduledCase.seed());
+    }
+
+    ToolCompatibilityRow analyze(
+            ToolCompatibilityCaseSelection.ScheduledCase scheduledCase,
+            ToolCompatibilityResolvedModelIdentity modelIdentity,
+            ToolCompatibilityInvocationTrace trace,
+            ToolCompatibilitySystemPromptIdentity systemPrompt,
+            Integer globalPairSequence,
+            ToolCompatibilityConditionExecutionPosition conditionExecutionPosition,
+            Integer effectiveSeed
     ) {
         Objects.requireNonNull(scheduledCase, "scheduledCase must not be null");
         Objects.requireNonNull(modelIdentity, "modelIdentity must not be null");
@@ -100,7 +119,7 @@ final class ToolCompatibilityRowAnalyzer {
                 scheduledCase.sequence(),
                 scheduledCase.caseId(),
                 scheduledCase.repetition(),
-                scheduledCase.seed(),
+                effectiveSeed,
                 ToolCompatibilityProtocol.PROVIDER,
                 modelIdentity.requestedModel(),
                 modelIdentity.effectiveModel(),

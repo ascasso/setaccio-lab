@@ -281,6 +281,30 @@ tasks.register('toolCompatibilityReanalyze', ToolCompatibilityOfflineTask) {
     workingDirectory.set(layout.projectDirectory)
 }
 
+tasks.register('toolCompatibilityCohortVerify', ToolCompatibilityOfflineTask) {
+    description = 'Verifies saved tool compatibility cohort evidence without starting Spring or calling a model provider.'
+    dependsOn tasks.named('toolCompatibilityClasses')
+    classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+    workingDirectory.set(layout.projectDirectory)
+}
+
+tasks.register('toolCompatibilityCohortReanalyze', ToolCompatibilityOfflineTask) {
+    description = 'Regenerates and verifies saved tool compatibility cohort summaries without starting Spring or calling a model provider.'
+    dependsOn tasks.named('toolCompatibilityClasses')
+    classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+    workingDirectory.set(layout.projectDirectory)
+}
+
 tasks.register('localEvaluationVerify', LocalEvaluationOfflineTask) {
     description = 'Verifies saved local fact-check evidence without starting Spring or calling a model provider.'
     dependsOn tasks.named('localEvaluationClasses')

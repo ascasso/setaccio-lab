@@ -5,6 +5,7 @@ record ToolCompatibilityCohortInventoryModel(
         String installedTag,
         String digest,
         ExecutionLocation executionLocation,
+        ToolCompatibilityCohortSeedSemantics seedSemantics,
         ToolCompatibilityCohortModelMetadata metadata
 ) {
 
@@ -16,6 +17,9 @@ record ToolCompatibilityCohortInventoryModel(
         }
         if (executionLocation == null) {
             throw new IllegalArgumentException("executionLocation is required");
+        }
+        if (seedSemantics == null) {
+            throw new IllegalArgumentException("seedSemantics is required");
         }
         if (metadata == null) {
             throw new IllegalArgumentException("metadata is required");
