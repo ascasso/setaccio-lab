@@ -22,8 +22,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
   deterministic reanalysis; all first provider turns were classified as
   `PROVIDER_FAILURE`, with no observed tool calls or final responses. This is
   a provider-turn compatibility observation only, not a quality, reliability,
-  production, or model-ranking claim. The paired Phase 2 run is now complete;
-  its human interpretation remains open.
+  production, or model-ranking claim. The paired Phase 2 run and owner-only
+  human interpretation are now complete. The `inconclusive` decision selects
+  untreated cohort operation with an explicit limitation and authorizes no
+  prompt-effect claim.
 
 ### Added
 
@@ -47,17 +49,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
   named lexical markers; reports tokens per passing row only with complete
   passing-row usage; and carries a mixed-artifact deployed-system caveat with
   no total rank. Read-only inspection found all provisional tags installed
-  under Ollama `0.32.15`, but no owner decision, cohort lock, live cohort task,
-  model invocation, pull, or evidence run occurred.
+  under Ollama `0.32.15`. The owner subsequently selected `inconclusive` for
+  T2.5, activating untreated operation plus the recorded limitation. No cohort
+  lock, live cohort task, model invocation, pull, or evidence run occurred.
 
 - Completed the authorized Phase 2 small-model prompt comparison from clean
   commit `80bc122`. One locked interleaved 32-attempt run produced two
   independently verified and reanalyzed 16-row conditions, and the strict
   deterministic comparison passed. Both conditions reached the same first
   `PROVIDER_FAILURE` boundary on all rows, so this is not evidence of a prompt
-  effect, quality, reliability, or model ranking. The ignored T2.5 worksheet
-  is prepared for the owner's human decision; Phase 3 prompt selection and
-  cohort execution remain gated until it is recorded.
+  effect, quality, reliability, or model ranking. On 2026-08-23 the owner
+  completed the ignored T2.5 worksheet with `inconclusive`; the bound policy is
+  untreated operation with the limitation recorded. Exact cohort approval and
+  any live execution remain separately gated.
 
 - Completed the T0.1 small-model tool-compatibility documentation packet. The
   locked 16-row Phase 1 protocol and its authorization boundaries are now

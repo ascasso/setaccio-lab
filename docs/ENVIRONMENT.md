@@ -725,14 +725,15 @@ bounded compatibility observation, not a quality or reliability claim.
 
 Both conditions reached the same first `PROVIDER_FAILURE` boundary on all 16
 rows. This is a bounded provider-turn observation, not a prompt-effect,
-quality, reliability, or ranking result. The T2.5 worksheet is ignored and
-requires the owner's human decision before Phase 3 can select a prompt policy
-or execute a cohort. Dependency-independent provider-free preflight work and
-read-only installed-model inspection were separately authorized on 2026-08-23;
-they do not lock the provisional cohort or authorize model invocation. Any
-future cohort task must use explicit ordered peer tags and a separately
-labelled reference, record one Ollama runtime version and full model digests,
-fail before allocation on identity drift, and never read `OLLAMA_MODEL`, pull a
+quality, reliability, or ranking result. On 2026-08-23 the owner completed the
+ignored T2.5 worksheet with `inconclusive`. The resulting cohort policy is
+untreated operation with the limitation recorded; no prompt-effect claim is
+authorized. Dependency-independent provider-free preflight work and read-only
+installed-model inspection were separately authorized on 2026-08-23; they do
+not lock the provisional cohort or authorize model invocation. Any future
+cohort task must use explicit ordered peer tags and a separately labelled
+reference, record one Ollama runtime version and full model digests, fail
+before allocation on identity drift, and never read `OLLAMA_MODEL`, pull a
 model, join a default lifecycle, or publish ignored raw output.
 
 The provider-free cohort evidence tasks are available without a live runner:
@@ -752,8 +753,8 @@ recovery, output behavior, efficiency, and incomplete/unsupported
 observations. Token totals include provider-turn coverage, tokens per passing
 row appears only when every passing row has complete usage, and mixed
 artifact/runtime formats remain labelled as deployed-system observations. No
-`toolCompatibilityCohort` live task exists until T2.5 and exact identity
-approval are complete.
+`toolCompatibilityCohort` live task exists until exact identity approval and
+the separately reviewed live-runner boundary are complete.
 
 ## Opt-In Tool Search Smoke Automation
 

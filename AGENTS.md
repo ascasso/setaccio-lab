@@ -307,15 +307,18 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   deterministic closeout on 2026-08-21 from clean commit `80bc122`. The two
   ignored 16-row conditions verify, reanalyze, and compare successfully, but
   every row reached the same first `PROVIDER_FAILURE` boundary. This supports
-  no prompt-effect, quality, reliability, or ranking claim. The owner-only T2.5
-  human decision remains pending. Separately authorized dependency-independent
-  Phase 3 preparation now has provider-free cohort preflight and prompt-policy
-  foundations, a model-major fake-session executor, strict cohort evidence,
-  offline verify/reanalyze tasks, a complete synthetic-fixture T3.4
-  multidimensional analysis/reporting layer, and one read-only installed-model
-  inventory observation. No cohort identities or prompt policy are locked, no
-  real cohort evidence has been analyzed, and no live cohort task or model
-  invocation is authorized by that preparation.
+  no prompt-effect, quality, reliability, or ranking claim. On 2026-08-23 the
+  owner completed T2.5 with the decision `inconclusive`, bound to the preserved
+  runs and comparison. The cohort prompt policy is therefore untreated
+  operation with the limitation recorded; no prompt-effect claim is
+  authorized. Separately authorized dependency-independent Phase 3 preparation
+  now has provider-free cohort preflight and prompt-policy foundations, a
+  model-major fake-session executor, strict cohort evidence, offline
+  verify/reanalyze tasks, a complete synthetic-fixture T3.4 multidimensional
+  analysis/reporting layer, and one read-only installed-model inventory
+  observation. No cohort identities are locked, no real cohort evidence has
+  been analyzed, and no live cohort task or model invocation is authorized by
+  that preparation.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -466,14 +469,15 @@ Pending and separately deferred:
   [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
   is closed through one bounded clean baseline, offline verification and
   reanalysis, and the dated public-safe interpretation. Phase 2's paired
-  execution and deterministic comparison are complete, but its owner-only
-  human decision is still pending. The owner separately authorized
+  execution, deterministic comparison, and owner-only T2.5 decision are
+  complete. The owner selected `inconclusive` on 2026-08-23, which selects
+  untreated cohort operation with an explicit limitation and authorizes no
+  prompt-effect claim. The owner separately authorized
   dependency-independent Phase 3 provider-free work and read-only inventory
   inspection on 2026-08-23, including the provider-free T3.3 executor/evidence
   core, offline tasks, and synthetic-fixture T3.4 analysis/reporting layer; the
-  evidence closeout itself still does not authorize a prompt-policy selection,
-  final cohort lock, model invocation, live cohort run, or evidence-based model
-  comparison.
+  completed decision still does not authorize a final cohort lock, model
+  invocation, live cohort run, or evidence-based model comparison.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing

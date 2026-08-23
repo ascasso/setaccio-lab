@@ -11,7 +11,7 @@ Proposed next work after completion of:
 - the bounded Anthropic architecture-portability proof;
 - the existing standard-versus-regex Tool Search baseline.
 
-This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21; its T2.5 human decision remains open. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection while completing T2.5. Cohort identity approval and any live cohort execution remain separately gated.
+This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on 2026-08-23. That decision selects untreated cohort operation with the limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection. Cohort identity approval and any live cohort execution remain separately gated.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
@@ -52,10 +52,17 @@ same installed model digest and locked settings. Both conditions verified and
 reanalyzed offline, and the strict paired comparison reproduced
 deterministically. Every row in both conditions stopped at the same first
 `PROVIDER_FAILURE` boundary, so the evidence supports no prompt-effect,
-quality, reliability, or ranking conclusion. The ignored T2.5 worksheet is
-prepared but still blank: only the project owner may record `adopt`, `revise`,
-`reject`, or `inconclusive`. Until that decision is recorded, Phase 3 remains
-blocked from selecting its executable prompt policy or running the cohort.
+quality, reliability, or ranking conclusion. On 2026-08-23 the project owner
+completed the ignored T2.5 worksheet with `inconclusive`, bound to baseline run
+`2026-08-21-lfm-prompt-untreated`, candidate run
+`2026-08-21-lfm-prompted`, prompt-catalog digest
+`d55122cd60ac056c8f5cc3e35a2661e497bc1468cff6a593f4cf666b1eb7e06d`,
+comparison-report digest
+`e22289df2fbfdd6bddda8ac0776395681bed0d85939f69b955f777274d05a7b9`,
+and review date `2026-08-23`. The executable Phase 3 prompt policy is therefore
+untreated operation with the limitation recorded. No prompt-effect claim is
+authorized, and cohort identity approval plus live execution remain separate
+gates.
 
 Dependency-independent Phase 3 preparation began on 2026-08-23 under separate
 owner authorization. The provider-free foundation resolves explicit ordered
@@ -65,8 +72,10 @@ family, artifact/runtime format, precision, template, system-prompt, tool, and
 thinking metadata as explicitly available or unavailable; rejects remote,
 missing, mutable-alias, duplicate-tag, and duplicate-byte identities; and
 validates a fresh output path without allocating it. A deterministic T3.2
-mapping covers all four future owner decisions and rejects evidence-binding
-drift, but no decision has been selected or read from the ignored worksheet.
+mapping covers all four owner decision values and rejects evidence-binding
+drift. The owner's `inconclusive` decision activates untreated operation plus
+the recorded limitation without requiring the implementation to read the
+ignored worksheet.
 Read-only inspection found every provisional peer and `qwen3.8:27b-mlx`
 installed under Ollama `0.32.15`; that observation does not lock the cohort or
 approve the reference digest. The provider-free T3.3 core now creates a dynamic
@@ -81,10 +90,9 @@ ordered per-model sections for every planned dimension, explicit unavailable
 metadata and token coverage, lexical-only output/recovery observations,
 complete-usage-gated tokens per passing row, and mixed-artifact caveats without
 a rank or winner. No live cohort task, model invocation, output allocation,
-pull, or Phase 3 evidence run occurred. Completing T3.3 still requires the
-completed T2.5 binding, explicit approval of the resolved identities, and the
-separately reviewed live runner boundary; T3.4 remains unexercised against real
-cohort evidence.
+pull, or Phase 3 evidence run occurred. Completing T3.3 still requires explicit
+approval of the resolved identities and the separately reviewed live runner
+boundary; T3.4 remains unexercised against real cohort evidence.
 
 ## Purpose
 
@@ -1245,6 +1253,10 @@ Bind the human decision to:
 - prompt catalog digest;
 - comparison report digest;
 - review date.
+
+Status: completed by the project owner on 2026-08-23 with `inconclusive`.
+Phase 3 therefore uses untreated operation while recording that no prompt
+effect could be determined; no prompt-effect claim is authorized.
 
 ## Phase 2 exit criteria
 
@@ -2453,7 +2465,8 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   `toolCompatibilityPromptMatrix` command, model, and both fresh output paths.
 - **Deliverable:** one interleaved 32-attempt execution producing two immutable
   16-row condition runs, offline verification of each, strict comparison, and a
-  deterministic comparison report. Human interpretation remains T2.5.
+  deterministic comparison report. Human interpretation was completed
+  separately under T2.5.
 - **Stop:** any missing model, digest or prompt/oracle drift, dirty worktree,
   either output collision, required pull, schedule drift, or absent exact
   authorization stops before allocation or invocation. Never substitute two
@@ -2472,6 +2485,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   `adopt`, `revise`, `reject`, or `inconclusive`.
 - **Stop:** an agent-assisted review is not the required human decision and
   cannot unlock Phase 3 prompt policy.
+- **Status:** completed by the project owner on 2026-08-23 with
+  `inconclusive`; the bound Phase 3 policy is untreated operation plus the
+  recorded limitation, with no prompt-effect claim.
 
 ## Phase 3 packets
 

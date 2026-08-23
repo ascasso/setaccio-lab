@@ -332,14 +332,16 @@ not place a live model call in default tests or CI.
   `2026-08-21-lfm-prompt-untreated` and `2026-08-21-lfm-prompted` directories;
   both verify and reanalyze offline, and `toolCompatibilityCompare` passes.
   Both conditions reached the same first `PROVIDER_FAILURE` boundary on every
-  row, so no prompt-effect or quality conclusion is permitted. The T2.5 human
-  decision worksheet remains blank. Separately authorized provider-free Phase
-  3 preparation must cover ordered peer/reference resolution, full digest and
-  runtime-version checks, duplicate tags/bytes and mutable aliases, local-only
-  execution, explicit unavailable metadata, mixed artifact formats, and
-  failure before output allocation. Its prompt-policy tests must cover all four
-  owner decisions and reject decision-binding drift. No test may select the
-  owner's actual decision, contact Ollama, or execute a live cohort model. T3.3
+  row, so no prompt-effect or quality conclusion is permitted. On 2026-08-23
+  the owner completed the ignored T2.5 worksheet with `inconclusive`; the
+  bound policy is untreated operation with the limitation recorded. Tests must
+  not read or modify that private worksheet. Separately authorized
+  provider-free Phase 3 preparation must cover ordered peer/reference
+  resolution, full-digest and runtime-version checks, duplicate tags/bytes and
+  mutable aliases, local-only execution, explicit unavailable metadata, mixed
+  artifact formats, and failure before output allocation. Its prompt-policy
+  tests must cover all four decision values and reject decision-binding drift.
+  No test may contact Ollama or execute a live cohort model. T3.3
   provider-free tests must cover exact model-major order/count, no cross-model
   advisor state, supported and unsupported seed recording, no thinking
   override, runtime drift, retained provider failures, strict evidence layout,
