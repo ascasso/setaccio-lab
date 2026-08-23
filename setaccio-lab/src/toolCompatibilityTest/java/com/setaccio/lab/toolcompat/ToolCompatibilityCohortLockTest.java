@@ -56,6 +56,9 @@ class ToolCompatibilityCohortLockTest {
                         ToolCompatibilityCohortModelIdentity.Role.PEER,
                         ToolCompatibilityCohortModelIdentity.Role.REFERENCE);
         assertThat(prepared.orderedModels())
+                .extracting(ToolCompatibilityCohortModelIdentity::seedSemantics)
+                .containsOnly(ToolCompatibilityCohortSeedSemantics.SUPPORTED);
+        assertThat(prepared.orderedModels())
                 .extracting(model -> model.metadata().artifactRuntimeFormat().value())
                 .containsExactly(
                         "GGUF via Ollama",
@@ -71,6 +74,21 @@ class ToolCompatibilityCohortLockTest {
                     assertThat(model.metadata().defaultSystemPromptFingerprint().value())
                             .matches("sha256:[0-9a-f]{64}");
                 });
+        ToolCompatibilityCohortExecutionPlan plan =
+                ToolCompatibilityCohortExecutionPlan.createApproved(prepared);
+        assertThat(plan.schedule().entries()).hasSize(96);
+        assertThat(plan.schedule().entries())
+                .extracting(ToolCompatibilityCohortSchedule.Entry::modelPosition)
+                .containsExactlyElementsOf(java.util.stream.IntStream.rangeClosed(1, 6)
+                        .boxed()
+                        .flatMap(position -> java.util.stream.Stream.generate(() -> position)
+                                .limit(ToolCompatibilityProtocol.ROW_COUNT))
+                        .toList());
+        assertThat(plan.schedule().entries())
+                .extracting(ToolCompatibilityCohortSchedule.Entry::effectiveSeed)
+                .doesNotContainNull();
+        assertThat(plan.promptPolicy().promptCondition())
+                .isEqualTo(ToolCompatibilityPromptCondition.UNTREATED);
         assertThat(prepared.outputDirectory()).doesNotExist();
     }
 
@@ -103,6 +121,14 @@ class ToolCompatibilityCohortLockTest {
                 () -> inventoryWithMetadataDrift()))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("position 3");
+
+        assertThatThrownBy(() -> preflight.prepareApproved(
+                project,
+                "http://localhost:11434",
+                "build/tool-compatibility/2026-08-23-approved-cohort",
+                () -> inventoryWithSeedDrift()))
+                .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
+                .hasMessageContaining("position 4");
         assertThat(output).doesNotExist();
     }
 
@@ -151,6 +177,20 @@ class ToolCompatibilityCohortLockTest {
                 ToolCompatibilityCohortLock.OLLAMA_RUNTIME_VERSION, models);
     }
 
+    private static ToolCompatibilityCohortInventory inventoryWithSeedDrift() {
+        List<ToolCompatibilityCohortInventoryModel> models = new ArrayList<>(
+                approvedInventory(ToolCompatibilityCohortLock.OLLAMA_RUNTIME_VERSION).models());
+        ToolCompatibilityCohortInventoryModel original = models.get(3);
+        models.set(3, new ToolCompatibilityCohortInventoryModel(
+                original.installedTag(),
+                original.digest(),
+                original.executionLocation(),
+                ToolCompatibilityCohortSeedSemantics.UNSUPPORTED,
+                original.metadata()));
+        return new ToolCompatibilityCohortInventory(
+                ToolCompatibilityCohortLock.OLLAMA_RUNTIME_VERSION, models);
+    }
+
     private static ToolCompatibilityCohortInventoryModel inventoryModel(
             ToolCompatibilityCohortLock.ApprovedModel model
     ) {
@@ -158,7 +198,7 @@ class ToolCompatibilityCohortLockTest {
                 model.installedTag(),
                 model.digest(),
                 ToolCompatibilityCohortInventoryModel.ExecutionLocation.LOCAL,
-                ToolCompatibilityCohortSeedSemantics.SUPPORTED,
+                model.seedSemantics(),
                 model.metadata());
     }
 }

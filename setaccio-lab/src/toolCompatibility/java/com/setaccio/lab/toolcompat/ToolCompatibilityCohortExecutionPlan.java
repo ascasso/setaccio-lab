@@ -46,6 +46,15 @@ record ToolCompatibilityCohortExecutionPlan(
                 ToolCompatibilityCallbackCatalog.canonicalCallbacks());
     }
 
+    static ToolCompatibilityCohortExecutionPlan createApproved(
+            ToolCompatibilityCohortPreflight.Prepared preflight
+    ) {
+        return create(
+                preflight,
+                ToolCompatibilityPhase2DecisionLock.decision(),
+                ToolCompatibilityPhase2DecisionLock.binding());
+    }
+
     ToolCompatibilitySystemPromptIdentity systemPrompt() {
         return promptPolicy.prompt(ToolCompatibilityProtocol.systemPromptCatalog());
     }

@@ -60,9 +60,10 @@ record ToolCompatibilityCohortResult(
                 || cohortSchedule == null) {
             throw new IllegalArgumentException("cohort result settings and identities are incomplete");
         }
+        ToolCompatibilityPhase2DecisionLock.requireMatches(humanDecision);
         ToolCompatibilityCohortPromptPolicy.Selection policy =
                 ToolCompatibilityCohortPromptPolicy.resolve(
-                        humanDecision, humanDecision.binding());
+                        humanDecision, ToolCompatibilityPhase2DecisionLock.binding());
         if (policy.executionState()
                         != ToolCompatibilityCohortPromptPolicy.ExecutionState.EXECUTABLE
                 || policy.promptCondition() != promptCondition

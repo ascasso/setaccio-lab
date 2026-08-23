@@ -145,7 +145,7 @@ class ToolCompatibilityCohortAnalyzerTest {
                 .doesNotContain("## Winner", "## Ranking", "## Leaderboard");
         assertThat(EvidenceIntegrity.sha256(report.getBytes(StandardCharsets.UTF_8)))
                 .as("golden cohort analysis report digest")
-                .isEqualTo("059bf537d41a9c42e9de05065d71e6c950bf16528bd9273d7bc19bb24644ef34");
+                .isEqualTo("e053eed2324097e089c0f14ee5f67d8a9e5eefb330267486c7903f23571775f3");
     }
 
     private static List<ToolCompatibilityRow> anomalyRows() {

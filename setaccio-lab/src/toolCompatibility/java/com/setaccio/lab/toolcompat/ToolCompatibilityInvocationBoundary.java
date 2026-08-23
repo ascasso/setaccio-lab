@@ -90,6 +90,30 @@ final class ToolCompatibilityInvocationBoundary {
                 modelIdentity);
     }
 
+    static ToolCompatibilityCohortControlledOllamaModel createControlledCohortOllamaModel(
+            OllamaApi ollamaApi,
+            ToolCompatibilityCohortModelIdentity modelIdentity,
+            Integer effectiveSeed
+    ) {
+        Objects.requireNonNull(ollamaApi, "ollamaApi must not be null");
+        Objects.requireNonNull(modelIdentity, "modelIdentity must not be null");
+        var optionsBuilder = OllamaChatOptions.builder()
+                .model(modelIdentity.requestedTag())
+                .temperature(ToolCompatibilityProtocol.TEMPERATURE)
+                .numPredict(ToolCompatibilityProtocol.MAX_OUTPUT_TOKENS_PER_PROVIDER_TURN);
+        if (effectiveSeed != null) {
+            optionsBuilder.seed(effectiveSeed);
+        }
+        return new ToolCompatibilityCohortControlledOllamaModel(
+                OllamaChatModelFactory.createNoPullModel(
+                        ollamaApi,
+                        optionsBuilder.build(),
+                        ToolCompatibilityProtocol.ROW_TIMEOUT,
+                        ToolCompatibilityProtocol.LOGICAL_ROW_ATTEMPTS),
+                modelIdentity,
+                effectiveSeed);
+    }
+
     static ToolCompatibilityInvocationBoundary forProviderFreeDeadlineTest(
             Duration rowDeadline, Duration stopConfirmationTimeout) {
         return new ToolCompatibilityInvocationBoundary(rowDeadline, stopConfirmationTimeout);

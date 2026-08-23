@@ -2,7 +2,6 @@ package com.setaccio.lab.toolcompat;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,12 +28,7 @@ class ToolCompatibilityCohortExecutorTest {
     private static final String PEER_TWO = "cohort-peer-two:3b";
     private static final String REFERENCE = "cohort-reference:27b-mlx";
     private static final ToolCompatibilityHumanDecisionBinding BINDING =
-            new ToolCompatibilityHumanDecisionBinding(
-                    "baseline-run",
-                    "candidate-run",
-                    ToolCompatibilitySystemPromptCatalog.SHA256,
-                    "e".repeat(64),
-                    LocalDate.parse("2026-08-23"));
+            ToolCompatibilityPhase2DecisionLock.binding();
 
     @TempDir
     Path temporaryDirectory;
@@ -173,9 +167,7 @@ class ToolCompatibilityCohortExecutorTest {
                                                 "c".repeat(64),
                                                 ToolCompatibilityCohortSeedSemantics.SUPPORTED,
                                                 "thinking-advertised-default-unavailable"))));
-        ToolCompatibilityHumanDecision decision = new ToolCompatibilityHumanDecision(
-                ToolCompatibilityHumanDecision.Decision.INCONCLUSIVE,
-                BINDING);
+        ToolCompatibilityHumanDecision decision = ToolCompatibilityPhase2DecisionLock.decision();
         return ToolCompatibilityCohortExecutionPlan.create(preflight, decision, BINDING);
     }
 

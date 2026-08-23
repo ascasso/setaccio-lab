@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.nio.file.Path;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,12 +12,7 @@ final class ToolCompatibilityCohortTestFixtures {
     static final JsonMapper OBJECT_MAPPER =
             JsonMapper.builder().findAndAddModules().build();
     static final ToolCompatibilityHumanDecisionBinding BINDING =
-            new ToolCompatibilityHumanDecisionBinding(
-                    "baseline-run",
-                    "candidate-run",
-                    ToolCompatibilitySystemPromptCatalog.SHA256,
-                    "e".repeat(64),
-                    LocalDate.parse("2026-08-23"));
+            ToolCompatibilityPhase2DecisionLock.binding();
     static final String RUNTIME_VERSION = "0.32.15";
 
     private static final Instant STARTED = Instant.parse("2026-08-23T10:00:00Z");
@@ -37,9 +31,7 @@ final class ToolCompatibilityCohortTestFixtures {
             List<ToolCompatibilityRow> referenceRows
     ) {
         ToolCompatibilityCohortPreflight.Prepared preflight = prepared();
-        ToolCompatibilityHumanDecision decision = new ToolCompatibilityHumanDecision(
-                ToolCompatibilityHumanDecision.Decision.INCONCLUSIVE,
-                BINDING);
+        ToolCompatibilityHumanDecision decision = ToolCompatibilityPhase2DecisionLock.decision();
         ToolCompatibilityCohortExecutionPlan plan =
                 ToolCompatibilityCohortExecutionPlan.create(preflight, decision, BINDING);
         List<ToolCompatibilityCohortModelRun> runs = new ArrayList<>();

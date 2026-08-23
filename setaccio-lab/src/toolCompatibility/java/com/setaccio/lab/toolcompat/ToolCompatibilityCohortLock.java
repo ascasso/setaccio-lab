@@ -83,6 +83,7 @@ final class ToolCompatibilityCohortLock {
                     ToolCompatibilityCohortModelIdentity.Role.REFERENCE,
                     "qwen3.8:27b-mlx",
                     "5642e97495e1a088883805981563dcdc4a040c2f53388b7a41d1f24d3622cf7e",
+                    ToolCompatibilityCohortSeedSemantics.SUPPORTED,
                     metadata(
                             18_174_721_847L,
                             "ollama-show architecture=qwen3_5",
@@ -145,6 +146,7 @@ final class ToolCompatibilityCohortLock {
                     || !observed.requestedTag().equals(expected.installedTag())
                     || !observed.effectiveInstalledTag().equals(expected.installedTag())
                     || !observed.digest().equals(expected.digest())
+                    || observed.seedSemantics() != expected.seedSemantics()
                     || !observed.metadata().equals(expected.metadata())) {
                 throw new ToolCompatibilityProtocolIntegrityException(
                         "Resolved cohort identity or metadata does not match the owner-approved "
@@ -164,6 +166,7 @@ final class ToolCompatibilityCohortLock {
                 ToolCompatibilityCohortModelIdentity.Role.PEER,
                 installedTag,
                 digest,
+                ToolCompatibilityCohortSeedSemantics.SUPPORTED,
                 metadata);
     }
 
@@ -197,6 +200,7 @@ final class ToolCompatibilityCohortLock {
             ToolCompatibilityCohortModelIdentity.Role role,
             String installedTag,
             String digest,
+            ToolCompatibilityCohortSeedSemantics seedSemantics,
             ToolCompatibilityCohortModelMetadata metadata
     ) {
 
@@ -208,6 +212,7 @@ final class ToolCompatibilityCohortLock {
                     || installedTag.endsWith(":latest")
                     || digest == null
                     || !digest.matches("[0-9a-f]{64}")
+                    || seedSemantics == null
                     || metadata == null) {
                 throw new IllegalArgumentException("approved cohort model lock is invalid");
             }
