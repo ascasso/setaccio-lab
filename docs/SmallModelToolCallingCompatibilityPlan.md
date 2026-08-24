@@ -11,7 +11,7 @@ Proposed next work after completion of:
 - the bounded Anthropic architecture-portability proof;
 - the existing standard-versus-regex Tool Search baseline.
 
-This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on 2026-08-23. That decision selects untreated cohort operation with the limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection. Cohort identity approval and any live cohort execution remain separately gated.
+This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on 2026-08-23. That decision selects untreated cohort operation with the limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection. The owner then approved the exact T3.1 cohort, one clean-baseline local T3.3 run, and bounded offline T3.4 interpretation on 2026-08-24. T3.5 remains separately gated.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
@@ -89,10 +89,20 @@ analysis layer is also implemented against synthetic cohort fixtures. It emits
 ordered per-model sections for every planned dimension, explicit unavailable
 metadata and token coverage, lexical-only output/recovery observations,
 complete-usage-gated tokens per passing row, and mixed-artifact caveats without
-a rank or winner. No live cohort task, model invocation, output allocation,
-pull, or Phase 3 evidence run occurred. Completing T3.3 still requires explicit
-approval of the resolved identities and the separately reviewed live runner
-boundary; T3.4 remains unexercised against real cohort evidence.
+a rank or winner. At that provider-free implementation checkpoint, no live
+cohort task, model invocation, output allocation, pull, or Phase 3 evidence run
+had occurred.
+
+After the owner approved the resolved identities and live-runner boundary, one
+clean-baseline cohort run completed on 2026-08-24 from commit `e897edf`.
+All 96 planned rows were retained under the locked untreated protocol, and the
+ignored evidence verified and reanalyzed offline. The owner then authorized the
+bounded T3.4 interpretation recorded in
+`docs/logs/2026-08-24-phase3-tool-compatibility-cohort.md`. It preserves
+per-model multidimensional observations, incomplete evidence, mixed
+artifact/runtime caveats, and the separately labelled reference without
+creating a rank, selection, general capability, or semantic-correctness claim.
+T3.5 remains unauthorized.
 
 ## Purpose
 

@@ -17,6 +17,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 ### Changed
 
 - Updated the Gradle Wrapper from 9.6.1 to 9.7.1.
+- Completed one owner-authorized Phase 3 small-model tool-compatibility cohort
+  run from clean commit `e897edf`, retaining all 96 locked sequential rows in
+  ignored evidence. The saved run verifies and reanalyzes offline, and its
+  bounded T3.4 record remains per-model and multidimensional without a rank,
+  selection, general-capability, semantic-correctness, or backend-normalized
+  performance claim. T3.5, reruns, model pulls, and replacements remain
+  separately unauthorized.
 - Closed the bounded Phase 1 small-model tool-compatibility baseline. The
   clean 16-row untreated LFM2.5 run completed with offline verification and
   deterministic reanalysis; all first provider turns were classified as
@@ -50,8 +57,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
   passing-row usage; and carries a mixed-artifact deployed-system caveat with
   no total rank. Read-only inspection found all provisional tags installed
   under Ollama `0.32.15`. The owner subsequently selected `inconclusive` for
-  T2.5, activating untreated operation plus the recorded limitation. No cohort
-  lock, live cohort task, model invocation, pull, or evidence run occurred.
+  T2.5, activating untreated operation plus the recorded limitation. At this
+  provider-free implementation checkpoint, no cohort lock, live cohort task,
+  model invocation, pull, or evidence run had occurred.
 
 - Completed the authorized Phase 2 small-model prompt comparison from clean
   commit `80bc122`. One locked interleaved 32-attempt run produced two

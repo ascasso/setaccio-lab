@@ -341,7 +341,10 @@ not place a live model call in default tests or CI.
   mutable aliases, local-only execution, explicit unavailable metadata, mixed
   artifact formats, and failure before output allocation. Its prompt-policy
   tests must cover all four decision values and reject decision-binding drift.
-  No test may contact Ollama or execute a live cohort model. T3.3
+  No default test or CI job may contact Ollama or execute a live cohort model.
+  The one separately authorized opt-in cohort run completed from clean commit
+  `e897edf`; its evidence verifies and reanalyzes offline, but this does not
+  broaden live-test authorization. T3.3
   provider-free tests must cover exact model-major order/count, no cross-model
   advisor state, supported and unsupported seed recording, no thinking
   override, runtime drift, retained provider failures, strict evidence layout,

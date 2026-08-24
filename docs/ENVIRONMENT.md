@@ -729,10 +729,12 @@ quality, reliability, or ranking result. On 2026-08-23 the owner completed the
 ignored T2.5 worksheet with `inconclusive`. The resulting cohort policy is
 untreated operation with the limitation recorded; no prompt-effect claim is
 authorized. Dependency-independent provider-free preflight work and read-only
-installed-model inspection were separately authorized on 2026-08-23; they do
-not lock the provisional cohort or authorize model invocation. Any future
-cohort task must use explicit ordered peer tags and a separately labelled
-reference, record one Ollama runtime version and full model digests, fail
+installed-model inspection were separately authorized on 2026-08-23. The owner
+later approved the exact T3.1 cohort and one 2026-08-24 live run from clean
+commit `e897edf`; its 96 rows are preserved in ignored evidence and verified
+and reanalyzed offline. Any additional cohort task still requires a separately
+authorized exact command and must use the suite-owned ordered peer/reference
+identities, record one Ollama runtime version and full model digests, fail
 before allocation on identity drift, and never read `OLLAMA_MODEL`, pull a
 model, join a default lifecycle, or publish ignored raw output.
 
@@ -752,9 +754,10 @@ for compatibility, discipline, arguments, multi-step behavior, failure
 recovery, output behavior, efficiency, and incomplete/unsupported
 observations. Token totals include provider-turn coverage, tokens per passing
 row appears only when every passing row has complete usage, and mixed
-artifact/runtime formats remain labelled as deployed-system observations. No
-`toolCompatibilityCohort` live task exists until exact identity approval and
-the separately reviewed live-runner boundary are complete.
+artifact/runtime formats remain labelled as deployed-system observations. The
+isolated live task was used once for the approved 2026-08-24 cohort run; it
+remains outside every default lifecycle. The bounded T3.4 record does not
+authorize T3.5, a rerun, a pull, a substitute model, or a new output directory.
 
 ## Opt-In Tool Search Smoke Automation
 

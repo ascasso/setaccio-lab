@@ -311,14 +311,17 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   owner completed T2.5 with the decision `inconclusive`, bound to the preserved
   runs and comparison. The cohort prompt policy is therefore untreated
   operation with the limitation recorded; no prompt-effect claim is
-  authorized. Separately authorized dependency-independent Phase 3 preparation
-  now has provider-free cohort preflight and prompt-policy foundations, a
-  model-major fake-session executor, strict cohort evidence, offline
-  verify/reanalyze tasks, a complete synthetic-fixture T3.4 multidimensional
-  analysis/reporting layer, and one read-only installed-model inventory
-  observation. No cohort identities are locked, no real cohort evidence has
-  been analyzed, and no live cohort task or model invocation is authorized by
-  that preparation.
+  authorized. The owner then approved the exact T3.1 cohort: five peers and a
+  separately labelled `qwen3.8:27b-mlx` reference, all locked to full local
+  digests under Ollama `0.32.15`. One clean-baseline `toolCompatibilityCohort`
+  run completed on 2026-08-24 from commit `e897edf`, retaining all 96 planned
+  rows under the untreated policy. Its ignored evidence verified and reanalyzed
+  offline, and the owner authorized a bounded T3.4 interpretation recorded in
+  `docs/logs/2026-08-24-phase3-tool-compatibility-cohort.md`. That record is
+  per-model and multidimensional, preserves incomplete and mixed-runtime
+  observations, and makes no rank, selection, general-capability, or
+  semantic-correctness claim. T3.5 remains separately unauthorized; do not
+  rerun, replace, repair, pull, or customize any cohort model.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -472,12 +475,13 @@ Pending and separately deferred:
   execution, deterministic comparison, and owner-only T2.5 decision are
   complete. The owner selected `inconclusive` on 2026-08-23, which selects
   untreated cohort operation with an explicit limitation and authorizes no
-  prompt-effect claim. The owner separately authorized
-  dependency-independent Phase 3 provider-free work and read-only inventory
-  inspection on 2026-08-23, including the provider-free T3.3 executor/evidence
-  core, offline tasks, and synthetic-fixture T3.4 analysis/reporting layer; the
-  completed decision still does not authorize a final cohort lock, model
-  invocation, live cohort run, or evidence-based model comparison.
+  prompt-effect claim. The owner subsequently approved the exact T3.1 cohort,
+  one clean-baseline T3.3 execution, and bounded T3.4 offline interpretation.
+  The 96-row ignored run from commit `e897edf` verifies and reanalyzes offline;
+  its public-safe per-model interpretation is recorded in the dated cohort log.
+  This does not authorize T3.5, a reference-model comparison, a new model
+  invocation, a rerun, replacement row, model pull, or evidence-based model
+  selection.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing
