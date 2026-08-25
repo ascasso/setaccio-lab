@@ -20,6 +20,8 @@ import com.setaccio.gradle.ChatMatrixTask
 import com.setaccio.gradle.AnthropicChatMatrixTask
 import com.setaccio.gradle.LocalEvaluationOfflineTask
 import com.setaccio.gradle.LocalEvaluationTask
+import com.setaccio.gradle.LocalEvaluationBudgetTask
+import com.setaccio.gradle.LocalEvaluationBudgetOfflineTask
 import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
 import com.setaccio.gradle.VisionMatrixComparisonTask
@@ -94,6 +96,16 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.localEvaluation.output
         runtimeClasspath += output + compileClasspath
     }
+    localEvaluationBudget {
+        java.srcDir 'src/localEvaluationBudget/java'
+        compileClasspath += sourceSets.main.output + sourceSets.localEvaluation.output
+        runtimeClasspath += output + compileClasspath
+    }
+    localEvaluationBudgetTest {
+        java.srcDir 'src/localEvaluationBudgetTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.localEvaluation.output + sourceSets.localEvaluationBudget.output
+        runtimeClasspath += output + compileClasspath
+    }
     chatMatrix {
         java.srcDir 'src/chatMatrix/java'
         compileClasspath += sourceSets.main.output
@@ -129,6 +141,10 @@ configurations {
     localEvaluationRuntimeOnly.extendsFrom runtimeOnly
     localEvaluationTestImplementation.extendsFrom testImplementation, localEvaluationImplementation
     localEvaluationTestRuntimeOnly.extendsFrom testRuntimeOnly, localEvaluationRuntimeOnly
+    localEvaluationBudgetImplementation.extendsFrom implementation
+    localEvaluationBudgetRuntimeOnly.extendsFrom runtimeOnly
+    localEvaluationBudgetTestImplementation.extendsFrom testImplementation, localEvaluationBudgetImplementation
+    localEvaluationBudgetTestRuntimeOnly.extendsFrom testRuntimeOnly, localEvaluationBudgetRuntimeOnly
     chatMatrixImplementation.extendsFrom implementation
     chatMatrixRuntimeOnly.extendsFrom runtimeOnly
     chatMatrixTestImplementation.extendsFrom testImplementation, chatMatrixImplementation
@@ -376,6 +392,50 @@ tasks.register('localEvaluationTest', Test) {
     classpath = sourceSets.localEvaluationTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('test')
+}
+
+tasks.register('localEvaluationBudget', LocalEvaluationBudgetTask) {
+    description = 'Runs the explicit fresh 64/256-token local fact-check pair; provider-backed and opt-in.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBudgetRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationBudgetVerify', LocalEvaluationBudgetOfflineTask) {
+    description = 'Verifies one saved F1 budget pair without starting Spring or calling a provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBudgetOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationBudgetReanalyze', LocalEvaluationBudgetOfflineTask) {
+    description = 'Regenerates and verifies one saved F1 budget pair without starting Spring or calling a provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBudgetOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationBudgetTest', Test) {
+    description = 'Runs provider-free tests for the F1 fresh 64/256-token fact-check protocol and F2 pair evidence.'
+    group = 'verification'
+    testClassesDirs = sourceSets.localEvaluationBudgetTest.output.classesDirs
+    classpath = sourceSets.localEvaluationBudgetTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('localEvaluationTest')
 }
 
 tasks.register('toolSearchSmoke', ToolSearchSmokeTask) {
