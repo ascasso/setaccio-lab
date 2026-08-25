@@ -115,6 +115,38 @@ class ToolCompatibilityCohortComparisonTest {
 
         assertThat(row.latencyDeltaMillis()).isEqualTo(-20);
         assertThat(row.totalTokenDelta()).isEqualTo(4);
+
+        ToolCompatibilityCohortComparison.RowComparison partialUsage =
+                new ToolCompatibilityCohortComparison.RowComparison(
+                        "arithmetic-add",
+                        1,
+                        ToolCompatibilityCohortComparison.Outcome.BOTH_PASS,
+                        "pass",
+                        "pass",
+                        ToolCompatibilityOutputLimitState.NOT_REACHED,
+                        ToolCompatibilityOutputLimitState.NOT_REACHED,
+                        30,
+                        10,
+                        new ToolCompatibilityCohortComparison.TokenObservation(
+                                ToolCompatibilityUsageAvailability.PARTIAL, 6),
+                        new ToolCompatibilityCohortComparison.TokenObservation(
+                                ToolCompatibilityUsageAvailability.COMPLETE, 10));
+
+        assertThat(partialUsage.totalTokenDelta()).isNull();
+    }
+
+    @Test
+    void preservesDiagnosticsRecordedOnPassingRows() {
+        ToolCompatibilityCohortComparison.ComparisonResult result = comparison.compare(
+                "2026-08-25-passing-diagnostic-fixture",
+                CLEAN_BASELINE,
+                ToolCompatibilityCohortTestFixtures.result());
+
+        ToolCompatibilityCohortComparison.PeerComparison peer =
+                result.data().peers().getFirst();
+        assertThat(peer.rows().getFirst().peerDiagnostic())
+                .isEqualTo(ToolCompatibilityDiagnostic.VISIBLE_REASONING_TEXT);
+        assertThat(peer.rows().get(2).peerDiagnostic()).isEqualTo("pass");
     }
 
     @Test

@@ -111,14 +111,14 @@ final class ToolCompatibilityCohortComparison {
     }
 
     private static String diagnostic(ToolCompatibilityRow row) {
+        if (row.diagnosticCategory() != null && !row.diagnosticCategory().isBlank()) {
+            return row.diagnosticCategory();
+        }
         if (row.caseContractPassed()) {
             return "pass";
         }
-        if (row.diagnosticCategory() == null || row.diagnosticCategory().isBlank()) {
-            throw new ToolCompatibilityProtocolIntegrityException(
-                    "A failed comparison row is missing its deterministic diagnostic");
-        }
-        return row.diagnosticCategory();
+        throw new ToolCompatibilityProtocolIntegrityException(
+                "A failed comparison row is missing its deterministic diagnostic");
     }
 
     private static ToolCompatibilityOutputLimitState outputLimit(
@@ -230,7 +230,11 @@ final class ToolCompatibilityCohortComparison {
         }
 
         Integer totalTokenDelta() {
-            if (peerTokens.totalTokens() == null || referenceTokens.totalTokens() == null) {
+            if (peerTokens.availability() != ToolCompatibilityUsageAvailability.COMPLETE
+                    || referenceTokens.availability()
+                            != ToolCompatibilityUsageAvailability.COMPLETE
+                    || peerTokens.totalTokens() == null
+                    || referenceTokens.totalTokens() == null) {
                 return null;
             }
             return Math.subtractExact(
