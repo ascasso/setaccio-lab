@@ -307,8 +307,38 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   deterministic closeout on 2026-08-21 from clean commit `80bc122`. The two
   ignored 16-row conditions verify, reanalyze, and compare successfully, but
   every row reached the same first `PROVIDER_FAILURE` boundary. This supports
-  no prompt-effect, quality, reliability, or ranking claim. The owner-only T2.5
-  human decision remains pending, and Phase 3 cohort work is still gated.
+  no prompt-effect, quality, reliability, or ranking claim. On 2026-08-23 the
+  owner completed T2.5 with the decision `inconclusive`, bound to the preserved
+  runs and comparison. The cohort prompt policy is therefore untreated
+  operation with the limitation recorded; no prompt-effect claim is
+  authorized. The owner then approved the exact T3.1 cohort: five peers and a
+  separately labelled `qwen3.8:27b-mlx` reference, all locked to full local
+  digests under Ollama `0.32.15`. One clean-baseline `toolCompatibilityCohort`
+  run completed on 2026-08-24 from commit `e897edf`, retaining all 96 planned
+  rows under the untreated policy. Its ignored evidence verified and reanalyzed
+  offline, and the owner authorized a bounded T3.4 interpretation recorded in
+  `docs/logs/2026-08-24-phase3-tool-compatibility-cohort.md`. That record is
+  per-model and multidimensional, preserves incomplete and mixed-runtime
+  observations, and makes no rank, selection, general-capability, or
+  semantic-correctness claim. Provider-free T3.5 implementation and one
+  deterministic offline comparison completed on 2026-08-25 against that same
+  verified run. The isolated `toolCompatibilityCohortCompare` task verifies
+  the saved cohort, pairs every peer with the separately labelled reference by
+  locked case/repetition identity, and writes only to standard output. The
+  comparison found reference-only pass counts of `16`, `2`, `4`, `2`, and `2`
+  in peer order, with no peer-only or neither-pass rows. This is not a ranking,
+  ground-truth, model-selection, semantic-correctness, or backend-normalized
+  performance result. The owner then authorized T3.6. The isolated
+  provider-free `toolCompatibilityCohortFrontier` task verified the same run,
+  required the complete locked schedule, compared only all-pass models by
+  recorded installed-artifact byte size, and wrote its report only to standard
+  output. Exactly one artifact qualified: the separately labelled
+  `qwen3.8:27b-mlx` reference passed `16/16` rows at a recorded artifact size of
+  `18174721847` bytes. This supports only the narrow smallest-among-qualifying-
+  tested-artifacts statement under the exact protocol, not a general
+  smallest-capable, ranking, or selection claim. Every new run remains
+  separately unauthorized; do not rerun, replace, repair, pull, or customize
+  any cohort model.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -459,9 +489,31 @@ Pending and separately deferred:
   [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
   is closed through one bounded clean baseline, offline verification and
   reanalysis, and the dated public-safe interpretation. Phase 2's paired
-  execution and deterministic comparison are complete, but its owner-only
-  human decision is still pending; Phase 3 cohort work is not authorized by
-  that evidence closeout.
+  execution, deterministic comparison, and owner-only T2.5 decision are
+  complete. The owner selected `inconclusive` on 2026-08-23, which selects
+  untreated cohort operation with an explicit limitation and authorizes no
+  prompt-effect claim. The owner subsequently approved the exact T3.1 cohort,
+  one clean-baseline T3.3 execution, and bounded T3.4 offline interpretation.
+  The 96-row ignored run from commit `e897edf` verifies and reanalyzes offline;
+  its public-safe per-model interpretation is recorded in the dated cohort log.
+  Provider-free T3.5 and one deterministic reference comparison of that same
+  run completed on 2026-08-25 without provider access or evidence mutation.
+  Provider-free T3.6 then evaluated the same verified run once and found the
+  frontier measurable only in the narrow deployed-protocol sense: the
+  separately labelled `qwen3.8:27b-mlx` reference was the sole `16/16`
+  qualifier. This does not authorize another Phase 3 invocation, rerun,
+  replacement row, model pull, or evidence-based model selection. Separately,
+  on 2026-08-25 the owner granted standing authorization throughout requested
+  Phase 4 and Phase 5 work to start or connect to loopback Ollama, inspect its
+  inventory, select among and invoke already-installed local models, repeat
+  disposable diagnostics, and execute complete formal protocols when their
+  own prerequisites are satisfied. No per-call, per-command, per-model,
+  per-session, or per-run approval is required for that local scope. Default
+  tests and CI remain provider-free; formal evidence remains immutable and
+  protocol-bound. This standing authorization does not include pulls,
+  downloads, removals, renames, silent substitutions, remote providers,
+  credentials, spending, Docker, publication of ignored output, pushes,
+  releases, or tags.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing
@@ -474,11 +526,13 @@ plan, changelog, and dated log when the status of a deferred item changes.
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- If separately authorized, design a new output-budget compatibility
-  experiment that changes only the explicit positive token limit and writes a
-  new evidence directory; do not treat it as a retry or correction of A5. Its
-  fresh 64- and 256-token arms must execute from the same clean Git commit
-  (see [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
+- When Phase 4 F1 is explicitly started, design a new output-budget
+  compatibility experiment that changes only the explicit positive token limit
+  and writes new evidence directories; do not treat it as a retry or correction
+  of A5. Local Ollama calls need no further execution approval under the
+  standing Phase 4/5 policy. The fresh 64- and 256-token arms must execute from
+  the same clean Git commit (see
+  [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
   Phase 4); if the worktree becomes dirty or the commit changes between arms,
   stop and restart both from a new clean commit.
 - Keep any later container-backed work isolated in `setaccio-testcontainers`
@@ -571,10 +625,15 @@ Provider/model-type phase:
 
 Evaluation/Testcontainers phase:
 
-- If separately authorized, test the registered output-budget compatibility
-  hypothesis as a new run while preserving the immutable judge digest,
+- When the Phase 4 slice is explicitly started, test the registered
+  output-budget compatibility hypothesis as a new run while preserving the
+  immutable judge digest,
   prompt, fixtures, row order, temperature, seeds, one-attempt policy, no-pull
   behavior, failure classification, and offline evidence verification.
+- Already-installed loopback Ollama calls during requested Phase 4/5 work have
+  standing authorization and may be used whenever useful. Keep them outside
+  default tests and CI, separate disposable diagnostics from formal evidence,
+  and never selectively retry or replace a formal row.
 - Later retrieval slice: relevancy evaluation only when a real retrieval flow
   supplies preserved context.
 - Testcontainers is deferred for the completed fact-check cycle. A later

@@ -64,13 +64,14 @@ record ToolCompatibilityRow(
         ToolCompatibilityCaseSelection.ScheduledCase scheduledCase = requireScheduledCase(sequence);
         if (!scheduledCase.caseId().equals(caseId)
                 || scheduledCase.repetition() != repetition
-                || !Objects.equals(scheduledCase.seed(), seed)) {
+                || (seed != null && !Objects.equals(scheduledCase.seed(), seed))) {
             throw new IllegalArgumentException("row identity must match the locked schedule");
         }
         if (!ToolCompatibilityProtocol.PROVIDER.equals(provider)) {
             throw new IllegalArgumentException("provider must equal the locked Ollama provider");
         }
-        new ToolCompatibilityModelIdentity(requestedModel, effectiveModel, modelDigest);
+        ToolCompatibilityResolvedModelIdentity.requireFields(
+                requestedModel, effectiveModel, modelDigest);
         ToolCompatibilitySystemPromptIdentity systemPrompt = ToolCompatibilityProtocol.systemPromptCatalog()
                 .requirePrompt(systemPromptId);
         if (!systemPrompt.id().equals(systemPromptId)

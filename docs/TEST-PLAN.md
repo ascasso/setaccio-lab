@@ -211,10 +211,17 @@ not place a live model call in default tests or CI.
   offline tests before a future runner can consume them.
 - Maintain the implemented `FactCheckingEvaluator` recording boundary against
   the balanced public claim/context fixture cohort and an explicitly selected
-  host-Ollama judge. Keep live execution separately authorized. Follow
+  host-Ollama judge. Requested Phase 4/5 work has standing authorization for
+  already-installed loopback Ollama calls; no per-call or per-run approval is
+  required. Keep every live task outside the default lifecycle. Follow
   [`docs/LOCAL-AI-EVALUATION-PLAN.md`](LOCAL-AI-EVALUATION-PLAN.md).
 - Defer `RelevancyEvaluator` until a real retrieval flow can supply and preserve
   retrieved documents; ordinary fixture context is not a RAG benchmark.
+- Keep R0–R3 formal retrieval tasks and evidence provider-free. Standing local
+  Ollama authorization may support separate disposable diagnostics, and R4–R6
+  may use fully recorded installed local embedding, answer, and evaluator
+  models. Default tests must use fakes or recorded fixtures and run without
+  Ollama.
 - Keep judge and fixture-expectation results separate. A valid `yes` / `no`
   verdict is not automatically an expectation match or a general factuality
   score.
@@ -320,8 +327,16 @@ not place a live model call in default tests or CI.
 - Require `toolCompatibilityMatrix`, `toolCompatibilityPromptMatrix`,
   `toolCompatibilityVerify`, `toolCompatibilityReanalyze`, and
   `toolCompatibilityCompare` to stay outside `test`, `check`, `build`,
-  application startup, and CI. Verify/reanalyze/compare must not start Spring,
-  resolve a model, or contact Ollama.
+  application startup, and CI. The provider-free
+  `toolCompatibilityCohortVerify`, `toolCompatibilityCohortReanalyze`, and
+  `toolCompatibilityCohortCompare`, and `toolCompatibilityCohortFrontier`
+  tasks must remain equally isolated. Verify/reanalyze/compare/frontier must
+  not start Spring, resolve a model, or contact Ollama. The cohort comparison
+  and frontier must verify before analysis, write only to standard output, and
+  leave every saved evidence artifact byte-identical. Frontier tests must cover
+  a unique recorded-size minimum, a selected reference role, no all-pass model,
+  unavailable qualifying size, an ambiguous minimum, missing evidence, and the
+  exact one-directory CLI boundary.
 - The completed Phase 1 baseline is recorded under the ignored
   `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory.
   Its public-safe interpretation is limited to the observed provider-turn
@@ -330,8 +345,38 @@ not place a live model call in default tests or CI.
   `2026-08-21-lfm-prompt-untreated` and `2026-08-21-lfm-prompted` directories;
   both verify and reanalyze offline, and `toolCompatibilityCompare` passes.
   Both conditions reached the same first `PROVIDER_FAILURE` boundary on every
-  row, so no prompt-effect or quality conclusion is permitted. The T2.5 human
-  decision worksheet remains blank and Phase 3 is still gated.
+  row, so no prompt-effect or quality conclusion is permitted. On 2026-08-23
+  the owner completed the ignored T2.5 worksheet with `inconclusive`; the
+  bound policy is untreated operation with the limitation recorded. Tests must
+  not read or modify that private worksheet. Separately authorized
+  provider-free Phase 3 preparation must cover ordered peer/reference
+  resolution, full-digest and runtime-version checks, duplicate tags/bytes and
+  mutable aliases, local-only execution, explicit unavailable metadata, mixed
+  artifact formats, and failure before output allocation. Its prompt-policy
+  tests must cover all four decision values and reject decision-binding drift.
+  No default test or CI job may contact Ollama or execute a live cohort model.
+  The one separately authorized opt-in cohort run completed from clean commit
+  `e897edf`; its evidence verifies and reanalyzes offline, but this does not
+  broaden live-test authorization. T3.3
+  provider-free tests must cover exact model-major order/count, no cross-model
+  advisor state, supported and unsupported seed recording, no thinking
+  override, runtime drift, retained provider failures, strict evidence layout,
+  tampering, offline verification/reanalysis, and default-lifecycle isolation.
+  T3.4 provider-free tests must cover every per-model analysis dimension,
+  deterministic model/case order, omitted/unknown/incorrect arguments,
+  multi-step continuation/order/premature-final/duplicate observations,
+  deterministic failure retention plus bounded lexical recovery markers,
+  response-format markers and final-response length, successful-row
+  median/range, complete and incomplete token coverage, tokens-per-passing-row
+  gating, mixed artifact formats, a golden report digest, and the absence of a
+  winner/ranking/leaderboard section.
+  T3.5 provider-free tests must cover every ordered peer against the separately
+  labelled reference, both-pass/reference-only/peer-only/neither outcomes,
+  missing-evidence rejection before reporting, exact case/repetition pairing,
+  retained deterministic diagnostics and output-limit states, complete and
+  unavailable total-token deltas, signed latency deltas, visible GGUF/MLX
+  deployment identity, deterministic report bytes, stdout-only CLI arguments,
+  and the absence of a reference-ground-truth or backend-normalized claim.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.

@@ -23,6 +23,11 @@ final class ToolCompatibilityAnalyzer {
         return analyzeRows(result.rows());
     }
 
+    ToolCompatibilityAnalysis analyzeCohortModelRun(ToolCompatibilityCohortModelRun result) {
+        requireIntegrity(result);
+        return analyzeRows(result.rows());
+    }
+
     private static ToolCompatibilityAnalysis analyzeRows(List<ToolCompatibilityRow> rows) {
         return new ToolCompatibilityAnalysis(
                 invocation(rows),
@@ -84,6 +89,33 @@ final class ToolCompatibilityAnalyzer {
         } catch (RuntimeException exception) {
             throw new ToolCompatibilityProtocolIntegrityException(
                     "Tool compatibility prompt-matrix result failed deterministic integrity validation",
+                    exception);
+        }
+    }
+
+    private static void requireIntegrity(ToolCompatibilityCohortModelRun result) {
+        if (result == null) {
+            throw new ToolCompatibilityProtocolIntegrityException(
+                    "Tool compatibility cohort model run must not be null");
+        }
+        try {
+            ToolCompatibilityCohortModelRun canonical =
+                    ToolCompatibilityCohortModelRun.create(
+                            result.modelIdentity(),
+                            result.startedAt(),
+                            result.finishedAt(),
+                            result.systemPromptIdentity(),
+                            result.rows());
+            if (!canonical.equals(result)) {
+                throw new ToolCompatibilityProtocolIntegrityException(
+                        "Tool compatibility cohort model run identity drifted");
+            }
+            requireRowDiagnostics(result.rows());
+        } catch (ToolCompatibilityProtocolIntegrityException exception) {
+            throw exception;
+        } catch (RuntimeException exception) {
+            throw new ToolCompatibilityProtocolIntegrityException(
+                    "Tool compatibility cohort model run failed deterministic integrity validation",
                     exception);
         }
     }
