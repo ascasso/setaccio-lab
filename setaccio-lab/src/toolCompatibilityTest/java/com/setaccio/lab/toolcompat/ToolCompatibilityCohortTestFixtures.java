@@ -71,6 +71,46 @@ final class ToolCompatibilityCohortTestFixtures {
                 List.of(firstPeerRows, secondPeerRows, referenceRows));
     }
 
+    static ToolCompatibilityCohortResult frontierResult(
+            List<FrontierModelFixture> models,
+            List<List<ToolCompatibilityRow>> rowsByModel
+    ) {
+        List<FrontierModelFixture> fixtures = List.copyOf(models);
+        if (fixtures.size() < 2
+                || fixtures.getLast().role()
+                        != ToolCompatibilityCohortModelIdentity.Role.REFERENCE
+                || fixtures.subList(0, fixtures.size() - 1).stream().anyMatch(model ->
+                        model.role() != ToolCompatibilityCohortModelIdentity.Role.PEER)) {
+            throw new IllegalArgumentException(
+                    "frontier fixtures require ordered peers and a final reference");
+        }
+        List<ToolCompatibilityCohortModelIdentity> identities = new ArrayList<>();
+        for (int index = 0; index < fixtures.size(); index++) {
+            FrontierModelFixture fixture = fixtures.get(index);
+            identities.add(identity(
+                    index + 1,
+                    fixture.role(),
+                    fixture.tag(),
+                    fixture.digest(),
+                    fixture.role() == ToolCompatibilityCohortModelIdentity.Role.REFERENCE
+                            ? ToolCompatibilityCohortSeedSemantics.UNSUPPORTED
+                            : ToolCompatibilityCohortSeedSemantics.SUPPORTED,
+                    fixture.role() == ToolCompatibilityCohortModelIdentity.Role.REFERENCE
+                            ? "MLX"
+                            : "GGUF",
+                    fixture.sizeBytes() == null
+                            ? ToolCompatibilityMetadataField.unavailable()
+                            : ToolCompatibilityMetadataField.available(fixture.sizeBytes())));
+        }
+        ToolCompatibilityCohortPreflight.Prepared preflight =
+                new ToolCompatibilityCohortPreflight.Prepared(
+                        Path.of("build/tool-compatibility/2026-08-25-frontier-fixture"),
+                        RUNTIME_VERSION,
+                        identities.subList(0, identities.size() - 1),
+                        identities.getLast());
+        return result(preflight, rowsByModel);
+    }
+
     private static ToolCompatibilityCohortResult result(
             ToolCompatibilityCohortPreflight.Prepared preflight,
             List<List<ToolCompatibilityRow>> rowsByModel
@@ -137,6 +177,25 @@ final class ToolCompatibilityCohortTestFixtures {
             ToolCompatibilityCohortSeedSemantics seedSemantics,
             String format
     ) {
+        return identity(
+                position,
+                role,
+                tag,
+                digest,
+                seedSemantics,
+                format,
+                ToolCompatibilityMetadataField.available("1000"));
+    }
+
+    private static ToolCompatibilityCohortModelIdentity identity(
+            int position,
+            ToolCompatibilityCohortModelIdentity.Role role,
+            String tag,
+            String digest,
+            ToolCompatibilityCohortSeedSemantics seedSemantics,
+            String format,
+            ToolCompatibilityMetadataField sizeBytes
+    ) {
         ToolCompatibilityMetadataField unavailable = ToolCompatibilityMetadataField.unavailable();
         return new ToolCompatibilityCohortModelIdentity(
                 position,
@@ -146,7 +205,7 @@ final class ToolCompatibilityCohortTestFixtures {
                 digest,
                 seedSemantics,
                 new ToolCompatibilityCohortModelMetadata(
-                        ToolCompatibilityMetadataField.available("1000"),
+                        sizeBytes,
                         ToolCompatibilityMetadataField.available("fixture-family"),
                         ToolCompatibilityMetadataField.available(format),
                         ToolCompatibilityMetadataField.available("fixture-precision"),
@@ -155,6 +214,24 @@ final class ToolCompatibilityCohortTestFixtures {
                         ToolCompatibilityMetadataField.available("tools"),
                         ToolCompatibilityMetadataField.available(
                                 "effective-default-unavailable")));
+    }
+
+    record FrontierModelFixture(
+            ToolCompatibilityCohortModelIdentity.Role role,
+            String tag,
+            String digest,
+            String sizeBytes
+    ) {
+
+        FrontierModelFixture {
+            if (role == null
+                    || tag == null
+                    || tag.isBlank()
+                    || digest == null
+                    || !digest.matches("[0-9a-f]{64}")) {
+                throw new IllegalArgumentException("frontier model fixture is invalid");
+            }
+        }
     }
 
     private static ToolCompatibilityRow rowFor(

@@ -322,10 +322,14 @@ not place a live model call in default tests or CI.
   `toolCompatibilityCompare` to stay outside `test`, `check`, `build`,
   application startup, and CI. The provider-free
   `toolCompatibilityCohortVerify`, `toolCompatibilityCohortReanalyze`, and
-  `toolCompatibilityCohortCompare` tasks must remain equally isolated.
-  Verify/reanalyze/compare must not start Spring, resolve a model, or contact
-  Ollama. The cohort comparison must verify before comparing, write only to
-  standard output, and leave every saved evidence artifact byte-identical.
+  `toolCompatibilityCohortCompare`, and `toolCompatibilityCohortFrontier`
+  tasks must remain equally isolated. Verify/reanalyze/compare/frontier must
+  not start Spring, resolve a model, or contact Ollama. The cohort comparison
+  and frontier must verify before analysis, write only to standard output, and
+  leave every saved evidence artifact byte-identical. Frontier tests must cover
+  a unique recorded-size minimum, a selected reference role, no all-pass model,
+  unavailable qualifying size, an ambiguous minimum, missing evidence, and the
+  exact one-directory CLI boundary.
 - The completed Phase 1 baseline is recorded under the ignored
   `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory.
   Its public-safe interpretation is limited to the observed provider-turn

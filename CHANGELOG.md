@@ -23,7 +23,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
   bounded T3.4 record remains per-model and multidimensional without a rank,
   selection, general-capability, semantic-correctness, or backend-normalized
   performance claim. The separately authorized provider-free T3.5 comparison
-  is now complete; T3.6, reruns, model pulls, and replacements remain
+  and T3.6 capability-frontier analysis are now complete. The frontier was
+  measurable because the separately labelled `qwen3.8:27b-mlx` reference was
+  the only tested installed artifact to pass all 16 locked rows and had a
+  recorded installed-artifact size. This is not a general smallest-capable,
+  ranking, or selection claim; reruns, model pulls, and replacements remain
   separately unauthorized.
 - Closed the bounded Phase 1 small-model tool-compatibility baseline. The
   clean 16-row untreated LFM2.5 run completed with offline verification and
@@ -37,6 +41,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the isolated provider-free `toolCompatibilityCohortFrontier` task for
+  T3.6. It strictly verifies one saved cohort, requires every planned row,
+  selects a frontier only from all-pass installed artifacts with an
+  unambiguous recorded byte-size minimum, reports non-measurability otherwise,
+  writes only to standard output, and leaves saved evidence unchanged.
 - Added the isolated provider-free `toolCompatibilityCohortCompare` task for
   T3.5. It strictly verifies one saved cohort, compares each ordered peer with
   the separately labelled reference by locked case/repetition identity, emits

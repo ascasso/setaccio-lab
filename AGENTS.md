@@ -328,9 +328,17 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   comparison found reference-only pass counts of `16`, `2`, `4`, `2`, and `2`
   in peer order, with no peer-only or neither-pass rows. This is not a ranking,
   ground-truth, model-selection, semantic-correctness, or backend-normalized
-  performance result. Optional T3.6 and every new run remain separately
-  unauthorized; do not rerun, replace, repair, pull, or customize any cohort
-  model.
+  performance result. The owner then authorized T3.6. The isolated
+  provider-free `toolCompatibilityCohortFrontier` task verified the same run,
+  required the complete locked schedule, compared only all-pass models by
+  recorded installed-artifact byte size, and wrote its report only to standard
+  output. Exactly one artifact qualified: the separately labelled
+  `qwen3.8:27b-mlx` reference passed `16/16` rows at a recorded artifact size of
+  `18174721847` bytes. This supports only the narrow smallest-among-qualifying-
+  tested-artifacts statement under the exact protocol, not a general
+  smallest-capable, ranking, or selection claim. Every new run remains
+  separately unauthorized; do not rerun, replace, repair, pull, or customize
+  any cohort model.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -490,7 +498,10 @@ Pending and separately deferred:
   its public-safe per-model interpretation is recorded in the dated cohort log.
   Provider-free T3.5 and one deterministic reference comparison of that same
   run completed on 2026-08-25 without provider access or evidence mutation.
-  This does not authorize optional T3.6, a new model invocation, a rerun,
+  Provider-free T3.6 then evaluated the same verified run once and found the
+  frontier measurable only in the narrow deployed-protocol sense: the
+  separately labelled `qwen3.8:27b-mlx` reference was the sole `16/16`
+  qualifier. This does not authorize a new model invocation, rerun,
   replacement row, model pull, or evidence-based model selection.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof

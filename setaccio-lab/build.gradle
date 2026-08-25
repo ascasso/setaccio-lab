@@ -10,6 +10,7 @@ import com.setaccio.gradle.ToolSearchMatrixOfflineTask
 import com.setaccio.gradle.ToolCompatibilityMatrixTask
 import com.setaccio.gradle.ToolCompatibilityCohortTask
 import com.setaccio.gradle.ToolCompatibilityCohortComparisonTask
+import com.setaccio.gradle.ToolCompatibilityCohortFrontierTask
 import com.setaccio.gradle.ToolCompatibilityPromptMatrixTask
 import com.setaccio.gradle.ToolCompatibilityComparisonTask
 import com.setaccio.gradle.ToolCompatibilityHumanReviewPrepareTask
@@ -242,6 +243,16 @@ tasks.register('toolCompatibilityCohortCompare', ToolCompatibilityCohortComparis
     dependsOn tasks.named('toolCompatibilityClasses')
     classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
     mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityCohortComparisonRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+    workingDirectory.set(layout.projectDirectory)
+}
+
+tasks.register('toolCompatibilityCohortFrontier', ToolCompatibilityCohortFrontierTask) {
+    dependsOn tasks.named('toolCompatibilityClasses')
+    classpath.from(sourceSets.toolCompatibility.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.toolcompat.ToolCompatibilityCohortFrontierRunner')
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

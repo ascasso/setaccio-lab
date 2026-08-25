@@ -11,7 +11,7 @@ Proposed next work after completion of:
 - the bounded Anthropic architecture-portability proof;
 - the existing standard-versus-regex Tool Search baseline.
 
-This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on 2026-08-23. That decision selects untreated cohort operation with the limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection. The owner then approved the exact T3.1 cohort, one clean-baseline local T3.3 run, and bounded offline T3.4 interpretation on 2026-08-24. On 2026-08-25, the owner authorized and completed provider-free T3.5 implementation plus one deterministic offline descriptive comparison of the same immutable cohort. Optional T3.6 remains separately gated.
+This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on 2026-08-23. That decision selects untreated cohort operation with the limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection. The owner then approved the exact T3.1 cohort, one clean-baseline local T3.3 run, and bounded offline T3.4 interpretation on 2026-08-24. On 2026-08-25, the owner authorized and completed provider-free T3.5 implementation plus one deterministic offline descriptive comparison of the same immutable cohort, then separately authorized and completed the provider-free T3.6 capability-frontier analysis of that run. Phase 3 is closed through T3.6; any new execution or analysis rule remains separately gated.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
@@ -110,6 +110,14 @@ case/repetition identity, and wrote the deterministic report only to standard
 output. No evidence artifact changed and no model or provider was contacted.
 The public-safe closeout is recorded in
 `docs/logs/2026-08-25-phase3-tool-compatibility-reference-comparison.md`.
+The owner then separately authorized T3.6. The isolated provider-free
+`toolCompatibilityCohortFrontier` task verified the same run and wrote its
+deterministic report only to standard output. Every planned identity and row
+was complete, every qualifying installed artifact had a recorded byte size,
+and the minimum was unambiguous. Exactly one artifact qualified: the separately
+labelled `qwen3.8:27b-mlx` reference passed all 16 rows at a recorded
+installed-artifact size of `18174721847` bytes. The narrow closeout is recorded
+in `docs/logs/2026-08-25-phase3-tool-compatibility-capability-frontier.md`.
 
 ## Purpose
 
@@ -1539,6 +1547,17 @@ Not allowed:
 
 > “Model X is the smallest model capable of tool calling.”
 
+Provider-free implementation and the one authorized analysis completed on
+2026-08-25. The analyzer strictly verifies one saved cohort, requires the
+complete per-model locked schedule, qualifies only artifacts that passed every
+row, and compares the recorded installed-artifact byte size only among those
+qualifiers. It reports the frontier as not measurable when there is no
+all-pass model, a qualifying size is unavailable or invalid, or the smallest
+qualifying size is tied. In the preserved run, `qwen3.8:27b-mlx` was the sole
+qualifier at `16/16`; it remains explicitly labelled as the reference. This is
+not a general smallest-capable, ranking, ground-truth, selection, or
+backend-normalized result.
+
 ## Phase 3 exit criteria
 
 - Cohort identities and digests are locked.
@@ -1972,6 +1991,7 @@ CLI does not change after evidence exists:
 ```text
 toolCompatibilityCohort
 toolCompatibilityCohortCompare
+toolCompatibilityCohortFrontier
 toolCompatibilityCohortVerify
 toolCompatibilityCohortReanalyze
 ```
@@ -2604,6 +2624,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   statement when every locked condition is demonstrably met.
 - **Stop:** if any identity, planned row, or required case is incomplete, report
   the frontier as not measurable; do not generalize beyond the cohort.
+- **Status:** completed on 2026-08-25 through provider-free implementation and
+  one stdout-only deterministic analysis of the verified immutable cohort; no
+  evidence file or provider state changed.
 
 ## Phase 4 packets
 
