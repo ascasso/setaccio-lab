@@ -38,7 +38,7 @@ public final class LocalEvaluationBudgetRunner {
         prepared.requireModelIdentityUnchanged();
         LocalEvaluationBudgetPreflight.AllocatedOutputs outputs = prepared.allocateBoth();
         EvidenceCodeBaseline baseline = prepared.codeBaseline();
-        LocalEvaluationEvidence evidence = new LocalEvaluationEvidence(
+        LocalEvaluationBudgetEvidence evidence = new LocalEvaluationBudgetEvidence(
                 objectMapper,
                 prepared.contract().prompt(),
                 prepared.contract().catalog(),
@@ -48,6 +48,15 @@ public final class LocalEvaluationBudgetRunner {
             prepared.requireRepositoryUnchanged();
             prepared.requireModelIdentityUnchanged();
             runArm(prepared, evidence, baseline, 256, outputs.budget256());
+            prepared.requireRepositoryUnchanged();
+            LocalEvaluationBudgetEvidence.OfflinePairResult pairVerification = evidence.verifyPair(
+                    outputs.budget64(),
+                    outputs.budget256());
+            if (!pairVerification.valid()) {
+                throw new LocalEvaluationBudgetProtocolIntegrityException(
+                        "Generated F1 pair failed verification: "
+                                + String.join(" ", pairVerification.failures()));
+            }
             prepared.requireRepositoryUnchanged();
             System.out.println("F1 fresh fact-check budget pair complete:");
             System.out.println("  64 tokens: "
@@ -62,9 +71,9 @@ public final class LocalEvaluationBudgetRunner {
         }
     }
 
-    private static void runArm(
+    private static LocalEvaluationResult runArm(
             LocalEvaluationBudgetPreflight.Prepared prepared,
-            LocalEvaluationEvidence evidence,
+            LocalEvaluationBudgetEvidence evidence,
             EvidenceCodeBaseline baseline,
             int maxTokens,
             Path outputDirectory
@@ -73,8 +82,9 @@ public final class LocalEvaluationBudgetRunner {
         LocalEvaluationResult result = new LocalEvaluationExecutor()
                 .execute(prepared.arm(maxTokens, outputDirectory));
         prepared.requireRepositoryUnchanged();
-        evidence.write(outputDirectory, result, baseline);
+        evidence.writeArm(outputDirectory, result, baseline);
         prepared.requireRepositoryUnchanged();
+        return result;
     }
 
     private static void printProtocol(LocalEvaluationBudgetPreflight.Prepared prepared) {

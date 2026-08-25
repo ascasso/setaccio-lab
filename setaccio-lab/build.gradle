@@ -21,6 +21,7 @@ import com.setaccio.gradle.AnthropicChatMatrixTask
 import com.setaccio.gradle.LocalEvaluationOfflineTask
 import com.setaccio.gradle.LocalEvaluationTask
 import com.setaccio.gradle.LocalEvaluationBudgetTask
+import com.setaccio.gradle.LocalEvaluationBudgetOfflineTask
 import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
 import com.setaccio.gradle.VisionMatrixComparisonTask
@@ -404,8 +405,32 @@ tasks.register('localEvaluationBudget', LocalEvaluationBudgetTask) {
     }.map { it.executablePath.asFile.absolutePath })
 }
 
+tasks.register('localEvaluationBudgetVerify', LocalEvaluationBudgetOfflineTask) {
+    description = 'Verifies one saved F1 budget pair without starting Spring or calling a provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBudgetOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationBudgetReanalyze', LocalEvaluationBudgetOfflineTask) {
+    description = 'Regenerates and verifies one saved F1 budget pair without starting Spring or calling a provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBudgetOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
 tasks.register('localEvaluationBudgetTest', Test) {
-    description = 'Runs provider-free tests for the F1 fresh 64/256-token fact-check protocol.'
+    description = 'Runs provider-free tests for the F1 fresh 64/256-token fact-check protocol and F2 pair evidence.'
     group = 'verification'
     testClassesDirs = sourceSets.localEvaluationBudgetTest.output.classesDirs
     classpath = sourceSets.localEvaluationBudgetTest.runtimeClasspath
