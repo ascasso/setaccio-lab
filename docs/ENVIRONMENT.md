@@ -958,11 +958,42 @@ The completed A5 run produced twelve one-attempt rows with complete usage and
 no infrastructure failure, but ten responses were empty and only two produced
 valid matching `no` verdicts. A6 interpreted that immutable evidence without a
 provider call or row replacement. All empty responses reached the explicit
-`64`-token output limit, which registers only a later, separately authorized
-output-budget compatibility hypothesis; it does not establish causation.
+`64`-token output limit, which registers only a later, separately implemented
+and pre-registered output-budget compatibility hypothesis; it does not
+establish causation. The 2026-08-25 standing Phase 4/5 local Ollama
+authorization now removes the need
+for another local-call or local-run approval once that implementation scope is
+explicitly started.
 Testcontainers is deferred for this cycle because container provisioning would
 not answer that verdict-yield question. No additional environment variable,
 Docker setup, rerun, release, or tag is required by the A6 closeout.
+
+## Phase 4 and Phase 5 Local Ollama Authorization
+
+As of 2026-08-25, requested Phase 4 and Phase 5 work has standing authorization
+to use local Ollama liberally whenever useful. No additional per-call,
+per-command, per-model, per-session, or per-run approval is required to:
+
+- start or connect to Ollama on a loopback endpoint;
+- inspect its runtime, installed inventory, and model metadata;
+- select among and invoke already-installed models for implementation,
+  diagnostics, smoke checks, controlled runs, embeddings, answer generation,
+  or evaluator work; or
+- repeat disposable diagnostics and restart a complete formal protocol when
+  its clean-baseline rule requires fresh evidence.
+
+This standing authorization does not make live Ollama part of `test`, `check`,
+`build`, application startup, or CI. Provider-free tests must pass without an
+Ollama service. Disposable calls must not be promoted into formal evidence,
+and formal rows retain their exact attempt policy: no selective retry, repair,
+or replacement is allowed. Formal evidence must use ignored fresh output,
+record full model and runtime identity, and satisfy the slice-specific
+preflight. Phase 4's 64/256 arms must still run from the same clean commit.
+
+The scope is limited to already-installed models on loopback Ollama. It does
+not authorize pulls, downloads, removals, renames, silent substitutions,
+non-loopback endpoints, remote providers, credentials, spending, Docker,
+publication of ignored raw output, pushes, releases, or tags.
 
 ## Tool Search Advisor
 

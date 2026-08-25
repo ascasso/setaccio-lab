@@ -16,6 +16,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Recorded standing authorization for liberal use of already-installed
+  loopback Ollama models whenever useful during requested Phase 4 and Phase 5
+  work. Local implementation diagnostics and formal calls no longer require
+  per-call, per-command, per-model, per-session, or per-run approval. Default
+  tests and CI remain provider-free; formal evidence keeps its clean-baseline,
+  exact-identity, attempt, immutability, and no-selective-retry rules. Model
+  pulls, remote providers, credentials, Docker, pushes, releases, and tags
+  remain separately gated.
 - Updated the Gradle Wrapper from 9.6.1 to 9.7.1.
 - Completed one owner-authorized Phase 3 small-model tool-compatibility cohort
   run from clean commit `e897edf`, retaining all 96 locked sequential rows in

@@ -501,8 +501,19 @@ Pending and separately deferred:
   Provider-free T3.6 then evaluated the same verified run once and found the
   frontier measurable only in the narrow deployed-protocol sense: the
   separately labelled `qwen3.8:27b-mlx` reference was the sole `16/16`
-  qualifier. This does not authorize a new model invocation, rerun,
-  replacement row, model pull, or evidence-based model selection.
+  qualifier. This does not authorize another Phase 3 invocation, rerun,
+  replacement row, model pull, or evidence-based model selection. Separately,
+  on 2026-08-25 the owner granted standing authorization throughout requested
+  Phase 4 and Phase 5 work to start or connect to loopback Ollama, inspect its
+  inventory, select among and invoke already-installed local models, repeat
+  disposable diagnostics, and execute complete formal protocols when their
+  own prerequisites are satisfied. No per-call, per-command, per-model,
+  per-session, or per-run approval is required for that local scope. Default
+  tests and CI remain provider-free; formal evidence remains immutable and
+  protocol-bound. This standing authorization does not include pulls,
+  downloads, removals, renames, silent substitutions, remote providers,
+  credentials, spending, Docker, publication of ignored output, pushes,
+  releases, or tags.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing
@@ -515,11 +526,13 @@ plan, changelog, and dated log when the status of a deferred item changes.
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
-- If separately authorized, design a new output-budget compatibility
-  experiment that changes only the explicit positive token limit and writes a
-  new evidence directory; do not treat it as a retry or correction of A5. Its
-  fresh 64- and 256-token arms must execute from the same clean Git commit
-  (see [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
+- When Phase 4 F1 is explicitly started, design a new output-budget
+  compatibility experiment that changes only the explicit positive token limit
+  and writes new evidence directories; do not treat it as a retry or correction
+  of A5. Local Ollama calls need no further execution approval under the
+  standing Phase 4/5 policy. The fresh 64- and 256-token arms must execute from
+  the same clean Git commit (see
+  [SmallModelToolCallingCompatibilityPlan.md](docs/SmallModelToolCallingCompatibilityPlan.md)
   Phase 4); if the worktree becomes dirty or the commit changes between arms,
   stop and restart both from a new clean commit.
 - Keep any later container-backed work isolated in `setaccio-testcontainers`
@@ -612,10 +625,15 @@ Provider/model-type phase:
 
 Evaluation/Testcontainers phase:
 
-- If separately authorized, test the registered output-budget compatibility
-  hypothesis as a new run while preserving the immutable judge digest,
+- When the Phase 4 slice is explicitly started, test the registered
+  output-budget compatibility hypothesis as a new run while preserving the
+  immutable judge digest,
   prompt, fixtures, row order, temperature, seeds, one-attempt policy, no-pull
   behavior, failure classification, and offline evidence verification.
+- Already-installed loopback Ollama calls during requested Phase 4/5 work have
+  standing authorization and may be used whenever useful. Keep them outside
+  default tests and CI, separate disposable diagnostics from formal evidence,
+  and never selectively retry or replace a formal row.
 - Later retrieval slice: relevancy evaluation only when a real retrieval flow
   supplies preserved context.
 - Testcontainers is deferred for the completed fact-check cycle. A later
