@@ -31,11 +31,58 @@ final class ToolCompatibilityCohortTestFixtures {
             List<ToolCompatibilityRow> referenceRows
     ) {
         ToolCompatibilityCohortPreflight.Prepared preflight = prepared();
+        return result(preflight, List.of(peerRows, referenceRows));
+    }
+
+    static ToolCompatibilityCohortResult comparisonResult(
+            List<ToolCompatibilityRow> firstPeerRows,
+            List<ToolCompatibilityRow> secondPeerRows,
+            List<ToolCompatibilityRow> referenceRows
+    ) {
+        ToolCompatibilityCohortModelIdentity firstPeer = identity(
+                1,
+                ToolCompatibilityCohortModelIdentity.Role.PEER,
+                "fixture-peer-one:1b",
+                "a".repeat(64),
+                ToolCompatibilityCohortSeedSemantics.SUPPORTED,
+                "GGUF");
+        ToolCompatibilityCohortModelIdentity secondPeer = identity(
+                2,
+                ToolCompatibilityCohortModelIdentity.Role.PEER,
+                "fixture-peer-two:3b",
+                "b".repeat(64),
+                ToolCompatibilityCohortSeedSemantics.SUPPORTED,
+                "GGUF");
+        ToolCompatibilityCohortModelIdentity reference = identity(
+                3,
+                ToolCompatibilityCohortModelIdentity.Role.REFERENCE,
+                "fixture-reference:27b-mlx",
+                "c".repeat(64),
+                ToolCompatibilityCohortSeedSemantics.UNSUPPORTED,
+                "MLX");
+        ToolCompatibilityCohortPreflight.Prepared preflight =
+                new ToolCompatibilityCohortPreflight.Prepared(
+                        Path.of("build/tool-compatibility/2026-08-25-comparison-fixture"),
+                        RUNTIME_VERSION,
+                        List.of(firstPeer, secondPeer),
+                        reference);
+        return result(
+                preflight,
+                List.of(firstPeerRows, secondPeerRows, referenceRows));
+    }
+
+    private static ToolCompatibilityCohortResult result(
+            ToolCompatibilityCohortPreflight.Prepared preflight,
+            List<List<ToolCompatibilityRow>> rowsByModel
+    ) {
         ToolCompatibilityHumanDecision decision = ToolCompatibilityPhase2DecisionLock.decision();
         ToolCompatibilityCohortExecutionPlan plan =
                 ToolCompatibilityCohortExecutionPlan.create(preflight, decision, BINDING);
         List<ToolCompatibilityCohortModelRun> runs = new ArrayList<>();
-        List<List<ToolCompatibilityRow>> rowsByModel = List.of(peerRows, referenceRows);
+        if (rowsByModel.size() != preflight.orderedModels().size()) {
+            throw new IllegalArgumentException(
+                    "cohort fixture rows must match the prepared model count");
+        }
         for (int index = 0; index < preflight.orderedModels().size(); index++) {
             ToolCompatibilityCohortModelIdentity identity = preflight.orderedModels().get(index);
             List<ToolCompatibilityRow> rows = List.copyOf(rowsByModel.get(index)).stream()

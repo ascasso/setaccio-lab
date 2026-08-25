@@ -321,9 +321,11 @@ not place a live model call in default tests or CI.
   `toolCompatibilityVerify`, `toolCompatibilityReanalyze`, and
   `toolCompatibilityCompare` to stay outside `test`, `check`, `build`,
   application startup, and CI. The provider-free
-  `toolCompatibilityCohortVerify` and `toolCompatibilityCohortReanalyze` tasks
-  must remain equally isolated. Verify/reanalyze/compare must not start Spring,
-  resolve a model, or contact Ollama.
+  `toolCompatibilityCohortVerify`, `toolCompatibilityCohortReanalyze`, and
+  `toolCompatibilityCohortCompare` tasks must remain equally isolated.
+  Verify/reanalyze/compare must not start Spring, resolve a model, or contact
+  Ollama. The cohort comparison must verify before comparing, write only to
+  standard output, and leave every saved evidence artifact byte-identical.
 - The completed Phase 1 baseline is recorded under the ignored
   `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory.
   Its public-safe interpretation is limited to the observed provider-turn
@@ -357,6 +359,13 @@ not place a live model call in default tests or CI.
   median/range, complete and incomplete token coverage, tokens-per-passing-row
   gating, mixed artifact formats, a golden report digest, and the absence of a
   winner/ranking/leaderboard section.
+  T3.5 provider-free tests must cover every ordered peer against the separately
+  labelled reference, both-pass/reference-only/peer-only/neither outcomes,
+  missing-evidence rejection before reporting, exact case/repetition pairing,
+  retained deterministic diagnostics and output-limit states, complete and
+  unavailable total-token deltas, signed latency deltas, visible GGUF/MLX
+  deployment identity, deterministic report bytes, stdout-only CLI arguments,
+  and the absence of a reference-ground-truth or backend-normalized claim.
 - Treat incomplete standard-advisor observability as a stop-and-review result.
   Do not introduce a lower-level custom tool execution loop or widen existing
   interactive classes to bypass that gate.

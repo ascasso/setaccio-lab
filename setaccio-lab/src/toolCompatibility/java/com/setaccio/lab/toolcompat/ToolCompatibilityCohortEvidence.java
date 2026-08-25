@@ -104,7 +104,31 @@ final class ToolCompatibilityCohortEvidence {
     }
 
     OfflineResult verify(Path runDirectory) {
+        return verify(inspectInputs(runDirectory));
+    }
+
+    VerifiedCohort requireVerified(Path runDirectory, String label) {
+        if (label == null || label.isBlank() || !label.equals(label.strip())) {
+            throw new IllegalArgumentException(
+                    "cohort comparison label must be nonblank and trimmed");
+        }
         Inspection inspection = inspectInputs(runDirectory);
+        OfflineResult verification = verify(inspection);
+        if (!verification.valid()) {
+            throw new IllegalArgumentException("The " + label + " did not verify: "
+                    + String.join(" ", verification.failures()));
+        }
+        if (inspection.root() == null
+                || inspection.manifest() == null
+                || inspection.result() == null) {
+            throw new IllegalStateException(
+                    "Verified tool compatibility cohort evidence was missing comparison data");
+        }
+        return new VerifiedCohort(
+                inspection.root(), inspection.manifest(), inspection.result());
+    }
+
+    private OfflineResult verify(Inspection inspection) {
         LinkedHashSet<String> failures = new LinkedHashSet<>(inspection.failures());
         if (inspection.root() != null && inspection.manifest() != null) {
             EvidenceVerification verification = verifier.verify(
@@ -231,6 +255,7 @@ final class ToolCompatibilityCohortEvidence {
         return new Inspection(
                 root,
                 manifest,
+                result,
                 summaryPath,
                 expectedSummary,
                 List.copyOf(new LinkedHashSet<>(failures)));
@@ -316,16 +341,31 @@ final class ToolCompatibilityCohortEvidence {
         }
     }
 
+    record VerifiedCohort(
+            Path root,
+            EvidenceManifest manifest,
+            ToolCompatibilityCohortResult result
+    ) {
+
+        VerifiedCohort {
+            if (root == null || manifest == null || result == null) {
+                throw new IllegalArgumentException(
+                        "verified cohort root, manifest, and result are required");
+            }
+        }
+    }
+
     private record Inspection(
             Path root,
             EvidenceManifest manifest,
+            ToolCompatibilityCohortResult result,
             Path summaryPath,
             String expectedSummary,
             List<String> failures
     ) {
 
         private static Inspection invalid(List<String> failures) {
-            return new Inspection(null, null, null, null, List.copyOf(failures));
+            return new Inspection(null, null, null, null, null, List.copyOf(failures));
         }
     }
 }

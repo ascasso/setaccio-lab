@@ -22,7 +22,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
   ignored evidence. The saved run verifies and reanalyzes offline, and its
   bounded T3.4 record remains per-model and multidimensional without a rank,
   selection, general-capability, semantic-correctness, or backend-normalized
-  performance claim. T3.5, reruns, model pulls, and replacements remain
+  performance claim. The separately authorized provider-free T3.5 comparison
+  is now complete; T3.6, reruns, model pulls, and replacements remain
   separately unauthorized.
 - Closed the bounded Phase 1 small-model tool-compatibility baseline. The
   clean 16-row untreated LFM2.5 run completed with offline verification and
@@ -36,6 +37,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the isolated provider-free `toolCompatibilityCohortCompare` task for
+  T3.5. It strictly verifies one saved cohort, compares each ordered peer with
+  the separately labelled reference by locked case/repetition identity, emits
+  descriptive pass overlap, diagnostics, output-limit observations, latency,
+  and total-token deltas only to standard output, and leaves saved evidence
+  unchanged. One authorized comparison of the preserved 2026-08-24 cohort
+  completed without contacting Ollama and without producing a rank, reference
+  ground-truth, model-selection, or backend-normalized performance claim.
 - Began the separately authorized dependency-independent Phase 3 small-model
   cohort preparation. Provider-free code now resolves explicit ordered peers
   plus one separately labelled reference from fake/read-only inventories,

@@ -746,18 +746,27 @@ The provider-free cohort evidence tasks are available without a live runner:
 
 ./gradlew :setaccio-lab:toolCompatibilityCohortReanalyze \
   --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+
+./gradlew :setaccio-lab:toolCompatibilityCohortCompare \
+  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
 ```
 
-They share the strict offline runner, do not start Spring, and do not contact
-Ollama. Their deterministic summary contains ordered per-model T3.4 sections
+All three tasks are strict and provider-free: they do not start Spring or
+contact Ollama. Verify and reanalyze share the evidence runner and maintain the
+deterministic saved summary;
+`toolCompatibilityCohortCompare` first verifies the same evidence and then
+writes one T3.5 peer/reference comparison only to standard output without
+creating or modifying an evidence artifact. The deterministic summary contains
+ordered per-model T3.4 sections
 for compatibility, discipline, arguments, multi-step behavior, failure
 recovery, output behavior, efficiency, and incomplete/unsupported
 observations. Token totals include provider-turn coverage, tokens per passing
 row appears only when every passing row has complete usage, and mixed
 artifact/runtime formats remain labelled as deployed-system observations. The
 isolated live task was used once for the approved 2026-08-24 cohort run; it
-remains outside every default lifecycle. The bounded T3.4 record does not
-authorize T3.5, a rerun, a pull, a substitute model, or a new output directory.
+remains outside every default lifecycle. The bounded T3.5 comparison completed
+once on 2026-08-25 without provider access or evidence mutation. It does not
+authorize T3.6, a rerun, a pull, a substitute model, or a new output directory.
 
 ## Opt-In Tool Search Smoke Automation
 

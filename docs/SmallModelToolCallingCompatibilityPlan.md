@@ -11,7 +11,7 @@ Proposed next work after completion of:
 - the bounded Anthropic architecture-portability proof;
 - the existing standard-versus-regex Tool Search baseline.
 
-This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on 2026-08-23. That decision selects untreated cohort operation with the limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection. The owner then approved the exact T3.1 cohort, one clean-baseline local T3.3 run, and bounded offline T3.4 interpretation on 2026-08-24. T3.5 remains separately gated.
+This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on 2026-08-23. That decision selects untreated cohort operation with the limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection. The owner then approved the exact T3.1 cohort, one clean-baseline local T3.3 run, and bounded offline T3.4 interpretation on 2026-08-24. On 2026-08-25, the owner authorized and completed provider-free T3.5 implementation plus one deterministic offline descriptive comparison of the same immutable cohort. Optional T3.6 remains separately gated.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
@@ -102,7 +102,14 @@ bounded T3.4 interpretation recorded in
 per-model multidimensional observations, incomplete evidence, mixed
 artifact/runtime caveats, and the separately labelled reference without
 creating a rank, selection, general capability, or semantic-correctness claim.
-T3.5 remains unauthorized.
+On 2026-08-25, the owner authorized T3.5 provider-free implementation and one
+offline comparison of that same verified run. The isolated
+`toolCompatibilityCohortCompare` task verified the evidence before comparing it,
+paired every peer row with the separately labelled reference by locked
+case/repetition identity, and wrote the deterministic report only to standard
+output. No evidence artifact changed and no model or provider was contacted.
+The public-safe closeout is recorded in
+`docs/logs/2026-08-25-phase3-tool-compatibility-reference-comparison.md`.
 
 ## Purpose
 
@@ -1504,6 +1511,18 @@ Examples:
 
 Do not infer that the reference answer is semantically correct merely because the reference model is larger.
 
+Provider-free implementation and the one authorized comparison completed on
+2026-08-25. The comparator strictly verifies one saved cohort, rejects missing
+evidence, preserves ordered peer/reference and case/repetition identities,
+classifies both-pass/reference-only/peer-only/neither observations, retains
+each side's deterministic diagnostic and output-limit state, and prints
+latency and total-token deltas only to standard output. In the preserved run,
+the reference passed all 16 locked rows; reference-only pass counts were `16`,
+`2`, `4`, `2`, and `2` for the five ordered peers. There were no peer-only or
+neither-pass rows. These are descriptive overlaps, not a correctness oracle,
+ranking, model selection, backend-normalized performance result, or attribution
+to model weights.
+
 ## Slice T3.6 — Optional capability frontier
 
 After the first cohort, a later analysis may define:
@@ -1952,6 +1971,7 @@ CLI does not change after evidence exists:
 
 ```text
 toolCompatibilityCohort
+toolCompatibilityCohortCompare
 toolCompatibilityCohortVerify
 toolCompatibilityCohortReanalyze
 ```
@@ -2571,6 +2591,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   deterministic report tests.
 - **Stop:** do not treat reference output as ground truth or attribute an
   MLX/non-MLX difference solely to model weights.
+- **Status:** completed on 2026-08-25 through provider-free implementation and
+  one stdout-only deterministic comparison of the verified immutable cohort;
+  no evidence file or provider state changed.
 
 ### T3.6 — Optional capability frontier
 

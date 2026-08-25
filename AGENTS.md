@@ -320,8 +320,17 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   `docs/logs/2026-08-24-phase3-tool-compatibility-cohort.md`. That record is
   per-model and multidimensional, preserves incomplete and mixed-runtime
   observations, and makes no rank, selection, general-capability, or
-  semantic-correctness claim. T3.5 remains separately unauthorized; do not
-  rerun, replace, repair, pull, or customize any cohort model.
+  semantic-correctness claim. Provider-free T3.5 implementation and one
+  deterministic offline comparison completed on 2026-08-25 against that same
+  verified run. The isolated `toolCompatibilityCohortCompare` task verifies
+  the saved cohort, pairs every peer with the separately labelled reference by
+  locked case/repetition identity, and writes only to standard output. The
+  comparison found reference-only pass counts of `16`, `2`, `4`, `2`, and `2`
+  in peer order, with no peer-only or neither-pass rows. This is not a ranking,
+  ground-truth, model-selection, semantic-correctness, or backend-normalized
+  performance result. Optional T3.6 and every new run remain separately
+  unauthorized; do not rerun, replace, repair, pull, or customize any cohort
+  model.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -479,9 +488,10 @@ Pending and separately deferred:
   one clean-baseline T3.3 execution, and bounded T3.4 offline interpretation.
   The 96-row ignored run from commit `e897edf` verifies and reanalyzes offline;
   its public-safe per-model interpretation is recorded in the dated cohort log.
-  This does not authorize T3.5, a reference-model comparison, a new model
-  invocation, a rerun, replacement row, model pull, or evidence-based model
-  selection.
+  Provider-free T3.5 and one deterministic reference comparison of that same
+  run completed on 2026-08-25 without provider access or evidence mutation.
+  This does not authorize optional T3.6, a new model invocation, a rerun,
+  replacement row, model pull, or evidence-based model selection.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing

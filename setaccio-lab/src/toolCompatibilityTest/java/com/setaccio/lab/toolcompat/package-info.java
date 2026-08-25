@@ -128,5 +128,21 @@
  *   <li>Exactly one baseline and one candidate CLI option:
  *       {@code ToolCompatibilityPromptMatrixComparisonRunnerArgumentsTest#requiresBothSavedRunsExactlyOnce}.</li>
  * </ul>
+ *
+ * <p>Phase 3 reference comparison:</p>
+ * <ul>
+ *   <li>Every ordered peer/reference pair, all four asymmetric pass outcomes, and retained
+ *       deterministic failure diagnostics:
+ *       {@code ToolCompatibilityCohortComparisonTest#comparesEveryPeerInOrderAndClassifiesAllFourPairedOutcomes}.</li>
+ *   <li>Deterministic deployment-labelled report with no reference-ground-truth or
+ *       backend-normalized inference:
+ *       {@code ToolCompatibilityCohortComparisonTest#rendersOneDeterministicBoundedReportWithVisibleDeploymentIdentity}.</li>
+ *   <li>Strict verification before comparison, no evidence mutation, and missing-evidence
+ *       rejection:
+ *       {@code ToolCompatibilityCohortComparisonTest#verifiesEvidenceBeforeComparisonAndLeavesEveryArtifactUnchanged}
+ *       and {@code #rejectsMissingEvidenceBeforeRenderingAnyComparison}.</li>
+ *   <li>Exactly one explicit saved cohort directory:
+ *       {@code ToolCompatibilityCohortComparisonRunnerArgumentsTest#requiresExactlyOneTrimmedSavedCohortDirectory}.</li>
+ * </ul>
  */
 package com.setaccio.lab.toolcompat;
