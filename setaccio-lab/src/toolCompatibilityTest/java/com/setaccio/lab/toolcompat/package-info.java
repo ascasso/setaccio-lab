@@ -128,5 +128,38 @@
  *   <li>Exactly one baseline and one candidate CLI option:
  *       {@code ToolCompatibilityPromptMatrixComparisonRunnerArgumentsTest#requiresBothSavedRunsExactlyOnce}.</li>
  * </ul>
+ *
+ * <p>Phase 3 reference comparison:</p>
+ * <ul>
+ *   <li>Every ordered peer/reference pair, all four asymmetric pass outcomes, and retained
+ *       deterministic failure diagnostics:
+ *       {@code ToolCompatibilityCohortComparisonTest#comparesEveryPeerInOrderAndClassifiesAllFourPairedOutcomes}.</li>
+ *   <li>Deterministic deployment-labelled report with no reference-ground-truth or
+ *       backend-normalized inference:
+ *       {@code ToolCompatibilityCohortComparisonTest#rendersOneDeterministicBoundedReportWithVisibleDeploymentIdentity}.</li>
+ *   <li>Strict verification before comparison, no evidence mutation, and missing-evidence
+ *       rejection:
+ *       {@code ToolCompatibilityCohortComparisonTest#verifiesEvidenceBeforeComparisonAndLeavesEveryArtifactUnchanged}
+ *       and {@code #rejectsMissingEvidenceBeforeRenderingAnyComparison}.</li>
+ *   <li>Exactly one explicit saved cohort directory:
+ *       {@code ToolCompatibilityCohortComparisonRunnerArgumentsTest#requiresExactlyOneTrimmedSavedCohortDirectory}.</li>
+ * </ul>
+ *
+ * <p>Phase 3 capability frontier:</p>
+ * <ul>
+ *   <li>Unique recorded-size selection across all qualifying installed artifacts and visible
+ *       reference role when the reference is selected:
+ *       {@code ToolCompatibilityCohortFrontierTest#selectsTheUniqueSmallestRecordedArtifactAmongAllPassModels}
+ *       and {@code #keepsReferenceRoleVisibleWhenItIsTheOnlyAllPassArtifact}.</li>
+ *   <li>Explicit not-measurable outcomes for no all-pass model, missing qualifying size, and
+ *       an ambiguous minimum:
+ *       {@code ToolCompatibilityCohortFrontierTest#reportsNotMeasurableWhenNoModelPassesEveryLockedRow}
+ *       and {@code #reportsNotMeasurableForMissingQualifyingSizeOrAmbiguousMinimum}.</li>
+ *   <li>Strict verification before analysis, no evidence mutation, missing-evidence rejection,
+ *       and exactly one explicit saved cohort directory:
+ *       {@code ToolCompatibilityCohortFrontierTest#verifiesEvidenceBeforeAnalysisAndLeavesEveryArtifactUnchanged},
+ *       {@code #rejectsMissingEvidenceBeforeRenderingAFrontier}, and
+ *       {@code ToolCompatibilityCohortFrontierRunnerArgumentsTest#requiresExactlyOneTrimmedSavedCohortDirectory}.</li>
+ * </ul>
  */
 package com.setaccio.lab.toolcompat;

@@ -207,13 +207,17 @@ rerun or replace a row, and left the ignored raw evidence unchanged.
   infrastructure failures. Median latency was `1073.5 ms`, with an observed
   range of `442–6545 ms`.
 
-The contract merits one later, separately authorized and pre-registered
+The contract merits one later, separately implemented and pre-registered
 output-budget compatibility hypothesis: test whether a larger explicit
 positive output-token limit increases exact `yes`/`no` verdict yield for the
 same immutable judge digest while keeping the prompt, fixtures, row order,
 temperature, seeds, one-attempt policy, and no-pull behavior fixed. That would
 be a new experiment with a new evidence directory, not a retry or correction
-of A5. A6 does not authorize or execute it.
+of A5. A6 did not execute it. On 2026-08-25, the owner granted standing
+authorization for already-installed loopback Ollama calls throughout requested
+Phase 4/5 work, so the future budget experiment does not need another local-call
+or local-run approval once its implementation scope is explicitly started. Its
+paired-evidence and clean-baseline safeguards remain unchanged.
 
 Testcontainers disposition for this cycle: **defer**. Host-Ollama execution,
 provenance, and offline verification worked; containerization would test model

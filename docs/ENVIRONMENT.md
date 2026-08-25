@@ -729,10 +729,12 @@ quality, reliability, or ranking result. On 2026-08-23 the owner completed the
 ignored T2.5 worksheet with `inconclusive`. The resulting cohort policy is
 untreated operation with the limitation recorded; no prompt-effect claim is
 authorized. Dependency-independent provider-free preflight work and read-only
-installed-model inspection were separately authorized on 2026-08-23; they do
-not lock the provisional cohort or authorize model invocation. Any future
-cohort task must use explicit ordered peer tags and a separately labelled
-reference, record one Ollama runtime version and full model digests, fail
+installed-model inspection were separately authorized on 2026-08-23. The owner
+later approved the exact T3.1 cohort and one 2026-08-24 live run from clean
+commit `e897edf`; its 96 rows are preserved in ignored evidence and verified
+and reanalyzed offline. Any additional cohort task still requires a separately
+authorized exact command and must use the suite-owned ordered peer/reference
+identities, record one Ollama runtime version and full model digests, fail
 before allocation on identity drift, and never read `OLLAMA_MODEL`, pull a
 model, join a default lifecycle, or publish ignored raw output.
 
@@ -744,17 +746,40 @@ The provider-free cohort evidence tasks are available without a live runner:
 
 ./gradlew :setaccio-lab:toolCompatibilityCohortReanalyze \
   --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+
+./gradlew :setaccio-lab:toolCompatibilityCohortCompare \
+  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+
+./gradlew :setaccio-lab:toolCompatibilityCohortFrontier \
+  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
 ```
 
-They share the strict offline runner, do not start Spring, and do not contact
-Ollama. Their deterministic summary contains ordered per-model T3.4 sections
+All four tasks are strict and provider-free: they do not start Spring or
+contact Ollama. Verify and reanalyze share the evidence runner and maintain the
+deterministic saved summary;
+`toolCompatibilityCohortCompare` first verifies the same evidence and then
+writes one T3.5 peer/reference comparison only to standard output without
+creating or modifying an evidence artifact. `toolCompatibilityCohortFrontier`
+also verifies first, requires every planned row, and writes one T3.6 report
+only to standard output. It selects a frontier only when at least one installed
+artifact passed every locked row, every qualifying artifact has a valid
+recorded byte size, and the minimum is unique; otherwise it reports the
+frontier as not measurable. The deterministic summary contains
+ordered per-model T3.4 sections
 for compatibility, discipline, arguments, multi-step behavior, failure
 recovery, output behavior, efficiency, and incomplete/unsupported
 observations. Token totals include provider-turn coverage, tokens per passing
 row appears only when every passing row has complete usage, and mixed
-artifact/runtime formats remain labelled as deployed-system observations. No
-`toolCompatibilityCohort` live task exists until exact identity approval and
-the separately reviewed live-runner boundary are complete.
+artifact/runtime formats remain labelled as deployed-system observations. The
+isolated live task was used once for the approved 2026-08-24 cohort run; it
+remains outside every default lifecycle. The bounded T3.5 comparison completed
+once on 2026-08-25 without provider access or evidence mutation. The authorized
+T3.6 analysis then completed once against the same verified run. Exactly one
+artifact qualified: the separately labelled `qwen3.8:27b-mlx` reference passed
+`16/16` rows at a recorded installed-artifact size of `18174721847` bytes. That
+is only a smallest-among-qualifying-tested-artifacts statement under the exact
+protocol; it does not authorize a rerun, pull, substitute model, new output
+directory, ranking, or model selection.
 
 ## Opt-In Tool Search Smoke Automation
 
@@ -933,11 +958,42 @@ The completed A5 run produced twelve one-attempt rows with complete usage and
 no infrastructure failure, but ten responses were empty and only two produced
 valid matching `no` verdicts. A6 interpreted that immutable evidence without a
 provider call or row replacement. All empty responses reached the explicit
-`64`-token output limit, which registers only a later, separately authorized
-output-budget compatibility hypothesis; it does not establish causation.
+`64`-token output limit, which registers only a later, separately implemented
+and pre-registered output-budget compatibility hypothesis; it does not
+establish causation. The 2026-08-25 standing Phase 4/5 local Ollama
+authorization now removes the need
+for another local-call or local-run approval once that implementation scope is
+explicitly started.
 Testcontainers is deferred for this cycle because container provisioning would
 not answer that verdict-yield question. No additional environment variable,
 Docker setup, rerun, release, or tag is required by the A6 closeout.
+
+## Phase 4 and Phase 5 Local Ollama Authorization
+
+As of 2026-08-25, requested Phase 4 and Phase 5 work has standing authorization
+to use local Ollama liberally whenever useful. No additional per-call,
+per-command, per-model, per-session, or per-run approval is required to:
+
+- start or connect to Ollama on a loopback endpoint;
+- inspect its runtime, installed inventory, and model metadata;
+- select among and invoke already-installed models for implementation,
+  diagnostics, smoke checks, controlled runs, embeddings, answer generation,
+  or evaluator work; or
+- repeat disposable diagnostics and restart a complete formal protocol when
+  its clean-baseline rule requires fresh evidence.
+
+This standing authorization does not make live Ollama part of `test`, `check`,
+`build`, application startup, or CI. Provider-free tests must pass without an
+Ollama service. Disposable calls must not be promoted into formal evidence,
+and formal rows retain their exact attempt policy: no selective retry, repair,
+or replacement is allowed. Formal evidence must use ignored fresh output,
+record full model and runtime identity, and satisfy the slice-specific
+preflight. Phase 4's 64/256 arms must still run from the same clean commit.
+
+The scope is limited to already-installed models on loopback Ollama. It does
+not authorize pulls, downloads, removals, renames, silent substitutions,
+non-loopback endpoints, remote providers, credentials, spending, Docker,
+publication of ignored raw output, pushes, releases, or tags.
 
 ## Tool Search Advisor
 

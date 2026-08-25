@@ -16,7 +16,27 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Recorded standing authorization for liberal use of already-installed
+  loopback Ollama models whenever useful during requested Phase 4 and Phase 5
+  work. Local implementation diagnostics and formal calls no longer require
+  per-call, per-command, per-model, per-session, or per-run approval. Default
+  tests and CI remain provider-free; formal evidence keeps its clean-baseline,
+  exact-identity, attempt, immutability, and no-selective-retry rules. Model
+  pulls, remote providers, credentials, Docker, pushes, releases, and tags
+  remain separately gated.
 - Updated the Gradle Wrapper from 9.6.1 to 9.7.1.
+- Completed one owner-authorized Phase 3 small-model tool-compatibility cohort
+  run from clean commit `e897edf`, retaining all 96 locked sequential rows in
+  ignored evidence. The saved run verifies and reanalyzes offline, and its
+  bounded T3.4 record remains per-model and multidimensional without a rank,
+  selection, general-capability, semantic-correctness, or backend-normalized
+  performance claim. The separately authorized provider-free T3.5 comparison
+  and T3.6 capability-frontier analysis are now complete. The frontier was
+  measurable because the separately labelled `qwen3.8:27b-mlx` reference was
+  the only tested installed artifact to pass all 16 locked rows and had a
+  recorded installed-artifact size. This is not a general smallest-capable,
+  ranking, or selection claim; reruns, model pulls, and replacements remain
+  separately unauthorized.
 - Closed the bounded Phase 1 small-model tool-compatibility baseline. The
   clean 16-row untreated LFM2.5 run completed with offline verification and
   deterministic reanalysis; all first provider turns were classified as
@@ -29,6 +49,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the isolated provider-free `toolCompatibilityCohortFrontier` task for
+  T3.6. It strictly verifies one saved cohort, requires every planned row,
+  selects a frontier only from all-pass installed artifacts with an
+  unambiguous recorded byte-size minimum, reports non-measurability otherwise,
+  writes only to standard output, and leaves saved evidence unchanged.
+- Added the isolated provider-free `toolCompatibilityCohortCompare` task for
+  T3.5. It strictly verifies one saved cohort, compares each ordered peer with
+  the separately labelled reference by locked case/repetition identity, emits
+  descriptive pass overlap, diagnostics, output-limit observations, latency,
+  and total-token deltas only to standard output, and leaves saved evidence
+  unchanged. One authorized comparison of the preserved 2026-08-24 cohort
+  completed without contacting Ollama and without producing a rank, reference
+  ground-truth, model-selection, or backend-normalized performance claim.
 - Began the separately authorized dependency-independent Phase 3 small-model
   cohort preparation. Provider-free code now resolves explicit ordered peers
   plus one separately labelled reference from fake/read-only inventories,
@@ -50,8 +83,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
   passing-row usage; and carries a mixed-artifact deployed-system caveat with
   no total rank. Read-only inspection found all provisional tags installed
   under Ollama `0.32.15`. The owner subsequently selected `inconclusive` for
-  T2.5, activating untreated operation plus the recorded limitation. No cohort
-  lock, live cohort task, model invocation, pull, or evidence run occurred.
+  T2.5, activating untreated operation plus the recorded limitation. At this
+  provider-free implementation checkpoint, no cohort lock, live cohort task,
+  model invocation, pull, or evidence run had occurred.
 
 - Completed the authorized Phase 2 small-model prompt comparison from clean
   commit `80bc122`. One locked interleaved 32-attempt run produced two

@@ -11,7 +11,24 @@ Proposed next work after completion of:
 - the bounded Anthropic architecture-portability proof;
 - the existing standard-versus-regex Tool Search baseline.
 
-This plan authorizes no implementation, live Ollama call, model pull, Docker use, release, tag, push, or remote-provider expenditure by itself. Each live execution remains a separate explicit action after its implementation and provider-free preflight are complete. Phase 1 was separately authorized and closed on 2026-08-20. The Phase 2 paired execution and deterministic evidence closeout completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on 2026-08-23. That decision selects untreated cohort operation with the limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the project owner separately authorized dependency-independent Phase 3 provider-free work and read-only installed-model inspection. Cohort identity approval and any live cohort execution remain separately gated.
+This plan authorizes no implementation, model pull, Docker use, release, tag,
+push, or remote-provider expenditure by itself. Implementation still begins one
+requested slice at a time. Phase 1 was separately authorized and closed on
+2026-08-20. The Phase 2 paired execution and deterministic evidence closeout
+completed on 2026-08-21, and the owner completed T2.5 with `inconclusive` on
+2026-08-23. That decision selects untreated cohort operation with the
+limitation recorded and authorizes no prompt-effect claim. On 2026-08-23, the
+project owner separately authorized dependency-independent Phase 3
+provider-free work and read-only installed-model inspection. The owner then
+approved the exact T3.1 cohort, one clean-baseline local T3.3 run, and bounded
+offline T3.4 interpretation on 2026-08-24. On 2026-08-25, the owner authorized
+and completed provider-free T3.5 implementation plus one deterministic offline
+descriptive comparison of the same immutable cohort, then separately
+authorized and completed the provider-free T3.6 capability-frontier analysis
+of that run. Phase 3 is closed through T3.6; any new Phase 3 execution or
+analysis rule remains separately gated. Also on 2026-08-25, the owner granted
+the standing local Ollama authorization defined below for all subsequently
+requested Phase 4 and Phase 5 work.
 
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
@@ -89,10 +106,35 @@ analysis layer is also implemented against synthetic cohort fixtures. It emits
 ordered per-model sections for every planned dimension, explicit unavailable
 metadata and token coverage, lexical-only output/recovery observations,
 complete-usage-gated tokens per passing row, and mixed-artifact caveats without
-a rank or winner. No live cohort task, model invocation, output allocation,
-pull, or Phase 3 evidence run occurred. Completing T3.3 still requires explicit
-approval of the resolved identities and the separately reviewed live runner
-boundary; T3.4 remains unexercised against real cohort evidence.
+a rank or winner. At that provider-free implementation checkpoint, no live
+cohort task, model invocation, output allocation, pull, or Phase 3 evidence run
+had occurred.
+
+After the owner approved the resolved identities and live-runner boundary, one
+clean-baseline cohort run completed on 2026-08-24 from commit `e897edf`.
+All 96 planned rows were retained under the locked untreated protocol, and the
+ignored evidence verified and reanalyzed offline. The owner then authorized the
+bounded T3.4 interpretation recorded in
+`docs/logs/2026-08-24-phase3-tool-compatibility-cohort.md`. It preserves
+per-model multidimensional observations, incomplete evidence, mixed
+artifact/runtime caveats, and the separately labelled reference without
+creating a rank, selection, general capability, or semantic-correctness claim.
+On 2026-08-25, the owner authorized T3.5 provider-free implementation and one
+offline comparison of that same verified run. The isolated
+`toolCompatibilityCohortCompare` task verified the evidence before comparing it,
+paired every peer row with the separately labelled reference by locked
+case/repetition identity, and wrote the deterministic report only to standard
+output. No evidence artifact changed and no model or provider was contacted.
+The public-safe closeout is recorded in
+`docs/logs/2026-08-25-phase3-tool-compatibility-reference-comparison.md`.
+The owner then separately authorized T3.6. The isolated provider-free
+`toolCompatibilityCohortFrontier` task verified the same run and wrote its
+deterministic report only to standard output. Every planned identity and row
+was complete, every qualifying installed artifact had a recorded byte size,
+and the minimum was unambiguous. Exactly one artifact qualified: the separately
+labelled `qwen3.8:27b-mlx` reference passed all 16 rows at a recorded
+installed-artifact size of `18174721847` bytes. The narrow closeout is recorded
+in `docs/logs/2026-08-25-phase3-tool-compatibility-capability-frontier.md`.
 
 ## Purpose
 
@@ -1494,6 +1536,18 @@ Examples:
 
 Do not infer that the reference answer is semantically correct merely because the reference model is larger.
 
+Provider-free implementation and the one authorized comparison completed on
+2026-08-25. The comparator strictly verifies one saved cohort, rejects missing
+evidence, preserves ordered peer/reference and case/repetition identities,
+classifies both-pass/reference-only/peer-only/neither observations, retains
+each side's deterministic diagnostic and output-limit state, and prints
+latency and total-token deltas only to standard output. In the preserved run,
+the reference passed all 16 locked rows; reference-only pass counts were `16`,
+`2`, `4`, `2`, and `2` for the five ordered peers. There were no peer-only or
+neither-pass rows. These are descriptive overlaps, not a correctness oracle,
+ranking, model selection, backend-normalized performance result, or attribution
+to model weights.
+
 ## Slice T3.6 — Optional capability frontier
 
 After the first cohort, a later analysis may define:
@@ -1510,6 +1564,17 @@ Not allowed:
 
 > “Model X is the smallest model capable of tool calling.”
 
+Provider-free implementation and the one authorized analysis completed on
+2026-08-25. The analyzer strictly verifies one saved cohort, requires the
+complete per-model locked schedule, qualifies only artifacts that passed every
+row, and compares the recorded installed-artifact byte size only among those
+qualifiers. It reports the frontier as not measurable when there is no
+all-pass model, a qualifying size is unavailable or invalid, or the smallest
+qualifying size is tied. In the preserved run, `qwen3.8:27b-mlx` was the sole
+qualifier at `16/16`; it remains explicitly labelled as the reference. This is
+not a general smallest-capable, ranking, ground-truth, selection, or
+backend-normalized result.
+
 ## Phase 3 exit criteria
 
 - Cohort identities and digests are locked.
@@ -1521,6 +1586,45 @@ Not allowed:
 - Follow-up hypotheses are identified without silently expanding scope.
 
 ---
+
+# Standing local Ollama authorization for Phases 4 and 5
+
+Within work explicitly requested under Phase 4 or Phase 5, local Ollama may be
+used liberally whenever it is useful. No additional per-call, per-command,
+per-model, per-session, or per-run permission is required. Codex may:
+
+- start or connect to the loopback Ollama service;
+- inspect the local runtime, installed inventory, and model metadata;
+- select among and invoke already-installed local models for implementation,
+  smoke checks, diagnostics, protocol preflight, controlled experiments,
+  embedding generation, answer generation, or evaluator work;
+- repeat disposable local diagnostics when useful; and
+- execute or restart a complete formal protocol when its own clean-baseline or
+  integrity rule requires a fresh run.
+
+This is standing execution authorization, not a requirement to call a model
+when provider-free work is sufficient, and it does not start an unrequested
+slice. It also does not weaken the experimental contract:
+
+- default tests, `check`, `build`, application startup, and CI remain free of
+  live provider calls;
+- disposable diagnostics must stay separate from formal saved evidence;
+- a formal row still has its locked attempt policy, and failed or inconvenient
+  rows must not be selectively retried, repaired, or replaced;
+- formal runs must record the requested and effective installed tag, full
+  digest, Ollama version, material settings, clean-code baseline when required,
+  and ignored output identity;
+- Phase 4's formal 64/256 arms must still execute from the same clean commit;
+  if that paired baseline is invalidated, restart the complete pair in fresh
+  directories rather than salvaging rows; and
+- Phase 5's retrieval-only slices must keep their formal tasks and evidence
+  model-free even if separate local diagnostics are useful during development.
+
+The authorization is local-only. It does not authorize pulling, downloading,
+removing, renaming, or silently substituting a model; a non-loopback endpoint;
+remote-provider or credential use; provider spending; Docker; publication of
+ignored raw output; a push; a release; or a tag. Those actions retain their
+existing separate gates.
 
 # Phase 4 — Fact-check output-budget compatibility
 
@@ -1534,6 +1638,12 @@ Observed prior association:
 - two valid `no` verdicts used two completion tokens.
 
 The earlier evidence did not establish causation.
+
+The Phase 4/5 standing local Ollama authorization applies. Local calls may be
+made whenever useful during requested Phase 4 work. The provider-free test and
+offline-analysis contracts remain provider-free, while the formal paired arms
+may run once their runner, evidence lifecycle, parity checks, and clean-baseline
+guards are ready; they do not need another execution-authorization request.
 
 ## Primary hypothesis
 
@@ -1589,6 +1699,14 @@ Permitted differences between the two arms are limited to:
 - observed invocation outcomes.
 
 If the repository becomes dirty, the commit changes, or implementation code changes between the two arms, the paired experiment must stop and restart from two fresh run directories after a new clean commit is established. Partial completion under a changed baseline must not be salvaged into the comparison.
+
+Exploratory calls made while implementing or diagnosing Phase 4 are disposable
+and must not be promoted into either formal arm. Once the F1–F3 execution,
+evidence, and comparison boundaries are implemented and verified, the fresh
+64/256 pair may be executed under the standing authorization without pausing
+for an exact-command approval. Each formal row still receives exactly one
+logical attempt; standing authorization does not permit selective row retries
+or replacement evidence.
 
 ## Slice F2 — Paired evidence
 
@@ -1664,7 +1782,9 @@ Only after a successful 64-versus-256 result:
 256
 ```
 
-This later slice must be separately planned and authorized.
+This later slice must be separately planned and explicitly started as new
+experimental scope. Once started, the standing local Ollama authorization
+covers its local calls without another per-run approval.
 
 ## Phase 4 exit criteria
 
@@ -1684,6 +1804,14 @@ This later slice must be separately planned and authorized.
 Create a genuine retrieval path that preserves retrieved documents and can support future relevancy evaluation.
 
 This phase is intentionally later because it introduces a new model/evaluation surface rather than reusing an existing tool protocol.
+
+The Phase 4/5 standing local Ollama authorization applies throughout this
+phase. R0–R3 retain provider-free formal deliverables so corpus, fixture,
+lexical-retrieval, and evidence correctness can be established independently
+of model behavior. Separate disposable Ollama diagnostics are still allowed
+when useful. R4–R6 may use already-installed local Ollama embedding, answer,
+and evaluator models without another call or run approval, provided every
+formal model choice and full digest is recorded before evidence generation.
 
 ## Research questions
 
@@ -1767,15 +1895,20 @@ Initial metrics:
 - correct no-match;
 - result stability.
 
-Do not call an LLM.
+The formal retrieval-only task and its evidence must not call an LLM. Separate
+local Ollama diagnostics are allowed under the standing authorization, but
+their output must not enter R3 metrics or saved retrieval-only evidence.
 
 Do not use `RelevancyEvaluator` yet.
 
 ## Slice R4 — Embedding retrieval
 
-After the lexical lifecycle is proven, add an explicit embedding provider/model.
-
-Potential local candidates should be selected separately.
+After the lexical lifecycle is proven, add an explicit embedding
+provider/model. Codex may inspect, smoke-test, and choose among already-installed
+local Ollama embedding candidates without seeking additional execution
+permission. Lock the selected tag, full digest, and retrieval settings before
+formal vector generation. A model pull or remote embedding provider remains a
+separate authorization boundary.
 
 Retain:
 
@@ -1797,6 +1930,10 @@ Use fixtures or recorded vectors for provider-free tests.
 
 Only after retrieval evidence is preserved, add a model answer stage.
 
+An already-installed local Ollama answer model may be selected and invoked
+under the standing authorization. Lock its requested/effective identity, full
+digest, prompt, and material options before formal answer evidence is written.
+
 Each answer row should retain:
 
 - retrieved document identities;
@@ -1813,6 +1950,10 @@ Do not merge retrieval success and answer correctness.
 ## Slice R6 — Relevancy evaluation
 
 Introduce Spring AI `RelevancyEvaluator` only when the actual retrieved documents are supplied to it.
+
+An already-installed local Ollama evaluator may be invoked under the standing
+authorization. A remote evaluator, credentials, or spending still requires
+separate approval.
 
 Keep separate:
 
@@ -1942,6 +2083,8 @@ CLI does not change after evidence exists:
 
 ```text
 toolCompatibilityCohort
+toolCompatibilityCohortCompare
+toolCompatibilityCohortFrontier
 toolCompatibilityCohortVerify
 toolCompatibilityCohortReanalyze
 ```
@@ -2138,8 +2281,11 @@ This gives the project one clean answer before introducing prompt interventions 
 # Codex Execution Runbook
 
 This section turns the research plan into bounded implementation packets. It is
-an execution aid, not standing authorization. A packet may begin only when its
-dependency and authorization lines are satisfied.
+an execution aid, not standing implementation authorization. A packet may
+begin only when its dependency and scope-start lines are satisfied. The one
+exception is already explicit above: once Phase 4 or Phase 5 work is requested,
+already-installed loopback Ollama invocation has standing authorization and
+does not require a second per-call or per-run approval.
 
 ## Codex model routing
 
@@ -2156,8 +2302,11 @@ high-volume choice. For this plan:
   first pass on the hardest architecture boundaries, for a final review of
   those boundaries, or after Terra repeats the same blocker twice. Paying for
   Sol on every fixture, report, or documentation packet is unnecessary.
-- Model choice never authorizes a live provider call, model pull, Docker use,
-  credential use, spending, push, release, or work on a later packet.
+- Model choice never authorizes a model pull, Docker use, credential use,
+  spending, push, release, or work on a later packet. It also does not authorize
+  a remote-provider call. For requested Phase 4/5 work only, the standing
+  authorization already covers calls to selected, already-installed local
+  Ollama models.
 
 The routing labels are workflow guidance, not benchmark results about Codex
 models. A human reviewer remains responsible for authorization, experimental
@@ -2179,10 +2328,12 @@ listed repository precedent directly. Confirm the dependency gate from tracked
 source and Git history; do not infer it from this prompt.
 
 Stay inside the packet's allowed paths and preserve unrelated worktree changes.
-Do not implement a later slice. Do not make a live Ollama or remote-provider
-call, pull a model, use Docker, read credentials, publish ignored evidence,
-push, release, or tag unless the packet and a separate current user instruction
-explicitly authorize that exact action.
+Do not implement a later slice. For requested Phase 4/5 work, already-installed
+loopback Ollama calls are standing-authorized whenever useful; no separate
+exact-action approval is required. For other phases, do not make a live Ollama
+call unless currently authorized. Never infer permission here for a remote-
+provider call, model pull, Docker use, credential access, publication of
+ignored evidence, push, release, or tag.
 
 Implement the smallest suite-specific design satisfying the locked contract.
 Do not widen existing main-code visibility or create generic abstractions just
@@ -2561,6 +2712,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   deterministic report tests.
 - **Stop:** do not treat reference output as ground truth or attribute an
   MLX/non-MLX difference solely to model weights.
+- **Status:** completed on 2026-08-25 through provider-free implementation and
+  one stdout-only deterministic comparison of the verified immutable cohort;
+  no evidence file or provider state changed.
 
 ### T3.6 — Optional capability frontier
 
@@ -2571,14 +2725,18 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   statement when every locked condition is demonstrably met.
 - **Stop:** if any identity, planned row, or required case is incomplete, report
   the frontier as not measurable; do not generalize beyond the cohort.
+- **Status:** completed on 2026-08-25 through provider-free implementation and
+  one stdout-only deterministic analysis of the verified immutable cohort; no
+  evidence file or provider state changed.
 
 ## Phase 4 packets
 
 ### F1 — Fresh two-arm budget experiment implementation
 
 - **Routing:** Terra; Sol review recommended. Not Luna-ready.
-- **Dependency:** separate Phase 4 authorization. The historic A5 evidence is
-  contextual only.
+- **Dependency:** an explicit request to begin F1. Standing local Ollama
+  authorization is already recorded; the historic A5 evidence is contextual
+  only.
 - **Allowed paths:** `setaccio-lab/build.gradle`, dedicated
   `src/localEvaluationBudget/**`, `src/localEvaluationBudgetTest/**`, new
   suite-specific build task wrappers, and dated log. Original local-evaluation
@@ -2588,8 +2746,10 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   original fact-check identities, and no change to the A5 runner.
 - **Checks:** `localEvaluationBudgetTest`, original `localEvaluationTest`,
   default lab tests, task isolation, and `git diff --check`.
-- **Stop:** no live arm, old evidence reuse, code-baseline mismatch allowance,
-  or original CLI change.
+- **Stop:** provider-free tests must not require Ollama. Local diagnostics are
+  allowed but remain disposable; do not treat them as a formal arm. No old
+  evidence reuse, code-baseline mismatch allowance, selective row retry, or
+  original CLI change.
 
 ### F2 — Paired evidence lifecycle
 
@@ -2619,7 +2779,7 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 
 - **Routing:** Terra may draft from verified aggregates; Luna may populate the
   four outcome template. Human review required before closeout.
-- **Dependency:** separately authorized live arms from one clean commit and a
+- **Dependency:** standing-authorized live arms from one clean commit and a
   valid F3 comparison.
 - **Allowed paths:** public-safe closeout docs and dated log; raw ignored
   evidence remains untracked.
@@ -2634,7 +2794,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 
 - **Routing:** Terra; Sol review recommended. Not Luna-ready for the schema
   decision. Human privacy sign-off required for corpus approval.
-- **Dependency:** separate Phase 5 authorization.
+- **Dependency:** an explicit request to begin R0. Standing local Ollama
+  authorization is already recorded, although R0's formal deliverable remains
+  provider-free.
 - **Allowed paths:** `setaccio-lab/build.gradle`, `src/retrieval/**`,
   `src/retrievalTest/**`, public-safe retrieval resources, tests, and dated log.
 - **Deliverable:** exact document/catalog schema, stable identity rules,
@@ -2653,7 +2815,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   document IDs, no-match cases, digest, and confirmation state.
 - **Checks:** complete ID linkage, balance/no-match, pending-review rejection,
   strict parse, and `retrievalFixtureTest`.
-- **Stop:** do not encode expected generated answers or call a model.
+- **Stop:** do not encode expected generated answers or use model output to
+  author or confirm fixture truth. Separate disposable local Ollama diagnostics
+  remain allowed under the standing policy.
 
 ### R2 — Deterministic lexical baseline
 
@@ -2667,7 +2831,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   choice before implementation.
 - **Checks:** hand-calculated ranking fixtures, ties, empty query, no match,
   repeatability, and `retrievalFixtureTest`.
-- **Stop:** no embedding, vector store, LLM, or undeclared dependency.
+- **Stop:** the formal lexical baseline must not use an embedding, vector store,
+  LLM, or undeclared dependency. Separate disposable local Ollama diagnostics
+  remain allowed but cannot enter its scores or evidence.
 
 ### R3 — Retrieval-only evaluation and evidence
 
@@ -2686,23 +2852,28 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 
 - **Routing:** Sol preferred; Terra acceptable with Sol or human architecture
   review. Not Luna-ready.
-- **Dependency:** R3 completed and a separately approved provider/model,
-  chunking, normalization, distance, top-K, and spending/local-run boundary.
+- **Dependency:** R3 completed and a recorded provider/model, chunking,
+  normalization, distance, and top-K contract. An already-installed local
+  Ollama model may be selected and run under standing authorization; a remote
+  provider or spending boundary still requires separate approval.
 - **Allowed paths:** retrieval source sets/tests, tracked public-safe config,
   environment/test docs, and dated log. Credentials and vectors remain ignored.
 - **Deliverable:** explicit embedding boundary and identity, recorded-vector or
   fake-provider tests, and opt-in generation outside default lifecycle.
 - **Checks:** dimensions, deterministic fixtures, provider failure, identity
   drift, no-default-live-call, and full retrieval tests.
-- **Stop:** no credential lookup, provider call, model pull, or vector generation
-  without separate authorization; do not choose a provider/model autonomously.
+- **Stop:** no credential lookup, model pull, remote-provider call, or untracked
+  formal model choice. Local Ollama inspection, selection, calls, and vector
+  generation are standing-authorized, but exact identity and settings must be
+  locked before formal evidence.
 
 ### R5 — Answer generation
 
 - **Routing:** Terra; Sol review recommended. Not Luna-ready for evidence
   semantics.
-- **Dependency:** verified retrieval evidence and separate answer-model/live-run
-  authorization.
+- **Dependency:** verified retrieval evidence and a recorded answer-model
+  contract. Already-installed local Ollama answer calls have standing
+  authorization; remote answer providers remain separately gated.
 - **Allowed paths:** retrieval source sets/tests, environment/test docs, and
   dated log.
 - **Deliverable:** provider-neutral answer boundary retaining exact retrieved
@@ -2710,13 +2881,15 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   assertions, abstention, usage, and failures separately from retrieval success.
 - **Checks:** fake-model tests for supported, unsupported, abstaining, malformed,
   empty, timeout, and provider-failure outcomes.
-- **Stop:** no live call, endpoint migration, or merged retrieval/answer score.
+- **Stop:** no remote call, model pull, endpoint migration, unrecorded formal
+  local model, or merged retrieval/answer score. Local Ollama calls are allowed.
 
 ### R6 — Relevancy evaluation
 
 - **Routing:** Terra; Luna-ready only for individual contract-defined tests.
-- **Dependency:** R5 committed with actual retrieved documents preserved and
-  separate evaluator authorization for any live judge.
+- **Dependency:** R5 committed with actual retrieved documents preserved and a
+  recorded evaluator contract. Already-installed local Ollama judge calls have
+  standing authorization; remote judges remain separately gated.
 - **Allowed paths:** retrieval source sets/tests, evaluator prompt/config if
   public-safe, environment/test docs, and dated log.
 - **Deliverable:** invoke `RelevancyEvaluator` only with actual retrieved
@@ -2724,8 +2897,9 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
   judgment, and answer correctness as separate fields.
 - **Checks:** fake/recorded evaluator coverage, missing-context rejection,
   self-evaluation flagging, failure classification, and no-default-live-call.
-- **Stop:** an AI evaluator is not ground truth; no live judge or credential use
-  without separate authorization.
+- **Stop:** an AI evaluator is not ground truth. No remote judge, credential
+  use, or model pull without separate authorization; local Ollama judge calls
+  are allowed under the standing policy.
 
 # Appendix A — Spring AI 2.0 Tool-Calling Implementation Notes
 
