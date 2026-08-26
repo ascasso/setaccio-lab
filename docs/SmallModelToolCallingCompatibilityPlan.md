@@ -1786,6 +1786,17 @@ This later slice must be separately planned and explicitly started as new
 experimental scope. Once started, the standing local Ollama authorization
 covers its local calls without another per-run approval.
 
+The breakpoint study started on 2026-08-26. It uses five fresh, distinct
+ignored output directories under `build/evaluation-matrix/`, runs each locked
+token arm in order with the same six-fixture, two-repetition schedule (60 rows
+total), and requires the same clean Git commit and installed full judge digest
+before allocation and between every arm. The runner persists each arm after
+its 12 one-attempt rows, retains any incomplete evidence on failure, and never
+retries or replaces a row. Its standalone verifier/reanalyzer requires every
+arm to match in all non-budget protocol identities; its report is a
+deterministic five-column descriptive aggregate only. The owner retains the
+interpretation decision after verified evidence is available.
+
 ## Phase 4 exit criteria
 
 - Fresh paired evidence exists, and both arms executed from the same clean Git commit.
