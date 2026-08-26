@@ -240,6 +240,14 @@ not place a live model call in default tests or CI.
 - Require prompt ID/version/digest, full judge-model digest, complete generation
   settings, two seeded repetitions, balanced supported/unsupported fixtures,
   explicit execution order, and shared-manifest offline verification.
+- Keep the separately started five-arm output-budget breakpoint study opt-in and
+  outside the default lifecycle. Lock its arms to `64`, `96`, `128`, `192`, and
+  `256` output tokens; require 12 sequential one-attempt rows per arm, fresh
+  distinct ignored directories, the same clean Git baseline and installed full
+  judge digest across all five arms, immediate per-arm persistence, and strict
+  offline non-budget parity verification before deterministic five-way
+  aggregation. Do not infer a provider finish reason from completion tokens or
+  choose the study interpretation without the owner.
 - Keep `localEvaluationTest` provider-free. Require exact counterbalanced row
   order, BLAKE3 document/claim identities, separate evaluator/verdict/agreement
   signals, exhaustive diagnostic coherence, usage/latency/attempt validation,

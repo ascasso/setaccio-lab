@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "public-safe-retrieval-corpus",
+  "catalogVersion": 1,
+  "privacyReviewState": "PENDING_HUMAN_REVIEW",
+  "documents": [
+    {
+      "documentId": "garden-compost-basics",
+      "relativePath": "documents/garden-compost-basics.md",
+      "contentSha256": "c59e9056b1ef3f12e5b21a66fb8e7ca7c43fc7ee5d432525d67ec614cc8f4f0b",
+      "title": "Community garden compost basics",
+      "topic": "community-garden",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "garden-tool-shed",
+      "relativePath": "documents/garden-tool-shed.md",
+      "contentSha256": "2dab33fd6d9591b679a8399ba131247d41957ff9be2580a656144168ec4a7a70",
+      "title": "Community garden tool shed",
+      "topic": "community-garden",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "garden-water-schedule",
+      "relativePath": "documents/garden-water-schedule.md",
+      "contentSha256": "a923d74bc6c0d39220bfee2575c9b4b083dcfb6fa5bb2c6c38f2a551babc07d1",
+      "title": "Community garden water schedule",
+      "topic": "community-garden",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "library-borrowing-rules",
+      "relativePath": "documents/library-borrowing-rules.md",
+      "contentSha256": "04db2ace5324eec966c6e53c8856fdc41439c116b04ab4ae8da726b374ec71e4",
+      "title": "Neighborhood library borrowing rules",
+      "topic": "neighborhood-library",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "library-study-room",
+      "relativePath": "documents/library-study-room.md",
+      "contentSha256": "c3a4d99dad7f36a386be5250701b0654bc6bb2ffcc85db9b6d017443979ea796",
+      "title": "Neighborhood library study room",
+      "topic": "neighborhood-library",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "library-workshop-calendar",
+      "relativePath": "documents/library-workshop-calendar.md",
+      "contentSha256": "c961ae5bf5bd2600da5132bc14eb77f54357a602c7b0a5467d21a8409fdb7696",
+      "title": "Neighborhood library workshop calendar",
+      "topic": "neighborhood-library",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "trail-access-notice",
+      "relativePath": "documents/trail-access-notice.md",
+      "contentSha256": "554e2a9cb81690dfeef0b62a2e0741e187846d0e37e4fd90b367c428dbb43f7a",
+      "title": "Coastal trail access notice",
+      "topic": "coastal-trail",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "trail-bird-observation",
+      "relativePath": "documents/trail-bird-observation.md",
+      "contentSha256": "43bf23081a1d4beb44ed658c468347f826fd2213576d110f957a72b1c465e61b",
+      "title": "Coastal trail bird observation",
+      "topic": "coastal-trail",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "trail-weather-guidance",
+      "relativePath": "documents/trail-weather-guidance.md",
+      "contentSha256": "620da5e58e679476391180c6f79ece4888842fdb1a34afba8c4c50cb6b879baf",
+      "title": "Coastal trail weather guidance",
+      "topic": "coastal-trail",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "workshop-bike-check",
+      "relativePath": "documents/workshop-bike-check.md",
+      "contentSha256": "7a65cbf1d294e3e011c2e6340434e68e24ca40b5b16c20df3ee4416e28081809",
+      "title": "Bicycle workshop safety check",
+      "topic": "bicycle-workshop",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "workshop-membership",
+      "relativePath": "documents/workshop-membership.md",
+      "contentSha256": "43f7acfd335b775cd96cb572c5d932e2313e530d06cf1f99a5c0c11cc5f32a78",
+      "title": "Bicycle workshop membership",
+      "topic": "bicycle-workshop",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    },
+    {
+      "documentId": "workshop-route-map",
+      "relativePath": "documents/workshop-route-map.md",
+      "contentSha256": "b4cf986d1d58eb5d9a0094fe232804ec14ba1771afbc966515df8ec799d0cf79",
+      "title": "Bicycle workshop route map",
+      "topic": "bicycle-workshop",
+      "sourceType": "REPOSITORY_AUTHORED",
+      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+    }
+  ]
+}

@@ -23,6 +23,8 @@ import com.setaccio.gradle.LocalEvaluationTask
 import com.setaccio.gradle.LocalEvaluationBudgetTask
 import com.setaccio.gradle.LocalEvaluationBudgetOfflineTask
 import com.setaccio.gradle.LocalEvaluationBudgetComparisonTask
+import com.setaccio.gradle.LocalEvaluationBreakpointTask
+import com.setaccio.gradle.LocalEvaluationBreakpointOfflineTask
 import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
 import com.setaccio.gradle.VisionMatrixComparisonTask
@@ -127,6 +129,16 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.toolCompatibility.output
         runtimeClasspath += output + compileClasspath
     }
+    retrieval {
+        java.srcDir 'src/retrieval/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    retrievalTest {
+        java.srcDir 'src/retrievalTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.retrieval.output
+        runtimeClasspath += output + compileClasspath
+    }
 }
 
 configurations {
@@ -154,6 +166,10 @@ configurations {
     toolCompatibilityRuntimeOnly.extendsFrom runtimeOnly
     toolCompatibilityTestImplementation.extendsFrom testImplementation, toolCompatibilityImplementation
     toolCompatibilityTestRuntimeOnly.extendsFrom testRuntimeOnly, toolCompatibilityRuntimeOnly
+    retrievalImplementation.extendsFrom implementation
+    retrievalRuntimeOnly.extendsFrom runtimeOnly
+    retrievalTestImplementation.extendsFrom testImplementation, retrievalImplementation
+    retrievalTestRuntimeOnly.extendsFrom testRuntimeOnly, retrievalRuntimeOnly
 }
 
 tasks.register('chatMatrix', ChatMatrixTask) {
@@ -232,6 +248,15 @@ tasks.register('toolCompatibilityTest', Test) {
     group = 'verification'
     testClassesDirs = sourceSets.toolCompatibilityTest.output.classesDirs
     classpath = sourceSets.toolCompatibilityTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.register('retrievalFixtureTest', Test) {
+    description = 'Runs provider-free tests for the Phase 5 retrieval corpus contract and public-safe fixtures.'
+    group = 'verification'
+    testClassesDirs = sourceSets.retrievalTest.output.classesDirs
+    classpath = sourceSets.retrievalTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('test')
 }
@@ -448,6 +473,52 @@ tasks.register('localEvaluationBudgetTest', Test) {
     classpath = sourceSets.localEvaluationBudgetTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('localEvaluationTest')
+}
+
+tasks.register('localEvaluationBreakpoint', LocalEvaluationBreakpointTask) {
+    description = 'Runs one fresh five-arm 64/96/128/192/256-token fact-check breakpoint study; provider-backed and opt-in.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBreakpointRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationBreakpointVerify', LocalEvaluationBreakpointOfflineTask) {
+    description = 'Verifies one saved five-arm breakpoint study without starting Spring or calling a provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBreakpointOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationBreakpointReanalyze', LocalEvaluationBreakpointOfflineTask) {
+    description = 'Regenerates and verifies a saved five-arm breakpoint summary without starting Spring or calling a provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBreakpointOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('localEvaluationBreakpointCompare', LocalEvaluationBreakpointOfflineTask) {
+    description = 'Prints the provider-free aggregate report for one verified five-arm breakpoint study.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBreakpointComparisonRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
 }
 
 tasks.register('toolSearchSmoke', ToolSearchSmokeTask) {

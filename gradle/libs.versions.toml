@@ -5,7 +5,7 @@ springBoot = "4.1.0"
 springAi = "2.0.0"
 commonsCodec = "1.22.0"
 slf4j = "2.0.18"
-caffeine = "3.2.0"
+caffeine = "3.2.4"
 bouncycastle = "1.84"
 
 [libraries]
