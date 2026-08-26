@@ -22,6 +22,7 @@ import com.setaccio.gradle.LocalEvaluationOfflineTask
 import com.setaccio.gradle.LocalEvaluationTask
 import com.setaccio.gradle.LocalEvaluationBudgetTask
 import com.setaccio.gradle.LocalEvaluationBudgetOfflineTask
+import com.setaccio.gradle.LocalEvaluationBudgetComparisonTask
 import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
 import com.setaccio.gradle.VisionMatrixComparisonTask
@@ -429,8 +430,19 @@ tasks.register('localEvaluationBudgetReanalyze', LocalEvaluationBudgetOfflineTas
     }.map { it.executablePath.asFile.absolutePath })
 }
 
+tasks.register('localEvaluationBudgetCompare', LocalEvaluationBudgetComparisonTask) {
+    description = 'Compares one verified F1 64/256-token fact-check pair without starting Spring or calling a provider.'
+    dependsOn tasks.named('localEvaluationClasses')
+    dependsOn tasks.named('localEvaluationBudgetClasses')
+    classpath.from(sourceSets.localEvaluationBudget.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.evaluation.LocalEvaluationBudgetComparisonRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
 tasks.register('localEvaluationBudgetTest', Test) {
-    description = 'Runs provider-free tests for the F1 fresh 64/256-token fact-check protocol and F2 pair evidence.'
+    description = 'Runs provider-free tests for the F1-F3 fresh 64/256-token fact-check protocol and evidence lifecycle.'
     group = 'verification'
     testClassesDirs = sourceSets.localEvaluationBudgetTest.output.classesDirs
     classpath = sourceSets.localEvaluationBudgetTest.runtimeClasspath
