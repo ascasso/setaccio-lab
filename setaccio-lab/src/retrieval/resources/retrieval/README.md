@@ -123,7 +123,26 @@ content digest, exact score fields, and matched terms. The confirmed v1 fixture
 tests pin one expected hit for each of twelve supported queries and no hit for
 both no-match queries.
 
-R2 stops before embeddings, answer generation, `RelevancyEvaluator`, provider
-calls, or formal retrieval evidence. R3 must retain these identities plus the
-actual retrieved document text rather than describing ordinary fixture context
-as retrieval.
+## Retrieval-only evaluation and saved evidence, version 1
+
+R3 runs the exact confirmed catalog sequentially through the locked lexical
+baseline. It immediately repeats every row and records whether the two results
+are identical. The raw result retains each fixture's human-confirmed labels,
+full lexical result, and the complete text of every returned public corpus
+document alongside its ID, rank, SHA-256, exact score fields, and matched terms.
+
+`retrievalEvaluation` writes a new dated directory directly under
+`build/retrieval-evaluation/`. The manifest declares only the raw JSON and
+deterministic `SUMMARY.md`; all writes are non-overwriting. The offline
+`retrievalEvaluationVerify`, `retrievalEvaluationReanalyze`, and
+`retrievalEvaluationCompare` tasks require saved directories under that same
+root and never start Spring, call a provider, or contact a network service.
+
+The R3 metrics are expected-support retrieval, top 1, top 3, forbidden-document
+retrieval, correct no-match, and immediate-repeat stability. They are
+deterministic observations against the exact human-confirmed labels, not answer
+quality, general semantic relevance, embedding performance, or an AI-evaluator
+judgment.
+
+R3 stops before embeddings, answer generation, `RelevancyEvaluator`, or any
+provider call.

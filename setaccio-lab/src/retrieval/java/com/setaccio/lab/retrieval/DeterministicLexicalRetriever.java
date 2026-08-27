@@ -57,6 +57,15 @@ public final class DeterministicLexicalRetriever {
             TIE_BREAK);
 
     /**
+     * Returns the complete immutable version-one lexical method contract.
+     *
+     * @return locked method parameters recorded in retrieval-only evidence
+     */
+    public static RetrievalLexicalParameters parameters() {
+        return PARAMETERS;
+    }
+
+    /**
      * Retrieves for one confirmed fixture.
      *
      * @param corpus exact approved corpus
