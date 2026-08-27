@@ -146,3 +146,46 @@ judgment.
 
 R3 stops before embeddings, answer generation, `RelevancyEvaluator`, or any
 provider call.
+
+## Local embedding retrieval and saved evidence, version 1
+
+R4 adds one explicit, opt-in local Ollama embedding boundary. It is not part
+of the default build or test lifecycle. The generation task requires all of
+the following at invocation time: a loopback-only Ollama URL, one already
+installed embedding-model tag, a positive top-K value, and one new dated
+directory directly under `build/retrieval-embedding/`. It first requires a
+clean full Git commit, validates the approved corpus and confirmed query
+catalog, resolves the exact installed tag and full digest from the local
+inventory, and only then sends one batch containing all twelve document texts
+followed by all fourteen query texts to Spring AI's direct `/api/embed`
+boundary. It never pulls a model, retries a request, starts Spring, or accepts
+a remote endpoint.
+
+The first planned formal configuration is requested model `qwen3.5:0.8b` and
+top K `3`. This is an operational, resource-minimizing selection among the
+models installed when R4 began; it is not a semantic-quality, capability,
+performance, or model-selection claim. The task records the preflight full
+digest before the request and rejects a response whose effective model differs
+from that identity. The formal configuration also locks `whole-document-v1`
+chunking, `unit-l2-v1` normalization, `cosine-descending-document-id` ranking,
+one batch, one attempt, and a two-minute request timeout.
+
+The runner writes only under ignored `build/retrieval-embedding/`, retaining a
+non-overwriting raw JSON result, shared-v1 manifest, and deterministic
+`SUMMARY.md`. Raw evidence retains the provider and endpoint category,
+requested/effective model and full digest, corpus/query identities, provider
+timing metadata when returned, every normalized document/query vector, and
+every deterministic top-K rank, document identity, content digest, and cosine
+score. The summary deliberately excludes vectors. Its provider-free
+`retrievalEmbeddingVerify` and `retrievalEmbeddingReanalyze` tasks check the
+saved layout, artifact hashes, model/settings/corpus identities, vector
+dimensions and normalization, and recomputed rankings without starting Spring
+or contacting Ollama.
+
+An embedding-enabled local `/api/embed` service is a prerequisite for a formal
+run. If that endpoint is unavailable or rejects the selected installed model,
+the task fails before creating evidence and does not retry, pull, substitute a
+model, or treat the failure as a retrieval result. R4 preserves rankings for a
+later retrieval flow but sets no support threshold, scores no-match fixtures,
+generates no answer, makes no semantic-relevance claim, and does not invoke
+`RelevancyEvaluator`.
