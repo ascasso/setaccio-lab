@@ -1,9 +1,9 @@
 # Public retrieval corpus contract, version 1
 
-This resource defines the Phase 5 R0 corpus contract. It contains only
-short, fictional, repository-authored Markdown documents. It contains no
-personal data, imported articles, private Setaccio material, query fixtures,
-answers, embeddings, model output, or relevance judgments.
+The `corpus-v1/` resource defines the Phase 5 R0 corpus contract. It contains
+only short, fictional, repository-authored Markdown documents. It contains no
+personal data, imported articles, private Setaccio material, answers,
+embeddings, model output, or relevance judgments.
 
 The version-one corpus root is `retrieval/corpus-v1/` and must contain exactly:
 
@@ -45,13 +45,58 @@ review state must agree.
 
 A status of `PENDING_HUMAN_REVIEW` permits contract validation but prevents
 formal retrieval use. A human must change the catalog and every document to
-`APPROVED_PUBLIC_SAFE` after reviewing the text and its provenance. That change
-also changes the pinned catalog digest, so it is a versioned, reviewable source
-change. Future content changes require a new catalog version, updated document
-and catalog digests, and a new human public-safety review; they must not alter
-saved evidence from an earlier version.
+`APPROVED_PUBLIC_SAFE` after reviewing the text and its provenance. The project
+owner completed that review for corpus version 1 on 2026-08-27. The approved
+catalog and every document now carry `APPROVED_PUBLIC_SAFE`, and the catalog's
+new pinned SHA-256 captures that reviewed state. Future content changes require
+a new catalog version, updated document and catalog digests, and a new human
+public-safety review; they must not alter saved evidence from an earlier
+version.
 
-The R0 contract deliberately stops before query fixtures, lexical ranking,
-embeddings, answer generation, or `RelevancyEvaluator`. Later slices must use
-the catalog and document SHA-256 identities to retain actual retrieved
-documents, rather than describing ordinary fixture context as retrieval.
+## Query fixture contract, version 1
+
+The `query-fixtures-v1/` resource defines the Phase 5 R1 retrieval-only
+questions. It contains exactly `catalog.json` and `catalog.sha256`. The query
+catalog is bound to the exact approved corpus catalog ID, version, and SHA-256;
+changing the corpus makes the query catalog invalid until a new reviewed query
+version is created.
+
+Each fixture has this exact schema:
+
+```json
+{
+  "caseId": "stable-lowercase-hyphen-id",
+  "query": "One retrieval question?",
+  "expectedSupportingDocumentIds": ["required-best-support-id"],
+  "allowedSupportingDocumentIds": ["required-best-support-id"],
+  "forbiddenDocumentIds": ["explicit-distractor-id"],
+  "expectedNoMatch": false,
+  "humanReviewState": "PENDING_HUMAN_REVIEW | CONFIRMED"
+}
+```
+
+`expectedSupportingDocumentIds` identifies the document that must be retrieved
+for a matching version-one case. `allowedSupportingDocumentIds` is the complete
+set that may count as supporting and must include every expected ID.
+`forbiddenDocumentIds` records explicit distractors and must be disjoint from
+the allow-list; an unlisted document is not accepted as support merely because
+it is not an explicit distractor. Every ID must link to the bound corpus.
+
+Version 1 has twelve matching fixtures in corpus-document order, so every
+document is the expected support exactly once. It also has two topical no-match
+fixtures. A no-match fixture has empty expected and allowed lists and records
+all twelve corpus documents as forbidden. The catalog contains no expected
+answer text: it labels retrieval support only.
+
+The query catalog and every fixture are initially
+`PENDING_HUMAN_REVIEW`. This permits schema and linkage validation, while
+`loadConfirmed` rejects formal use until a human confirms every query and its
+expected, allowed, forbidden, and no-match judgment against the pinned corpus.
+Confirmation changes every query review state to `CONFIRMED` and repins the
+query catalog digest in one reviewable source change.
+
+R0 and R1 stop before lexical ranking, embeddings, answer generation,
+`RelevancyEvaluator`, provider calls, or formal retrieval evidence. Later
+slices must retain the catalog, query, and document identities plus the actual
+retrieved document text, rather than describing ordinary fixture context as
+retrieval.

@@ -19,7 +19,7 @@ import org.junit.jupiter.api.io.TempDir;
 class RetrievalCorpusLoaderTest {
 
     private static final String PACKAGED_CATALOG_SHA256 =
-            "6337149171869af7cfee23302234ffc0c33366e877a168108974f5c10ac3c6bd";
+            "2c3f72f153cfb097caeef73ae210a66265af054b585b1b2a292162f289087b9d";
 
     @TempDir
     Path temporaryDirectory;
@@ -33,7 +33,7 @@ class RetrievalCorpusLoaderTest {
         assertThat(corpus.catalogId()).isEqualTo(RetrievalCorpusLoader.CATALOG_ID);
         assertThat(corpus.catalogVersion()).isEqualTo(RetrievalCorpusLoader.CATALOG_VERSION);
         assertThat(corpus.catalogSha256()).isEqualTo(PACKAGED_CATALOG_SHA256);
-        assertThat(corpus.privacyReviewState()).isEqualTo(RetrievalPrivacyReviewState.PENDING_HUMAN_REVIEW);
+        assertThat(corpus.privacyReviewState()).isEqualTo(RetrievalPrivacyReviewState.APPROVED_PUBLIC_SAFE);
         assertThat(corpus.documents()).extracting(RetrievalDocument::documentId).containsExactly(
                 "garden-compost-basics",
                 "garden-tool-shed",
@@ -49,24 +49,25 @@ class RetrievalCorpusLoaderTest {
                 "workshop-route-map");
         assertThat(corpus.documents()).allSatisfy(document -> {
             assertThat(document.sourceType()).isEqualTo(RetrievalDocumentSource.REPOSITORY_AUTHORED);
-            assertThat(document.privacyReviewState()).isEqualTo(RetrievalPrivacyReviewState.PENDING_HUMAN_REVIEW);
+            assertThat(document.privacyReviewState()).isEqualTo(RetrievalPrivacyReviewState.APPROVED_PUBLIC_SAFE);
             assertThat(document.content()).endsWith("\n");
         });
     }
 
     @Test
     void requiresAnExplicitHumanPublicSafetyApprovalBeforeFormalCorpusUse() throws Exception {
-        Path pendingCorpus = packagedCorpusRoot();
+        assertThat(loader.loadApproved(packagedCorpusRoot()).privacyReviewState())
+                .isEqualTo(RetrievalPrivacyReviewState.APPROVED_PUBLIC_SAFE);
 
-        assertThatThrownBy(() -> loader.loadApproved(pendingCorpus))
+        TestCorpus pendingCorpus = writeValidCorpus();
+        assertThatThrownBy(() -> loader.loadApproved(pendingCorpus.root()))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("not approved");
 
-        TestCorpus approvedCorpus = writeValidCorpus();
-        rewriteCatalog(approvedCorpus, catalog -> catalog.replace(
+        rewriteCatalog(pendingCorpus, catalog -> catalog.replace(
                 "PENDING_HUMAN_REVIEW", "APPROVED_PUBLIC_SAFE"));
 
-        assertThat(loader.loadApproved(approvedCorpus.root()).privacyReviewState())
+        assertThat(loader.loadApproved(pendingCorpus.root()).privacyReviewState())
                 .isEqualTo(RetrievalPrivacyReviewState.APPROVED_PUBLIC_SAFE);
     }
 
