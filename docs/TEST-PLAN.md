@@ -222,6 +222,11 @@ not place a live model call in default tests or CI.
   may use fully recorded installed local embedding, answer, and evaluator
   models. Default tests must use fakes or recorded fixtures and run without
   Ollama.
+- R3 retrieval evidence must retain each returned corpus document's exact text,
+  ID, SHA-256, rank, score fields, and matched terms. Require the fixed
+  retrieval-only metrics, immediate-repeat stability, shared-v1 manifest
+  integrity, non-overwriting dated output, summary-drift repair only, and
+  offline verify/reanalyze/compare coverage through `retrievalFixtureTest`.
 - Keep judge and fixture-expectation results separate. A valid `yes` / `no`
   verdict is not automatically an expectation match or a general factuality
   score.

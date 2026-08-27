@@ -1,0 +1,247 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "public-safe-retrieval-query-fixtures",
+  "catalogVersion": 1,
+  "corpusCatalogId": "public-safe-retrieval-corpus",
+  "corpusCatalogVersion": 1,
+  "corpusCatalogSha256": "2c3f72f153cfb097caeef73ae210a66265af054b585b1b2a292162f289087b9d",
+  "humanReviewState": "CONFIRMED",
+  "fixtures": [
+    {
+      "caseId": "garden-compost-accepted-materials",
+      "query": "Which items does Harbor Garden accept in its shared compost bins?",
+      "expectedSupportingDocumentIds": [
+        "garden-compost-basics"
+      ],
+      "allowedSupportingDocumentIds": [
+        "garden-compost-basics"
+      ],
+      "forbiddenDocumentIds": [
+        "garden-tool-shed",
+        "garden-water-schedule"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "garden-shed-tool-inventory",
+      "query": "Which tools are stored in the Harbor Garden shared shed?",
+      "expectedSupportingDocumentIds": [
+        "garden-tool-shed"
+      ],
+      "allowedSupportingDocumentIds": [
+        "garden-tool-shed"
+      ],
+      "forbiddenDocumentIds": [
+        "garden-compost-basics",
+        "garden-water-schedule"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "garden-rain-watering-schedule",
+      "query": "How does rainfall affect Harbor Garden's scheduled watering round?",
+      "expectedSupportingDocumentIds": [
+        "garden-water-schedule"
+      ],
+      "allowedSupportingDocumentIds": [
+        "garden-water-schedule"
+      ],
+      "forbiddenDocumentIds": [
+        "garden-compost-basics",
+        "garden-tool-shed"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "library-borrowing-renewal-condition",
+      "query": "When may a Riverside Library borrower renew an item?",
+      "expectedSupportingDocumentIds": [
+        "library-borrowing-rules"
+      ],
+      "allowedSupportingDocumentIds": [
+        "library-borrowing-rules"
+      ],
+      "forbiddenDocumentIds": [
+        "library-study-room",
+        "library-workshop-calendar"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "library-study-room-equipment",
+      "query": "What equipment is available in the Riverside Library quiet study room?",
+      "expectedSupportingDocumentIds": [
+        "library-study-room"
+      ],
+      "allowedSupportingDocumentIds": [
+        "library-study-room"
+      ],
+      "forbiddenDocumentIds": [
+        "library-borrowing-rules",
+        "library-workshop-calendar"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "library-repair-workshop-exclusions",
+      "query": "Which items does the Riverside Library repair workshop not repair?",
+      "expectedSupportingDocumentIds": [
+        "library-workshop-calendar"
+      ],
+      "allowedSupportingDocumentIds": [
+        "library-workshop-calendar"
+      ],
+      "forbiddenDocumentIds": [
+        "library-borrowing-rules",
+        "library-study-room"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "trail-dune-shortcut-closure",
+      "query": "Why is the North Shore Trail dune shortcut closed?",
+      "expectedSupportingDocumentIds": [
+        "trail-access-notice"
+      ],
+      "allowedSupportingDocumentIds": [
+        "trail-access-notice"
+      ],
+      "forbiddenDocumentIds": [
+        "trail-bird-observation",
+        "trail-weather-guidance"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "trail-bird-observation-rules",
+      "query": "What bird-observation rules apply to feeding birds and being near nesting signs at the North Shore Trail marsh?",
+      "expectedSupportingDocumentIds": [
+        "trail-bird-observation"
+      ],
+      "allowedSupportingDocumentIds": [
+        "trail-bird-observation"
+      ],
+      "forbiddenDocumentIds": [
+        "trail-access-notice",
+        "trail-weather-guidance"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "trail-weather-closure-alerts",
+      "query": "Which weather alerts close the North Shore Trail?",
+      "expectedSupportingDocumentIds": [
+        "trail-weather-guidance"
+      ],
+      "allowedSupportingDocumentIds": [
+        "trail-weather-guidance"
+      ],
+      "forbiddenDocumentIds": [
+        "trail-access-notice",
+        "trail-bird-observation"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "workshop-bicycle-safety-inspection",
+      "query": "What does the Open Wheel Workshop inspect during its bicycle safety check?",
+      "expectedSupportingDocumentIds": [
+        "workshop-bike-check"
+      ],
+      "allowedSupportingDocumentIds": [
+        "workshop-bike-check"
+      ],
+      "forbiddenDocumentIds": [
+        "workshop-membership",
+        "workshop-route-map"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "workshop-first-visit-membership",
+      "query": "Does a first visit to the Open Wheel Workshop require membership?",
+      "expectedSupportingDocumentIds": [
+        "workshop-membership"
+      ],
+      "allowedSupportingDocumentIds": [
+        "workshop-membership"
+      ],
+      "forbiddenDocumentIds": [
+        "workshop-bike-check",
+        "workshop-route-map"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "workshop-route-map-limit",
+      "query": "What limitation applies to the Open Wheel Workshop's printed route map?",
+      "expectedSupportingDocumentIds": [
+        "workshop-route-map"
+      ],
+      "allowedSupportingDocumentIds": [
+        "workshop-route-map"
+      ],
+      "forbiddenDocumentIds": [
+        "workshop-bike-check",
+        "workshop-membership"
+      ],
+      "expectedNoMatch": false,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "no-match-library-home-delivery",
+      "query": "Does Riverside Library deliver borrowed books to a reader's home?",
+      "expectedSupportingDocumentIds": [],
+      "allowedSupportingDocumentIds": [],
+      "forbiddenDocumentIds": [
+        "garden-compost-basics",
+        "garden-tool-shed",
+        "garden-water-schedule",
+        "library-borrowing-rules",
+        "library-study-room",
+        "library-workshop-calendar",
+        "trail-access-notice",
+        "trail-bird-observation",
+        "trail-weather-guidance",
+        "workshop-bike-check",
+        "workshop-membership",
+        "workshop-route-map"
+      ],
+      "expectedNoMatch": true,
+      "humanReviewState": "CONFIRMED"
+    },
+    {
+      "caseId": "no-match-trail-overnight-camping",
+      "query": "Where may visitors camp overnight along the North Shore Trail?",
+      "expectedSupportingDocumentIds": [],
+      "allowedSupportingDocumentIds": [],
+      "forbiddenDocumentIds": [
+        "garden-compost-basics",
+        "garden-tool-shed",
+        "garden-water-schedule",
+        "library-borrowing-rules",
+        "library-study-room",
+        "library-workshop-calendar",
+        "trail-access-notice",
+        "trail-bird-observation",
+        "trail-weather-guidance",
+        "workshop-bike-check",
+        "workshop-membership",
+        "workshop-route-map"
+      ],
+      "expectedNoMatch": true,
+      "humanReviewState": "CONFIRMED"
+    }
+  ]
+}

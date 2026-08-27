@@ -29,6 +29,9 @@ import com.setaccio.gradle.VisionHumanReviewPrepareTask
 import com.setaccio.gradle.VisionMatrixOfflineTask
 import com.setaccio.gradle.VisionMatrixComparisonTask
 import com.setaccio.gradle.VisionMatrixTask
+import com.setaccio.gradle.RetrievalEvaluationTask
+import com.setaccio.gradle.RetrievalEvaluationOfflineTask
+import com.setaccio.gradle.RetrievalEvaluationComparisonTask
 
 description = 'Setaccio Lab'
 
@@ -253,12 +256,52 @@ tasks.register('toolCompatibilityTest', Test) {
 }
 
 tasks.register('retrievalFixtureTest', Test) {
-    description = 'Runs provider-free tests for the Phase 5 retrieval corpus contract and public-safe fixtures.'
+    description = 'Runs provider-free tests for the Phase 5 retrieval corpus, lexical baseline, and saved-evidence lifecycle.'
     group = 'verification'
     testClassesDirs = sourceSets.retrievalTest.output.classesDirs
     classpath = sourceSets.retrievalTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('test')
+}
+
+tasks.register('retrievalEvaluation', RetrievalEvaluationTask) {
+    dependsOn tasks.named('retrievalClasses')
+    classpath.from(sourceSets.retrieval.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.retrieval.RetrievalEvaluationRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('retrievalEvaluationVerify', RetrievalEvaluationOfflineTask) {
+    description = 'Verifies saved retrieval-only evidence without starting Spring or calling a provider.'
+    dependsOn tasks.named('retrievalClasses')
+    classpath.from(sourceSets.retrieval.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.retrieval.RetrievalEvaluationOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('retrievalEvaluationReanalyze', RetrievalEvaluationOfflineTask) {
+    description = 'Regenerates and verifies a saved retrieval-only summary without starting Spring or calling a provider.'
+    dependsOn tasks.named('retrievalClasses')
+    classpath.from(sourceSets.retrieval.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.retrieval.RetrievalEvaluationOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('retrievalEvaluationCompare', RetrievalEvaluationComparisonTask) {
+    dependsOn tasks.named('retrievalClasses')
+    classpath.from(sourceSets.retrieval.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.retrieval.RetrievalEvaluationComparisonRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
 }
 
 tasks.register('toolCompatibilityMatrix', ToolCompatibilityMatrixTask) {
