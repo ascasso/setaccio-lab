@@ -5,7 +5,7 @@
   "corpusCatalogId": "public-safe-retrieval-corpus",
   "corpusCatalogVersion": 1,
   "corpusCatalogSha256": "2c3f72f153cfb097caeef73ae210a66265af054b585b1b2a292162f289087b9d",
-  "humanReviewState": "PENDING_HUMAN_REVIEW",
+  "humanReviewState": "CONFIRMED",
   "fixtures": [
     {
       "caseId": "garden-compost-accepted-materials",
@@ -21,7 +21,7 @@
         "garden-water-schedule"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "garden-shed-tool-inventory",
@@ -37,7 +37,7 @@
         "garden-water-schedule"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "garden-rain-watering-schedule",
@@ -53,7 +53,7 @@
         "garden-tool-shed"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "library-borrowing-renewal-condition",
@@ -69,7 +69,7 @@
         "library-workshop-calendar"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "library-study-room-equipment",
@@ -85,7 +85,7 @@
         "library-workshop-calendar"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "library-repair-workshop-exclusions",
@@ -101,7 +101,7 @@
         "library-study-room"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "trail-dune-shortcut-closure",
@@ -117,7 +117,7 @@
         "trail-weather-guidance"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "trail-bird-observation-rules",
@@ -133,7 +133,7 @@
         "trail-weather-guidance"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "trail-weather-closure-alerts",
@@ -149,7 +149,7 @@
         "trail-bird-observation"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "workshop-bicycle-safety-inspection",
@@ -165,7 +165,7 @@
         "workshop-route-map"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "workshop-first-visit-membership",
@@ -181,7 +181,7 @@
         "workshop-route-map"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "workshop-route-map-limit",
@@ -197,7 +197,7 @@
         "workshop-membership"
       ],
       "expectedNoMatch": false,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "no-match-library-home-delivery",
@@ -219,7 +219,7 @@
         "workshop-route-map"
       ],
       "expectedNoMatch": true,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     },
     {
       "caseId": "no-match-trail-overnight-camping",
@@ -241,7 +241,7 @@
         "workshop-route-map"
       ],
       "expectedNoMatch": true,
-      "humanReviewState": "PENDING_HUMAN_REVIEW"
+      "humanReviewState": "CONFIRMED"
     }
   ]
 }

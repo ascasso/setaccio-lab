@@ -53,19 +53,23 @@ For each no-match case, every corpus document is forbidden.
 | `no-match-library-home-delivery` | Does Riverside Library deliver borrowed books to a reader's home? | none; expected no match | all twelve corpus documents |
 | `no-match-trail-overnight-camping` | Where may visitors camp overnight along the North Shore Trail? | none; expected no match | all twelve corpus documents |
 
-The catalog and every fixture remain `PENDING_HUMAN_REVIEW`. This is an
-agent-authored review packet, not a human confirmation. R2 remains blocked
-until the project owner reviews the exact table against corpus version 1 and
-explicitly confirms or corrects all fourteen relevance judgments. That later
-confirmation must change every state to `CONFIRMED` and repin the catalog
-digest; it must not be inferred from the earlier corpus public-safety approval.
-
 An agent semantic cross-check tightened two questions before confirmation. The
 library repair question now mirrors the document's `does not repair` wording
 instead of inferring non-acceptance. The bird-observation question now names
 feeding and nesting signs so the general dog-leash rule in the forbidden
 trail-access distractor cannot reasonably count as support. Expected, allowed,
 forbidden, and no-match labels did not change.
+
+The project owner then explicitly confirmed all fourteen query fixtures and
+their expected, allowed, forbidden, and no-match judgments, binding that
+decision to the exact pre-confirmation catalog SHA-256
+`e50e22266a1806ab94034f985248a51bb6428b27292feb2e99956af2606c8204`.
+The catalog and all fourteen fixture states were changed together from
+`PENDING_HUMAN_REVIEW` to `CONFIRMED`. The resulting confirmed catalog SHA-256
+is `ced4a31b13542a47d171a88879400fe649a0de985eeecd4ca58fea4feefb59b5`.
+
+This closes the R1 human-content gate. R2 is now eligible to be requested, but
+this confirmation does not start or authorize the R2 lexical-baseline slice.
 
 ## Boundary and verification
 

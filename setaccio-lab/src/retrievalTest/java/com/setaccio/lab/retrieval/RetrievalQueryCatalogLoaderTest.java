@@ -19,7 +19,7 @@ import org.junit.jupiter.api.io.TempDir;
 class RetrievalQueryCatalogLoaderTest {
 
     private static final String PACKAGED_QUERY_CATALOG_SHA256 =
-            "e50e22266a1806ab94034f985248a51bb6428b27292feb2e99956af2606c8204";
+            "ced4a31b13542a47d171a88879400fe649a0de985eeecd4ca58fea4feefb59b5";
     private static final List<String> EXPECTED_CASE_IDS = List.of(
             "garden-compost-accepted-materials",
             "garden-shed-tool-inventory",
@@ -54,11 +54,11 @@ class RetrievalQueryCatalogLoaderTest {
         assertThat(catalog.corpusCatalogId()).isEqualTo(corpus.catalogId());
         assertThat(catalog.corpusCatalogVersion()).isEqualTo(corpus.catalogVersion());
         assertThat(catalog.corpusCatalogSha256()).isEqualTo(corpus.catalogSha256());
-        assertThat(catalog.humanReviewState()).isEqualTo(RetrievalQueryReviewState.PENDING_HUMAN_REVIEW);
+        assertThat(catalog.humanReviewState()).isEqualTo(RetrievalQueryReviewState.CONFIRMED);
         assertThat(catalog.fixtures()).extracting(RetrievalQueryFixture::caseId).containsExactlyElementsOf(EXPECTED_CASE_IDS);
         assertThat(catalog.fixtures()).allSatisfy(fixture -> {
             assertThat(fixture.query()).endsWith("?");
-            assertThat(fixture.humanReviewState()).isEqualTo(RetrievalQueryReviewState.PENDING_HUMAN_REVIEW);
+            assertThat(fixture.humanReviewState()).isEqualTo(RetrievalQueryReviewState.CONFIRMED);
         });
 
         List<String> expectedDocumentCoverage = catalog.fixtures().stream()
@@ -70,17 +70,21 @@ class RetrievalQueryCatalogLoaderTest {
     }
 
     @Test
-    void rejectsPendingFixturesUntilAHumanConfirmsTheWholeExactCatalog() throws Exception {
+    void requiresExplicitHumanConfirmationOfTheWholeExactCatalog() throws Exception {
         RetrievalCorpus corpus = approvedCorpus();
 
-        assertThatThrownBy(() -> queryLoader.loadConfirmed(packagedQueryCatalogRoot(), corpus))
+        assertThat(queryLoader.loadConfirmed(packagedQueryCatalogRoot(), corpus).humanReviewState())
+                .isEqualTo(RetrievalQueryReviewState.CONFIRMED);
+
+        TestQueryCatalog pending = copyPackagedQueryCatalog();
+        rewriteCatalog(pending, catalog -> catalog.replace("CONFIRMED", "PENDING_HUMAN_REVIEW"));
+        assertThatThrownBy(() -> queryLoader.loadConfirmed(pending.root(), corpus))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("not confirmed");
 
-        TestQueryCatalog confirmed = copyPackagedQueryCatalog();
-        rewriteCatalog(confirmed, catalog -> catalog.replace("PENDING_HUMAN_REVIEW", "CONFIRMED"));
+        rewriteCatalog(pending, catalog -> catalog.replace("PENDING_HUMAN_REVIEW", "CONFIRMED"));
 
-        assertThat(queryLoader.loadConfirmed(confirmed.root(), corpus).humanReviewState())
+        assertThat(queryLoader.loadConfirmed(pending.root(), corpus).humanReviewState())
                 .isEqualTo(RetrievalQueryReviewState.CONFIRMED);
     }
 

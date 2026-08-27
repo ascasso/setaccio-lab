@@ -95,6 +95,14 @@ expected, allowed, forbidden, and no-match judgment against the pinned corpus.
 Confirmation changes every query review state to `CONFIRMED` and repins the
 query catalog digest in one reviewable source change.
 
+The project owner confirmed all fourteen version-one judgments on 2026-08-27,
+bound to pre-confirmation catalog SHA-256
+`e50e22266a1806ab94034f985248a51bb6428b27292feb2e99956af2606c8204`.
+The catalog and every fixture now carry `CONFIRMED`; the resulting catalog
+SHA-256 is
+`ced4a31b13542a47d171a88879400fe649a0de985eeecd4ca58fea4feefb59b5`.
+Any query or relevance-label change requires a new digest and new human review.
+
 R0 and R1 stop before lexical ranking, embeddings, answer generation,
 `RelevancyEvaluator`, provider calls, or formal retrieval evidence. Later
 slices must retain the catalog, query, and document identities plus the actual
