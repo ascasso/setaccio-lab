@@ -61,3 +61,49 @@ fixture behavior, immutable input/result collections, and repeatability.
 No embedding, vector store, model call, answer generation, evaluator, formal
 evidence writer, new dependency, credential, network access, Docker, or
 Testcontainers behavior is authorized or needed. R3 remains a later slice.
+
+## Implementation
+
+The isolated `retrieval` source set now contains
+`DeterministicLexicalRetriever` and immutable parameter, result, and hit
+records. The confirmed-fixture entry point rejects a query whose review state
+is not `CONFIRMED`; every entry point rejects a corpus that is not
+`APPROVED_PUBLIC_SAFE`. A separate explicit-query entry point permits the
+provider-free empty-query, threshold, and diagnostic contract tests without
+weakening formal fixture use.
+
+Every result carries the query ID and exact text, approved corpus identity, the
+complete locked parameter record, retained query terms, and ordered hits. Each
+hit carries its one-based rank, stable document ID, exact content SHA-256,
+score numerator and denominator, and matched terms in query order. The
+floating-point `score()` method is display-only; qualification and ordering use
+integers.
+
+The confirmed catalog produces these pinned results:
+
+| Case group | Result |
+|---|---|
+| Garden supported cases | expected document only at `2/4`, `2/3`, and `4/5` |
+| Library supported cases | expected document only at `2/3`, `3/5`, and `2/2` |
+| Trail supported cases | expected document only at `3/3`, `7/10`, and `3/3` |
+| Workshop supported cases | expected document only at `3/3`, `3/4`, and `3/5` |
+| Two confirmed no-match cases | no qualifying document |
+
+These are algorithm contract observations for the exact confirmed fixtures,
+not an R3 evaluation report, general retrieval-quality claim, embedding
+comparison, or semantic judgment.
+
+## Verification
+
+The provider-free dedicated suite passed:
+
+```text
+./gradlew :setaccio-lab:retrievalFixtureTest --rerun-tasks --no-daemon
+```
+
+Coverage includes hand-calculated two-result ranking and exact score fractions,
+stable document-ID ties, structural stop words, the maximum-document-frequency
+filter, exact threshold boundaries, empty and unmatched queries, every
+confirmed fixture, rejection of pending fixtures and corpora, immutable result
+collections, and 100 identical repeated rankings. No provider or network
+service was contacted.

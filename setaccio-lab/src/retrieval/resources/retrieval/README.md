@@ -103,8 +103,27 @@ SHA-256 is
 `ced4a31b13542a47d171a88879400fe649a0de985eeecd4ca58fea4feefb59b5`.
 Any query or relevance-label change requires a new digest and new human review.
 
-R0 and R1 stop before lexical ranking, embeddings, answer generation,
-`RelevancyEvaluator`, provider calls, or formal retrieval evidence. Later
-slices must retain the catalog, query, and document identities plus the actual
-retrieved document text, rather than describing ordinary fixture context as
-retrieval.
+## Deterministic lexical baseline, version 1
+
+R2 adds one plain-Java exact-term coverage baseline. It lowercases with
+`Locale.ROOT`, extracts ASCII alphanumeric terms, removes the fixed
+`english-structural-v1` stop-word set, keeps distinct query terms in first-use
+order, and ignores query terms found in more than two corpus documents. Unseen
+query terms remain in the score denominator.
+
+A document qualifies after matching at least two retained query terms and at
+least half of all retained query terms. Its exact score is
+`matchedTermCount / retainedQueryTermCount`. Ranking uses descending matched
+count, which is equivalent to descending coverage for a single query, then
+ascending stable document ID. Empty retained queries return no documents.
+
+Each result retains query ID and text; corpus ID, version, and digest; all
+method parameters; retained query terms; and each hit's rank, document ID,
+content digest, exact score fields, and matched terms. The confirmed v1 fixture
+tests pin one expected hit for each of twelve supported queries and no hit for
+both no-match queries.
+
+R2 stops before embeddings, answer generation, `RelevancyEvaluator`, provider
+calls, or formal retrieval evidence. R3 must retain these identities plus the
+actual retrieved document text rather than describing ordinary fixture context
+as retrieval.
