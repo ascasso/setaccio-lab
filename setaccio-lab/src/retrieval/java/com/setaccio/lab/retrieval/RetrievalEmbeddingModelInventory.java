@@ -34,4 +34,20 @@ final class RetrievalEmbeddingModelInventory {
         }
         return new RetrievalEmbeddingModelIdentity(requestedModel, model.name(), model.digest());
     }
+
+    static void requireEmbeddingCapability(
+            OllamaApi.ShowModelResponse response,
+            RetrievalEmbeddingModelIdentity modelIdentity
+    ) {
+        if (modelIdentity == null) {
+            throw new IllegalArgumentException("embedding model identity must not be null");
+        }
+        boolean embeddingCapable = response != null
+                && response.capabilities() != null
+                && response.capabilities().stream().anyMatch("embedding"::equals);
+        if (!embeddingCapable) {
+            throw new IllegalArgumentException("Requested Ollama model does not advertise embedding capability: "
+                    + modelIdentity.effectiveModel());
+        }
+    }
 }

@@ -21,7 +21,7 @@ class RetrievalEmbeddingTest {
 
     private static final int DIMENSION = 12;
     private static final RetrievalEmbeddingModelIdentity MODEL = new RetrievalEmbeddingModelIdentity(
-            "qwen3.5:0.8b", "qwen3.5:0.8b", "a".repeat(64));
+            "test-embedding-model:latest", "test-embedding-model:latest", "a".repeat(64));
 
     @TempDir
     Path temporaryDirectory;
@@ -76,6 +76,12 @@ class RetrievalEmbeddingTest {
                 new RecordingEmbeddingClient(MODEL.effectiveModel(), mismatchedDimension)))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("one dimension");
+
+        assertThatThrownBy(() -> execute(inputs, (modelIdentity, requestInputs) -> {
+            throw new IllegalStateException("provider unavailable");
+        }))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("provider unavailable");
     }
 
     @Test
@@ -137,6 +143,15 @@ class RetrievalEmbeddingTest {
                 new OllamaApi.ListModelResponse(List.of(installed)), MODEL.requestedModel());
 
         assertThat(resolved).isEqualTo(MODEL);
+        RetrievalEmbeddingModelInventory.requireEmbeddingCapability(new OllamaApi.ShowModelResponse(
+                null, null, null, null, null, null, null, null, null,
+                List.of("completion", "embedding"), Instant.EPOCH), resolved);
+        assertThatThrownBy(() -> RetrievalEmbeddingModelInventory.requireEmbeddingCapability(
+                new OllamaApi.ShowModelResponse(
+                        null, null, null, null, null, null, null, null, null,
+                        List.of("completion"), Instant.EPOCH), resolved))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("does not advertise embedding capability");
         assertThatThrownBy(() -> RetrievalEmbeddingModelInventory.requireInstalled(
                 new OllamaApi.ListModelResponse(List.of(installed)), "other:latest"))
                 .isInstanceOf(IllegalArgumentException.class)

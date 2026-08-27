@@ -32,6 +32,9 @@ public final class RetrievalEmbeddingRunner {
                 parsed.ollamaBaseUrl(), Duration.ofMillis(settings.requestTimeoutMillis()));
         RetrievalEmbeddingModelIdentity modelIdentity = RetrievalEmbeddingModelInventory.requireInstalled(
                 ollamaApi.listModels(), parsed.embeddingModel());
+        RetrievalEmbeddingModelInventory.requireEmbeddingCapability(
+                ollamaApi.showModel(new OllamaApi.ShowModelRequest(modelIdentity.effectiveModel())),
+                modelIdentity);
         Path outputDirectory = resolveNewOutputDirectory(parsed.outputDirectory());
 
         printProtocol(inputs, settings, modelIdentity, codeBaseline, outputDirectory);

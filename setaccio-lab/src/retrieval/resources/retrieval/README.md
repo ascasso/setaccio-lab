@@ -161,14 +161,16 @@ followed by all fourteen query texts to Spring AI's direct `/api/embed`
 boundary. It never pulls a model, retries a request, starts Spring, or accepts
 a remote endpoint.
 
-The first planned formal configuration is requested model `qwen3.5:0.8b` and
-top K `3`. This is an operational, resource-minimizing selection among the
-models installed when R4 began; it is not a semantic-quality, capability,
-performance, or model-selection claim. The task records the preflight full
-digest before the request and rejects a response whose effective model differs
-from that identity. The formal configuration also locks `whole-document-v1`
-chunking, `unit-l2-v1` normalization, `cosine-descending-document-id` ranking,
-one batch, one attempt, and a two-minute request timeout.
+The formal model tag, full digest, and top K are intentionally supplied and
+locked by the clean preflight immediately before any generation. The task
+requires the selected installed model to advertise Ollama's `embedding`
+capability, records its full digest before the request, and rejects a response
+whose effective model differs from that identity. This is an operational
+identity control, not a semantic-quality, capability, performance, or
+model-selection claim. The formal configuration also locks
+`whole-document-v1` chunking, `unit-l2-v1` normalization,
+`cosine-descending-document-id` ranking, one batch, one attempt, and a
+two-minute request timeout.
 
 The runner writes only under ignored `build/retrieval-embedding/`, retaining a
 non-overwriting raw JSON result, shared-v1 manifest, and deterministic
