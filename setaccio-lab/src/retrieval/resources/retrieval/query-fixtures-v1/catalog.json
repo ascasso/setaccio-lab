@@ -89,7 +89,7 @@
     },
     {
       "caseId": "library-repair-workshop-exclusions",
-      "query": "Which items will the Riverside Library repair workshop not accept?",
+      "query": "Which items does the Riverside Library repair workshop not repair?",
       "expectedSupportingDocumentIds": [
         "library-workshop-calendar"
       ],
@@ -121,7 +121,7 @@
     },
     {
       "caseId": "trail-bird-observation-rules",
-      "query": "What rules apply when visitors observe birds at the North Shore Trail marsh?",
+      "query": "What bird-observation rules apply to feeding birds and being near nesting signs at the North Shore Trail marsh?",
       "expectedSupportingDocumentIds": [
         "trail-bird-observation"
       ],

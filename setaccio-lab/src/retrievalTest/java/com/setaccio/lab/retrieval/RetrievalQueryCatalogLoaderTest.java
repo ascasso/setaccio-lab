@@ -19,7 +19,7 @@ import org.junit.jupiter.api.io.TempDir;
 class RetrievalQueryCatalogLoaderTest {
 
     private static final String PACKAGED_QUERY_CATALOG_SHA256 =
-            "539103668e04045cf7d3b95e7b30916fb7ff5308a23b9ce29ae08d292f47ef29";
+            "e50e22266a1806ab94034f985248a51bb6428b27292feb2e99956af2606c8204";
     private static final List<String> EXPECTED_CASE_IDS = List.of(
             "garden-compost-accepted-materials",
             "garden-shed-tool-inventory",

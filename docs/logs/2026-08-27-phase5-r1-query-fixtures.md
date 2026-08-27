@@ -13,8 +13,8 @@ the document text and its existing per-document digests did not change.
 
 The new `public-safe-retrieval-query-fixtures` catalog version 1 is bound to
 that exact approved corpus ID, version, and SHA-256. Its tracked pre-confirmation
-SHA-256 is
-`539103668e04045cf7d3b95e7b30916fb7ff5308a23b9ce29ae08d292f47ef29`.
+SHA-256 after semantic cross-check is
+`e50e22266a1806ab94034f985248a51bb6428b27292feb2e99956af2606c8204`.
 
 The ordered catalog contains twelve matching questions, one per corpus
 document in corpus order, plus two topical no-match questions. Each matching
@@ -43,9 +43,9 @@ For each no-match case, every corpus document is forbidden.
 | `garden-rain-watering-schedule` | How does rainfall affect Harbor Garden's scheduled watering round? | `garden-water-schedule` | `garden-compost-basics`, `garden-tool-shed` |
 | `library-borrowing-renewal-condition` | When may a Riverside Library borrower renew an item? | `library-borrowing-rules` | `library-study-room`, `library-workshop-calendar` |
 | `library-study-room-equipment` | What equipment is available in the Riverside Library quiet study room? | `library-study-room` | `library-borrowing-rules`, `library-workshop-calendar` |
-| `library-repair-workshop-exclusions` | Which items will the Riverside Library repair workshop not accept? | `library-workshop-calendar` | `library-borrowing-rules`, `library-study-room` |
+| `library-repair-workshop-exclusions` | Which items does the Riverside Library repair workshop not repair? | `library-workshop-calendar` | `library-borrowing-rules`, `library-study-room` |
 | `trail-dune-shortcut-closure` | Why is the North Shore Trail dune shortcut closed? | `trail-access-notice` | `trail-bird-observation`, `trail-weather-guidance` |
-| `trail-bird-observation-rules` | What rules apply when visitors observe birds at the North Shore Trail marsh? | `trail-bird-observation` | `trail-access-notice`, `trail-weather-guidance` |
+| `trail-bird-observation-rules` | What bird-observation rules apply to feeding birds and being near nesting signs at the North Shore Trail marsh? | `trail-bird-observation` | `trail-access-notice`, `trail-weather-guidance` |
 | `trail-weather-closure-alerts` | Which weather alerts close the North Shore Trail? | `trail-weather-guidance` | `trail-access-notice`, `trail-bird-observation` |
 | `workshop-bicycle-safety-inspection` | What does the Open Wheel Workshop inspect during its bicycle safety check? | `workshop-bike-check` | `workshop-membership`, `workshop-route-map` |
 | `workshop-first-visit-membership` | Does a first visit to the Open Wheel Workshop require membership? | `workshop-membership` | `workshop-bike-check`, `workshop-route-map` |
@@ -59,6 +59,13 @@ until the project owner reviews the exact table against corpus version 1 and
 explicitly confirms or corrects all fourteen relevance judgments. That later
 confirmation must change every state to `CONFIRMED` and repin the catalog
 digest; it must not be inferred from the earlier corpus public-safety approval.
+
+An agent semantic cross-check tightened two questions before confirmation. The
+library repair question now mirrors the document's `does not repair` wording
+instead of inferring non-acceptance. The bird-observation question now names
+feeding and nesting signs so the general dog-leash rule in the forbidden
+trail-access distractor cannot reasonably count as support. Expected, allowed,
+forbidden, and no-match labels did not change.
 
 ## Boundary and verification
 
