@@ -136,6 +136,18 @@ labelled `qwen3.8:27b-mlx` reference passed all 16 rows at a recorded
 installed-artifact size of `18174721847` bytes. The narrow closeout is recorded
 in `docs/logs/2026-08-25-phase3-tool-compatibility-capability-frontier.md`.
 
+Phase 5 R0–R4 implementation is complete: the approved public corpus,
+confirmed query catalog, deterministic lexical baseline, saved retrieval-only
+evidence, and opt-in embedding boundary are available. R5 now adds the
+provider-neutral answer-generation boundary and provider-free fake-model,
+saved-evidence, and offline verification coverage. It consumes a verified,
+clean-baseline R3 run rather than re-running retrieval; preserves that run's
+complete retrieved documents and ranks beside each generated answer; and keeps
+reference syntax, explicit abstention, invocation/usage/failure data, and the
+unassessed assertion-support boundary separate from retrieval measures. No R5
+model was selected or invoked, and no R5 formal evidence was created during
+implementation. R6 remains later work.
+
 ## Purpose
 
 Evaluate whether small, fast, locally hosted language models can reliably perform constrained tool-calling tasks even when their general factual knowledge and open-ended conversational quality are limited.
@@ -1959,6 +1971,20 @@ Each answer row should retain:
 
 Do not merge retrieval success and answer correctness.
 
+The dedicated `retrievalAnswerMatrix` task must accept only a verified,
+clean-baseline R3 directory directly under `build/retrieval-evaluation/`, then
+write a fresh, ignored directory directly under `build/retrieval-answer/`.
+It locks the tracked `retrieval-grounded-answer-v1` prompt, the requested and
+effective local model plus full digest, temperature `0.0`, explicit seed,
+explicit maximum output tokens, timeout, one attempt, and no-pull policy
+before reserving output. `retrievalAnswerVerify` and
+`retrievalAnswerReanalyze` are offline only. R5 records bracketed
+document-reference syntax and exact `NO_SUPPORT` abstention deterministically;
+it retains raw answer text and source documents but intentionally records
+unsupported-assertion assessment as `NOT_ASSESSED` until a later separately
+bounded evaluator or human-review slice. A reference is not proof of semantic
+support.
+
 ## Slice R6 — Relevancy evaluation
 
 Introduce Spring AI `RelevancyEvaluator` only when the actual retrieved documents are supplied to it.
@@ -2125,10 +2151,16 @@ but `localEvaluation` must not depend on it.
 
 ```text
 retrievalFixtureTest
-retrievalMatrix
-retrievalVerify
-retrievalReanalyze
-retrievalCompare
+retrievalEvaluation
+retrievalEvaluationVerify
+retrievalEvaluationReanalyze
+retrievalEvaluationCompare
+retrievalEmbedding
+retrievalEmbeddingVerify
+retrievalEmbeddingReanalyze
+retrievalAnswerMatrix
+retrievalAnswerVerify
+retrievalAnswerReanalyze
 ```
 
 Use source sets `retrieval` and `retrievalTest` under package
@@ -2136,11 +2168,9 @@ Use source sets `retrieval` and `retrievalTest` under package
 task for the contract, fixtures, lexical baseline, evidence, and later mocked
 provider boundaries.
 
-Later:
+Later, after an R5 run preserves actual retrieved documents:
 
 ```text
-embeddingRetrievalMatrix
-retrievalAnswerMatrix
 retrievalEvaluationMatrix
 ```
 

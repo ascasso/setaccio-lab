@@ -634,8 +634,12 @@ Evaluation/Testcontainers phase:
   standing authorization and may be used whenever useful. Keep them outside
   default tests and CI, separate disposable diagnostics from formal evidence,
   and never selectively retry or replace a formal row.
-- Later retrieval slice: relevancy evaluation only when a real retrieval flow
-  supplies preserved context.
+- R5 answer generation must consume verified retrieval evidence without
+  re-running retrieval, preserve the exact retrieved context/ranks beside each
+  answer, and keep answer behavior separate from retrieval metrics. Its local
+  task remains opt-in with fake-provider default tests; assertion support stays
+  unassessed until later R6 or actual human review. Relevancy evaluation only
+  begins when a real retrieval flow supplies preserved context.
 - Testcontainers is deferred for the completed fact-check cycle. A later
   optional typed Ollama service-connection/model-provisioning slice must be
   independently justified, isolated in `setaccio-testcontainers`, and never

@@ -238,6 +238,18 @@ not place a live model call in default tests or CI.
   reservation, vector-count/dimension failures,
   artifact integrity, and summary-only repair. Do not make relevance, no-match,
   answer-quality, or model-comparison claims at this slice.
+- Keep R5 answer generation behind the explicit `retrievalAnswerMatrix` task.
+  It must verify a clean-baseline R3 run before output allocation, preserve
+  every original retrieval row and complete returned document text beside its
+  sequential one-attempt answer, and lock a tracked prompt, loopback-only
+  already-installed model tag/full digest, temperature `0.0`, explicit seed,
+  output-token limit, timeout, and no-pull policy. Retain raw answer text,
+  reference syntax, explicit `NO_SUPPORT` abstention, available usage, and
+  invocation failure separately from retrieval observations under ignored
+  `build/retrieval-answer/`; `retrievalAnswerVerify` and
+  `retrievalAnswerReanalyze` stay provider-free. A bracketed document ID is
+  not proof that an answer is supported, and unsupported assertions remain
+  unassessed until R6 or human review.
 - R3 retrieval evidence must retain each returned corpus document's exact text,
   ID, SHA-256, rank, score fields, and matched terms. Require the fixed
   retrieval-only metrics, immediate-repeat stability, shared-v1 manifest

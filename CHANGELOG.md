@@ -49,6 +49,15 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the opt-in Phase 5 R5 retrieval-answer matrix. It consumes a verified
+  clean R3 run without re-running retrieval; locks the tracked grounded-answer
+  prompt, an already-installed loopback Ollama model/full digest, and explicit
+  one-attempt/no-pull settings before allocating ignored evidence; preserves
+  exact retrieved documents/ranks beside each raw answer; and supplies offline
+  verification/reanalysis. Default tests use fake chat invocations. Reference
+  syntax and explicit abstention are observations only; assertion support,
+  answer correctness, relevance, and model quality remain unassessed. No R5
+  model was invoked or formal evidence created by this implementation.
 - Added Phase 5 retrieval fixtures and the provider-free R1–R3 lexical
   retrieval-evidence lifecycle, plus the opt-in R4 local Ollama embedding
   boundary. R4 requires a clean Git baseline, a loopback-only endpoint, an

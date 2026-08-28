@@ -199,3 +199,39 @@ model, or treat the failure as a retrieval result. R4 preserves rankings for a
 later retrieval flow but sets no support threshold, scores no-match fixtures,
 generates no answer, makes no semantic-relevance claim, and does not invoke
 `RelevancyEvaluator`.
+
+## Local answer generation and saved evidence, version 1
+
+R5 adds one explicit, opt-in local answer stage. It is not part of the default
+build or test lifecycle, and it does not re-run retrieval. The
+`retrievalAnswerMatrix` task requires a loopback-only Ollama URL, one explicit
+already-installed answer-model tag, explicit maximum output tokens, seed, and
+timeout, a verified clean-baseline R3 saved run, and a new dated directory
+directly under `build/retrieval-answer/`. Before reserving output it verifies
+the R3 evidence against the current approved corpus and confirmed catalog,
+requires its clean source baseline, loads the tracked
+`retrieval-grounded-answer-v1` prompt, resolves the requested/effective answer
+model and full digest from local inventory, and locks temperature `0.0`, one
+attempt, and pull strategy `never`.
+
+The runner sends one sequential answer request for every preserved R3 row. Each
+raw R5 row retains the exact original R3 row—including complete returned public
+document text, document IDs, ranks, SHA-256 values, lexical score fields, and
+fixture labels—together with the complete rendered prompt, prompt/model
+identity, raw answer, safe provider response identifier, available usage,
+latency, and classified invocation outcome. It observes exact `NO_SUPPORT`
+abstention and bracketed document-ID reference syntax. It does not decide
+whether an assertion is supported: raw answer/source text is retained and the
+assessment is `NOT_ASSESSED` until a separately scoped evaluator or human
+review. A correct-looking citation does not prove semantic support.
+
+The answer run writes only a non-overwriting raw JSON result, shared-v1
+manifest, and deterministic `SUMMARY.md` under ignored
+`build/retrieval-answer/`. `retrievalAnswerVerify` and
+`retrievalAnswerReanalyze` operate offline; they validate source-row
+preservation, prompt/model/settings identity, reference/abstention
+recomputation, hashes, layout, and summary drift without starting Spring or
+contacting Ollama. If invocation, post-run model-identity, or clean-baseline
+checks fail after reservation, the path remains a non-reusable diagnostic
+marker rather than a completed run. R5 does not score retrieval, claim answer
+correctness or relevance, rank a model, or invoke `RelevancyEvaluator`.

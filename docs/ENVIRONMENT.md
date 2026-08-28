@@ -995,6 +995,35 @@ not authorize pulls, downloads, removals, renames, silent substitutions,
 non-loopback endpoints, remote providers, credentials, spending, Docker,
 publication of ignored raw output, pushes, releases, or tags.
 
+### R5 retrieval answer matrix
+
+`retrievalAnswerMatrix` is the only R5 live entry point. It does not read
+environment variables: require every model, option, source run, and output
+path on the command line so a formal run cannot silently change configuration.
+The source directory must be a verified clean-baseline R3 run directly under
+ignored `build/retrieval-evaluation/`; the output must be a new dated direct
+child of ignored `build/retrieval-answer/`.
+
+```bash
+./gradlew :setaccio-lab:retrievalAnswerMatrix \
+  --ollama-base-url=http://127.0.0.1:11434 \
+  --answer-model=<already-installed-tag> \
+  --max-output-tokens=256 \
+  --seed=42 \
+  --timeout=PT2M \
+  --source-retrieval-run-dir=build/retrieval-evaluation/<verified-r3-run> \
+  --output-dir=build/retrieval-answer/YYYY-MM-DD-r5
+```
+
+The task preflights the loopback URL, source evidence, clean Git baseline,
+prompt, requested/effective model, and full digest before reserving output. It
+uses temperature `0.0`, one request per preserved R3 row in order, one attempt,
+and pull strategy `never`. Verify a completed run offline with
+`retrievalAnswerVerify --run-dir=...`; regenerate only a stale summary with
+`retrievalAnswerReanalyze --run-dir=...`. A formal run remains optional: this
+documentation does not select a model, authorize a pull, or make answer
+correctness/relevance claims.
+
 ## Tool Search Advisor
 
 Spring AI's Tool Search Tool support is available on the `setaccio-lab` classpath through `spring-ai-starter-tool-search-advisor`, but it is disabled by default. Keep it off for normal local runs, default tests, and the current vision benchmark path.
