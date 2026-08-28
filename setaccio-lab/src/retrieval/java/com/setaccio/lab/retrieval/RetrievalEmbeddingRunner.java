@@ -52,6 +52,9 @@ public final class RetrievalEmbeddingRunner {
                         + String.join(" ", analysis.integrityFailures()));
             }
 
+            requireSameCleanBaseline(
+                    codeBaseline,
+                    EvidenceProvenance.captureCodeBaseline(Path.of("")));
             new RetrievalEmbeddingEvidence(objectMapper, inputs.corpus(), inputs.catalog())
                     .write(outputDirectory, result, codeBaseline);
             System.out.println("Embedding retrieval complete: "
@@ -109,6 +112,17 @@ public final class RetrievalEmbeddingRunner {
                     "Formal retrieval embedding generation requires a clean worktree at a full Git commit.");
         }
         return codeBaseline;
+    }
+
+    static void requireSameCleanBaseline(
+            EvidenceCodeBaseline expected,
+            EvidenceCodeBaseline observed
+    ) {
+        EvidenceCodeBaseline initial = requireCleanBaseline(expected);
+        EvidenceCodeBaseline current = requireCleanBaseline(observed);
+        if (!initial.gitCommit().equals(current.gitCommit())) {
+            throw new IllegalStateException("Git baseline changed during retrieval embedding generation.");
+        }
     }
 
     private static void printProtocol(

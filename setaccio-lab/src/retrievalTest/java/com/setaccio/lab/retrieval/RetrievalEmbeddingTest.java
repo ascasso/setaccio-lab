@@ -182,6 +182,23 @@ class RetrievalEmbeddingTest {
     }
 
     @Test
+    void requiresTheSameCleanGitBaselineBeforeWritingEvidence() {
+        EvidenceCodeBaseline baseline = new EvidenceCodeBaseline("a".repeat(40), false);
+
+        RetrievalEmbeddingRunner.requireSameCleanBaseline(
+                baseline, new EvidenceCodeBaseline("a".repeat(40), false));
+
+        assertThatThrownBy(() -> RetrievalEmbeddingRunner.requireSameCleanBaseline(
+                baseline, new EvidenceCodeBaseline("a".repeat(40), true)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("clean worktree");
+        assertThatThrownBy(() -> RetrievalEmbeddingRunner.requireSameCleanBaseline(
+                baseline, new EvidenceCodeBaseline("b".repeat(40), false)))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Git baseline changed");
+    }
+
+    @Test
     void restrictsNewAndSavedEvidenceToTheDedicatedR4Root() {
         assertThat(RetrievalEmbeddingRunner.resolveNewOutputDirectory(
                 "build/retrieval-embedding/2026-08-28-r4").getFileName().toString())
