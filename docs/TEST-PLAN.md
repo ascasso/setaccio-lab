@@ -222,6 +222,22 @@ not place a live model call in default tests or CI.
   may use fully recorded installed local embedding, answer, and evaluator
   models. Default tests must use fakes or recorded fixtures and run without
   Ollama.
+- Keep R4 embedding generation behind the explicit `retrievalEmbedding` task:
+  require a clean full Git baseline, loopback-only endpoint, exact installed
+  requested/effective model and full digest, and literal `embedding` capability
+  from `ollama show` (an `embedding length` field is not sufficient). Use one
+  batch, no pull, one attempt, fixed whole-document chunking, unit-L2
+  normalization, deterministic cosine tie-breaking, and explicit top K.
+  Atomically reserve the fresh ignored output directory before the provider
+  attempt, retain a failed reservation as non-reusable diagnostic state, and
+  re-check the installed full model identity before writing evidence. Retain
+  ignored vectors and ranked document identities under
+  `build/retrieval-embedding/`; verify/reanalyze saved evidence offline.
+  Provider-free tests must cover dimensions, normalization, stable ranks,
+  provider-response and post-request installed-identity drift, output
+  reservation, vector-count/dimension failures,
+  artifact integrity, and summary-only repair. Do not make relevance, no-match,
+  answer-quality, or model-comparison claims at this slice.
 - R3 retrieval evidence must retain each returned corpus document's exact text,
   ID, SHA-256, rank, score fields, and matched terms. Require the fixed
   retrieval-only metrics, immediate-repeat stability, shared-v1 manifest
