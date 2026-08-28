@@ -36,23 +36,32 @@ public final class RetrievalEmbeddingRunner {
                 ollamaApi.showModel(new OllamaApi.ShowModelRequest(modelIdentity.effectiveModel())),
                 modelIdentity);
         Path outputDirectory = resolveNewOutputDirectory(parsed.outputDirectory());
+        reserveOutputDirectory(outputDirectory);
 
         printProtocol(inputs, settings, modelIdentity, codeBaseline, outputDirectory);
-        RetrievalEmbeddingResult result = new RetrievalEmbeddingExecutor(
-                new OllamaRetrievalEmbeddingClient(ollamaApi))
-                .execute(inputs.corpus(), inputs.catalog(), settings, modelIdentity);
-        RetrievalEmbeddingAnalyzer.Analysis analysis = new RetrievalEmbeddingAnalyzer(
-                inputs.corpus(), inputs.catalog()).analyze(result);
-        if (!analysis.valid()) {
-            throw new IllegalStateException("Retrieval embedding result failed integrity checks: "
-                    + String.join(" ", analysis.integrityFailures()));
-        }
+        try {
+            RetrievalEmbeddingResult result = new RetrievalEmbeddingExecutor(
+                    new OllamaRetrievalEmbeddingClient(ollamaApi))
+                    .execute(inputs.corpus(), inputs.catalog(), settings, modelIdentity);
+            requireUnchangedModelIdentity(modelIdentity, RetrievalEmbeddingModelInventory.requireInstalled(
+                    ollamaApi.listModels(), parsed.embeddingModel()));
+            RetrievalEmbeddingAnalyzer.Analysis analysis = new RetrievalEmbeddingAnalyzer(
+                    inputs.corpus(), inputs.catalog()).analyze(result);
+            if (!analysis.valid()) {
+                throw new IllegalStateException("Retrieval embedding result failed integrity checks: "
+                        + String.join(" ", analysis.integrityFailures()));
+            }
 
-        EvidenceRunDirectory.createNamed(outputDirectory.getParent(), outputDirectory.getFileName().toString());
-        new RetrievalEmbeddingEvidence(objectMapper, inputs.corpus(), inputs.catalog())
-                .write(outputDirectory, result, codeBaseline);
-        System.out.println("Embedding retrieval complete: "
-                + outputDirectory.resolve(RetrievalEmbeddingEvidence.SUMMARY_FILENAME));
+            new RetrievalEmbeddingEvidence(objectMapper, inputs.corpus(), inputs.catalog())
+                    .write(outputDirectory, result, codeBaseline);
+            System.out.println("Embedding retrieval complete: "
+                    + outputDirectory.resolve(RetrievalEmbeddingEvidence.SUMMARY_FILENAME));
+        } catch (RuntimeException exception) {
+            throw new IllegalStateException(
+                    "Retrieval embedding generation failed after output reservation; retained diagnostic directory: "
+                            + outputDirectory,
+                    exception);
+        }
     }
 
     static Path resolveNewOutputDirectory(String value) {
@@ -71,6 +80,24 @@ public final class RetrievalEmbeddingRunner {
             throw new IllegalArgumentException("Output directory must contain a YYYY-MM-DD date.");
         }
         return outputDirectory;
+    }
+
+    static Path reserveOutputDirectory(Path outputDirectory) {
+        if (outputDirectory == null || outputDirectory.getParent() == null || outputDirectory.getFileName() == null) {
+            throw new IllegalArgumentException("Output directory must identify a named run directory.");
+        }
+        return EvidenceRunDirectory.createNamed(outputDirectory.getParent(), outputDirectory.getFileName().toString());
+    }
+
+    static void requireUnchangedModelIdentity(
+            RetrievalEmbeddingModelIdentity expected,
+            RetrievalEmbeddingModelIdentity observed
+    ) {
+        if (!expected.equals(observed)) {
+            throw new IllegalStateException(
+                    "Ollama embedding model identity changed during generation; refusing to write evidence. "
+                            + "Expected " + expected + " but observed " + observed + ".");
+        }
     }
 
     private static EvidenceCodeBaseline requireCleanBaseline(EvidenceCodeBaseline codeBaseline) {

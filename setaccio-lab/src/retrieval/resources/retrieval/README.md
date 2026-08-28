@@ -156,10 +156,10 @@ installed embedding-model tag, a positive top-K value, and one new dated
 directory directly under `build/retrieval-embedding/`. It first requires a
 clean full Git commit, validates the approved corpus and confirmed query
 catalog, resolves the exact installed tag and full digest from the local
-inventory, and only then sends one batch containing all twelve document texts
-followed by all fourteen query texts to Spring AI's direct `/api/embed`
-boundary. It never pulls a model, retries a request, starts Spring, or accepts
-a remote endpoint.
+inventory, and atomically reserves the output directory before sending one
+batch containing all twelve document texts followed by all fourteen query texts
+to Spring AI's direct `/api/embed` boundary. It never pulls a model, retries a
+request, starts Spring, or accepts a remote endpoint.
 
 The formal model tag, full digest, and top K are intentionally supplied and
 locked by the clean preflight immediately before any generation. The task
@@ -169,8 +169,12 @@ metadata, not proof that the model accepts `/api/embed`. Ollama's embedding API
 accepts either one input or an ordered input batch and returns one unit-length
 vector per input. See the official [embedding capability documentation](https://docs.ollama.com/capabilities/embeddings).
 The task records the full
-digest before the request and rejects a response whose effective model differs
-from that identity. This is an operational identity control, not a
+digest before the request, rejects a response whose effective model differs
+from that identity, and rechecks the installed identity/digest after the
+request before writing evidence. If the request or post-request check fails,
+the reservation remains as non-reusable diagnostic state rather than allowing
+the path to be reused; it is not completed evidence. This is an operational
+identity control, not a
 semantic-quality, capability, performance, or model-selection claim. The formal
 configuration also locks `whole-document-v1` chunking, `unit-l2-v1`
 normalization, `cosine-descending-document-id` ranking, one batch, one attempt,

@@ -16,6 +16,13 @@ and confirmed v1 query catalog, resolves the requested/effective installed tag
 and its full digest, and requires the model's Ollama `show` response to declare
 the `embedding` capability before allocating any evidence directory.
 
+After those checks, it atomically reserves the specified fresh output directory
+before the single embedding request. It then re-resolves the requested model
+from Ollama's installed inventory and requires the full identity/digest to be
+unchanged before writing evidence. If generation or this post-request identity
+check fails, the reserved directory remains as a non-reusable diagnostic marker
+rather than permitting the same path to be reused; it is not a completed run.
+
 It makes exactly one direct Spring AI `/api/embed` request containing the
 twelve corpus documents followed by the fourteen confirmed queries. It disables
 input truncation, applies no model options, has a two-minute timeout, does not

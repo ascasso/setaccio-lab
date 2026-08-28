@@ -165,6 +165,23 @@ class RetrievalEmbeddingTest {
     }
 
     @Test
+    void reservesTheNamedOutputBeforeGenerationAndRejectsModelIdentityDriftAfterward() {
+        Path outputDirectory = temporaryDirectory.resolve("2026-08-28-r4-embedding");
+
+        assertThat(RetrievalEmbeddingRunner.reserveOutputDirectory(outputDirectory)).isEqualTo(outputDirectory);
+        assertThatThrownBy(() -> RetrievalEmbeddingRunner.reserveOutputDirectory(outputDirectory))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("already exists");
+        RetrievalEmbeddingRunner.requireUnchangedModelIdentity(MODEL, MODEL);
+        assertThatThrownBy(() -> RetrievalEmbeddingRunner.requireUnchangedModelIdentity(
+                MODEL,
+                new RetrievalEmbeddingModelIdentity(
+                        MODEL.requestedModel(), MODEL.effectiveModel(), "b".repeat(64))))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("identity changed during generation");
+    }
+
+    @Test
     void restrictsNewAndSavedEvidenceToTheDedicatedR4Root() {
         assertThat(RetrievalEmbeddingRunner.resolveNewOutputDirectory(
                 "build/retrieval-embedding/2026-08-28-r4").getFileName().toString())

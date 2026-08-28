@@ -227,11 +227,15 @@ not place a live model call in default tests or CI.
   requested/effective model and full digest, and literal `embedding` capability
   from `ollama show` (an `embedding length` field is not sufficient). Use one
   batch, no pull, one attempt, fixed whole-document chunking, unit-L2
-  normalization, deterministic cosine tie-breaking, and explicit top K. Retain
+  normalization, deterministic cosine tie-breaking, and explicit top K.
+  Atomically reserve the fresh ignored output directory before the provider
+  attempt, retain a failed reservation as non-reusable diagnostic state, and
+  re-check the installed full model identity before writing evidence. Retain
   ignored vectors and ranked document identities under
   `build/retrieval-embedding/`; verify/reanalyze saved evidence offline.
   Provider-free tests must cover dimensions, normalization, stable ranks,
-  provider-response identity drift, vector-count/dimension failures,
+  provider-response and post-request installed-identity drift, output
+  reservation, vector-count/dimension failures,
   artifact integrity, and summary-only repair. Do not make relevance, no-match,
   answer-quality, or model-comparison claims at this slice.
 - R3 retrieval evidence must retain each returned corpus document's exact text,
