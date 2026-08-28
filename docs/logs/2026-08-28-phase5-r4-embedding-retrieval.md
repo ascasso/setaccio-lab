@@ -31,12 +31,33 @@ The retrieval settings are `whole-document-v1`, `unit-l2-v1`, and
 retrieval-support threshold and intentionally does not score no-match behavior
 or the human-confirmed relevance labels.
 
+## Embedding capability rule
+
+Ollama's native `/api/embed` endpoint accepts one string or an ordered batch and
+returns one unit-L2-normalized vector per input. A model is eligible for R4 only
+when `ollama show <tag>` lists the literal `embedding` capability. The separate
+`embedding length` field reports a model's vector dimension; it is not evidence
+that the tag supports the endpoint. This distinction is now enforced in the R4
+preflight before any evidence directory or provider request is allocated.
+
+Ollama currently recommends dedicated `embeddinggemma`, `qwen3-embedding`, and
+`all-minilm` models for this use. Its embedding-model catalog also lists
+`nomic-embed-text` and `mxbai-embed-large`. These are catalog examples, not a
+selection or authorization to download one. Sources: [Ollama embeddings](https://docs.ollama.com/capabilities/embeddings),
+[embedding-model catalog](https://ollama.com/library?type=embedding),
+[EmbeddingGemma](https://ollama.com/library/embeddinggemma), and
+[Qwen3 Embedding tags](https://ollama.com/library/qwen3-embedding/tags).
+
 ## Local eligibility diagnostic, not formal evidence
 
-The upgraded local Ollama CLI reported version `0.33.1`. A disposable direct
-`/api/embed` request against the selected small chat candidate returned the
-runner's embedding-disabled response. Its `show` metadata did not declare the
-required `embedding` capability. An isolated `ollama serve --embeddings` start
+The upgraded local Ollama CLI reported version `0.33.1`. Read-only `show`
+inspection of all twenty installed non-cloud artifacts found no advertised
+`embedding` capability. The cloud-only `gpt-oss:120b-cloud` entry was excluded
+because it is not an installed local artifact. In particular,
+`qwen3.5:0.8b` reports an embedding length of `1024` but advertises only
+completion, vision, tools, and thinking. A disposable direct `/api/embed`
+request against that small chat candidate returned the runner's
+embedding-disabled response. An isolated `ollama serve --embeddings` start
 attempt also failed because this CLI did not accept that flag. These are only
 local eligibility diagnostics: they are not vector evidence, retrieval results,
 or a model comparison. They did not create a run directory, alter the existing

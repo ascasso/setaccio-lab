@@ -164,13 +164,17 @@ a remote endpoint.
 The formal model tag, full digest, and top K are intentionally supplied and
 locked by the clean preflight immediately before any generation. The task
 requires the selected installed model to advertise Ollama's `embedding`
-capability, records its full digest before the request, and rejects a response
-whose effective model differs from that identity. This is an operational
-identity control, not a semantic-quality, capability, performance, or
-model-selection claim. The formal configuration also locks
-`whole-document-v1` chunking, `unit-l2-v1` normalization,
-`cosine-descending-document-id` ranking, one batch, one attempt, and a
-two-minute request timeout.
+capability in `ollama show <tag>`; an `embedding length` field is dimensional
+metadata, not proof that the model accepts `/api/embed`. Ollama's embedding API
+accepts either one input or an ordered input batch and returns one unit-length
+vector per input. See the official [embedding capability documentation](https://docs.ollama.com/capabilities/embeddings).
+The task records the full
+digest before the request and rejects a response whose effective model differs
+from that identity. This is an operational identity control, not a
+semantic-quality, capability, performance, or model-selection claim. The formal
+configuration also locks `whole-document-v1` chunking, `unit-l2-v1`
+normalization, `cosine-descending-document-id` ranking, one batch, one attempt,
+and a two-minute request timeout.
 
 The runner writes only under ignored `build/retrieval-embedding/`, retaining a
 non-overwriting raw JSON result, shared-v1 manifest, and deterministic
