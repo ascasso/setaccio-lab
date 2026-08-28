@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "catalogId": "public-safe-retrieval-corpus",
   "catalogVersion": 1,
-  "privacyReviewState": "PENDING_HUMAN_REVIEW",
+  "privacyReviewState": "APPROVED_PUBLIC_SAFE",
   "documents": [
     {
       "documentId": "garden-compost-basics",
@@ -11,7 +11,7 @@
       "title": "Community garden compost basics",
       "topic": "community-garden",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "garden-tool-shed",
@@ -20,7 +20,7 @@
       "title": "Community garden tool shed",
       "topic": "community-garden",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "garden-water-schedule",
@@ -29,7 +29,7 @@
       "title": "Community garden water schedule",
       "topic": "community-garden",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "library-borrowing-rules",
@@ -38,7 +38,7 @@
       "title": "Neighborhood library borrowing rules",
       "topic": "neighborhood-library",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "library-study-room",
@@ -47,7 +47,7 @@
       "title": "Neighborhood library study room",
       "topic": "neighborhood-library",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "library-workshop-calendar",
@@ -56,7 +56,7 @@
       "title": "Neighborhood library workshop calendar",
       "topic": "neighborhood-library",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "trail-access-notice",
@@ -65,7 +65,7 @@
       "title": "Coastal trail access notice",
       "topic": "coastal-trail",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "trail-bird-observation",
@@ -74,7 +74,7 @@
       "title": "Coastal trail bird observation",
       "topic": "coastal-trail",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "trail-weather-guidance",
@@ -83,7 +83,7 @@
       "title": "Coastal trail weather guidance",
       "topic": "coastal-trail",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "workshop-bike-check",
@@ -92,7 +92,7 @@
       "title": "Bicycle workshop safety check",
       "topic": "bicycle-workshop",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "workshop-membership",
@@ -101,7 +101,7 @@
       "title": "Bicycle workshop membership",
       "topic": "bicycle-workshop",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     },
     {
       "documentId": "workshop-route-map",
@@ -110,7 +110,7 @@
       "title": "Bicycle workshop route map",
       "topic": "bicycle-workshop",
       "sourceType": "REPOSITORY_AUTHORED",
-      "privacyReviewState": "PENDING_HUMAN_REVIEW"
+      "privacyReviewState": "APPROVED_PUBLIC_SAFE"
     }
   ]
 }

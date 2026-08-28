@@ -49,6 +49,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added Phase 5 retrieval fixtures and the provider-free R1–R3 lexical
+  retrieval-evidence lifecycle, plus the opt-in R4 local Ollama embedding
+  boundary. R4 requires a clean Git baseline, a loopback-only endpoint, an
+  already-installed embedding-capable model with a locked full digest, one
+  batch, no pull, one attempt, and non-overwriting ignored evidence with
+  offline verify/reanalyze support. No formal embedding run was created.
 - Added the isolated provider-free `toolCompatibilityCohortFrontier` task for
   T3.6. It strictly verifies one saved cohort, requires every planned row,
   selects a frontier only from all-pass installed artifacts with an
