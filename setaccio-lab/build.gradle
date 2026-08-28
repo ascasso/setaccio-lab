@@ -36,6 +36,8 @@ import com.setaccio.gradle.RetrievalEmbeddingTask
 import com.setaccio.gradle.RetrievalEmbeddingOfflineTask
 import com.setaccio.gradle.RetrievalAnswerTask
 import com.setaccio.gradle.RetrievalAnswerOfflineTask
+import com.setaccio.gradle.RetrievalRelevancyTask
+import com.setaccio.gradle.RetrievalRelevancyOfflineTask
 
 description = 'Setaccio Lab'
 
@@ -364,6 +366,37 @@ tasks.register('retrievalAnswerReanalyze', RetrievalAnswerOfflineTask) {
     dependsOn tasks.named('retrievalClasses')
     classpath.from(sourceSets.retrieval.runtimeClasspath)
     mainClass.set('com.setaccio.lab.retrieval.RetrievalAnswerOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('retrievalRelevancyMatrix', RetrievalRelevancyTask) {
+    dependsOn tasks.named('retrievalClasses')
+    classpath.from(sourceSets.retrieval.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.retrieval.RetrievalRelevancyRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('retrievalRelevancyVerify', RetrievalRelevancyOfflineTask) {
+    description = 'Verifies saved retrieval relevancy evidence without starting Spring or calling a provider.'
+    dependsOn tasks.named('retrievalClasses')
+    classpath.from(sourceSets.retrieval.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.retrieval.RetrievalRelevancyOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('retrievalRelevancyReanalyze', RetrievalRelevancyOfflineTask) {
+    description = 'Regenerates saved retrieval relevancy evidence without starting Spring or calling a provider.'
+    dependsOn tasks.named('retrievalClasses')
+    classpath.from(sourceSets.retrieval.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.retrieval.RetrievalRelevancyOfflineRunner')
     mode.set('reanalyze')
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)

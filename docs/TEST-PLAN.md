@@ -215,8 +215,9 @@ not place a live model call in default tests or CI.
   already-installed loopback Ollama calls; no per-call or per-run approval is
   required. Keep every live task outside the default lifecycle. Follow
   [`docs/LOCAL-AI-EVALUATION-PLAN.md`](LOCAL-AI-EVALUATION-PLAN.md).
-- Defer `RelevancyEvaluator` until a real retrieval flow can supply and preserve
-  retrieved documents; ordinary fixture context is not a RAG benchmark.
+- R6 may invoke `RelevancyEvaluator` only through its explicit opt-in task and
+  only with actual documents preserved by a verified R5 answer run; ordinary
+  fixture context is not a RAG benchmark.
 - Keep R0–R3 formal retrieval tasks and evidence provider-free. Standing local
   Ollama authorization may support separate disposable diagnostics, and R4–R6
   may use fully recorded installed local embedding, answer, and evaluator
@@ -250,6 +251,19 @@ not place a live model call in default tests or CI.
   `retrievalAnswerReanalyze` stay provider-free. A bracketed document ID is
   not proof that an answer is supported, and unsupported assertions remain
   unassessed until R6 or human review.
+- Keep R6 relevancy evaluation behind the explicit `retrievalRelevancyMatrix`
+  task. It must verify a clean-baseline R5 run before output allocation and
+  preserve each exact R5 row while giving `RelevancyEvaluator` only its
+  preserved documents. Lock the tracked evaluator prompt, loopback-only
+  already-installed evaluator tag/full digest, temperature `0.0`, explicit
+  seed, output-token limit, timeout, and no-pull one-attempt policy. Record
+  deterministic retrieval expectation, evaluator invocation/verdict/score,
+  self-evaluation flag, human support judgment, and answer correctness as
+  distinct fields under ignored `build/retrieval-relevancy/`;
+  `retrievalRelevancyVerify` and `retrievalRelevancyReanalyze` remain
+  provider-free. Missing context and unavailable answers must not invoke the
+  evaluator. An evaluator verdict is not ground truth or an answer-quality
+  score.
 - R3 retrieval evidence must retain each returned corpus document's exact text,
   ID, SHA-256, rank, score fields, and matched terms. Require the fixed
   retrieval-only metrics, immediate-repeat stability, shared-v1 manifest

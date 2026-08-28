@@ -136,17 +136,18 @@ labelled `qwen3.8:27b-mlx` reference passed all 16 rows at a recorded
 installed-artifact size of `18174721847` bytes. The narrow closeout is recorded
 in `docs/logs/2026-08-25-phase3-tool-compatibility-capability-frontier.md`.
 
-Phase 5 R0–R4 implementation is complete: the approved public corpus,
+Phase 5 R0–R6 implementation is complete: the approved public corpus,
 confirmed query catalog, deterministic lexical baseline, saved retrieval-only
-evidence, and opt-in embedding boundary are available. R5 now adds the
-provider-neutral answer-generation boundary and provider-free fake-model,
-saved-evidence, and offline verification coverage. It consumes a verified,
-clean-baseline R3 run rather than re-running retrieval; preserves that run's
-complete retrieved documents and ranks beside each generated answer; and keeps
-reference syntax, explicit abstention, invocation/usage/failure data, and the
-unassessed assertion-support boundary separate from retrieval measures. No R5
-model was selected or invoked, and no R5 formal evidence was created during
-implementation. R6 remains later work.
+evidence, opt-in embedding and answer boundaries, and an opt-in Spring AI
+relevancy-evaluation boundary are available. R5 consumes a verified,
+clean-baseline R3 run rather than re-running retrieval; R6 consumes a verified,
+clean-baseline R5 run rather than re-running retrieval or answer generation.
+R6 gives `RelevancyEvaluator` only the preserved retrieved documents and keeps
+the deterministic retrieval expectation, evaluator invocation/pass/score/verdict,
+self-evaluation relationship, human support judgment, and answer correctness
+as separate fields. No R5 or R6 model was selected or invoked, and no formal
+answer or relevancy evidence was created during implementation. An AI evaluator
+is not ground truth.
 
 ## Purpose
 
@@ -2003,6 +2004,19 @@ Keep separate:
 
 An AI evaluator is not ground truth.
 
+The dedicated `retrievalRelevancyMatrix` task accepts only a verified,
+clean-baseline R5 directory directly under `build/retrieval-answer/`, then
+writes a fresh ignored directory directly under `build/retrieval-relevancy/`.
+It locks the tracked `retrieval-relevancy-evaluator-v1` prompt, requested and
+effective local evaluator model plus full digest, temperature `0.0`, explicit
+seed, explicit maximum output tokens, timeout, one attempt, and no-pull policy
+before reserving output. It rejects missing retrieved context and unavailable
+R5 answers before a provider call. `retrievalRelevancyVerify` and
+`retrievalRelevancyReanalyze` are offline only; their raw evidence retains the
+exact R5 source row. A normalized evaluator verdict does not become an
+expectation match, human support finding, answer-correctness result, or model
+score.
+
 ## Phase 5 exit criteria
 
 - A real retrieval path exists.
@@ -2161,18 +2175,15 @@ retrievalEmbeddingReanalyze
 retrievalAnswerMatrix
 retrievalAnswerVerify
 retrievalAnswerReanalyze
+retrievalRelevancyMatrix
+retrievalRelevancyVerify
+retrievalRelevancyReanalyze
 ```
 
 Use source sets `retrieval` and `retrievalTest` under package
 `com.setaccio.lab.retrieval`. `retrievalFixtureTest` is the provider-free test
 task for the contract, fixtures, lexical baseline, evidence, and later mocked
 provider boundaries.
-
-Later, after an R5 run preserves actual retrieved documents:
-
-```text
-retrievalEvaluationMatrix
-```
 
 ---
 

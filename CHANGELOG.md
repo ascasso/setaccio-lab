@@ -49,6 +49,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the opt-in Phase 5 R6 retrieval-relevancy matrix. It consumes a
+  verified clean R5 run without re-running retrieval or answer generation;
+  gives Spring AI `RelevancyEvaluator` only the retained retrieved documents;
+  locks a tracked evaluator prompt, already-installed loopback Ollama
+  evaluator/full digest, and explicit one-attempt/no-pull settings; and
+  supplies offline verification/reanalysis. It retains deterministic retrieval
+  expectation, evaluator observation, self-evaluation, human support judgment,
+  and answer correctness as separate fields. Default tests use fake chat
+  models. Evaluator output is not ground truth; no R6 model was invoked or
+  formal evidence created by this implementation.
 - Added the opt-in Phase 5 R5 retrieval-answer matrix. It consumes a verified
   clean R3 run without re-running retrieval; locks the tracked grounded-answer
   prompt, an already-installed loopback Ollama model/full digest, and explicit

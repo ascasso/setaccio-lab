@@ -638,8 +638,12 @@ Evaluation/Testcontainers phase:
   re-running retrieval, preserve the exact retrieved context/ranks beside each
   answer, and keep answer behavior separate from retrieval metrics. Its local
   task remains opt-in with fake-provider default tests; assertion support stays
-  unassessed until later R6 or actual human review. Relevancy evaluation only
-  begins when a real retrieval flow supplies preserved context.
+  unassessed until R6 or actual human review. R6 may consume only a verified R5
+  run: it supplies `RelevancyEvaluator` the preserved retrieved documents, not
+  synthetic fixture context, and separately records deterministic retrieval
+  expectation, evaluator result, self-evaluation flag, human support judgment,
+  and answer correctness. It remains opt-in and fake-provider tested; an AI
+  evaluator is not ground truth.
 - Testcontainers is deferred for the completed fact-check cycle. A later
   optional typed Ollama service-connection/model-provisioning slice must be
   independently justified, isolated in `setaccio-testcontainers`, and never
