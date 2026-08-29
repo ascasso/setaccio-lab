@@ -136,6 +136,19 @@ labelled `qwen3.8:27b-mlx` reference passed all 16 rows at a recorded
 installed-artifact size of `18174721847` bytes. The narrow closeout is recorded
 in `docs/logs/2026-08-25-phase3-tool-compatibility-capability-frontier.md`.
 
+Phase 5 R0–R6 implementation is complete: the approved public corpus,
+confirmed query catalog, deterministic lexical baseline, saved retrieval-only
+evidence, opt-in embedding and answer boundaries, and an opt-in Spring AI
+relevancy-evaluation boundary are available. R5 consumes a verified,
+clean-baseline R3 run rather than re-running retrieval; R6 consumes a verified,
+clean-baseline R5 run rather than re-running retrieval or answer generation.
+R6 gives `RelevancyEvaluator` only the preserved retrieved documents and keeps
+the deterministic retrieval expectation, evaluator invocation/pass/score/verdict,
+self-evaluation relationship, human support judgment, and answer correctness
+as separate fields. No R5 or R6 model was selected or invoked, and no formal
+answer or relevancy evidence was created during implementation. An AI evaluator
+is not ground truth.
+
 ## Purpose
 
 Evaluate whether small, fast, locally hosted language models can reliably perform constrained tool-calling tasks even when their general factual knowledge and open-ended conversational quality are limited.
@@ -1959,6 +1972,20 @@ Each answer row should retain:
 
 Do not merge retrieval success and answer correctness.
 
+The dedicated `retrievalAnswerMatrix` task must accept only a verified,
+clean-baseline R3 directory directly under `build/retrieval-evaluation/`, then
+write a fresh, ignored directory directly under `build/retrieval-answer/`.
+It locks the tracked `retrieval-grounded-answer-v1` prompt, the requested and
+effective local model plus full digest, temperature `0.0`, explicit seed,
+explicit maximum output tokens, timeout, one attempt, and no-pull policy
+before reserving output. `retrievalAnswerVerify` and
+`retrievalAnswerReanalyze` are offline only. R5 records bracketed
+document-reference syntax and exact `NO_SUPPORT` abstention deterministically;
+it retains raw answer text and source documents but intentionally records
+unsupported-assertion assessment as `NOT_ASSESSED` until a later separately
+bounded evaluator or human-review slice. A reference is not proof of semantic
+support.
+
 ## Slice R6 — Relevancy evaluation
 
 Introduce Spring AI `RelevancyEvaluator` only when the actual retrieved documents are supplied to it.
@@ -1976,6 +2003,19 @@ Keep separate:
 - answer correctness.
 
 An AI evaluator is not ground truth.
+
+The dedicated `retrievalRelevancyMatrix` task accepts only a verified,
+clean-baseline R5 directory directly under `build/retrieval-answer/`, then
+writes a fresh ignored directory directly under `build/retrieval-relevancy/`.
+It locks the tracked `retrieval-relevancy-evaluator-v1` prompt, requested and
+effective local evaluator model plus full digest, temperature `0.0`, explicit
+seed, explicit maximum output tokens, timeout, one attempt, and no-pull policy
+before reserving output. It rejects missing retrieved context and unavailable
+R5 answers before a provider call. `retrievalRelevancyVerify` and
+`retrievalRelevancyReanalyze` are offline only; their raw evidence retains the
+exact R5 source row. A normalized evaluator verdict does not become an
+expectation match, human support finding, answer-correctness result, or model
+score.
 
 ## Phase 5 exit criteria
 
@@ -2125,24 +2165,25 @@ but `localEvaluation` must not depend on it.
 
 ```text
 retrievalFixtureTest
-retrievalMatrix
-retrievalVerify
-retrievalReanalyze
-retrievalCompare
+retrievalEvaluation
+retrievalEvaluationVerify
+retrievalEvaluationReanalyze
+retrievalEvaluationCompare
+retrievalEmbedding
+retrievalEmbeddingVerify
+retrievalEmbeddingReanalyze
+retrievalAnswerMatrix
+retrievalAnswerVerify
+retrievalAnswerReanalyze
+retrievalRelevancyMatrix
+retrievalRelevancyVerify
+retrievalRelevancyReanalyze
 ```
 
 Use source sets `retrieval` and `retrievalTest` under package
 `com.setaccio.lab.retrieval`. `retrievalFixtureTest` is the provider-free test
 task for the contract, fixtures, lexical baseline, evidence, and later mocked
 provider boundaries.
-
-Later:
-
-```text
-embeddingRetrievalMatrix
-retrievalAnswerMatrix
-retrievalEvaluationMatrix
-```
 
 ---
 
