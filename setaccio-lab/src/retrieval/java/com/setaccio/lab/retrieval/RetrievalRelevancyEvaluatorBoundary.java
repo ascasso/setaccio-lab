@@ -71,7 +71,8 @@ final class RetrievalRelevancyEvaluatorBoundary implements RetrievalRelevancyEva
             EvaluationResponse response = evaluator.evaluate(new EvaluationRequest(query, documents, answerText));
             RecordedInvocation invocation = recordingModel.observation();
             RetrievalRelevancyVerdict verdict = RetrievalRelevancyVerdict.normalize(invocation.rawResponse());
-            RetrievalRelevancyDiagnosticCategory category = category(invocation.rawResponse(), verdict);
+            RetrievalRelevancyDiagnosticCategory category = RetrievalRelevancyDiagnosticCategory.fromRawResponse(
+                    invocation.rawResponse(), verdict);
             return new RetrievalRelevancyEvaluatorOutcome(
                     modelIdentity,
                     promptDefinition.contract().promptId(),
@@ -137,18 +138,6 @@ final class RetrievalRelevancyEvaluatorBoundary implements RetrievalRelevancyEva
         return new RetrievalRelevancyEvaluatorOutcome(
                 modelIdentity, prompt.promptId(), prompt.promptSha256(), false, false,
                 null, null, null, category, null, null, null, null, null, 0, 0);
-    }
-
-    private static RetrievalRelevancyDiagnosticCategory category(
-            String rawResponse,
-            RetrievalRelevancyVerdict verdict
-    ) {
-        if (rawResponse == null || rawResponse.isBlank()) {
-            return RetrievalRelevancyDiagnosticCategory.EMPTY_RESPONSE;
-        }
-        return verdict == null
-                ? RetrievalRelevancyDiagnosticCategory.MALFORMED_VERDICT
-                : RetrievalRelevancyDiagnosticCategory.NONE;
     }
 
     private static RetrievalRelevancyDiagnosticCategory category(RuntimeException exception) {

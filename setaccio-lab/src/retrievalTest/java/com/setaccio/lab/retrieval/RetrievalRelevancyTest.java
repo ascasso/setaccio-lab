@@ -145,6 +145,31 @@ class RetrievalRelevancyTest {
     }
 
     @Test
+    void rejectsEvaluatorOutcomesThatConflictWithTheirRetainedResponseOrFailureState() throws Exception {
+        RetrievalRelevancyAnalyzer analyzer = analyzer();
+
+        RetrievalRelevancyResult forgedSuccessfulResult = execute(
+                answers((index, request) -> successfulAnswer(index)),
+                (query, documents, answer) -> evaluatorOutcome(
+                        true, true, true, 1.0f, null, RetrievalRelevancyDiagnosticCategory.NONE, "YES"),
+                EVALUATOR_MODEL_IDENTITY);
+        assertThat(analyzer.analyze(forgedSuccessfulResult).integrityFailures())
+                .contains("Relevancy row 1 normalized evaluator verdict does not match the retained raw response.");
+        Path forgedRun = Files.createDirectory(temporaryDirectory.resolve("forged-successful-relevancy-result"));
+        assertThatThrownBy(() -> evidence().write(
+                forgedRun, forgedSuccessfulResult, new EvidenceCodeBaseline("c".repeat(40), false)))
+                .hasMessageContaining("normalized evaluator verdict does not match the retained raw response");
+
+        RetrievalRelevancyResult forgedFailedResult = execute(
+                answers((index, request) -> successfulAnswer(index)),
+                (query, documents, answer) -> evaluatorOutcome(
+                        true, false, null, null, null, RetrievalRelevancyDiagnosticCategory.NONE, null),
+                EVALUATOR_MODEL_IDENTITY);
+        assertThat(analyzer.analyze(forgedFailedResult).integrityFailures())
+                .contains("Relevancy row 1 failed evaluator invocation does not retain a provider failure diagnostic.");
+    }
+
+    @Test
     void writesVerifiesAndRepairsOnlyTheDeterministicSummary() throws Exception {
         RetrievalRelevancyEvidence evidence = evidence();
         Path run = Files.createDirectory(temporaryDirectory.resolve("relevancy-run"));
@@ -211,6 +236,11 @@ class RetrievalRelevancyTest {
                 JsonMapper.builder().findAndAddModules().build(), inputs.corpus(), inputs.catalog());
     }
 
+    private static RetrievalRelevancyAnalyzer analyzer() {
+        RetrievalEvaluationRunner.Inputs inputs = RetrievalEvaluationRunner.loadInputs();
+        return new RetrievalRelevancyAnalyzer(inputs.corpus(), inputs.catalog());
+    }
+
     private static RetrievalRelevancySourceEvidence sourceEvidence() {
         return new RetrievalRelevancySourceEvidence("2026-08-28-r5", "f".repeat(64), "1".repeat(64), "2".repeat(40));
     }
@@ -233,6 +263,23 @@ class RetrievalRelevancyTest {
                 true, 1.0f, RetrievalRelevancyVerdict.YES, RetrievalRelevancyDiagnosticCategory.NONE,
                 "YES", new RetrievalRelevancyResponseMetadata("response_1", "evaluator-test"),
                 10, 2, 12, 1L, 1);
+    }
+
+    private static RetrievalRelevancyEvaluatorOutcome evaluatorOutcome(
+            boolean attempted,
+            boolean succeeded,
+            Boolean passed,
+            Float score,
+            RetrievalRelevancyVerdict verdict,
+            RetrievalRelevancyDiagnosticCategory category,
+            String rawResponse
+    ) {
+        RetrievalRelevancyPromptContract prompt = RetrievalRelevancyPromptDefinition.load().contract();
+        return new RetrievalRelevancyEvaluatorOutcome(
+                EVALUATOR_MODEL_IDENTITY, prompt.promptId(), prompt.promptSha256(), attempted, succeeded,
+                passed, score, verdict, category, rawResponse,
+                succeeded ? new RetrievalRelevancyResponseMetadata("response_1", "evaluator-test") : null,
+                null, null, null, 1L, 1);
     }
 
     private static ChatInvocationOutcome successfulAnswer(int index) {

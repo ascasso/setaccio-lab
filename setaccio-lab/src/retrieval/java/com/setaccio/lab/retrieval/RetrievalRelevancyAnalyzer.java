@@ -101,16 +101,34 @@ final class RetrievalRelevancyAnalyzer {
             return;
         }
         if (outcome.invocationSucceeded()) {
-            if (outcome.normalizedVerdict() == RetrievalRelevancyVerdict.YES
+            RetrievalRelevancyVerdict expectedVerdict = RetrievalRelevancyVerdict.normalize(outcome.rawResponse());
+            RetrievalRelevancyDiagnosticCategory expectedCategory =
+                    RetrievalRelevancyDiagnosticCategory.fromRawResponse(outcome.rawResponse(), expectedVerdict);
+            if (outcome.normalizedVerdict() != expectedVerdict) {
+                failures.add("Relevancy row " + sequence
+                        + " normalized evaluator verdict does not match the retained raw response.");
+            }
+            if (outcome.diagnosticCategory() != expectedCategory) {
+                failures.add("Relevancy row " + sequence
+                        + " evaluator diagnostic does not match the retained raw response.");
+            }
+            if (expectedVerdict == RetrievalRelevancyVerdict.YES
                     && (!Boolean.TRUE.equals(outcome.springEvaluatorPassed())
                     || !Float.valueOf(1.0f).equals(outcome.springEvaluatorScore()))) {
                 failures.add("Relevancy row " + sequence + " YES verdict does not match Spring evaluator output.");
             }
-            if (outcome.normalizedVerdict() == RetrievalRelevancyVerdict.NO
+            if (expectedVerdict == RetrievalRelevancyVerdict.NO
                     && (Boolean.TRUE.equals(outcome.springEvaluatorPassed())
                     || !Float.valueOf(0.0f).equals(outcome.springEvaluatorScore()))) {
                 failures.add("Relevancy row " + sequence + " NO verdict does not match Spring evaluator output.");
             }
+            return;
+        }
+        if (outcome.diagnosticCategory() != RetrievalRelevancyDiagnosticCategory.EVALUATOR_MODEL_UNAVAILABLE
+                && outcome.diagnosticCategory() != RetrievalRelevancyDiagnosticCategory.TIMEOUT
+                && outcome.diagnosticCategory() != RetrievalRelevancyDiagnosticCategory.PROVIDER_FAILURE) {
+            failures.add("Relevancy row " + sequence
+                    + " failed evaluator invocation does not retain a provider failure diagnostic.");
         }
     }
 

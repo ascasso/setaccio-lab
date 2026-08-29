@@ -9,6 +9,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Hardened Phase 5 R6 offline evidence validation so successful evaluator
+  outcomes must reproduce their normalized verdict and diagnostic from the
+  retained raw response, while failed invocations must retain a classified
+  provider failure. This prevents inconsistent evaluator observations from
+  being accepted as verified evidence.
 - Hardened Phase 1 tool-compatibility evidence validation so every saved row
   must match the result's locked untreated system-prompt identity. Prompt-matrix
   evidence remains condition-specific and continues to validate each row

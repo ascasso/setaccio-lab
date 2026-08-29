@@ -9,5 +9,16 @@ public enum RetrievalRelevancyDiagnosticCategory {
     TIMEOUT,
     PROVIDER_FAILURE,
     EMPTY_RESPONSE,
-    MALFORMED_VERDICT
+    MALFORMED_VERDICT;
+
+    /** Derives the only valid response diagnostic for a completed evaluator invocation. */
+    static RetrievalRelevancyDiagnosticCategory fromRawResponse(
+            String rawResponse,
+            RetrievalRelevancyVerdict normalizedVerdict
+    ) {
+        if (rawResponse == null || rawResponse.isBlank()) {
+            return EMPTY_RESPONSE;
+        }
+        return normalizedVerdict == null ? MALFORMED_VERDICT : NONE;
+    }
 }
