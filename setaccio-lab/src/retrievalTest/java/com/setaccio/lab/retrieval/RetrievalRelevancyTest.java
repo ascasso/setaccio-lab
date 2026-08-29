@@ -170,6 +170,24 @@ class RetrievalRelevancyTest {
     }
 
     @Test
+    void rejectsReportedEvaluatorModelDriftBeforeItCanEnterEvidence() throws Exception {
+        RetrievalRelevancyResult driftedResult = execute(
+                answers((index, request) -> successfulAnswer(index)),
+                boundary(modelReturning("YES", "different-evaluator")),
+                EVALUATOR_MODEL_IDENTITY);
+
+        assertThat(driftedResult.rows().getFirst().evaluatorOutcome().responseMetadata().responseModel())
+                .isEqualTo("different-evaluator");
+        assertThat(analyzer().analyze(driftedResult).integrityFailures())
+                .contains("Relevancy row 1 evaluator response model differs from the locked effective evaluator model.");
+        Path rejectedRun = Files.createDirectory(temporaryDirectory.resolve("rejected-model-drift"));
+        assertThatThrownBy(() -> evidence().write(
+                rejectedRun, driftedResult, new EvidenceCodeBaseline("c".repeat(40), false)))
+                .hasMessageContaining("evaluator response model differs from the locked effective evaluator model");
+        assertThat(rejectedRun).isEmptyDirectory();
+    }
+
+    @Test
     void writesVerifiesAndRepairsOnlyTheDeterministicSummary() throws Exception {
         RetrievalRelevancyEvidence evidence = evidence();
         Path run = Files.createDirectory(temporaryDirectory.resolve("relevancy-run"));
@@ -187,6 +205,27 @@ class RetrievalRelevancyTest {
 
         Files.writeString(run.resolve(RetrievalRelevancyProtocol.RAW_FILENAME), "{}\n");
         assertThat(evidence.reanalyze(run).failures()).isNotEmpty();
+    }
+
+    @Test
+    void preservesFractionalTimeoutsInTheDeterministicSummary() {
+        RetrievalRelevancyResult original = execute(
+                answers((index, request) -> successfulAnswer(index)),
+                (query, documents, answer) -> successfulEvaluatorOutcome(EVALUATOR_MODEL_IDENTITY),
+                EVALUATOR_MODEL_IDENTITY);
+        RetrievalRelevancyResult fractionalTimeout = new RetrievalRelevancyResult(
+                original.protocolVersion(), original.suite(), original.startedAt(), original.finishedAt(),
+                original.executionEngine(), original.executionStrategy(), original.sourceEvidence(),
+                original.answerEvidence(), original.prompt(), original.modelIdentity(),
+                RetrievalRelevancyProtocol.settings(42, 64, Duration.ofMillis(1_500)), original.rows());
+
+        assertThat(new RetrievalRelevancyReport().render(
+                fractionalTimeout,
+                new RetrievalRelevancyAnalyzer.Analysis(List.of()),
+                RetrievalRelevancyProtocol.RAW_FILENAME,
+                "f".repeat(64),
+                new EvidenceCodeBaseline("c".repeat(40), false)))
+                .contains("timeout `PT1.5S`");
     }
 
     @Test
@@ -298,8 +337,12 @@ class RetrievalRelevancyTest {
     }
 
     private static ChatModel modelReturning(String rawResponse) {
+        return modelReturning(rawResponse, "evaluator-test");
+    }
+
+    private static ChatModel modelReturning(String rawResponse, String responseModel) {
         ChatModel model = mock(ChatModel.class);
-        when(model.call(any(Prompt.class))).thenReturn(response(rawResponse, 10, 2));
+        when(model.call(any(Prompt.class))).thenReturn(response(rawResponse, 10, 2, responseModel));
         return model;
     }
 
@@ -310,11 +353,20 @@ class RetrievalRelevancyTest {
     }
 
     private static ChatResponse response(String text, int promptTokens, int completionTokens) {
+        return response(text, promptTokens, completionTokens, "evaluator-test");
+    }
+
+    private static ChatResponse response(
+            String text,
+            int promptTokens,
+            int completionTokens,
+            String responseModel
+    ) {
         return new ChatResponse(
                 List.of(new Generation(new AssistantMessage(text))),
                 ChatResponseMetadata.builder()
                         .id("response_1")
-                        .model("evaluator-test")
+                        .model(responseModel)
                         .usage(new DefaultUsage(promptTokens, completionTokens))
                         .build());
     }

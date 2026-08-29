@@ -139,6 +139,24 @@ class RetrievalAnswerTest {
     }
 
     @Test
+    void preservesFractionalTimeoutsInTheDeterministicSummary() {
+        RetrievalAnswerResult original = successfulResult();
+        RetrievalAnswerResult fractionalTimeout = new RetrievalAnswerResult(
+                original.protocolVersion(), original.suite(), original.startedAt(), original.finishedAt(),
+                original.executionEngine(), original.executionStrategy(), original.sourceEvidence(),
+                original.retrievalEvidence(), original.prompt(), original.modelIdentity(),
+                RetrievalAnswerProtocol.settings(42, 128, Duration.ofMillis(1_500)), original.rows());
+
+        assertThat(new RetrievalAnswerReport().render(
+                fractionalTimeout,
+                new RetrievalAnswerAnalyzer.Analysis(List.of()),
+                RetrievalAnswerProtocol.RAW_FILENAME,
+                "f".repeat(64),
+                new EvidenceCodeBaseline("b".repeat(40), false)))
+                .contains("timeout `PT1.5S`");
+    }
+
+    @Test
     void restrictsNewAnswerEvidenceToTheDedicatedDatedRoot() {
         assertThat(RetrievalAnswerRunner.resolveNewOutputDirectory(
                 "build/retrieval-answer/2026-08-28-r5").getFileName().toString()).isEqualTo("2026-08-28-r5");

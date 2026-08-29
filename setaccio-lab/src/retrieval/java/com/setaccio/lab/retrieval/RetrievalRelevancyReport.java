@@ -1,6 +1,7 @@
 package com.setaccio.lab.retrieval;
 
 import com.setaccio.lab.evidence.EvidenceCodeBaseline;
+import java.time.Duration;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -30,8 +31,9 @@ final class RetrievalRelevancyReport {
                 .append(result.modelIdentity().digest()).append("`\n");
         out.append("- Settings: temperature `").append(result.runSettings().temperature()).append("`, seed `")
                 .append(result.runSettings().seed()).append("`, max output tokens `")
-                .append(result.runSettings().maxOutputTokens()).append("`, timeout `PT")
-                .append(result.runSettings().requestTimeoutMillis() / 1000).append("S`, attempts `1`, pull `never`\n");
+                .append(result.runSettings().maxOutputTokens()).append("`, timeout `")
+                .append(Duration.ofMillis(result.runSettings().requestTimeoutMillis()))
+                .append("`, attempts `1`, pull `never`\n");
         out.append("- Execution: ").append(result.rows().size())
                 .append(" preserved R5 rows in order; retrieval and answer generation are not re-run.\n");
 

@@ -82,6 +82,13 @@ final class RetrievalRelevancyAnalyzer {
                 || !result.prompt().promptSha256().equals(outcome.promptSha256())) {
             failures.add("Relevancy row " + sequence + " evaluator model or prompt identity drifted.");
         }
+        RetrievalRelevancyResponseMetadata responseMetadata = outcome.responseMetadata();
+        if (responseMetadata != null
+                && !responseMetadata.responseModel().isBlank()
+                && !result.modelIdentity().effectiveModel().equals(responseMetadata.responseModel())) {
+            failures.add("Relevancy row " + sequence
+                    + " evaluator response model differs from the locked effective evaluator model.");
+        }
         if (answer.retrieval().retrievedDocuments().isEmpty()) {
             if (outcome.invocationAttempted()
                     || outcome.diagnosticCategory() != RetrievalRelevancyDiagnosticCategory.NOT_ATTEMPTED_MISSING_CONTEXT) {

@@ -9,6 +9,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Rejected Phase 5 R6 evaluator responses whose retained nonblank provider model
+  differs from the locked effective evaluator model, preventing model-identity
+  drift from being attributed to the approved digest. R5 and R6 deterministic
+  summaries now also preserve exact fractional timeout values instead of
+  truncating them to whole seconds.
 - Hardened Phase 5 R6 offline evidence validation so successful evaluator
   outcomes must reproduce their normalized verdict and diagnostic from the
   retained raw response, while failed invocations must retain a classified
