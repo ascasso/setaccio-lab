@@ -9,6 +9,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Rejected Phase 5 R6 evaluator responses whose retained nonblank provider model
+  differs from the locked effective evaluator model, preventing model-identity
+  drift from being attributed to the approved digest. R5 and R6 deterministic
+  summaries now also preserve exact fractional timeout values instead of
+  truncating them to whole seconds.
+- Hardened Phase 5 R6 offline evidence validation so successful evaluator
+  outcomes must reproduce their normalized verdict and diagnostic from the
+  retained raw response, while failed invocations must retain a classified
+  provider failure. This prevents inconsistent evaluator observations from
+  being accepted as verified evidence.
 - Hardened Phase 1 tool-compatibility evidence validation so every saved row
   must match the result's locked untreated system-prompt identity. Prompt-matrix
   evidence remains condition-specific and continues to validate each row
@@ -49,6 +59,25 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Added the opt-in Phase 5 R6 retrieval-relevancy matrix. It consumes a
+  verified clean R5 run without re-running retrieval or answer generation;
+  gives Spring AI `RelevancyEvaluator` only the retained retrieved documents;
+  locks a tracked evaluator prompt, already-installed loopback Ollama
+  evaluator/full digest, and explicit one-attempt/no-pull settings; and
+  supplies offline verification/reanalysis. It retains deterministic retrieval
+  expectation, evaluator observation, self-evaluation, human support judgment,
+  and answer correctness as separate fields. Default tests use fake chat
+  models. Evaluator output is not ground truth; no R6 model was invoked or
+  formal evidence created by this implementation.
+- Added the opt-in Phase 5 R5 retrieval-answer matrix. It consumes a verified
+  clean R3 run without re-running retrieval; locks the tracked grounded-answer
+  prompt, an already-installed loopback Ollama model/full digest, and explicit
+  one-attempt/no-pull settings before allocating ignored evidence; preserves
+  exact retrieved documents/ranks beside each raw answer; and supplies offline
+  verification/reanalysis. Default tests use fake chat invocations. Reference
+  syntax and explicit abstention are observations only; assertion support,
+  answer correctness, relevance, and model quality remain unassessed. No R5
+  model was invoked or formal evidence created by this implementation.
 - Added Phase 5 retrieval fixtures and the provider-free R1–R3 lexical
   retrieval-evidence lifecycle, plus the opt-in R4 local Ollama embedding
   boundary. R4 requires a clean Git baseline, a loopback-only endpoint, an
