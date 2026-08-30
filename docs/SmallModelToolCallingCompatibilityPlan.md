@@ -1807,7 +1807,7 @@ before allocation and between every arm. The runner persists each arm after
 its 12 one-attempt rows, retains any incomplete evidence on failure, and never
 retries or replaces a row. Its standalone verifier/reanalyzer requires every
 arm to match in all non-budget protocol identities; its report is a
-deterministic five-column descriptive aggregate only. In this exact study, valid-verdict yield was flat at 2/12 for the tested 64���128 token budgets and was higher at 192 tokens (6/12) and 256 tokens (12/12). I treat this as a protocol-specific association, not evidence of a causal threshold, a generally optimal budget, or model reliability. The interpretation does not authorize evidence change or another run.
+deterministic five-column descriptive aggregate only. In this exact study, valid-verdict yield was flat at 2/12 for the tested 64–128 token budgets and was higher at 192 tokens (6/12) and 256 tokens (12/12). I treat this as a protocol-specific association, not evidence of a causal threshold, a generally optimal budget, or model reliability. The interpretation does not authorize evidence change or another run.
 
 ## Phase 4 exit criteria
 
