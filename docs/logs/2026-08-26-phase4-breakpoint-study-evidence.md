@@ -32,14 +32,13 @@ All saved rows retained completion-token metadata. Counts at the configured
 maximum are an output-limit proxy only: this evidence does not record a
 provider finish reason.
 
-## Boundary and owner decision
+## Owner-reviewed bounded interpretation
 
-This is a descriptive result for the exact judge digest, runtime, prompt,
-fixtures, settings, and two repetitions. It does not select a judge, measure
-general factuality or reliability, establish a causal mechanism, or provide a
-backend-normalized latency comparison. The raw ignored evidence remains local.
+The project owner reviewed the verified and reanalyzed five-arm study bound to
+the recorded commit and judge digest. In this exact study, valid-verdict yield was flat at 2/12 for the tested 64–128 token budgets and was higher at 192 tokens (6/12) and 256 tokens (12/12). I treat this as a protocol-specific association, not evidence of a causal threshold, a generally optimal budget, or model reliability.
 
-No human interpretation decision is recorded by this closeout. The project
-owner may review the verified aggregate report and record a bounded conclusion
-separately; no arm may be rerun, replaced, repaired, or altered for that
-decision.
+This is a protocol-specific association, not evidence of a causal threshold, a
+generally optimal budget, or model reliability. It makes no general factuality,
+reliability, model-ranking, or causal claim, and it does not select a judge or
+provide a backend-normalized latency comparison. The raw ignored evidence
+remains local. No arm may be rerun, replaced, repaired, altered, or published.
