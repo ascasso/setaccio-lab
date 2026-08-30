@@ -1024,6 +1024,18 @@ and pull strategy `never`. Verify a completed run offline with
 documentation does not select a model, authorize a pull, or make answer
 correctness/relevance claims.
 
+One formal R5 run completed on 2026-08-30 from clean commit
+`c724e5a93c89eb5de8a11e9d1774a523f77bda37`, using the verified R3 baseline
+and an operationally selected already-installed `gemma4:e2b` tag with full
+digest `7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`
+under Ollama `0.33.2`. It locked the shown options, retained all 14 rows, and
+verified and reanalyzed its ignored output offline. Ten invocation outcomes
+completed, four were empty responses, and two used exact `NO_SUPPORT`; no
+unavailable-model, timeout, authentication, rate-limit, or provider-failure
+outcome occurred. This is not an answer-correctness, semantic-support,
+relevance, quality, ranking, or model-selection result. Its raw answers remain
+ignored and must not be rerun, repaired, replaced, or published.
+
 ### R6 retrieval relevancy evaluation
 
 `retrievalRelevancyMatrix` is the only R6 live entry point. It does not read
@@ -1053,6 +1065,21 @@ answers are recorded as not attempted. Verify a completed run offline with
 `retrievalRelevancyReanalyze --run-dir=...`. A formal run remains optional:
 the evaluator is not ground truth and the task makes no human-support,
 answer-correctness, ranking, or model-selection claim.
+
+One formal R6 run completed on 2026-08-30 from clean commit
+`f704d989429a10769ce334276dc79de5bd7cd308`, using the verified R5 source and
+an operationally selected already-installed `granite4.1:3b` tag with full
+digest `6fd349357287c7ffc9e38189a93b48ea175d24fc566b38f09cfc564fb7f303eb`
+under Ollama `0.33.2`. It locked the shown options, retained all 14 R5 rows,
+and verified and reanalyzed its ignored output offline. Eight eligible
+evaluator invocations completed; two missing-context rows and four
+unavailable-answer rows were explicitly not attempted. No unavailable-model,
+timeout, provider-failure, empty-response, or malformed-verdict outcome
+occurred. Its evaluator artifact differed from R5's answer artifact, but this
+does not establish independence. The result does not make the evaluator ground
+truth or assess retrieval expectation, human support, answer correctness,
+semantic correctness, quality, ranking, or selection. Raw evaluator output
+remains ignored and must not be rerun, repaired, replaced, or published.
 
 ## Tool Search Advisor
 

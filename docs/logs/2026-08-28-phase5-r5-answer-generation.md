@@ -33,6 +33,38 @@ semantic support finding. Every row records unsupported-assertion assessment as
 R6 or human review. Retrieval success, reference behavior, answer correctness,
 semantic relevance, and any evaluator result are not merged into a score.
 
+## Formal execution and closeout
+
+On 2026-08-30, the retained R3 run
+`build/retrieval-evaluation/2026-08-28-r3-baseline/` verified offline before
+R5 execution. From clean commit
+`c724e5a93c89eb5de8a11e9d1774a523f77bda37`, the one formal matrix selected
+the already-installed local `gemma4:e2b` tag solely as this protocol's
+operational answer model. The requested and effective tags matched, with full
+digest `7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`
+under Ollama `0.33.2`.
+
+The run locked `retrieval-grounded-answer-v1`, temperature `0.0`, seed `42`,
+maximum output tokens `256`, timeout `PT2M`, exactly one sequential attempt
+per preserved R3 row, and pull strategy `never`. Its fresh ignored evidence
+directory is `build/retrieval-answer/2026-08-30-r5-gemma4-e2b/`; raw answers
+remain there and are not published.
+
+All 14 planned answer rows were retained without retry, repair, replacement,
+or omission. Ten rows completed with invocation outcome `NONE`; four retained
+`EMPTY_RESPONSE`. No row recorded `MODEL_UNAVAILABLE`, `TIMEOUT`,
+`AUTHENTICATION`, `RATE_LIMIT`, or `PROVIDER_FAILURE`. Two rows used the exact
+`NO_SUPPORT` abstention. Four rows had retrieved-document-only bracketed
+references, while four had no document reference; no malformed or unreturned
+document reference was observed.
+
+`retrievalAnswerVerify` passed, deterministic `retrievalAnswerReanalyze`
+regenerated the saved summary successfully, and the provider-free
+`retrievalFixtureTest` plus `git diff --check` passed. These are bounded
+invocation, abstention, and reference-syntax observations. They do not assess
+assertion support or answer correctness, establish semantic relevance, rank or
+select a model, or initiate R4 or R6.
+
 ## Verification
 
 The provider-free retrieval suite passed with fake chat-invocation coverage for
@@ -46,9 +78,8 @@ summary-only repair:
 git diff --check
 ```
 
-## Not executed or authorized by this implementation
+## Still outside this closeout
 
-No Ollama answer model was selected or invoked. No R5 output directory or
-formal answer evidence was created. This change does not authorize a model
-pull, remote answer provider, credentials, spending, Docker, endpoint
-migration, `RelevancyEvaluator`, release, tag, or push.
+This R5 closeout does not start R4 embedding retrieval or R6 relevancy
+evaluation. It does not authorize a model pull, remote answer provider,
+credentials, spending, Docker, endpoint migration, release, tag, or push.

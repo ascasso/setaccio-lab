@@ -281,6 +281,37 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   locked Tool Search matrix and sequential vision matrix use the shared v1
   manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while
   vision verification accepts v1 evidence only.
+- Phase 5 R5 completed one formal answer-generation matrix on 2026-08-30 from
+  clean commit `c724e5a93c89eb5de8a11e9d1774a523f77bda37`, consuming the
+  separately verified R3 lexical baseline without rerunning retrieval. The
+  operationally selected already-installed `gemma4:e2b` tag resolved to full
+  digest `7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`
+  under Ollama `0.33.2`; the 14 sequential one-attempt rows locked
+  `retrieval-grounded-answer-v1`, temperature `0.0`, seed `42`, `256` output
+  tokens, `PT2M`, and no pull. Ten rows completed and four retained empty
+  responses; two used exact `NO_SUPPORT`, with no timeout, unavailable-model,
+  authentication, rate-limit, or provider-failure result. Ignored evidence
+  verified and reanalyzed offline. This is limited to invocation, abstention,
+  and bracketed-reference observations; it is not an answer-correctness,
+  semantic-support, relevance, quality, ranking, or model-selection claim. Do
+  not rerun, repair, replace, or publish its raw output; R4 remains unstarted.
+- Phase 5 R6 completed one formal relevancy-evaluation matrix on 2026-08-30
+  from clean commit `f704d989429a10769ce334276dc79de5bd7cd308`, consuming the
+  verified R5 evidence without rerunning retrieval or answer generation. The
+  operationally selected already-installed `granite4.1:3b` tag resolved to full
+  digest `6fd349357287c7ffc9e38189a93b48ea175d24fc566b38f09cfc564fb7f303eb`
+  under Ollama `0.33.2`; it differs from the R5 answer artifact but that does
+  not establish independence. The run locked `retrieval-relevancy-evaluator-v1`,
+  temperature `0.0`, seed `42`, `64` output tokens, `PT2M`, and no pull. It
+  retained 14 rows: eight eligible evaluator calls completed, two
+  missing-context rows and four unavailable-answer rows were not attempted, and
+  no unavailable-model, timeout, provider-failure, empty-response, or
+  malformed-verdict outcome occurred. Ignored evidence verified and reanalyzed
+  offline. This is limited to evaluator invocation and not-attempted-row
+  observations; human support remains `NOT_REVIEWED` and answer correctness
+  `NOT_ASSESSED`. Do not rerun, repair, replace, or publish raw evidence, and
+  do not treat an evaluator result as ground truth, semantic correctness,
+  quality, ranking, or selection.
 - The default Ollama model is `gemma4:e2b`.
 - The T0.1 documentation packet and provider-free T1.1-T1.8 implementation for
   the tracked small-model tool-calling compatibility plan are complete. The
