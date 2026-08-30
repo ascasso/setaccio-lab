@@ -251,6 +251,17 @@ not place a live model call in default tests or CI.
   `retrievalAnswerReanalyze` stay provider-free. A bracketed document ID is
   not proof that an answer is supported, and unsupported assertions remain
   unassessed until R6 or human review.
+- One clean-baseline R5 execution completed on 2026-08-30 from commit
+  `c724e5a93c89eb5de8a11e9d1774a523f77bda37` against the verified R3 source.
+  It retained all 14 sequential rows with the locked `gemma4:e2b` identity,
+  prompt, temperature, seed, `256`-token limit, `PT2M`, one-attempt, and
+  no-pull contract; evidence verification and deterministic reanalysis passed.
+  The aggregate retained 10 completed invocation outcomes, four empty
+  responses, and two exact abstentions, with no timeout or classified provider
+  failure. Preserve that ignored evidence without retry, repair, replacement,
+  or raw-output publication. These execution observations do not change the
+  fake-provider default-test requirement or assess answer correctness,
+  semantic support, relevance, or model quality.
 - Keep R6 relevancy evaluation behind the explicit `retrievalRelevancyMatrix`
   task. It must verify a clean-baseline R5 run before output allocation and
   preserve each exact R5 row while giving `RelevancyEvaluator` only its
@@ -264,6 +275,18 @@ not place a live model call in default tests or CI.
   provider-free. Missing context and unavailable answers must not invoke the
   evaluator. An evaluator verdict is not ground truth or an answer-quality
   score.
+- One clean-baseline R6 execution completed on 2026-08-30 from commit
+  `f704d989429a10769ce334276dc79de5bd7cd308` against the verified R5 source.
+  It retained all 14 R5 rows under the locked `granite4.1:3b` identity, prompt,
+  temperature, seed, `64`-token limit, `PT2M`, one-attempt, and no-pull
+  contract; evidence verification and deterministic reanalysis passed. Eight
+  eligible evaluator calls completed, while two missing-context rows and four
+  unavailable-answer rows remained not attempted; no timeout or classified
+  evaluator failure occurred. Preserve that ignored evidence without retry,
+  repair, replacement, or raw-output publication. These observations do not
+  alter the fake-provider default-test requirement or establish evaluator
+  ground truth, human support, answer correctness, semantic correctness,
+  quality, ranking, or selection.
 - R3 retrieval evidence must retain each returned corpus document's exact text,
   ID, SHA-256, rank, score fields, and matched terms. Require the fixed
   retrieval-only metrics, immediate-repeat stability, shared-v1 manifest

@@ -26,6 +26,28 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Completed one formal Phase 5 R6 retrieval-relevancy matrix from clean commit
+  `f704d989429a10769ce334276dc79de5bd7cd308` against the verified R5 answer
+  evidence. The operationally selected already-installed `granite4.1:3b`
+  evaluator, a different deployed artifact from R5's answer model, retained
+  all 14 rows with `64` output tokens, `PT2M`, and no pull; ignored evidence
+  verified and reanalyzed offline. Eight eligible evaluator calls completed,
+  while two missing-context and four unavailable-answer rows were not
+  attempted; no unavailable-model, timeout, provider-failure, empty-response,
+  or malformed-verdict outcome occurred. The separate-artifact relationship
+  does not prove evaluator independence. This is not evaluator ground truth,
+  human support, answer correctness, semantic correctness, quality, ranking,
+  or model selection; raw evaluator output remains ignored.
+- Completed one formal Phase 5 R5 retrieval-answer matrix from clean commit
+  `c724e5a93c89eb5de8a11e9d1774a523f77bda37` against the verified R3 lexical
+  baseline. The operationally selected already-installed `gemma4:e2b` model
+  ran all 14 locked sequential one-attempt rows with `256` output tokens,
+  `PT2M`, and no pull; ignored evidence verified and reanalyzed offline. Ten
+  invocation outcomes completed, four were empty responses, and two used exact
+  `NO_SUPPORT`, with no model-unavailable, timeout, authentication, rate-limit,
+  or provider-failure outcome. This is not an answer-correctness,
+  semantic-support, relevance, quality, ranking, or model-selection result;
+  raw answers remain ignored.
 - Recorded standing authorization for liberal use of already-installed
   loopback Ollama models whenever useful during requested Phase 4 and Phase 5
   work. Local implementation diagnostics and formal calls no longer require
@@ -67,8 +89,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   supplies offline verification/reanalysis. It retains deterministic retrieval
   expectation, evaluator observation, self-evaluation, human support judgment,
   and answer correctness as separate fields. Default tests use fake chat
-  models. Evaluator output is not ground truth; no R6 model was invoked or
-  formal evidence created by this implementation.
+  models. Evaluator output is not ground truth.
 - Added the opt-in Phase 5 R5 retrieval-answer matrix. It consumes a verified
   clean R3 run without re-running retrieval; locks the tracked grounded-answer
   prompt, an already-installed loopback Ollama model/full digest, and explicit
@@ -76,8 +97,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   exact retrieved documents/ranks beside each raw answer; and supplies offline
   verification/reanalysis. Default tests use fake chat invocations. Reference
   syntax and explicit abstention are observations only; assertion support,
-  answer correctness, relevance, and model quality remain unassessed. No R5
-  model was invoked or formal evidence created by this implementation.
+  answer correctness, relevance, and model quality remain unassessed.
 - Added Phase 5 retrieval fixtures and the provider-free R1–R3 lexical
   retrieval-evidence lifecycle, plus the opt-in R4 local Ollama embedding
   boundary. R4 requires a clean Git baseline, a loopback-only endpoint, an
