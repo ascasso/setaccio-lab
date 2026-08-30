@@ -275,6 +275,18 @@ not place a live model call in default tests or CI.
   provider-free. Missing context and unavailable answers must not invoke the
   evaluator. An evaluator verdict is not ground truth or an answer-quality
   score.
+- One clean-baseline R6 execution completed on 2026-08-30 from commit
+  `f704d989429a10769ce334276dc79de5bd7cd308` against the verified R5 source.
+  It retained all 14 R5 rows under the locked `granite4.1:3b` identity, prompt,
+  temperature, seed, `64`-token limit, `PT2M`, one-attempt, and no-pull
+  contract; evidence verification and deterministic reanalysis passed. Eight
+  eligible evaluator calls completed, while two missing-context rows and four
+  unavailable-answer rows remained not attempted; no timeout or classified
+  evaluator failure occurred. Preserve that ignored evidence without retry,
+  repair, replacement, or raw-output publication. These observations do not
+  alter the fake-provider default-test requirement or establish evaluator
+  ground truth, human support, answer correctness, semantic correctness,
+  quality, ranking, or selection.
 - R3 retrieval evidence must retain each returned corpus document's exact text,
   ID, SHA-256, rank, score fields, and matched terms. Require the fixed
   retrieval-only metrics, immediate-repeat stability, shared-v1 manifest

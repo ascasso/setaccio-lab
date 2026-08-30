@@ -1066,6 +1066,21 @@ answers are recorded as not attempted. Verify a completed run offline with
 the evaluator is not ground truth and the task makes no human-support,
 answer-correctness, ranking, or model-selection claim.
 
+One formal R6 run completed on 2026-08-30 from clean commit
+`f704d989429a10769ce334276dc79de5bd7cd308`, using the verified R5 source and
+an operationally selected already-installed `granite4.1:3b` tag with full
+digest `6fd349357287c7ffc9e38189a93b48ea175d24fc566b38f09cfc564fb7f303eb`
+under Ollama `0.33.2`. It locked the shown options, retained all 14 R5 rows,
+and verified and reanalyzed its ignored output offline. Eight eligible
+evaluator invocations completed; two missing-context rows and four
+unavailable-answer rows were explicitly not attempted. No unavailable-model,
+timeout, provider-failure, empty-response, or malformed-verdict outcome
+occurred. Its evaluator artifact differed from R5's answer artifact, but this
+does not establish independence. The result does not make the evaluator ground
+truth or assess retrieval expectation, human support, answer correctness,
+semantic correctness, quality, ranking, or selection. Raw evaluator output
+remains ignored and must not be rerun, repaired, replaced, or published.
+
 ## Tool Search Advisor
 
 Spring AI's Tool Search Tool support is available on the `setaccio-lab` classpath through `spring-ai-starter-tool-search-advisor`, but it is disabled by default. Keep it off for normal local runs, default tests, and the current vision benchmark path.
