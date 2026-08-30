@@ -142,12 +142,22 @@ evidence, opt-in embedding and answer boundaries, and an opt-in Spring AI
 relevancy-evaluation boundary are available. R5 consumes a verified,
 clean-baseline R3 run rather than re-running retrieval; R6 consumes a verified,
 clean-baseline R5 run rather than re-running retrieval or answer generation.
-R6 gives `RelevancyEvaluator` only the preserved retrieved documents and keeps
-the deterministic retrieval expectation, evaluator invocation/pass/score/verdict,
-self-evaluation relationship, human support judgment, and answer correctness
-as separate fields. No R5 or R6 model was selected or invoked, and no formal
-answer or relevancy evidence was created during implementation. An AI evaluator
-is not ground truth.
+On 2026-08-30, one clean-baseline R5 matrix completed from commit
+`c724e5a93c89eb5de8a11e9d1774a523f77bda37` against the verified R3 baseline.
+It used the operationally selected already-installed `gemma4:e2b` tag and its
+full digest, locked `retrieval-grounded-answer-v1`, temperature `0.0`, seed
+`42`, `256` maximum output tokens, `PT2M`, one attempt, and no pull. All 14
+rows were retained; 10 completed and four were empty responses, with no
+timeout, unavailable-model, authentication, rate-limit, or provider-failure
+outcome. The ignored evidence verified and reanalyzed offline. This records
+only bounded answer-invocation, exact-abstention, and reference-syntax
+observations, not answer correctness, semantic support, relevance, quality, or
+a model ranking or selection conclusion. R4 remains unrun and R6 has no
+selected or invoked evaluator or formal evidence. R6 gives `RelevancyEvaluator`
+only the preserved retrieved documents and keeps the deterministic retrieval
+expectation, evaluator invocation/pass/score/verdict, self-evaluation
+relationship, human support judgment, and answer correctness as separate
+fields. An AI evaluator is not ground truth.
 
 ## Purpose
 

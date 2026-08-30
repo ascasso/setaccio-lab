@@ -251,6 +251,17 @@ not place a live model call in default tests or CI.
   `retrievalAnswerReanalyze` stay provider-free. A bracketed document ID is
   not proof that an answer is supported, and unsupported assertions remain
   unassessed until R6 or human review.
+- One clean-baseline R5 execution completed on 2026-08-30 from commit
+  `c724e5a93c89eb5de8a11e9d1774a523f77bda37` against the verified R3 source.
+  It retained all 14 sequential rows with the locked `gemma4:e2b` identity,
+  prompt, temperature, seed, `256`-token limit, `PT2M`, one-attempt, and
+  no-pull contract; evidence verification and deterministic reanalysis passed.
+  The aggregate retained 10 completed invocation outcomes, four empty
+  responses, and two exact abstentions, with no timeout or classified provider
+  failure. Preserve that ignored evidence without retry, repair, replacement,
+  or raw-output publication. These execution observations do not change the
+  fake-provider default-test requirement or assess answer correctness,
+  semantic support, relevance, or model quality.
 - Keep R6 relevancy evaluation behind the explicit `retrievalRelevancyMatrix`
   task. It must verify a clean-baseline R5 run before output allocation and
   preserve each exact R5 row while giving `RelevancyEvaluator` only its

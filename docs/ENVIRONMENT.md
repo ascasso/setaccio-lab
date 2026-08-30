@@ -1024,6 +1024,18 @@ and pull strategy `never`. Verify a completed run offline with
 documentation does not select a model, authorize a pull, or make answer
 correctness/relevance claims.
 
+One formal R5 run completed on 2026-08-30 from clean commit
+`c724e5a93c89eb5de8a11e9d1774a523f77bda37`, using the verified R3 baseline
+and an operationally selected already-installed `gemma4:e2b` tag with full
+digest `7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`
+under Ollama `0.33.2`. It locked the shown options, retained all 14 rows, and
+verified and reanalyzed its ignored output offline. Ten invocation outcomes
+completed, four were empty responses, and two used exact `NO_SUPPORT`; no
+unavailable-model, timeout, authentication, rate-limit, or provider-failure
+outcome occurred. This is not an answer-correctness, semantic-support,
+relevance, quality, ranking, or model-selection result. Its raw answers remain
+ignored and must not be rerun, repaired, replaced, or published.
+
 ### R6 retrieval relevancy evaluation
 
 `retrievalRelevancyMatrix` is the only R6 live entry point. It does not read

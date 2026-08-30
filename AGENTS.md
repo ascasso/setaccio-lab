@@ -281,6 +281,21 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   locked Tool Search matrix and sequential vision matrix use the shared v1
   manifest; standalone Tool Search tasks retain legacy-v0 compatibility, while
   vision verification accepts v1 evidence only.
+- Phase 5 R5 completed one formal answer-generation matrix on 2026-08-30 from
+  clean commit `c724e5a93c89eb5de8a11e9d1774a523f77bda37`, consuming the
+  separately verified R3 lexical baseline without rerunning retrieval. The
+  operationally selected already-installed `gemma4:e2b` tag resolved to full
+  digest `7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e`
+  under Ollama `0.33.2`; the 14 sequential one-attempt rows locked
+  `retrieval-grounded-answer-v1`, temperature `0.0`, seed `42`, `256` output
+  tokens, `PT2M`, and no pull. Ten rows completed and four retained empty
+  responses; two used exact `NO_SUPPORT`, with no timeout, unavailable-model,
+  authentication, rate-limit, or provider-failure result. Ignored evidence
+  verified and reanalyzed offline. This is limited to invocation, abstention,
+  and bracketed-reference observations; it is not an answer-correctness,
+  semantic-support, relevance, quality, ranking, or model-selection claim. Do
+  not rerun, repair, replace, or publish its raw output; R4 and R6 remain
+  unstarted.
 - The default Ollama model is `gemma4:e2b`.
 - The T0.1 documentation packet and provider-free T1.1-T1.8 implementation for
   the tracked small-model tool-calling compatibility plan are complete. The

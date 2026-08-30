@@ -26,6 +26,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Completed one formal Phase 5 R5 retrieval-answer matrix from clean commit
+  `c724e5a93c89eb5de8a11e9d1774a523f77bda37` against the verified R3 lexical
+  baseline. The operationally selected already-installed `gemma4:e2b` model
+  ran all 14 locked sequential one-attempt rows with `256` output tokens,
+  `PT2M`, and no pull; ignored evidence verified and reanalyzed offline. Ten
+  invocation outcomes completed, four were empty responses, and two used exact
+  `NO_SUPPORT`, with no model-unavailable, timeout, authentication, rate-limit,
+  or provider-failure outcome. This is not an answer-correctness,
+  semantic-support, relevance, quality, ranking, or model-selection result;
+  raw answers remain ignored.
 - Recorded standing authorization for liberal use of already-installed
   loopback Ollama models whenever useful during requested Phase 4 and Phase 5
   work. Local implementation diagnostics and formal calls no longer require
@@ -76,8 +86,7 @@ and this project follows [Semantic Versioning](https://semver.org/).
   exact retrieved documents/ranks beside each raw answer; and supplies offline
   verification/reanalysis. Default tests use fake chat invocations. Reference
   syntax and explicit abstention are observations only; assertion support,
-  answer correctness, relevance, and model quality remain unassessed. No R5
-  model was invoked or formal evidence created by this implementation.
+  answer correctness, relevance, and model quality remain unassessed.
 - Added Phase 5 retrieval fixtures and the provider-free R1–R3 lexical
   retrieval-evidence lifecycle, plus the opt-in R4 local Ollama embedding
   boundary. R4 requires a clean Git baseline, a loopback-only endpoint, an
