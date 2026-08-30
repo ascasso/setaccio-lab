@@ -26,6 +26,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Closed the authorized Phase 0–5 small-model tool-calling protocol in
+  documentation. Retained R3, R5, and R6 evidence verified offline; R5 and R6
+  remain the completed local-model executions. R4 formal embedding execution is
+  deferred because retained eligibility evidence did not establish an
+  already-installed model advertising Ollama's literal `embedding` capability.
+  This is not an embedding-quality, answer-correctness, human-support,
+  semantic-relevance, evaluator-ground-truth, model-ranking, selection,
+  release, tag, push, or branch-promotion decision.
 - Completed one formal Phase 5 R6 retrieval-relevancy matrix from clean commit
   `f704d989429a10769ce334276dc79de5bd7cd308` against the verified R5 answer
   evidence. The operationally selected already-installed `granite4.1:3b`

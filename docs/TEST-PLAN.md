@@ -1,9 +1,12 @@
 # Test Plan
 
 The tracked [deferred-work index](DEFERRED-WORK.md) records the completed Phase
-2 chat reuse proof and the remaining start gates for future providers,
-retrieval, Testcontainers, model types, and MCP work. The Phase 2 closeout did
-not place a live model call in default tests or CI.
+2 chat reuse proof, bounded Phase 3 cohort/portability work, Phase 4 fact-check
+output-budget closeout, and the Phase 5 retrieval protocol closeout. Retained
+R3, R5, and R6 evidence verifies offline; R4 embedding execution remains
+deferred until a separately authorized future slice establishes an
+already-installed model advertising Ollama's literal `embedding` capability.
+No completed phase places a live model call in default tests or CI.
 
 ## Near Term
 
