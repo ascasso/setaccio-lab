@@ -1807,9 +1807,13 @@ before allocation and between every arm. The runner persists each arm after
 its 12 one-attempt rows, retains any incomplete evidence on failure, and never
 retries or replaces a row. Its standalone verifier/reanalyzer requires every
 arm to match in all non-budget protocol identities; its report is a
-deterministic five-column descriptive aggregate only. The owner retains the
-interpretation decision after verified evidence is available; no interpretation
-decision is recorded by this protocol implementation or execution.
+deterministic five-column descriptive aggregate only. The owner subsequently
+reviewed the verified and reanalyzed study and recorded a flat valid-verdict
+yield of `2/12` at `64`–`128` tokens, with higher yields at `192` (`6/12`) and
+`256` (`12/12`) tokens. This is a protocol-specific association only, not
+evidence of a causal threshold, generally optimal budget, model reliability,
+general factuality, or a model ranking; it does not authorize evidence change
+or another run.
 
 ## Phase 4 exit criteria
 
