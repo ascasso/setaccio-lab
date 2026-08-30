@@ -35,9 +35,7 @@ provider finish reason.
 ## Owner-reviewed bounded interpretation
 
 The project owner reviewed the verified and reanalyzed five-arm study bound to
-the recorded commit and judge digest. In this exact study, valid-verdict yield
-was flat at `2/12` for the tested `64`–`128` token budgets and was higher at
-`192` tokens (`6/12`) and `256` tokens (`12/12`).
+the recorded commit and judge digest. In this exact study, valid-verdict yield was flat at 2/12 for the tested 64���128 token budgets and was higher at 192 tokens (6/12) and 256 tokens (12/12). I treat this as a protocol-specific association, not evidence of a causal threshold, a generally optimal budget, or model reliability.
 
 This is a protocol-specific association, not evidence of a causal threshold, a
 generally optimal budget, or model reliability. It makes no general factuality,
