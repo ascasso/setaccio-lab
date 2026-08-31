@@ -26,6 +26,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Upgraded Spring Boot to `4.1.1` and Spring AI to `2.0.1`.
+- Updated direct Commons Codec, JUnit, and Bouncy Castle dependencies to
+  `1.22.1`, `6.1.3`, and `1.85.2`; retained the current stable AssertJ,
+  SLF4J, Caffeine, and Gradle dependency-management versions.
 - Closed the authorized Phase 0–5 small-model tool-calling protocol in
   documentation. Retained R3, R5, and R6 evidence verified offline; R5 and R6
   remain the completed local-model executions. R4 formal embedding execution is

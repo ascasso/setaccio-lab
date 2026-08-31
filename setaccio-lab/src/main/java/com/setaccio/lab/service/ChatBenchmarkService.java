@@ -13,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.metadata.EmptyUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.ChatOptions;
@@ -115,6 +116,9 @@ public class ChatBenchmarkService {
             Usage usage = response.getMetadata() == null
                     ? null
                     : response.getMetadata().getUsage();
+            if (usage instanceof EmptyUsage) {
+                usage = null;
+            }
             return ChatBenchmarkRow.ok(PROVIDER, model, prompt, advisorMode, elapsedMillis(started),
                     promptTokens(usage), completionTokens(usage), text);
         } catch (Exception e) {
