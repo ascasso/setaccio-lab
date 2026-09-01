@@ -213,10 +213,10 @@ positive output-token limit increases exact `yes`/`no` verdict yield for the
 same immutable judge digest while keeping the prompt, fixtures, row order,
 temperature, seeds, one-attempt policy, and no-pull behavior fixed. That would
 be a new experiment with a new evidence directory, not a retry or correction
-of A5. A6 did not execute it. On 2026-08-25, the owner granted standing
-authorization for already-installed loopback Ollama calls throughout requested
-Phase 4/5 work, so the future budget experiment does not need another local-call
-or local-run approval once its implementation scope is explicitly started. Its
+of A5. A6 did not execute it. The standing local Ollama policy covers calls to
+already-installed loopback models throughout explicitly requested repository
+work, so the future budget experiment does not need another local-call or
+local-run approval once its implementation scope is explicitly started. Its
 paired-evidence and clean-baseline safeguards remain unchanged.
 
 Testcontainers disposition for this cycle: **defer**. Host-Ollama execution,
@@ -230,8 +230,9 @@ documents. Release and tag decisions remain deferred.
 
 The completed August closeout and every intentionally deferred follow-up are
 indexed in [DEFERRED-WORK.md](DEFERRED-WORK.md). The historical contract detail
-below does not authorize a new experiment, provider, container, release, or
-tag.
+below does not itself start a new experiment or authorize a provider,
+container, release, or tag. The standing local Ollama policy remains in force
+for explicitly requested work using already-installed loopback models.
 
 ### Rubric and fixtures
 

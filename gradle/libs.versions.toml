@@ -1,12 +1,12 @@
 [versions]
 assertj = "3.27.7"
-junit = "6.0.3"
-springBoot = "4.1.0"
-springAi = "2.0.0"
-commonsCodec = "1.22.0"
+junit = "6.1.3"
+springBoot = "4.1.1"
+springAi = "2.0.1"
+commonsCodec = "1.22.1"
 slf4j = "2.0.18"
 caffeine = "3.2.4"
-bouncycastle = "1.84"
+bouncycastle = "1.85.2"
 
 [libraries]
 assertj = { module = "org.assertj:assertj-core", version.ref = "assertj" }

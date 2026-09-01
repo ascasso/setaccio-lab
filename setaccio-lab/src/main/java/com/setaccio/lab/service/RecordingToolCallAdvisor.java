@@ -13,6 +13,7 @@ import org.springframework.ai.chat.client.advisor.api.AdvisorChain;
 import org.springframework.ai.chat.client.advisor.api.BaseAdvisor;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.ToolResponseMessage;
+import org.springframework.ai.chat.metadata.EmptyUsage;
 import org.springframework.ai.chat.metadata.Usage;
 
 final class RecordingToolCallAdvisor implements BaseAdvisor {
@@ -90,7 +91,7 @@ final class RecordingToolCallAdvisor implements BaseAdvisor {
     }
 
     private void accumulateUsage(Usage usage) {
-        if (usage == null) {
+        if (usage == null || usage instanceof EmptyUsage) {
             return;
         }
         if (usage.getPromptTokens() != null) {
