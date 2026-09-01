@@ -26,6 +26,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Clarified the standing local Ollama authorization: all explicitly requested
+  repository work may inspect, select, and invoke already-installed models on
+  a loopback endpoint without per-call, per-command, per-model, per-session,
+  or per-run approval. This does not start an unrequested scope or weaken the
+  provider-free default lifecycle, formal evidence safeguards, or separate
+  boundaries for pulls, remote providers, credentials, Docker, publication,
+  pushes, releases, and tags.
 - Upgraded Spring Boot to `4.1.1` and Spring AI to `2.0.1`.
 - Updated direct Commons Codec, JUnit, and Bouncy Castle dependencies to
   `1.22.1`, `6.1.3`, and `1.85.2`; retained the current stable AssertJ,

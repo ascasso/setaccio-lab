@@ -479,7 +479,8 @@ model to its full Ollama digest before output allocation, and then runs exactly
 three locked prompts twice in sequential order with temperature `0.0`, seeds
 `42`/`43`, one attempt, and pull strategy `never`.
 
-Running it contacts local Ollama and requires separate explicit authorization:
+Running it contacts local Ollama and is covered by the standing authorization
+for already-installed loopback models documented below:
 
 ```bash
 ./gradlew :setaccio-lab:chatMatrix \
@@ -960,18 +961,18 @@ valid matching `no` verdicts. A6 interpreted that immutable evidence without a
 provider call or row replacement. All empty responses reached the explicit
 `64`-token output limit, which registers only a later, separately implemented
 and pre-registered output-budget compatibility hypothesis; it does not
-establish causation. The 2026-08-25 standing Phase 4/5 local Ollama
-authorization now removes the need
-for another local-call or local-run approval once that implementation scope is
-explicitly started.
+establish causation. The standing local Ollama authorization below removes the
+need for another local-call or local-run approval once the requested
+implementation or run scope is explicitly started.
 Testcontainers is deferred for this cycle because container provisioning would
 not answer that verdict-yield question. No additional environment variable,
 Docker setup, rerun, release, or tag is required by the A6 closeout.
 
-## Phase 4 and Phase 5 Local Ollama Authorization
+## Standing Local Ollama Authorization
 
-As of 2026-08-25, requested Phase 4 and Phase 5 work has standing authorization
-to use local Ollama liberally whenever useful. No additional per-call,
+As of 2026-09-01, all explicitly requested work in this repository has
+standing authorization to use local Ollama whenever useful, limited to models
+already installed on a loopback Ollama endpoint. No additional per-call,
 per-command, per-model, per-session, or per-run approval is required to:
 
 - start or connect to Ollama on a loopback endpoint;
@@ -982,7 +983,8 @@ per-command, per-model, per-session, or per-run approval is required to:
 - repeat disposable diagnostics and restart a complete formal protocol when
   its clean-baseline rule requires fresh evidence.
 
-This standing authorization does not make live Ollama part of `test`, `check`,
+This standing authorization does not itself start an unrequested task or
+slice, and it does not make live Ollama part of `test`, `check`,
 `build`, application startup, or CI. Provider-free tests must pass without an
 Ollama service. Disposable calls must not be promoted into formal evidence,
 and formal rows retain their exact attempt policy: no selective retry, repair,
@@ -993,7 +995,9 @@ preflight. Phase 4's 64/256 arms must still run from the same clean commit.
 The scope is limited to already-installed models on loopback Ollama. It does
 not authorize pulls, downloads, removals, renames, silent substitutions,
 non-loopback endpoints, remote providers, credentials, spending, Docker,
-publication of ignored raw output, pushes, releases, or tags.
+publication of ignored raw output, pushes, releases, or tags. New formal
+experiments still need their explicit scope-start request and slice-specific
+preflight, but not another local-call or local-run authorization.
 
 ### R5 retrieval answer matrix
 
