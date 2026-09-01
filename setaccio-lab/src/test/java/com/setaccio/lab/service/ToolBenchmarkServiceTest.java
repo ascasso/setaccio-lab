@@ -241,14 +241,14 @@ class ToolBenchmarkServiceTest {
                             .extracting(callback -> callback.getToolDefinition().name())
                             .containsExactly("toolSearchTool");
                     assertThat(options.getToolCallbacks().getFirst().getToolDefinition().inputSchema())
-                            .contains("\"arg0\"");
+                            .contains("\"query\"");
                     yield chatResponse(AssistantMessage.builder()
                                     .content("")
                                     .toolCalls(List.of(new AssistantMessage.ToolCall(
                                         "search-1",
                                         "function",
                                         "toolSearchTool",
-                                        "{\"arg0\":\"add numbers\"}")))
+                                        "{\"query\":\"add numbers\"}")))
                                     .build(),
                             10,
                             2);

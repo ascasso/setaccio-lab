@@ -74,7 +74,7 @@ class ChatBenchmarkServiceTest {
         when(ollamaChatModel.getOptions()).thenReturn(OllamaChatOptions.builder().model("stub-model").build());
         ChatResponse response = mock(ChatResponse.class);
         when(response.getResult()).thenReturn(new Generation(new AssistantMessage("answer")));
-        when(response.getMetadata()).thenReturn(null);
+        when(response.getMetadata()).thenReturn(ChatResponseMetadata.builder().build());
         when(ollamaChatModel.call(any(Prompt.class))).thenReturn(response);
 
         ChatBenchmarkService service = newService(outputDir, ollamaChatModel);
