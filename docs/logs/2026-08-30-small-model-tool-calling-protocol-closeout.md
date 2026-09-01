@@ -6,6 +6,13 @@ The owner-approved Phase 0–5 protocol closeout records completed authorized
 work without starting a new experiment. It preserves the historical packets and
 ignored evidence unchanged.
 
+The current standing local Ollama policy supersedes any narrower execution
+boundary in this historical closeout: all explicitly requested repository work
+may inspect, select, and invoke already-installed models through loopback
+Ollama without per-call or per-run approval. The closeout still does not start
+an unrequested slice or waive its protocol, evidence, no-pull, or provider-free
+default safeguards.
+
 ## Retained verified evidence
 
 The following saved evidence was verified offline on 2026-08-30. No verifier
@@ -30,8 +37,8 @@ establish an already-installed local model advertising Ollama's literal
 `embedding` capability. An `embedding length` field is insufficient for this
 gate.
 
-Before a future R4 slice may begin, it needs separate explicit authorization,
-a read-only eligibility check showing the literal capability and complete model
+Before a future R4 slice may begin, it needs an explicit scope-start request, a
+read-only eligibility check showing the literal capability and complete model
 digest, and a clean-baseline lock of the tag, corpus/query identities,
 chunking, normalization, distance metric, top-K, timeout, one attempt, and
 no-pull policy. The opt-in runner must create fresh non-overwriting ignored
@@ -41,8 +48,10 @@ by itself authorize execution.
 
 ## Still unauthorized
 
-This closeout does not authorize model inspection or selection for R4, model
-pulls or installs, provider invocation, credentials, remote providers,
-spending, Docker, evidence reanalysis or mutation, formal-matrix reruns,
-repairs or replacements, raw-output publication, human semantic review,
-release, tag, push, branch promotion, or successor work.
+This closeout does not itself start R4, a formal-matrix rerun, evidence
+reanalysis or mutation, human semantic review, release, tag, push, branch
+promotion, or successor work. The standing policy covers local inspection,
+selection, and invocation of already-installed loopback models for explicitly
+requested work. It does not authorize model pulls or installs, credentials,
+remote providers, spending, Docker, repairs or replacements of retained
+evidence, or raw-output publication.

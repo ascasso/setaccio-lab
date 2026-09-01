@@ -214,18 +214,19 @@ No completed phase places a live model call in default tests or CI.
   offline tests before a future runner can consume them.
 - Maintain the implemented `FactCheckingEvaluator` recording boundary against
   the balanced public claim/context fixture cohort and an explicitly selected
-  host-Ollama judge. Requested Phase 4/5 work has standing authorization for
-  already-installed loopback Ollama calls; no per-call or per-run approval is
-  required. Keep every live task outside the default lifecycle. Follow
+  host-Ollama judge. All explicitly requested repository work has standing
+  authorization for calls to already-installed loopback Ollama models; no
+  per-call or per-run approval is required. Keep every live task outside the
+  default lifecycle. Follow
   [`docs/LOCAL-AI-EVALUATION-PLAN.md`](LOCAL-AI-EVALUATION-PLAN.md).
 - R6 may invoke `RelevancyEvaluator` only through its explicit opt-in task and
   only with actual documents preserved by a verified R5 answer run; ordinary
   fixture context is not a RAG benchmark.
 - Keep R0–R3 formal retrieval tasks and evidence provider-free. Standing local
-  Ollama authorization may support separate disposable diagnostics, and R4–R6
-  may use fully recorded installed local embedding, answer, and evaluator
-  models. Default tests must use fakes or recorded fixtures and run without
-  Ollama.
+  Ollama authorization may support separate disposable diagnostics, and
+  explicitly requested R4–R6 work may use fully recorded installed local
+  embedding, answer, and evaluator models. Default tests must use fakes or
+  recorded fixtures and run without Ollama.
 - Keep R4 embedding generation behind the explicit `retrievalEmbedding` task:
   require a clean full Git baseline, loopback-only endpoint, exact installed
   requested/effective model and full digest, and literal `embedding` capability

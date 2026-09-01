@@ -1618,11 +1618,12 @@ backend-normalized result.
 
 ---
 
-# Standing local Ollama authorization for Phases 4 and 5
+# Standing local Ollama authorization
 
-Within work explicitly requested under Phase 4 or Phase 5, local Ollama may be
-used liberally whenever it is useful. No additional per-call, per-command,
-per-model, per-session, or per-run permission is required. Codex may:
+Within any work explicitly requested in this repository, local Ollama may be
+used liberally whenever it is useful, limited to models already installed on a
+loopback endpoint. No additional per-call, per-command, per-model,
+per-session, or per-run permission is required. Codex may:
 
 - start or connect to the loopback Ollama service;
 - inspect the local runtime, installed inventory, and model metadata;
@@ -1670,8 +1671,8 @@ Observed prior association:
 
 The earlier evidence did not establish causation.
 
-The Phase 4/5 standing local Ollama authorization applies. Local calls may be
-made whenever useful during requested Phase 4 work. The provider-free test and
+The standing local Ollama authorization applies. Local calls may be made
+whenever useful during explicitly requested Phase 4 work. The provider-free test and
 offline-analysis contracts remain provider-free, while the formal paired arms
 may run once their runner, evidence lifecycle, parity checks, and clean-baseline
 guards are ready; they do not need another execution-authorization request.
@@ -1846,8 +1847,8 @@ Create a genuine retrieval path that preserves retrieved documents and can suppo
 
 This phase is intentionally later because it introduces a new model/evaluation surface rather than reusing an existing tool protocol.
 
-The Phase 4/5 standing local Ollama authorization applies throughout this
-phase. R0–R3 retain provider-free formal deliverables so corpus, fixture,
+The standing local Ollama authorization applies throughout this phase. R0–R3
+retain provider-free formal deliverables so corpus, fixture,
 lexical-retrieval, and evidence correctness can be established independently
 of model behavior. Separate disposable Ollama diagnostics are still allowed
 when useful. R4–R6 may use already-installed local Ollama embedding, answer,
@@ -2332,8 +2333,10 @@ permits rerunning R5/R6; its formal embedding execution is deferred.
 
 ## Future R4 start gate
 
-A later R4 execution requires a new, explicit authorization and all of the
-following before any formal output directory is allocated:
+A later R4 execution requires an explicit request to start the deferred slice
+and all of the following before any formal output directory is allocated. The
+standing local Ollama authorization covers its already-installed loopback
+inspection and invocation; it does not start R4 or waive these gates:
 
 1. A read-only eligibility check must establish one already-installed local
    Ollama candidate with a complete immutable digest and a literal `embedding`
@@ -2362,11 +2365,11 @@ not itself authorize a new R4 run.
 # Codex Execution Runbook
 
 This section turns the research plan into bounded implementation packets. It is
-an execution aid, not standing implementation authorization. A packet may
-begin only when its dependency and scope-start lines are satisfied. The one
-exception is already explicit above: once Phase 4 or Phase 5 work is requested,
-already-installed loopback Ollama invocation has standing authorization and
-does not require a second per-call or per-run approval.
+an execution aid, not standing scope-start authorization. A packet may begin
+only when its dependency and scope-start lines are satisfied. Once repository
+work is explicitly requested, already-installed loopback Ollama invocation
+has standing authorization and does not require a second per-call or per-run
+approval.
 
 > **Closeout status (2026-08-30):** The historical Phase 0–4 packets are
 > complete. In Phase 5, R0–R3, R5, and R6 are complete; retained R3, R5, and
@@ -2391,9 +2394,9 @@ high-volume choice. For this plan:
   Sol on every fixture, report, or documentation packet is unnecessary.
 - Model choice never authorizes a model pull, Docker use, credential use,
   spending, push, release, or work on a later packet. It also does not authorize
-  a remote-provider call. For requested Phase 4/5 work only, the standing
-  authorization already covers calls to selected, already-installed local
-  Ollama models.
+  a remote-provider call. For any explicitly requested repository work, the
+  standing authorization already covers calls to selected, already-installed
+  local Ollama models.
 
 The routing labels are workflow guidance, not benchmark results about Codex
 models. A human reviewer remains responsible for authorization, experimental
@@ -2415,12 +2418,11 @@ listed repository precedent directly. Confirm the dependency gate from tracked
 source and Git history; do not infer it from this prompt.
 
 Stay inside the packet's allowed paths and preserve unrelated worktree changes.
-Do not implement a later slice. For requested Phase 4/5 work, already-installed
-loopback Ollama calls are standing-authorized whenever useful; no separate
-exact-action approval is required. For other phases, do not make a live Ollama
-call unless currently authorized. Never infer permission here for a remote-
-provider call, model pull, Docker use, credential access, publication of
-ignored evidence, push, release, or tag.
+Do not implement a later slice. For any explicitly requested repository work,
+already-installed loopback Ollama calls are standing-authorized whenever
+useful; no separate exact-action approval is required. Never infer permission
+here for an unrequested scope, remote-provider call, model pull, Docker use,
+credential access, publication of ignored evidence, push, release, or tag.
 
 Implement the smallest suite-specific design satisfying the locked contract.
 Do not widen existing main-code visibility or create generic abstractions just
@@ -2617,14 +2619,15 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 - **Routing:** Terra may operate the approved command and draft the bounded
   report; Sol is optional for review. Luna is not the live-run operator.
 - **Dependency:** T1.8 and the full provider-free verification pass from one
-  clean commit; separate explicit user approval of the exact command and model.
+  clean commit; an explicit request to run the locked protocol and identify the
+  model. Standing local Ollama authorization covers the local invocation.
 - **Deliverable:** one immutable 16-logical-row run with every observed provider
   turn and call retained, offline verify/reanalyze, then a public-safe aggregate
   closeout with no raw-output publication.
 - **Stop:** any missing model, digest drift, dirty worktree, output collision,
-  required pull, protocol drift, or absent explicit authorization stops before
-  allocation or invocation. A model-behavior failure remains a row and does not
-  trigger a replacement call.
+  required pull, protocol drift, or absent explicit scope-start request stops
+  before allocation or invocation. A model-behavior failure remains a row and
+  does not trigger a replacement call.
 
 ## Phase 2 packets
 

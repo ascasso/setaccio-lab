@@ -21,6 +21,24 @@ untracked; do not bypass or weaken those rules without explicit instruction.
 - Never push without explicit user instruction. Commit every completed,
   in-scope change after appropriate verification.
 
+## Standing Local Ollama Authorization
+
+All local Ollama calls to already-installed models are authorized for
+explicitly requested work in this repository. This includes starting or
+connecting to a loopback Ollama service, inspecting its installed inventory
+and model metadata, selecting an installed model, and invoking it. No
+additional per-call, per-command, per-model, per-session, or per-run approval
+is required.
+
+This authorization does not itself start an unrequested task or slice, and it
+does not make live Ollama part of default tests, `check`, `build`, application
+startup, or CI. Provider-free tests and offline verification must remain
+provider-free. Formal runs must still use their locked clean-baseline,
+identity, attempt, evidence-integrity, and no-selective-retry rules. Model
+pulls or downloads, removals, renames, silent substitutions, non-loopback
+endpoints, remote providers, credentials, spending, Docker, publication of
+ignored output, pushes, releases, and tags remain separately gated.
+
 ## Repository Purpose
 
 `setaccio-lab` is the public, Apache-2.0 side of the Setaccio split.
@@ -538,8 +556,10 @@ Pending and separately deferred:
   qualifier. This does not authorize another Phase 3 invocation, rerun,
   replacement row, model pull, or evidence-based model selection. The
   completed Phase 4 and bounded Phase 5 closeouts preserve their ignored
-  evidence and no longer authorize successor runs. Default tests and CI remain
-  provider-free; formal evidence remains immutable and protocol-bound. Pulls,
+  evidence and do not themselves start successor runs. The standing local
+  Ollama authorization above covers local calls for explicitly requested and
+  protocol-allowed work. Default tests and CI remain provider-free; formal
+  evidence remains immutable and protocol-bound. Pulls,
   downloads, removals, renames, silent substitutions, remote providers,
   credentials, spending, Docker, publication of ignored output, pushes,
   releases, and tags remain separately gated.
@@ -558,15 +578,18 @@ plan, changelog, and dated log when the status of a deferred item changes.
 - Phase 4 is closed: the initial F1–F4 work and the separately planned five-arm
   breakpoint follow-up are retained as immutable evidence. Do not rerun,
   repair, replace, alter, or publish an arm. Any later output-budget experiment
-  requires a separate authorization and a fresh clean-baseline protocol; it is
-  not a continuation of the completed Phase 4 work.
+  requires an explicit scope-start request and a fresh clean-baseline protocol;
+  its local Ollama calls are covered by the standing authorization above and it
+  is not a continuation of the completed Phase 4 work.
 - Phase 5 is closed as a bounded protocol closeout. R3, R5, and R6 retained
   evidence verifies offline; R5 and R6 are the completed local-model
-  executions. R4 remains deferred until a separately authorized future slice
+  executions. R4 remains deferred until an explicitly requested future slice
   can establish an already-installed local model with Ollama's literal
   `embedding` capability, then satisfy the locked clean-baseline, no-pull,
-  one-attempt, non-overwriting-evidence contract. Do not start that slice,
-  inspect or select a model for it, or rerun R3/R5/R6 under this closeout.
+  one-attempt, non-overwriting-evidence contract. This closeout does not start
+  that slice or authorize a formal rerun, but the standing authorization above
+  covers local inspection, selection, and invocation once that work is
+  explicitly requested.
 - Keep any later container-backed work isolated in `setaccio-testcontainers`
   and justify it with a provisioning or service-connection question distinct
   from the completed host-Ollama fact-check cycle.
@@ -664,8 +687,10 @@ Evaluation/Testcontainers phase:
 - The bounded Phase 5 closeout leaves R3, R5, and R6 retained evidence
   unchanged. R4 remains deferred until a separate future slice proves an
   already-installed model's literal `embedding` capability and locks the full
-  clean-baseline, no-pull, one-attempt contract. This closeout does not
-  authorize an Ollama inspection, selection, invocation, or model pull.
+  clean-baseline, no-pull, one-attempt contract. This closeout does not start
+  R4 or a formal rerun; the standing local Ollama authorization covers
+  inspection, selection, and invocation of already-installed loopback models
+  when that work is requested. Model pulls remain separately gated.
 - The completed R5 run consumed verified retrieval evidence without rerunning
   retrieval, and R6 consumed that verified R5 evidence without rerunning answer
   generation. Both preserve retrieved context/ranks and keep retrieval
