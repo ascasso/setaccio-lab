@@ -11,6 +11,11 @@ work without per-call or per-run approval. A listing here does not itself
 start an unrequested scope or authorize Docker use, credentials, spending,
 remote providers, a release, or a tag.
 
+For the deferred R4 embedding-retrieval slice, the top planning candidate is
+the dedicated `qwen3-embedding` family, beginning with versioned
+`qwen3-embedding:0.6b`. This is only the first candidate to inspect; it does
+not establish installed capability, model quality, or formal-run authorization.
+
 ## Completed Boundary
 
 The local fact-check cycle is complete: its versioned prompt and

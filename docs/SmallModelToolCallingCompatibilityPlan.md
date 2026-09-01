@@ -19,6 +19,12 @@ authorized Phase 0–5 protocol work:
   eligibility evidence did not establish an already-installed local model
   advertising Ollama's literal `embedding` capability.
 
+The planning priority for a future R4 run is the dedicated Qwen3 Embedding
+family, starting with the versioned `qwen3-embedding:0.6b` tag as the first
+candidate to inspect. This is a candidate priority only: it is not proof that
+the tag is installed or embedding-capable on the execution host, and it does
+not authorize a pull or formal run.
+
 This closeout authorizes no R4 execution, model inspection, model pull, Docker
 use, credential use, remote-provider expenditure, evidence mutation,
 reanalysis, rerun, repair, replacement, release, tag, push, or branch
@@ -1952,6 +1958,15 @@ permission. Lock the selected tag, full digest, and retrieval settings before
 formal vector generation. A model pull or remote embedding provider remains a
 separate authorization boundary.
 
+Candidate priority: use the dedicated `qwen3-embedding` family first, beginning
+with the versioned `qwen3-embedding:0.6b` tag. The smaller versioned tag is the
+initial local candidate for this small, opt-in slice; `:latest`, `:4b`, and
+`:8b` are not substitutes for it. Confirm the requested tag's installed full
+digest and literal `embedding` capability through the R4 gate before any
+invocation. If that candidate is absent or fails the gate, stop and record the
+eligibility result rather than silently pulling, substituting, or selecting a
+different tag.
+
 Retain:
 
 - embedding provider;
@@ -2341,7 +2356,8 @@ inspection and invocation; it does not start R4 or waive these gates:
 1. A read-only eligibility check must establish one already-installed local
    Ollama candidate with a complete immutable digest and a literal `embedding`
    capability in its retained `ollama show` output. An `embedding length` field
-   alone does not satisfy this gate. No model may be pulled, substituted, or
+   alone does not satisfy this gate. Begin with the prioritized
+   `qwen3-embedding:0.6b` candidate. No model may be pulled, substituted, or
    silently selected to satisfy it.
 2. From one clean Git baseline, lock the candidate tag and full digest together
    with the public embedding prompt/contract, corpus and query identities,
@@ -2952,6 +2968,10 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 
 - **Routing:** Sol preferred; Terra acceptable with Sol or human architecture
   review. Not Luna-ready.
+- **Candidate priority:** inspect the installed versioned
+  `qwen3-embedding:0.6b` tag first. This is a planning preference, not an
+  eligibility result, model-quality conclusion, pull authorization, or formal
+  run authorization.
 - **Dependency:** R3 completed and a recorded provider/model, chunking,
   normalization, distance, and top-K contract. An already-installed local
   Ollama model may be selected and run under standing authorization; a remote

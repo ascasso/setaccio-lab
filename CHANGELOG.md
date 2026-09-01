@@ -33,6 +33,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
   provider-free default lifecycle, formal evidence safeguards, or separate
   boundaries for pulls, remote providers, credentials, Docker, publication,
   pushes, releases, and tags.
+- Recorded the dedicated `qwen3-embedding` family as the top planned candidate
+  for the deferred R4 slice, beginning with versioned tag
+  `qwen3-embedding:0.6b`. This is a planning priority only: R4 still requires
+  read-only installed-model eligibility proof, including a complete digest and
+  literal Ollama `embedding` capability; no pull, substitution, or formal run
+  is authorized by this change.
 - Upgraded Spring Boot to `4.1.1` and Spring AI to `2.0.1`.
 - Updated direct Commons Codec, JUnit, and Bouncy Castle dependencies to
   `1.22.1`, `6.1.3`, and `1.85.2`; retained the current stable AssertJ,

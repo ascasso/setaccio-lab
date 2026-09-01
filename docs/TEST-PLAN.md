@@ -233,6 +233,9 @@ No completed phase places a live model call in default tests or CI.
   from `ollama show` (an `embedding length` field is not sufficient). Use one
   batch, no pull, one attempt, fixed whole-document chunking, unit-L2
   normalization, deterministic cosine tie-breaking, and explicit top K.
+  The planning priority is the dedicated `qwen3-embedding` family, beginning
+  with the versioned `qwen3-embedding:0.6b` tag; this does not authorize a pull,
+  substitute, or formal run.
   Atomically reserve the fresh ignored output directory before the provider
   attempt, retain a failed reservation as non-reusable diagnostic state, and
   re-check the installed full model identity before writing evidence. Retain

@@ -151,7 +151,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-30)
+## Current State Snapshot (as of 2026-09-01)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -315,7 +315,9 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   not rerun, repair, replace, or publish its raw output. R4 formal embedding
   execution remains deferred because retained eligibility evidence did not
   establish an already-installed local model advertising Ollama's literal
-  `embedding` capability.
+  `embedding` capability. The dedicated `qwen3-embedding` family, beginning
+  with versioned `qwen3-embedding:0.6b`, is the top planning candidate for a
+  future R4 inspection; this does not authorize a pull, substitution, or run.
 - Phase 5 R6 completed one formal relevancy-evaluation matrix on 2026-08-30
   from clean commit `f704d989429a10769ce334276dc79de5bd7cd308`, consuming the
   verified R5 evidence without rerunning retrieval or answer generation. The
