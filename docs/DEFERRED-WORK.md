@@ -157,6 +157,33 @@ hosted provider ID has different reproducibility semantics from an immutable
 local digest. No answer-quality, performance, statistical reliability, model
 ranking, endpoint migration, or future remote-call authorization is claimed.
 
+## Publication Boundary
+
+On 2026-09-02 the project owner authorized tracking deterministic run summaries
+and their evidence manifests in the repository, so a reader can inspect the
+shape of what a formal run produces. This is recorded in
+[logs/2026-09-02-public-evidence-and-readme.md](logs/2026-09-02-public-evidence-and-readme.md).
+
+Permitted, for a run whose closeout is already public-safe:
+
+- a byte-identical copy of its deterministic `SUMMARY.md`;
+- a byte-identical copy of its `manifest.json`;
+- placed under `docs/evidence/<run-id>/`, alongside a note explaining that a
+  publication copy is partial and therefore does not pass the suite's offline
+  verification task.
+
+Still ignored and unpublished, unchanged by this decision:
+
+- raw result artifacts, model responses, embedding vectors, evaluator output,
+  and per-row payloads;
+- the private local vision corpus and any filled case metadata;
+- local blog drafts under `docs/blog/`.
+
+Copying is read-only with respect to the source. It is not a rerun, repair,
+replacement, reanalysis, or mutation, and it does not weaken any closeout gate,
+retention rule, or interpretation boundary. It authorizes no model pull, remote
+provider, credential, Docker use, spending, release, tag, or push.
+
 ## Deferred Through the Current Roadmap
 
 The following do not enter the current three-phase path unless the plan is

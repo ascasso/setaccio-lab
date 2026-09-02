@@ -9,6 +9,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Published the first tracked evidence example under `docs/evidence/`. It holds
+  byte-identical copies of the Phase 5 R4 run's deterministic `SUMMARY.md` and
+  `manifest.json`, with the raw result artifact deliberately omitted. This moves
+  the documentation publication boundary to allow tracked summaries and
+  manifests while raw output, vectors, and model responses remain ignored. A
+  publication copy is partial by construction and does not pass
+  `retrievalEmbeddingVerify`; `docs/evidence/README.md` records why and what a
+  reader can check instead. No evidence was rerun, repaired, replaced,
+  reanalyzed, or mutated.
+
 - Completed the explicitly requested Phase 5 R4 embedding-retrieval run on
   2026-09-02 from clean commit `4c13b4a` using the prioritized
   `qwen3-embedding:0.6b` tag, which the project owner pulled that day before
@@ -51,6 +61,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
   against its declared prompt condition.
 
 ### Changed
+
+- Restructured `README.md` from 391 to 214 lines so it leads with results
+  instead of a slice-by-slice capability narration. A new `Findings` section
+  states the Phase 4 output-budget yield curve and the T3.6 single all-pass
+  qualifier with their original closeout qualifications carried over unchanged,
+  and records the cross-phase empty-response and first-turn `PROVIDER_FAILURE`
+  observation explicitly as an open question rather than a finding. A new
+  `How evidence works` section promotes the evidence lifecycle and links the
+  published example. The previous capability narration moved to
+  `docs/CAPABILITIES.md` with only heading-level and relative-link adjustments.
 
 - Pinned the tool-call limits applied by both tool paths through
   `ToolCallLimitPolicy` rather than inheriting Spring AI `2.0.1` defaults. The
