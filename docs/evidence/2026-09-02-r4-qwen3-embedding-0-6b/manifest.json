@@ -1,0 +1,55 @@
+{
+  "manifestVersion" : 1,
+  "suite" : "public-safe-retrieval-embedding",
+  "runId" : "2026-09-02-r4-qwen3-embedding-0-6b",
+  "generatedAt" : 1788344144.732600000,
+  "codeBaseline" : {
+    "gitCommit" : "4c13b4ac24f4b0d39497f662b9df0c930169f35f",
+    "workingTreeDirty" : false
+  },
+  "frameworkVersions" : {
+    "springBoot" : "4.1.1",
+    "springAi" : "2.0.1"
+  },
+  "executionEngine" : "spring-ai-ollama-api-embed",
+  "settings" : {
+    "protocolVersion" : 1,
+    "runSettings" : {
+      "provider" : "ollama",
+      "endpointCategory" : "loopback-local",
+      "topK" : 5,
+      "chunkingPolicy" : "whole-document-v1",
+      "normalizationPolicy" : "unit-l2-v1",
+      "distanceMetric" : "cosine-descending-document-id",
+      "requestTimeoutMillis" : 120000,
+      "maxAttempts" : 1
+    },
+    "queryCatalogVersion" : 1,
+    "queryCatalogId" : "public-safe-retrieval-query-fixtures",
+    "vectorDimension" : 1024,
+    "documentCount" : 12,
+    "corpusCatalogVersion" : 1,
+    "corpusCatalogId" : "public-safe-retrieval-corpus",
+    "executionStrategy" : "single-batch-one-attempt",
+    "queryCatalogSha256" : "ced4a31b13542a47d171a88879400fe649a0de985eeecd4ca58fea4feefb59b5",
+    "pullModelStrategy" : "never",
+    "queryCount" : 14,
+    "corpusCatalogSha256" : "2c3f72f153cfb097caeef73ae210a66265af054b585b1b2a292162f289087b9d",
+    "modelIdentity" : {
+      "requestedModel" : "qwen3-embedding:0.6b",
+      "effectiveModel" : "qwen3-embedding:0.6b",
+      "digest" : "ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d"
+    }
+  },
+  "artifacts" : [ {
+    "path" : "retrieval-embedding-results.json",
+    "role" : "raw-result",
+    "sizeBytes" : 379792,
+    "sha256" : "aa56b1add65bdd9506676170f33df3fedd580f6d16b9dc48b9a80b04362b716a"
+  }, {
+    "path" : "SUMMARY.md",
+    "role" : "summary",
+    "sizeBytes" : 1597,
+    "sha256" : "d47408f5139c0183e536b58b761d8c7d4e79b918af0c7c54e32e599f602f7662"
+  } ]
+}

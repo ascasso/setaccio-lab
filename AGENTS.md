@@ -2,8 +2,25 @@
 
 This file is the repo-local guide for Codex, Claude Code, and other AI agents working in this repository. Follow it unless the user gives a direct conflicting instruction or a higher-priority system rule applies. When in doubt, preserve the public/private boundary, do less, and ask.
 
-Commit every completed, in-scope change after appropriate verification. Do not
-push unless the user explicitly asks.
+## Standing Work Loop
+
+A completed, in-scope change is finished only when all four are done:
+
+1. **Verify.** Run the relevant Gradle build and any affected provider-free
+   test task.
+2. **Document.** Update every tracked document the change makes stale, in the
+   same change: `README.md`, `docs/CAPABILITIES.md`, `docs/ENVIRONMENT.md`,
+   `docs/TEST-PLAN.md`, `docs/DEFERRED-WORK.md`, and the relevant plan.
+3. **Log.** Add one `## [Unreleased]` entry to `CHANGELOG.md` under the correct
+   Keep a Changelog category, and a dated `docs/logs/` entry recording what was
+   authorized, what was done, what was verified, and what the change does not
+   claim or authorize.
+4. **Commit.** One focused commit per inseparable change. Report the modified
+   files and the verification run.
+
+Do not push. Pushing is separately gated: push only when the user asks in that
+session, never as the tail of another task, and never because an earlier
+session was allowed to push.
 
 Read and follow the repository's `.gitignore` before creating, inspecting, or
 including files. Treat its rules as authoritative for generated outputs,
@@ -18,8 +35,8 @@ untracked; do not bypass or weaken those rules without explicit instruction.
 - Never add credentials, tokens, API keys, or private endpoint details to tracked files.
 - Never add Docker or Testcontainers dependencies to `setaccio-lab`; keep them in `setaccio-testcontainers`.
 - Never make `setaccio-lab` depend on `setaccio-testcontainers`.
-- Never push without explicit user instruction. Commit every completed,
-  in-scope change after appropriate verification.
+- Never push without explicit user instruction, in any session, including
+  immediately after committing completed work.
 
 ## Standing Local Ollama Authorization
 
@@ -37,7 +54,9 @@ provider-free. Formal runs must still use their locked clean-baseline,
 identity, attempt, evidence-integrity, and no-selective-retry rules. Model
 pulls or downloads, removals, renames, silent substitutions, non-loopback
 endpoints, remote providers, credentials, spending, Docker, publication of
-ignored output, pushes, releases, and tags remain separately gated.
+ignored output beyond the deterministic summaries and manifests the Publication
+Boundary in `docs/DEFERRED-WORK.md` permits, pushes, releases, and tags remain
+separately gated.
 
 ## Repository Purpose
 
@@ -151,7 +170,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-09-01)
+## Current State Snapshot (as of 2026-09-02)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -313,11 +332,12 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   and bracketed-reference observations; it is not an answer-correctness,
   semantic-support, relevance, quality, ranking, or model-selection claim. Do
   not rerun, repair, replace, or publish its raw output. R4 formal embedding
-  execution remains deferred because retained eligibility evidence did not
-  establish an already-installed local model advertising Ollama's literal
-  `embedding` capability. The dedicated `qwen3-embedding` family, beginning
-  with versioned `qwen3-embedding:0.6b`, is the top planning candidate for a
-  future R4 inspection; this does not authorize a pull, substitution, or run.
+  execution completed once on 2026-09-02 with the `qwen3-embedding:0.6b` tag,
+  which the owner pulled that day and whose literal `embedding` capability was
+  confirmed by read-only inspection before any evidence directory was
+  allocated. Its evidence is immutable; a further run requires a new
+  scope-start request, a fresh capability and digest check, and a new dated
+  directory.
 - Phase 5 R6 completed one formal relevancy-evaluation matrix on 2026-08-30
   from clean commit `f704d989429a10769ce334276dc79de5bd7cd308`, consuming the
   verified R5 evidence without rerunning retrieval or answer generation. The
@@ -393,6 +413,12 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   smallest-capable, ranking, or selection claim. Every new run remains
   separately unauthorized; do not rerun, replace, repair, pull, or customize
   any cohort model.
+- Tracked documentation splits the front door from the detail: `README.md`
+  leads with findings and the evidence model, `docs/CAPABILITIES.md` carries
+  the slice-by-slice surface description, and `docs/evidence/` holds published
+  copies of deterministic summaries and manifests under the Publication
+  Boundary. A publication copy omits its raw artifact and therefore does not
+  pass the suite's offline verifier; that is intended.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -567,8 +593,9 @@ Pending and separately deferred:
   protocol-allowed work. Default tests and CI remain provider-free; formal
   evidence remains immutable and protocol-bound. Pulls,
   downloads, removals, renames, silent substitutions, remote providers,
-  credentials, spending, Docker, publication of ignored output, pushes,
-  releases, and tags remain separately gated.
+  credentials, spending, Docker, publication of ignored output beyond what the
+  Publication Boundary in `docs/DEFERRED-WORK.md` permits, pushes, releases,
+  and tags remain separately gated.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing
@@ -758,9 +785,9 @@ The lab app uses port `8082`.
 
 ## Git Workflow
 
-Commit every completed, in-scope change after appropriate verification. Keep
-unrelated user changes unstaged and uncommitted. Do not push unless the user
-explicitly asks; report the modified files and tests run with each commit.
+Follow the Standing Work Loop above for every change: verify, document, log,
+commit. Keep unrelated user changes unstaged and uncommitted. Report the
+modified files and the verification run with each commit.
 
 Standing closeout instruction for workflow-guidance corrections:
 
@@ -783,5 +810,7 @@ Before committing in a future session:
 
 - Run the relevant Gradle build.
 - Check `git status --short`.
-- Confirm no private docs or generated outputs are staged.
+- Confirm no private docs are staged, and no generated output beyond what the
+  Publication Boundary in `docs/DEFERRED-WORK.md` permits (deterministic
+  summaries and manifests under `docs/evidence/`).
 - Confirm no `.DS_Store`, `.gradle`, or `build` outputs are tracked.

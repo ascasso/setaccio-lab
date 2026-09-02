@@ -20,6 +20,35 @@ the retained ignored evidence verifies offline. This establishes no embedding
 quality, semantic relevance, or model ranking or selection conclusion; see
 [logs/2026-09-02-phase5-r4-embedding-run.md](logs/2026-09-02-phase5-r4-embedding-run.md).
 
+## Evidence Retention Status
+
+Read every "verifies offline" statement in this index as a record of what was
+true at that closeout, not as a claim about what is present today.
+
+Formal evidence is written under ignored `build/` directories, which ordinary
+Gradle cleaning removes. Integrity and retention are different properties: the
+manifest, artifact hashes, and non-overwriting run directories protect a saved
+run from being altered or silently replaced, and none of them protects it from
+being deleted.
+
+As of 2026-09-02, the only formal run evidence present on the maintainer's host
+is the Phase 5 R4 embedding run. Evidence for Phase 1, Phase 2, Phase 3, the
+Phase 4 five-arm breakpoint study, Phase 5 R3/R5/R6, the fact-check A5 run, the
+chat matrix, the vision matrices, and the Anthropic O3 portability run is not
+present there. This is the second ignored-evidence loss in the project; the
+first was the vision Prompt v1/v2 pair, closed on 2026-08-02 through a
+documented evidence-loss waiver.
+
+No waiver is claimed here and no closeout is withdrawn. Each recorded result
+was bounded to what its evidence supported and was verified when written, and
+the public-safe interpretations remain accurate. What is not currently
+reproducible is third-party or maintainer re-verification of those specific
+saved runs.
+
+Durable retention outside `build/` remains available as separately authorized
+future work. See
+[logs/2026-09-02-public-evidence-and-readme.md](logs/2026-09-02-public-evidence-and-readme.md).
+
 ## Completed Boundary
 
 The local fact-check cycle is complete: its versioned prompt and
@@ -156,6 +185,33 @@ repetitions are not protocol-identical to Ollama's seeded repetitions, and a
 hosted provider ID has different reproducibility semantics from an immutable
 local digest. No answer-quality, performance, statistical reliability, model
 ranking, endpoint migration, or future remote-call authorization is claimed.
+
+## Publication Boundary
+
+On 2026-09-02 the project owner authorized tracking deterministic run summaries
+and their evidence manifests in the repository, so a reader can inspect the
+shape of what a formal run produces. This is recorded in
+[logs/2026-09-02-public-evidence-and-readme.md](logs/2026-09-02-public-evidence-and-readme.md).
+
+Permitted, for a run whose closeout is already public-safe:
+
+- a byte-identical copy of its deterministic `SUMMARY.md`;
+- a byte-identical copy of its `manifest.json`;
+- placed under `docs/evidence/<run-id>/`, alongside a note explaining that a
+  publication copy is partial and therefore does not pass the suite's offline
+  verification task.
+
+Still ignored and unpublished, unchanged by this decision:
+
+- raw result artifacts, model responses, embedding vectors, evaluator output,
+  and per-row payloads;
+- the private local vision corpus and any filled case metadata;
+- local blog drafts under `docs/blog/`.
+
+Copying is read-only with respect to the source. It is not a rerun, repair,
+replacement, reanalysis, or mutation, and it does not weaken any closeout gate,
+retention rule, or interpretation boundary. It authorizes no model pull, remote
+provider, credential, Docker use, spending, release, tag, or push.
 
 ## Deferred Through the Current Roadmap
 
