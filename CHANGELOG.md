@@ -74,6 +74,25 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Replaced the three separate restatements of the commit rule in `AGENTS.md`
+  with one `Standing Work Loop` section covering verify, document, log, commit,
+  and naming pushing as separately gated. The documentation and logging
+  requirement was previously a convention visible only in commit history, not a
+  stated rule.
+- Reconciled three `AGENTS.md` statements that contradicted the new Publication
+  Boundary, including a pre-commit checklist item forbidding exactly what the
+  boundary authorizes.
+- Corrected a stale `AGENTS.md` statement that R4 embedding execution remained
+  deferred, which contradicted two other statements in the same file recording
+  the completed 2026-09-02 run. Updated the state snapshot date and recorded the
+  tracked documentation split.
+- Added an `Evidence Retention Status` section to `docs/DEFERRED-WORK.md`
+  recording that "verifies offline" statements describe their closeout rather
+  than the present, that the Phase 5 R4 run is the only formal evidence
+  currently present on the maintainer's host, and that integrity safeguards
+  protect a saved run from alteration but not from deletion. Additive only: no
+  closeout was rewritten and no result withdrawn.
+
 - Corrected the README `Findings` section. The empty-response observation is
   now stated as cross-surface but single-model, naming the shared `gemma4:e2b`
   digest, rather than implying several models; the previous wording overstated
