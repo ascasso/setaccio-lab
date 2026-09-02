@@ -2,6 +2,7 @@ package com.setaccio.lab.toolcompat;
 
 import com.setaccio.lab.chat.OllamaChatModelFactory;
 import com.setaccio.lab.model.ToolBenchmarkPrompt;
+import com.setaccio.lab.service.ToolCallLimitPolicy;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -32,7 +33,6 @@ import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
-import org.springframework.ai.model.tool.ToolCallingManager;
 import org.springframework.ai.ollama.api.OllamaChatOptions;
 import org.springframework.ai.ollama.api.OllamaApi;
 import org.springframework.ai.tool.ToolCallback;
@@ -269,7 +269,7 @@ final class ToolCompatibilityInvocationBoundary {
             }
             OllamaChatOptions options = optionsBuilder.build();
             ToolCallingAdvisor toolCallingAdvisor = ToolCallingAdvisor.builder()
-                    .toolCallingManager(ToolCallingManager.builder().build())
+                    .toolCallingManager(ToolCallLimitPolicy.toolCallingManager())
                     .build();
             ChatClient.ChatClientRequestSpec request = ChatClient.builder(chatModel)
                     .defaultAdvisors(toolCallingAdvisor, observingAdvisor)

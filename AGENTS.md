@@ -151,13 +151,13 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-08-30)
+## Current State Snapshot (as of 2026-09-01)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
 - Root Gradle build with Java 25.
 - `setaccio-core` is a plain Java BLAKE3 utility library.
-- `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.0`.
+- `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.1`.
 - The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses a tracked versioned public-safe prompt through a reusable direct Spring AI invocation boundary, supports optional temperature/seed/token settings, hashes inputs through `setaccio-core`, records prompt/MIME/token/structural/error metadata, returns a neutral `local` host value, and writes JSON under `build/lab-results/`.
 - The local vision corpus contract uses a tracked versioned public-safe template
   with six stable non-sensitive case IDs and explicit privacy review fields.
@@ -315,7 +315,9 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   not rerun, repair, replace, or publish its raw output. R4 formal embedding
   execution remains deferred because retained eligibility evidence did not
   establish an already-installed local model advertising Ollama's literal
-  `embedding` capability.
+  `embedding` capability. The dedicated `qwen3-embedding` family, beginning
+  with versioned `qwen3-embedding:0.6b`, is the top planning candidate for a
+  future R4 inspection; this does not authorize a pull, substitution, or run.
 - Phase 5 R6 completed one formal relevancy-evaluation matrix on 2026-08-30
   from clean commit `f704d989429a10769ce334276dc79de5bd7cd308`, consuming the
   verified R5 evidence without rerunning retrieval or answer generation. The
@@ -410,12 +412,14 @@ Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) for changelog st
 
 ## Important Spring AI Notes
 
-Spring AI `2.0.0` replaced the older RC1/M8/M4 planning targets.
+The Spring AI 2.0 line, currently pinned at `2.0.1`, replaced the older
+RC1/M8/M4 planning targets.
 
 Relevant upgrade concerns for this repo:
 
 - Keep future Spring AI upgrades focused and separate from mechanical repo split work.
-- Watch direct `ChatModel.call(Prompt)` usage with per-request options. Spring AI 2.0 M5+ changed how partial options are merged. Prefer `ChatClient` where practical, or explicitly combine options with model defaults.
+- Watch direct `ChatModel.call(Prompt)` usage with per-request options. `OllamaChatModel.buildRequestPrompt` substitutes the model's default options only when the prompt carries none; a non-null partial options object is used verbatim and every configured default is dropped. This is identical in Spring AI `2.0.0` and `2.0.1`, so it is a standing hazard rather than an upgrade regression. Prefer `ChatClient`, which merges the runtime options onto `chatModel.getOptions()`, or materialize a complete options object first. The vision boundary does the latter through `ollamaChatModel.getOptions().mutate()`, which keeps its direct-call protocol instead of gaining `ChatClient`'s auto-registered tool-calling advisor.
+- Spring AI `2.0.1` made tool-call limits configurable, defaulting to 40 calls per tool and 150 total with `ToolCallLimitBehavior.THROW`; exceeding either limit aborts the invocation instead of truncating it. `ToolCallLimitPolicy` pins those values for both tool paths so a later framework default cannot change the protocol silently. They are deliberately not written into saved evidence: Tool Search matrix verification compares the exact manifest settings key set, so adding a key would invalidate every retained manifest.
 - The long-term harness should cover Spring AI's major provider surface: Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama.
 - The long-term harness should cover Spring AI model types: chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Provider-backed tests must be opt-in and must not run by default in CI.
@@ -428,8 +432,10 @@ Relevant upgrade concerns for this repo:
 - Google GenAI tests should account for Gemini Developer API versus Vertex AI mode, multimodal input, response MIME type, Google Search grounding, server-side tool metadata, safety settings, cached content, thought signatures, and model-specific thinking option compatibility.
 - The deterministic evaluation benchmark already uses Spring AI's `Evaluator`
   and `EvaluationRequest`. The Slice 7 planning gate checked the Spring AI
-  `2.0.0` `RelevancyEvaluator` and `FactCheckingEvaluator` contracts; re-check
-  them if framework versions change before implementation.
+  `2.0.0` `RelevancyEvaluator` and `FactCheckingEvaluator` contracts, and they
+  were re-checked against `2.0.1`: the public contracts and the embedded
+  evaluation prompt texts are unchanged. Re-check them again if framework
+  versions change before implementation.
 - For container-backed tests, track Spring AI's `spring-ai-spring-boot-testcontainers` support and service connections, but keep Docker/Testcontainers opt-in.
 - Keep Testcontainers dependencies isolated in `setaccio-testcontainers`; do not add them to `setaccio-lab`.
 - Direct Spring AI 2.0 tool-calling and regex Tool Search comparison are implemented. Keep new advisor/index work bounded, expectation-aware, and offline-tested before expanding it.
@@ -583,11 +589,13 @@ plan, changelog, and dated log when the status of a deferred item changes.
   is not a continuation of the completed Phase 4 work.
 - Phase 5 is closed as a bounded protocol closeout. R3, R5, and R6 retained
   evidence verifies offline; R5 and R6 are the completed local-model
-  executions. R4 remains deferred until an explicitly requested future slice
-  can establish an already-installed local model with Ollama's literal
-  `embedding` capability, then satisfy the locked clean-baseline, no-pull,
-  one-attempt, non-overwriting-evidence contract. This closeout does not start
-  that slice or authorize a formal rerun, but the standing authorization above
+  executions. R4 completed one explicitly requested formal run on
+  2026-09-02 using the `qwen3-embedding:0.6b` tag, which the owner pulled that
+  day and which read-only inspection confirmed advertises Ollama's literal
+  `embedding` capability, under the locked clean-baseline, no-pull,
+  one-attempt, non-overwriting-evidence contract. Its evidence is immutable and
+  any further run needs a new scope-start request. This closeout does not
+  authorize a rerun, but the standing authorization above
   covers local inspection, selection, and invocation once that work is
   explicitly requested.
 - Keep any later container-backed work isolated in `setaccio-testcontainers`
@@ -685,10 +693,11 @@ Evaluation/Testcontainers phase:
   output-budget experiment needs separate authorization and a fresh
   clean-baseline protocol; it is not a continuation of the completed study.
 - The bounded Phase 5 closeout leaves R3, R5, and R6 retained evidence
-  unchanged. R4 remains deferred until a separate future slice proves an
-  already-installed model's literal `embedding` capability and locks the full
-  clean-baseline, no-pull, one-attempt contract. This closeout does not start
-  R4 or a formal rerun; the standing local Ollama authorization covers
+  unchanged. R4 completed one separately requested formal run on
+  2026-09-02 using the pulled `qwen3-embedding:0.6b` tag, whose literal
+  `embedding` capability was proven by read-only inspection under the locked
+  clean-baseline, no-pull, one-attempt contract. This closeout does not
+  authorize an R4 rerun; the standing local Ollama authorization covers
   inspection, selection, and invocation of already-installed loopback models
   when that work is requested. Model pulls remain separately gated.
 - The completed R5 run consumed verified retrieval evidence without rerunning

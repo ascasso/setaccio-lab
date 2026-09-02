@@ -6,6 +6,7 @@ import com.setaccio.lab.model.VisionInvocationSettings;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -26,6 +27,14 @@ import static org.mockito.Mockito.when;
 
 class VisionModelInvokerTest {
 
+    private static final OllamaChatOptions MODEL_DEFAULTS = OllamaChatOptions.builder()
+            .model("configured-default:model")
+            .temperature(0.9)
+            .seed(7)
+            .numPredict(64)
+            .numCtx(4096)
+            .build();
+
     @TempDir
     Path temporaryDirectory;
 
@@ -33,7 +42,7 @@ class VisionModelInvokerTest {
     void invokesTheTrackedPromptWithExplicitOptionsAndCapturesMetadata() throws Exception {
         UploadedImage image = image();
         VisionPromptDefinition promptDefinition = new VisionPromptDefinition();
-        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        OllamaChatModel ollamaChatModel = visionModel();
         when(ollamaChatModel.call(any(Prompt.class))).thenAnswer(invocation -> {
             Prompt prompt = invocation.getArgument(0);
             assertThat(prompt.getOptions()).isInstanceOf(OllamaChatOptions.class);
@@ -42,6 +51,7 @@ class VisionModelInvokerTest {
             assertThat(options.getTemperature()).isEqualTo(0.2);
             assertThat(options.getSeed()).isEqualTo(43);
             assertThat(options.getNumPredict()).isEqualTo(512);
+            assertThat(options.getNumCtx()).isEqualTo(4096);
             assertThat(prompt.getInstructions())
                     .singleElement()
                     .isInstanceOfSatisfying(UserMessage.class, message -> {
@@ -73,7 +83,7 @@ class VisionModelInvokerTest {
     @Test
     void keepsInvocationSuccessSeparateFromStructuralCompletion() throws Exception {
         VisionPromptDefinition promptDefinition = new VisionPromptDefinition();
-        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        OllamaChatModel ollamaChatModel = visionModel();
         ChatResponse response = response("A valid model response without the required headings.", null, null);
         when(ollamaChatModel.call(any(Prompt.class)))
                 .thenReturn(response);
@@ -92,7 +102,7 @@ class VisionModelInvokerTest {
     void invokesAnExplicitlySelectedPromptWithoutChangingTheDefaultPrompt() throws Exception {
         VisionPromptDefinition version1 = new VisionPromptDefinition();
         VisionPromptDefinition version2 = new VisionPromptCatalog(version1).require("2");
-        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        OllamaChatModel ollamaChatModel = visionModel();
         when(ollamaChatModel.call(any(Prompt.class))).thenAnswer(invocation -> {
             Prompt prompt = invocation.getArgument(0);
             assertThat(prompt.getInstructions())
@@ -126,11 +136,11 @@ class VisionModelInvokerTest {
                 settings);
         var unavailable = invoker(null, promptDefinition).invoke(image(), settings);
 
-        OllamaChatModel emptyModel = mock(OllamaChatModel.class);
+        OllamaChatModel emptyModel = visionModel();
         when(emptyModel.call(any(Prompt.class))).thenReturn(new ChatResponse(List.of()));
         var empty = invoker(emptyModel, promptDefinition).invoke(image(), settings);
 
-        OllamaChatModel failingModel = mock(OllamaChatModel.class);
+        OllamaChatModel failingModel = visionModel();
         when(failingModel.call(any(Prompt.class))).thenThrow(new IllegalStateException("fixture failure"));
         var failed = invoker(failingModel, promptDefinition).invoke(image(), settings);
 
@@ -139,6 +149,91 @@ class VisionModelInvokerTest {
         assertThat(empty.errorCategory()).isEqualTo(VisionErrorCategory.EMPTY_RESPONSE);
         assertThat(failed.errorCategory()).isEqualTo(VisionErrorCategory.PROVIDER_FAILURE);
         assertThat(failed.error()).isEqualTo("fixture failure");
+    }
+
+    @Test
+    void inheritsConfiguredModelDefaultsWhenVisionSettingsAreUnset() throws Exception {
+        assertInvocationOptions(
+                VisionInvocationSettings.modelDefaults("vision:model"),
+                options -> {
+                    assertThat(options.getTemperature()).isEqualTo(0.9);
+                    assertThat(options.getSeed()).isEqualTo(7);
+                    assertThat(options.getNumPredict()).isEqualTo(64);
+                });
+    }
+
+    @Test
+    void appliesEachExplicitSettingOverTheConfiguredModelDefault() throws Exception {
+        assertInvocationOptions(
+                new VisionInvocationSettings("vision:model", 0.2, null, null),
+                options -> {
+                    assertThat(options.getTemperature()).isEqualTo(0.2);
+                    assertThat(options.getSeed()).isEqualTo(7);
+                    assertThat(options.getNumPredict()).isEqualTo(64);
+                });
+        assertInvocationOptions(
+                new VisionInvocationSettings("vision:model", null, 43, null),
+                options -> {
+                    assertThat(options.getTemperature()).isEqualTo(0.9);
+                    assertThat(options.getSeed()).isEqualTo(43);
+                    assertThat(options.getNumPredict()).isEqualTo(64);
+                });
+        assertInvocationOptions(
+                new VisionInvocationSettings("vision:model", null, null, 512),
+                options -> {
+                    assertThat(options.getTemperature()).isEqualTo(0.9);
+                    assertThat(options.getSeed()).isEqualTo(7);
+                    assertThat(options.getNumPredict()).isEqualTo(512);
+                });
+    }
+
+    @Test
+    void treatsEmptyUsageMetadataAsUnavailableTokenCounts() throws Exception {
+        VisionPromptDefinition promptDefinition = new VisionPromptDefinition();
+        OllamaChatModel ollamaChatModel = visionModel();
+        String text = completeOutput(promptDefinition);
+        when(ollamaChatModel.call(any(Prompt.class))).thenReturn(new ChatResponse(
+                List.of(new Generation(new AssistantMessage(text))),
+                ChatResponseMetadata.builder().build()));
+
+        var result = invoker(ollamaChatModel, promptDefinition)
+                .invoke(image(), VisionInvocationSettings.modelDefaults("vision:model"));
+
+        assertThat(result.tokensIn()).isNull();
+        assertThat(result.tokensOut()).isNull();
+        assertThat(result.success()).isTrue();
+        assertThat(result.outputText()).isEqualTo(text);
+        assertThat(result.promptSha256()).isEqualTo(promptDefinition.sha256());
+        assertThat(result.structuralChecks()).hasSize(7).allMatch(check -> check.present());
+        assertThat(result.structureComplete()).isTrue();
+        assertThat(result.errorCategory()).isNull();
+    }
+
+    private void assertInvocationOptions(
+            VisionInvocationSettings settings,
+            Consumer<OllamaChatOptions> assertions) throws Exception {
+        VisionPromptDefinition promptDefinition = new VisionPromptDefinition();
+        OllamaChatModel ollamaChatModel = visionModel();
+        when(ollamaChatModel.call(any(Prompt.class))).thenAnswer(invocation -> {
+            Prompt prompt = invocation.getArgument(0);
+            OllamaChatOptions options = (OllamaChatOptions) prompt.getOptions();
+            assertThat(options.getModel()).isEqualTo("vision:model");
+            assertThat(options.getNumCtx()).isEqualTo(4096);
+            assertions.accept(options);
+            return response(completeOutput(promptDefinition), 11, 13);
+        });
+
+        var result = invoker(ollamaChatModel, promptDefinition).invoke(image(), settings);
+
+        assertThat(result.success()).isTrue();
+        assertThat(result.tokensIn()).isEqualTo(11);
+        assertThat(result.tokensOut()).isEqualTo(13);
+    }
+
+    private OllamaChatModel visionModel() {
+        OllamaChatModel ollamaChatModel = mock(OllamaChatModel.class);
+        when(ollamaChatModel.getOptions()).thenReturn(MODEL_DEFAULTS);
+        return ollamaChatModel;
     }
 
     private VisionModelInvoker invoker(

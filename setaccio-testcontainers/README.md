@@ -15,7 +15,7 @@ This module exists so Docker and Testcontainers support can evolve without becom
 
 This module is a skeleton. It declares Spring AI's Testcontainers support dependency but does not start any containers by default.
 
-Spring AI `2.0.0` supplies the Ollama service-connection factory and brings in
+Spring AI `2.0.1` supplies the Ollama service-connection factory and brings in
 Spring Boot's Testcontainers service-connection support. The separate typed
 Testcontainers Ollama module is intentionally not present.
 
