@@ -15,9 +15,17 @@ authorized Phase 0–5 protocol work:
 - Phase 5 R0–R3 implementation is complete and its retained R3 lexical
   evidence verifies offline. R5 answer generation and R6 relevancy evaluation
   each completed one retained local-model execution and verify offline. R4
-  formal embedding execution remains explicitly deferred because retained
-  eligibility evidence did not establish an already-installed local model
-  advertising Ollama's literal `embedding` capability.
+  formal embedding execution completed one retained clean-baseline run on
+  2026-09-02 using the pulled `qwen3-embedding:0.6b` tag, after a read-only
+  check confirmed its literal `embedding` capability and full digest; that
+  evidence verifies offline.
+
+That planning priority was followed. The 2026-09-02 R4 run used the versioned
+`qwen3-embedding:0.6b` tag. The tag was pulled on the execution host that day
+rather than being already installed, and its literal `embedding` capability and
+full digest were confirmed by read-only inspection before the run. This records
+candidate provenance only; it is not an embedding-quality, ranking, or
+model-selection conclusion.
 
 This closeout authorizes no R4 execution, model inspection, model pull, Docker
 use, credential use, remote-provider expenditure, evidence mutation,
@@ -146,9 +154,9 @@ timeout, unavailable-model, authentication, rate-limit, or provider-failure
 outcome. The ignored evidence verified and reanalyzed offline. This records
 only bounded answer-invocation, exact-abstention, and reference-syntax
 observations, not answer correctness, semantic support, relevance, quality, or
-a model ranking or selection conclusion. R4 formal embedding execution remains
-deferred; retained eligibility evidence did not establish an already-installed
-local model advertising Ollama's literal `embedding` capability. On 2026-08-30, one
+a model ranking or selection conclusion. R4 formal embedding execution completed once on
+2026-09-02 with the pulled `qwen3-embedding:0.6b` tag; see
+[logs/2026-09-02-phase5-r4-embedding-run.md](logs/2026-09-02-phase5-r4-embedding-run.md). On 2026-08-30, one
 clean-baseline R6 matrix completed from commit
 `f704d989429a10769ce334276dc79de5bd7cd308` against the verified R5 source. It
 used the operationally selected already-installed `granite4.1:3b` tag and its
@@ -1952,6 +1960,15 @@ permission. Lock the selected tag, full digest, and retrieval settings before
 formal vector generation. A model pull or remote embedding provider remains a
 separate authorization boundary.
 
+Candidate priority: use the dedicated `qwen3-embedding` family first, beginning
+with the versioned `qwen3-embedding:0.6b` tag. The smaller versioned tag is the
+initial local candidate for this small, opt-in slice; `:latest`, `:4b`, and
+`:8b` are not substitutes for it. Confirm the requested tag's installed full
+digest and literal `embedding` capability through the R4 gate before any
+invocation. If that candidate is absent or fails the gate, stop and record the
+eligibility result rather than silently pulling, substituting, or selecting a
+different tag.
+
 Retain:
 
 - embedding provider;
@@ -2326,12 +2343,18 @@ When chosen, decide together:
 
 # Protocol closeout and future R4 gate
 
-The authorized Phase 0–5 protocol is closed as documented above. R3, R5, and
-R6 are retained verified evidence. R5 and R6 are the completed local-model
-executions. R4 is not incomplete evidence to repair or a prerequisite that
-permits rerunning R5/R6; its formal embedding execution is deferred.
+The authorized Phase 0–5 protocol is closed as documented above. R3, R4, R5,
+and R6 are retained verified evidence. R4, R5, and R6 are the completed
+local-model executions; R4 completed one separately authorized formal embedding
+run on 2026-09-02. R4 is not incomplete evidence to repair or a prerequisite
+that permits rerunning R5/R6.
 
 ## Future R4 start gate
+
+This gate was satisfied once, for the 2026-09-02 run, with one recorded
+departure: the prioritized candidate was pulled by the project owner that day
+rather than being already installed. The gate as written below continues to
+govern any further R4 execution.
 
 A later R4 execution requires an explicit request to start the deferred slice
 and all of the following before any formal output directory is allocated. The
@@ -2341,7 +2364,8 @@ inspection and invocation; it does not start R4 or waive these gates:
 1. A read-only eligibility check must establish one already-installed local
    Ollama candidate with a complete immutable digest and a literal `embedding`
    capability in its retained `ollama show` output. An `embedding length` field
-   alone does not satisfy this gate. No model may be pulled, substituted, or
+   alone does not satisfy this gate. Begin with the prioritized
+   `qwen3-embedding:0.6b` candidate. No model may be pulled, substituted, or
    silently selected to satisfy it.
 2. From one clean Git baseline, lock the candidate tag and full digest together
    with the public embedding prompt/contract, corpus and query identities,
@@ -2376,6 +2400,10 @@ approval.
 > R6 evidence verifies offline. R4 formal embedding execution is deferred
 > pending the future gate above. The historical packet instructions below do
 > not authorize a rerun, evidence mutation, model pull, or successor work.
+
+> **Update (2026-09-02):** R4 formal embedding execution has since completed
+> once under a separate explicit scope-start request. The dated 2026-08-30
+> status above is preserved as written and is not restated here.
 
 ## Codex model routing
 
@@ -2946,12 +2974,19 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 
 ### R4 — Embedding retrieval
 
-> **Status: deferred.** Follow the future R4 gate above; do not treat
-> `embedding length` as the required literal `embedding` capability, and do not
-> inspect, pull, select, or invoke a model under this closeout.
+> **Status: completed 2026-09-02.** One formal run used the
+> `qwen3-embedding:0.6b` tag, pulled that day by the project owner and
+> confirmed by read-only inspection to advertise the literal `embedding`
+> capability; `embedding length` alone remains insufficient. The retained
+> evidence is immutable. Any further run needs a new scope-start request under
+> the R4 gate above; this closeout authorizes no rerun, pull, or replacement.
 
 - **Routing:** Sol preferred; Terra acceptable with Sol or human architecture
   review. Not Luna-ready.
+- **Candidate priority:** inspect the installed versioned
+  `qwen3-embedding:0.6b` tag first. This is a planning preference, not an
+  eligibility result, model-quality conclusion, pull authorization, or formal
+  run authorization.
 - **Dependency:** R3 completed and a recorded provider/model, chunking,
   normalization, distance, and top-K contract. An already-installed local
   Ollama model may be selected and run under standing authorization; a remote

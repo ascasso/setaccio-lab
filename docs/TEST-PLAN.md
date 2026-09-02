@@ -3,9 +3,10 @@
 The tracked [deferred-work index](DEFERRED-WORK.md) records the completed Phase
 2 chat reuse proof, bounded Phase 3 cohort/portability work, Phase 4 fact-check
 output-budget closeout, and the Phase 5 retrieval protocol closeout. Retained
-R3, R5, and R6 evidence verifies offline; R4 embedding execution remains
-deferred until a separately authorized future slice establishes an
-already-installed model advertising Ollama's literal `embedding` capability.
+R3, R5, and R6 evidence verifies offline. R4 embedding execution completed once
+on 2026-09-02 with the `qwen3-embedding:0.6b` tag after a read-only check
+confirmed its literal `embedding` capability, and its evidence verifies offline
+as well.
 No completed phase places a live model call in default tests or CI.
 
 ## Near Term
@@ -233,6 +234,10 @@ No completed phase places a live model call in default tests or CI.
   from `ollama show` (an `embedding length` field is not sufficient). Use one
   batch, no pull, one attempt, fixed whole-document chunking, unit-L2
   normalization, deterministic cosine tie-breaking, and explicit top K.
+  The 2026-09-02 run used the prioritized versioned `qwen3-embedding:0.6b` tag,
+  pulled that day and confirmed embedding-capable by read-only inspection before
+  the run. Its evidence is retained and immutable; any further run needs a new
+  scope-start request and must not pull, substitute, or overwrite it.
   Atomically reserve the fresh ignored output directory before the provider
   attempt, retain a failed reservation as non-reusable diagnostic state, and
   re-check the installed full model identity before writing evidence. Retain
@@ -299,8 +304,8 @@ No completed phase places a live model call in default tests or CI.
 - Keep judge and fixture-expectation results separate. A valid `yes` / `no`
   verdict is not automatically an expectation match or a general factuality
   score.
-- Because Spring AI `2.0.0`'s fact-checking response does not retain raw judge
-  text or usage metadata, capture the dedicated judge model response through a
+- Because Spring AI's fact-checking response does not retain raw judge text or
+  usage metadata, capture the dedicated judge model response through a
   narrow request-scoped recording boundary before evaluator normalization.
   Do not duplicate the evaluator implementation to obtain that evidence.
 - Require the dedicated boundary to propagate explicit model, temperature,

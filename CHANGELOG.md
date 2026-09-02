@@ -7,8 +7,34 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Completed the explicitly requested Phase 5 R4 embedding-retrieval run on
+  2026-09-02 from clean commit `4c13b4a` using the prioritized
+  `qwen3-embedding:0.6b` tag, which the project owner pulled that day before
+  authorizing the run. Read-only inspection confirmed the tag's literal
+  `embedding` capability and full digest before any evidence directory was
+  allocated. One batch of twelve corpus documents and fourteen confirmed
+  queries produced 1024-dimension unit-L2 vectors and deterministic top-K `5`
+  cosine rankings; the ignored evidence passed generation-time integrity
+  analysis and offline verification. This sets no retrieval-support threshold
+  and establishes no embedding quality, semantic relevance, or model ranking.
+
 ### Fixed
 
+- Treated Spring AI's `EmptyUsage` marker as unavailable in the vision
+  invocation boundary instead of recording synthetic zero-token usage.
+  `ChatResponseMetadata` defaults its usage field to `EmptyUsage`, so the
+  previous null-only check never applied. The chat, tool, and evaluator paths
+  were already adapted.
+- Stopped the vision boundary from discarding configured Ollama defaults.
+  `OllamaChatModel.buildRequestPrompt` substitutes model defaults only when a
+  prompt carries no options, so the previous partial options object silently
+  replaced every configured default. The boundary now materializes a complete
+  options object from the model defaults and applies the requested model and
+  any explicit temperature, seed, or token setting over it. This was a standing
+  defect, identical in Spring AI `2.0.0` and `2.0.1`, not an upgrade
+  regression, and the direct-call vision protocol is unchanged.
 - Rejected Phase 5 R6 evaluator responses whose retained nonblank provider model
   differs from the locked effective evaluator model, preventing model-identity
   drift from being attributed to the approved digest. R5 and R6 deterministic
@@ -26,6 +52,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Pinned the tool-call limits applied by both tool paths through
+  `ToolCallLimitPolicy` rather than inheriting Spring AI `2.0.1` defaults. The
+  pinned values match the current defaults of 40 calls per tool and 150 total
+  with `ToolCallLimitBehavior.THROW`, so behaviour is unchanged, but a later
+  framework default can no longer alter the protocol silently. Exceeding either
+  limit aborts an invocation instead of truncating it. The limits are recorded
+  in tracked documentation, not in saved evidence, because Tool Search matrix
+  verification compares an exact manifest settings key set.
 - Clarified the standing local Ollama authorization: all explicitly requested
   repository work may inspect, select, and invoke already-installed models on
   a loopback endpoint without per-call, per-command, per-model, per-session,
@@ -33,6 +67,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
   provider-free default lifecycle, formal evidence safeguards, or separate
   boundaries for pulls, remote providers, credentials, Docker, publication,
   pushes, releases, and tags.
+- Recorded the dedicated `qwen3-embedding` family as the top planned candidate
+  for the deferred R4 slice, beginning with versioned tag
+  `qwen3-embedding:0.6b`. This is a planning priority only: R4 still requires
+  read-only installed-model eligibility proof, including a complete digest and
+  literal Ollama `embedding` capability; no pull, substitution, or formal run
+  is authorized by this change.
 - Upgraded Spring Boot to `4.1.1` and Spring AI to `2.0.1`.
 - Updated direct Commons Codec, JUnit, and Bouncy Castle dependencies to
   `1.22.1`, `6.1.3`, and `1.85.2`; retained the current stable AssertJ,
