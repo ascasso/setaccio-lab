@@ -585,11 +585,13 @@ plan, changelog, and dated log when the status of a deferred item changes.
   is not a continuation of the completed Phase 4 work.
 - Phase 5 is closed as a bounded protocol closeout. R3, R5, and R6 retained
   evidence verifies offline; R5 and R6 are the completed local-model
-  executions. R4 remains deferred until an explicitly requested future slice
-  can establish an already-installed local model with Ollama's literal
-  `embedding` capability, then satisfy the locked clean-baseline, no-pull,
-  one-attempt, non-overwriting-evidence contract. This closeout does not start
-  that slice or authorize a formal rerun, but the standing authorization above
+  executions. R4 completed one explicitly requested formal run on
+  2026-09-02 using the `qwen3-embedding:0.6b` tag, which the owner pulled that
+  day and which read-only inspection confirmed advertises Ollama's literal
+  `embedding` capability, under the locked clean-baseline, no-pull,
+  one-attempt, non-overwriting-evidence contract. Its evidence is immutable and
+  any further run needs a new scope-start request. This closeout does not
+  authorize a rerun, but the standing authorization above
   covers local inspection, selection, and invocation once that work is
   explicitly requested.
 - Keep any later container-backed work isolated in `setaccio-testcontainers`
@@ -687,10 +689,11 @@ Evaluation/Testcontainers phase:
   output-budget experiment needs separate authorization and a fresh
   clean-baseline protocol; it is not a continuation of the completed study.
 - The bounded Phase 5 closeout leaves R3, R5, and R6 retained evidence
-  unchanged. R4 remains deferred until a separate future slice proves an
-  already-installed model's literal `embedding` capability and locks the full
-  clean-baseline, no-pull, one-attempt contract. This closeout does not start
-  R4 or a formal rerun; the standing local Ollama authorization covers
+  unchanged. R4 completed one separately requested formal run on
+  2026-09-02 using the pulled `qwen3-embedding:0.6b` tag, whose literal
+  `embedding` capability was proven by read-only inspection under the locked
+  clean-baseline, no-pull, one-attempt contract. This closeout does not
+  authorize an R4 rerun; the standing local Ollama authorization covers
   inspection, selection, and invocation of already-installed loopback models
   when that work is requested. Model pulls remain separately gated.
 - The completed R5 run consumed verified retrieval evidence without rerunning

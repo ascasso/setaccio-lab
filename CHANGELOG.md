@@ -7,6 +7,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- Completed the explicitly requested Phase 5 R4 embedding-retrieval run on
+  2026-09-02 from clean commit `4c13b4a` using the prioritized
+  `qwen3-embedding:0.6b` tag, which the project owner pulled that day before
+  authorizing the run. Read-only inspection confirmed the tag's literal
+  `embedding` capability and full digest before any evidence directory was
+  allocated. One batch of twelve corpus documents and fourteen confirmed
+  queries produced 1024-dimension unit-L2 vectors and deterministic top-K `5`
+  cosine rankings; the ignored evidence passed generation-time integrity
+  analysis and offline verification. This sets no retrieval-support threshold
+  and establishes no embedding quality, semantic relevance, or model ranking.
+
 ### Fixed
 
 - Rejected Phase 5 R6 evaluator responses whose retained nonblank provider model

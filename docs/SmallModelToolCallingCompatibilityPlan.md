@@ -15,15 +15,17 @@ authorized Phase 0–5 protocol work:
 - Phase 5 R0–R3 implementation is complete and its retained R3 lexical
   evidence verifies offline. R5 answer generation and R6 relevancy evaluation
   each completed one retained local-model execution and verify offline. R4
-  formal embedding execution remains explicitly deferred because retained
-  eligibility evidence did not establish an already-installed local model
-  advertising Ollama's literal `embedding` capability.
+  formal embedding execution completed one retained clean-baseline run on
+  2026-09-02 using the pulled `qwen3-embedding:0.6b` tag, after a read-only
+  check confirmed its literal `embedding` capability and full digest; that
+  evidence verifies offline.
 
-The planning priority for a future R4 run is the dedicated Qwen3 Embedding
-family, starting with the versioned `qwen3-embedding:0.6b` tag as the first
-candidate to inspect. This is a candidate priority only: it is not proof that
-the tag is installed or embedding-capable on the execution host, and it does
-not authorize a pull or formal run.
+That planning priority was followed. The 2026-09-02 R4 run used the versioned
+`qwen3-embedding:0.6b` tag. The tag was pulled on the execution host that day
+rather than being already installed, and its literal `embedding` capability and
+full digest were confirmed by read-only inspection before the run. This records
+candidate provenance only; it is not an embedding-quality, ranking, or
+model-selection conclusion.
 
 This closeout authorizes no R4 execution, model inspection, model pull, Docker
 use, credential use, remote-provider expenditure, evidence mutation,
@@ -152,9 +154,9 @@ timeout, unavailable-model, authentication, rate-limit, or provider-failure
 outcome. The ignored evidence verified and reanalyzed offline. This records
 only bounded answer-invocation, exact-abstention, and reference-syntax
 observations, not answer correctness, semantic support, relevance, quality, or
-a model ranking or selection conclusion. R4 formal embedding execution remains
-deferred; retained eligibility evidence did not establish an already-installed
-local model advertising Ollama's literal `embedding` capability. On 2026-08-30, one
+a model ranking or selection conclusion. R4 formal embedding execution completed once on
+2026-09-02 with the pulled `qwen3-embedding:0.6b` tag; see
+[logs/2026-09-02-phase5-r4-embedding-run.md](logs/2026-09-02-phase5-r4-embedding-run.md). On 2026-08-30, one
 clean-baseline R6 matrix completed from commit
 `f704d989429a10769ce334276dc79de5bd7cd308` against the verified R5 source. It
 used the operationally selected already-installed `granite4.1:3b` tag and its
@@ -2341,12 +2343,18 @@ When chosen, decide together:
 
 # Protocol closeout and future R4 gate
 
-The authorized Phase 0–5 protocol is closed as documented above. R3, R5, and
-R6 are retained verified evidence. R5 and R6 are the completed local-model
-executions. R4 is not incomplete evidence to repair or a prerequisite that
-permits rerunning R5/R6; its formal embedding execution is deferred.
+The authorized Phase 0–5 protocol is closed as documented above. R3, R4, R5,
+and R6 are retained verified evidence. R4, R5, and R6 are the completed
+local-model executions; R4 completed one separately authorized formal embedding
+run on 2026-09-02. R4 is not incomplete evidence to repair or a prerequisite
+that permits rerunning R5/R6.
 
 ## Future R4 start gate
+
+This gate was satisfied once, for the 2026-09-02 run, with one recorded
+departure: the prioritized candidate was pulled by the project owner that day
+rather than being already installed. The gate as written below continues to
+govern any further R4 execution.
 
 A later R4 execution requires an explicit request to start the deferred slice
 and all of the following before any formal output directory is allocated. The
@@ -2392,6 +2400,10 @@ approval.
 > R6 evidence verifies offline. R4 formal embedding execution is deferred
 > pending the future gate above. The historical packet instructions below do
 > not authorize a rerun, evidence mutation, model pull, or successor work.
+
+> **Update (2026-09-02):** R4 formal embedding execution has since completed
+> once under a separate explicit scope-start request. The dated 2026-08-30
+> status above is preserved as written and is not restated here.
 
 ## Codex model routing
 
@@ -2962,9 +2974,12 @@ recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,
 
 ### R4 — Embedding retrieval
 
-> **Status: deferred.** Follow the future R4 gate above; do not treat
-> `embedding length` as the required literal `embedding` capability, and do not
-> inspect, pull, select, or invoke a model under this closeout.
+> **Status: completed 2026-09-02.** One formal run used the
+> `qwen3-embedding:0.6b` tag, pulled that day by the project owner and
+> confirmed by read-only inspection to advertise the literal `embedding`
+> capability; `embedding length` alone remains insufficient. The retained
+> evidence is immutable. Any further run needs a new scope-start request under
+> the R4 gate above; this closeout authorizes no rerun, pull, or replacement.
 
 - **Routing:** Sol preferred; Terra acceptable with Sol or human architecture
   review. Not Luna-ready.
