@@ -9,6 +9,28 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Recorded read-only `ollama show` capability observations for the four
+  already-installed artifacts that appear in retained closeouts, in
+  `docs/logs/2026-09-02-model-capability-observations.md`. Every empty-response
+  run used one artifact, `gemma4:e2b` at digest `7fbdbf8f5e45`, which advertises
+  `thinking`; the R6 relevancy matrix ran at the same `64`-token budget against
+  `granite4.1:3b`, which does not, and recorded no empty response. The Phase 1
+  and Phase 2 artifact advertises `completion` only, without `tools`, while both
+  phases exercised the standard `ToolCallingAdvisor`. These are associations
+  from manifest metadata read under a later Ollama runtime than some of those
+  runs used. They are hypotheses, not results; no experiment was started, no
+  model was invoked or modified, and no closeout is retracted or reinterpreted.
+
+- Published the first tracked evidence example under `docs/evidence/`. It holds
+  byte-identical copies of the Phase 5 R4 run's deterministic `SUMMARY.md` and
+  `manifest.json`, with the raw result artifact deliberately omitted. This moves
+  the documentation publication boundary to allow tracked summaries and
+  manifests while raw output, vectors, and model responses remain ignored. A
+  publication copy is partial by construction and does not pass
+  `retrievalEmbeddingVerify`; `docs/evidence/README.md` records why and what a
+  reader can check instead. No evidence was rerun, repaired, replaced,
+  reanalyzed, or mutated.
+
 - Completed the explicitly requested Phase 5 R4 embedding-retrieval run on
   2026-09-02 from clean commit `4c13b4a` using the prioritized
   `qwen3-embedding:0.6b` tag, which the project owner pulled that day before
@@ -51,6 +73,43 @@ and this project follows [Semantic Versioning](https://semver.org/).
   against its declared prompt condition.
 
 ### Changed
+
+- Replaced the three separate restatements of the commit rule in `AGENTS.md`
+  with one `Standing Work Loop` section covering verify, document, log, commit,
+  and naming pushing as separately gated. The documentation and logging
+  requirement was previously a convention visible only in commit history, not a
+  stated rule.
+- Reconciled three `AGENTS.md` statements that contradicted the new Publication
+  Boundary, including a pre-commit checklist item forbidding exactly what the
+  boundary authorizes.
+- Corrected a stale `AGENTS.md` statement that R4 embedding execution remained
+  deferred, which contradicted two other statements in the same file recording
+  the completed 2026-09-02 run. Updated the state snapshot date and recorded the
+  tracked documentation split.
+- Added an `Evidence Retention Status` section to `docs/DEFERRED-WORK.md`
+  recording that "verifies offline" statements describe their closeout rather
+  than the present, that the Phase 5 R4 run is the only formal evidence
+  currently present on the maintainer's host, and that integrity safeguards
+  protect a saved run from alteration but not from deletion. Additive only: no
+  closeout was rewritten and no result withdrawn.
+
+- Corrected the README `Findings` section. The empty-response observation is
+  now stated as cross-surface but single-model, naming the shared `gemma4:e2b`
+  digest, rather than implying several models; the previous wording overstated
+  its generality. Added the R6 contrast row, added the omitted 30/30 standard
+  versus 12/30 regex Tool Search result, split the empty-response and
+  first-turn-`PROVIDER_FAILURE` open questions apart as separate phenomena, and
+  noted the untested candidate mechanism beside the Phase 4 budget finding.
+
+- Restructured `README.md` from 391 to 214 lines so it leads with results
+  instead of a slice-by-slice capability narration. A new `Findings` section
+  states the Phase 4 output-budget yield curve and the T3.6 single all-pass
+  qualifier with their original closeout qualifications carried over unchanged,
+  and records the cross-phase empty-response and first-turn `PROVIDER_FAILURE`
+  observation explicitly as an open question rather than a finding. A new
+  `How evidence works` section promotes the evidence lifecycle and links the
+  published example. The previous capability narration moved to
+  `docs/CAPABILITIES.md` with only heading-level and relative-link adjustments.
 
 - Pinned the tool-call limits applied by both tool paths through
   `ToolCallLimitPolicy` rather than inheriting Spring AI `2.0.1` defaults. The
