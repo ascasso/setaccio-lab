@@ -9,6 +9,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Recorded read-only `ollama show` capability observations for the four
+  already-installed artifacts that appear in retained closeouts, in
+  `docs/logs/2026-09-02-model-capability-observations.md`. Every empty-response
+  run used one artifact, `gemma4:e2b` at digest `7fbdbf8f5e45`, which advertises
+  `thinking`; the R6 relevancy matrix ran at the same `64`-token budget against
+  `granite4.1:3b`, which does not, and recorded no empty response. The Phase 1
+  and Phase 2 artifact advertises `completion` only, without `tools`, while both
+  phases exercised the standard `ToolCallingAdvisor`. These are associations
+  from manifest metadata read under a later Ollama runtime than some of those
+  runs used. They are hypotheses, not results; no experiment was started, no
+  model was invoked or modified, and no closeout is retracted or reinterpreted.
+
 - Published the first tracked evidence example under `docs/evidence/`. It holds
   byte-identical copies of the Phase 5 R4 run's deterministic `SUMMARY.md` and
   `manifest.json`, with the raw result artifact deliberately omitted. This moves
@@ -61,6 +73,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
   against its declared prompt condition.
 
 ### Changed
+
+- Corrected the README `Findings` section. The empty-response observation is
+  now stated as cross-surface but single-model, naming the shared `gemma4:e2b`
+  digest, rather than implying several models; the previous wording overstated
+  its generality. Added the R6 contrast row, added the omitted 30/30 standard
+  versus 12/30 regex Tool Search result, split the empty-response and
+  first-turn-`PROVIDER_FAILURE` open questions apart as separate phenomena, and
+  noted the untested candidate mechanism beside the Phase 4 budget finding.
 
 - Restructured `README.md` from 391 to 214 lines so it leads with results
   instead of a slice-by-slice capability narration. A new `Findings` section

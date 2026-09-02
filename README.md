@@ -15,9 +15,11 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 
 ## Findings
 
-Every result below is bounded by the closeout that produced it. The qualifying
+Each result below is bounded by the closeout that produced it. The qualifying
 language is part of the record, not hedging: these are small, controlled,
-single-run observations, and none of them ranks or selects a model.
+single-run observations, and none of them ranks or selects a model. The two
+open questions at the end are explicitly not results — they have no closeout
+and no controlled protocol.
 
 ### Output budget and fact-check verdict yield
 
@@ -28,6 +30,10 @@ tokens (12/12).
 This is a protocol-specific association, not evidence of a causal threshold, a
 generally optimal budget, or model reliability. Completion-token counts remain
 only an output-limit proxy.
+
+The study's judge advertises a `thinking` capability, which registers a
+candidate mechanism for the association — see the open question below. That
+mechanism is untested, and the finding above stands as recorded either way.
 
 ### Only one tested artifact cleared the tool-calling protocol
 
@@ -42,28 +48,57 @@ under this exact protocol. It is not a rank, correctness oracle, selection,
 general-capability, semantic-correctness, backend-normalized performance, or
 general smallest-capable result.
 
-### Open question: empty responses and first-turn failures
+### Standard tool calling outperformed regex Tool Search
 
-The most reproducible observation in the project is one it has not yet
-explained. Across otherwise unrelated surfaces, locally hosted models completed
-their provider invocation with no classified failure, and returned no content:
+In the controlled 60-row paired refresh from commit `08f1cb5` — three models,
+five canonical cases, two repetitions, alternating advisor order — standard
+mode passed all 30 rows while regex Tool Search passed 12 of 30. Two models
+showed only no-search or zero-discovery diagnostics; the third showed
+discovered-not-executed and output-contract diagnostics.
 
-| Run | Empty responses |
-| --- | --- |
-| Phase 2 chat matrix (`gemma4:e2b`, 128 tokens) | 6 of 6 |
-| Fact-check A5 (`gemma4:e2b`, 64 tokens) | 10 of 12 |
-| Phase 5 R5 answer matrix (`gemma4:e2b`, 256 tokens) | 4 of 14 |
+The result does not choose another index or provider. It supports only a future
+bounded discovery-focused experiment, not a generic Tool Search expansion.
 
-Separately, Phase 1's 16 tool-compatibility rows and Phase 2's 32 interleaved
-attempts stopped at the same first `PROVIDER_FAILURE` turn, in both the
-untreated and prompted conditions. No tool call, final response, usage,
-output-limit, or visible-reasoning observation was retained, and the safe
-evidence does not identify the underlying provider-failure cause.
+### Open question: empty responses from one thinking-capable model
 
-This is an open question, not a finding. It has no closeout, no controlled
-protocol, and no interpretation of its own. It is recorded here because it
-confounds several results above and is the most obvious candidate for the next
-controlled study.
+Across three unrelated task surfaces, one artifact completed its provider
+invocation with no classified failure and returned no content. This is
+cross-surface but **single-model**: every run below used `gemma4:e2b` at the
+same digest `7fbdbf8f5e45`, which advertises a `thinking` capability.
+
+| Run | Model | Budget | Empty responses |
+| --- | --- | --- | --- |
+| Phase 2 chat matrix | `gemma4:e2b` | 128 | 6 of 6 |
+| Fact-check A5 | `gemma4:e2b` | 64 | 10 of 12 |
+| Phase 5 R5 answer matrix | `gemma4:e2b` | 256 | 4 of 14 |
+| Phase 5 R6 relevancy matrix | `granite4.1:3b` | 64 | 0 of 8 eligible |
+
+The last row is the contrast. R6 ran at the same `64`-token budget that
+produced ten empty responses in A5, against a model that does not advertise
+`thinking`, and recorded no empty response at all.
+
+That suggests reasoning tokens may consume a small output budget before any
+assistant content is produced. It is a hypothesis from read-only capability
+metadata, not a tested result, and it is the most obvious candidate for the
+next controlled study. See
+[`docs/logs/2026-09-02-model-capability-observations.md`](docs/logs/2026-09-02-model-capability-observations.md).
+
+### Open question: first-turn failures against a completion-only artifact
+
+Phase 1's 16 tool-compatibility rows and Phase 2's 32 interleaved attempts
+stopped at the same first `PROVIDER_FAILURE` turn, in both the untreated and
+prompted conditions. No tool call, final response, usage, output-limit, or
+visible-reasoning observation was retained, and the retained evidence does not
+identify the underlying cause.
+
+That artifact currently advertises `completion` only — it does not advertise
+`tools` — while both phases exercised Spring AI's standard `ToolCallingAdvisor`
+against it. This is a separate phenomenon from the empty responses above, with a
+separate candidate explanation, and the same caveat applies: the capability
+string was read under a later Ollama runtime than the one those phases used.
+
+Neither open question has a closeout, a controlled protocol, or an
+interpretation of its own.
 
 ## How evidence works
 
