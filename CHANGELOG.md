@@ -22,6 +22,19 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Treated Spring AI's `EmptyUsage` marker as unavailable in the vision
+  invocation boundary instead of recording synthetic zero-token usage.
+  `ChatResponseMetadata` defaults its usage field to `EmptyUsage`, so the
+  previous null-only check never applied. The chat, tool, and evaluator paths
+  were already adapted.
+- Stopped the vision boundary from discarding configured Ollama defaults.
+  `OllamaChatModel.buildRequestPrompt` substitutes model defaults only when a
+  prompt carries no options, so the previous partial options object silently
+  replaced every configured default. The boundary now materializes a complete
+  options object from the model defaults and applies the requested model and
+  any explicit temperature, seed, or token setting over it. This was a standing
+  defect, identical in Spring AI `2.0.0` and `2.0.1`, not an upgrade
+  regression, and the direct-call vision protocol is unchanged.
 - Rejected Phase 5 R6 evaluator responses whose retained nonblank provider model
   differs from the locked effective evaluator model, preventing model-identity
   drift from being attributed to the approved digest. R5 and R6 deterministic
@@ -39,6 +52,14 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Pinned the tool-call limits applied by both tool paths through
+  `ToolCallLimitPolicy` rather than inheriting Spring AI `2.0.1` defaults. The
+  pinned values match the current defaults of 40 calls per tool and 150 total
+  with `ToolCallLimitBehavior.THROW`, so behaviour is unchanged, but a later
+  framework default can no longer alter the protocol silently. Exceeding either
+  limit aborts an invocation instead of truncating it. The limits are recorded
+  in tracked documentation, not in saved evidence, because Tool Search matrix
+  verification compares an exact manifest settings key set.
 - Clarified the standing local Ollama authorization: all explicitly requested
   repository work may inspect, select, and invoke already-installed models on
   a loopback endpoint without per-call, per-command, per-model, per-session,

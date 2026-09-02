@@ -356,7 +356,7 @@ public class ToolBenchmarkService {
     }
 
     private Advisor toolAdvisor(AdvisorMode advisorMode) {
-        ToolCallingManager toolCallingManager = ToolCallingManager.builder().build();
+        ToolCallingManager toolCallingManager = ToolCallLimitPolicy.toolCallingManager();
         return switch (advisorMode) {
             case STANDARD -> ToolCallingAdvisor.builder()
                     .toolCallingManager(toolCallingManager)

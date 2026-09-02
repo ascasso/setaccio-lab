@@ -304,8 +304,8 @@ No completed phase places a live model call in default tests or CI.
 - Keep judge and fixture-expectation results separate. A valid `yes` / `no`
   verdict is not automatically an expectation match or a general factuality
   score.
-- Because Spring AI `2.0.0`'s fact-checking response does not retain raw judge
-  text or usage metadata, capture the dedicated judge model response through a
+- Because Spring AI's fact-checking response does not retain raw judge text or
+  usage metadata, capture the dedicated judge model response through a
   narrow request-scoped recording boundary before evaluator normalization.
   Do not duplicate the evaluator implementation to obtain that evidence.
 - Require the dedicated boundary to propagate explicit model, temperature,

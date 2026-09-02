@@ -5,7 +5,8 @@ recorded on 2026-08-02; the dedicated recording judge boundary and offline
 evidence lifecycle plus the opt-in host-Ollama runner were added on 2026-08-03.
 The controlled local run and bounded interpretation completed on 2026-08-03.
 The framework contract was re-checked against Spring AI `2.0.0` and Spring
-Boot `4.1.0` during A2 implementation.
+Boot `4.1.0` during A2 implementation, and again against Spring AI `2.0.1` and
+Spring Boot `4.1.1`.
 
 This plan records one completed bounded local fact-checking cycle. Slices A1
 through A6 added a tracked offline prompt/fixture/review contract, a mockable
@@ -171,7 +172,7 @@ The upstream API review confirmed:
   through `EvaluationResponse` alone. A2 addresses that limitation with a
   narrow request-scoped recording boundary around the dedicated judge model;
   it does not fork or copy Spring AI's evaluator implementation.
-- Spring AI `2.0.0` documents an
+- Spring AI `2.0.1` documents an
   [`OllamaContainer` service connection](https://docs.spring.io/spring-ai/reference/api/testcontainers.html),
   while Spring Boot documents that
   [`@ServiceConnection` details override connection properties](https://docs.spring.io/spring-boot/reference/testing/testcontainers.html#testing.testcontainers.service-connections).
@@ -348,7 +349,7 @@ That later slice must:
   requires no Docker daemon.
 
 Stop and re-review compatibility before implementation if the repository moves
-off Spring AI `2.0.0` or Spring Boot `4.1.0`, the evaluator prompt contracts
+off Spring AI `2.0.1` or Spring Boot `4.1.1`, the evaluator prompt contracts
 change, the Ollama service connection no longer resolves, or the proposed
 slice requires RAG, a remote judge, automatic model pulls, or container
 provisioning to succeed.

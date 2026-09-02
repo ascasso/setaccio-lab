@@ -11,6 +11,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.EmptyUsage;
 import org.springframework.ai.chat.metadata.Usage;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -73,8 +74,8 @@ public final class VisionModelInvoker {
                     .text(selectedPromptDefinition.text())
                     .media(media)
                     .build();
-            OllamaChatOptions.Builder options = OllamaChatOptions.builder()
-                    .model(settings.model());
+            OllamaChatOptions.Builder options = ollamaChatModel.getOptions().mutate();
+            options.model(settings.model());
             if (settings.temperature() != null) {
                 options.temperature(settings.temperature());
             }
@@ -96,6 +97,9 @@ public final class VisionModelInvoker {
 
             String text = response.getResult().getOutput().getText();
             Usage usage = response.getMetadata() == null ? null : response.getMetadata().getUsage();
+            if (usage instanceof EmptyUsage) {
+                usage = null;
+            }
             List<VisionStructuralCheck> checks =
                     structureEvaluator.evaluate(text, selectedPromptDefinition.requiredSections());
             return new VisionInvocationResult(

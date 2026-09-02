@@ -157,7 +157,7 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
 
 - Root Gradle build with Java 25.
 - `setaccio-core` is a plain Java BLAKE3 utility library.
-- `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.0`.
+- `setaccio-lab` is a Spring Boot / Spring AI app using Spring AI `2.0.1`.
 - The local vision benchmark endpoint is wired at `POST /api/lab/vision`; it accepts uploaded images and model names, uses a tracked versioned public-safe prompt through a reusable direct Spring AI invocation boundary, supports optional temperature/seed/token settings, hashes inputs through `setaccio-core`, records prompt/MIME/token/structural/error metadata, returns a neutral `local` host value, and writes JSON under `build/lab-results/`.
 - The local vision corpus contract uses a tracked versioned public-safe template
   with six stable non-sensitive case IDs and explicit privacy review fields.
@@ -412,12 +412,14 @@ Follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) for changelog st
 
 ## Important Spring AI Notes
 
-Spring AI `2.0.0` replaced the older RC1/M8/M4 planning targets.
+The Spring AI 2.0 line, currently pinned at `2.0.1`, replaced the older
+RC1/M8/M4 planning targets.
 
 Relevant upgrade concerns for this repo:
 
 - Keep future Spring AI upgrades focused and separate from mechanical repo split work.
-- Watch direct `ChatModel.call(Prompt)` usage with per-request options. Spring AI 2.0 M5+ changed how partial options are merged. Prefer `ChatClient` where practical, or explicitly combine options with model defaults.
+- Watch direct `ChatModel.call(Prompt)` usage with per-request options. `OllamaChatModel.buildRequestPrompt` substitutes the model's default options only when the prompt carries none; a non-null partial options object is used verbatim and every configured default is dropped. This is identical in Spring AI `2.0.0` and `2.0.1`, so it is a standing hazard rather than an upgrade regression. Prefer `ChatClient`, which merges the runtime options onto `chatModel.getOptions()`, or materialize a complete options object first. The vision boundary does the latter through `ollamaChatModel.getOptions().mutate()`, which keeps its direct-call protocol instead of gaining `ChatClient`'s auto-registered tool-calling advisor.
+- Spring AI `2.0.1` made tool-call limits configurable, defaulting to 40 calls per tool and 150 total with `ToolCallLimitBehavior.THROW`; exceeding either limit aborts the invocation instead of truncating it. `ToolCallLimitPolicy` pins those values for both tool paths so a later framework default cannot change the protocol silently. They are deliberately not written into saved evidence: Tool Search matrix verification compares the exact manifest settings key set, so adding a key would invalidate every retained manifest.
 - The long-term harness should cover Spring AI's major provider surface: Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama.
 - The long-term harness should cover Spring AI model types: chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Provider-backed tests must be opt-in and must not run by default in CI.
@@ -430,8 +432,10 @@ Relevant upgrade concerns for this repo:
 - Google GenAI tests should account for Gemini Developer API versus Vertex AI mode, multimodal input, response MIME type, Google Search grounding, server-side tool metadata, safety settings, cached content, thought signatures, and model-specific thinking option compatibility.
 - The deterministic evaluation benchmark already uses Spring AI's `Evaluator`
   and `EvaluationRequest`. The Slice 7 planning gate checked the Spring AI
-  `2.0.0` `RelevancyEvaluator` and `FactCheckingEvaluator` contracts; re-check
-  them if framework versions change before implementation.
+  `2.0.0` `RelevancyEvaluator` and `FactCheckingEvaluator` contracts, and they
+  were re-checked against `2.0.1`: the public contracts and the embedded
+  evaluation prompt texts are unchanged. Re-check them again if framework
+  versions change before implementation.
 - For container-backed tests, track Spring AI's `spring-ai-spring-boot-testcontainers` support and service connections, but keep Docker/Testcontainers opt-in.
 - Keep Testcontainers dependencies isolated in `setaccio-testcontainers`; do not add them to `setaccio-lab`.
 - Direct Spring AI 2.0 tool-calling and regex Tool Search comparison are implemented. Keep new advisor/index work bounded, expectation-aware, and offline-tested before expanding it.
