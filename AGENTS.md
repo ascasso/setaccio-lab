@@ -427,6 +427,23 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   interactive endpoint output is unaffected and stays under
   `build/lab-results/`. See the durable evidence root section of
   `docs/ENVIRONMENT.md`.
+- Both local chat boundaries record provider responses as separate dimensions
+  through one shared `ChatResponseCapture`: assistant content, any reasoning
+  field, reasoning presence, finish reason, evaluated output tokens, the
+  explicitly requested `ChatReasoningPolicy`, and how the adapter handled it.
+  Content and reasoning are never merged. `OllamaReasoningOptions` maps the
+  provider-neutral policy onto Spring AI's `ThinkOption`, which stays inside the
+  Ollama adapter. The opt-in `thinkingDiagnostic` suite is a new diagnostic
+  protocol with its own schema under
+  `local/evidence/thinking-diagnostic/`; it reuses the tracked fact-check
+  fixture catalog and prompt but is not a rerun, repair, replacement, or
+  reanalysis of Phase 4 evidence and never writes into that suite. Every other
+  suite deliberately keeps sending `PROVIDER_DEFAULT`, so its protocol identity,
+  manifest settings, row schema, and retained evidence are unchanged; that
+  inherited default is a recorded limitation in `docs/DEFERRED-WORK.md`. Do not
+  add a constant to `ChatGenerationOption`: `ChatProviderOptionSupport` requires
+  every constant to be classified, so a new one would make retained chat and
+  answer raw JSON undeserializable.
 - Tracked documentation splits the front door from the detail: `README.md`
   leads with findings and the evidence model, `docs/CAPABILITIES.md` carries
   the slice-by-slice surface description, and `docs/evidence/` holds published
@@ -463,6 +480,7 @@ Relevant upgrade concerns for this repo:
 - Keep future Spring AI upgrades focused and separate from mechanical repo split work.
 - Watch direct `ChatModel.call(Prompt)` usage with per-request options. `OllamaChatModel.buildRequestPrompt` substitutes the model's default options only when the prompt carries none; a non-null partial options object is used verbatim and every configured default is dropped. This is identical in Spring AI `2.0.0` and `2.0.1`, so it is a standing hazard rather than an upgrade regression. Prefer `ChatClient`, which merges the runtime options onto `chatModel.getOptions()`, or materialize a complete options object first. The vision boundary does the latter through `ollamaChatModel.getOptions().mutate()`, which keeps its direct-call protocol instead of gaining `ChatClient`'s auto-registered tool-calling advisor.
 - Spring AI `2.0.1` made tool-call limits configurable, defaulting to 40 calls per tool and 150 total with `ToolCallLimitBehavior.THROW`; exceeding either limit aborts the invocation instead of truncating it. `ToolCallLimitPolicy` pins those values for both tool paths so a later framework default cannot change the protocol silently. They are deliberately not written into saved evidence: Tool Search matrix verification compares the exact manifest settings key set, so adding a key would invalidate every retained manifest.
+- Spring AI's `OllamaChatModel` maps Ollama's `message.thinking` into the assistant message's properties under the key `thinking`, and `message.content` into the assistant text; `getOutput().getText()` therefore returns content only. Generation metadata carries the finish reason and a duplicate `thinking` entry, but only when both `prompt_eval_count` and `eval_count` are present; otherwise it is `ChatGenerationMetadata.NULL`. `Usage.getCompletionTokens()` is Ollama's `eval_count`, which counts reasoning tokens too. `OllamaChatOptions.thinkOption` controls the request's `think` field, and Spring AI documents that a thinking-capable model auto-enables thinking when it is unset, so sending nothing is not the same as disabling. Verified identical in `2.0.0` sources and `2.0.1` bytecode; recorded in `docs/logs/2026-09-03-thinking-field-inspection.md`.
 - The long-term harness should cover Spring AI's major provider surface: Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama.
 - The long-term harness should cover Spring AI model types: chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Provider-backed tests must be opt-in and must not run by default in CI.

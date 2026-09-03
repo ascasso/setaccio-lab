@@ -51,16 +51,27 @@ public final class OllamaChatModelFactory {
             OllamaChatModelIdentity modelIdentity,
             ChatGenerationSettings settings
     ) {
+        return create(ollamaApi, modelIdentity, settings, ChatReasoningPolicy.PROVIDER_DEFAULT);
+    }
+
+    public ChatModel create(
+            OllamaApi ollamaApi,
+            OllamaChatModelIdentity modelIdentity,
+            ChatGenerationSettings settings,
+            ChatReasoningPolicy reasoningPolicy
+    ) {
         Objects.requireNonNull(modelIdentity, "modelIdentity must not be null");
         Objects.requireNonNull(settings, "settings must not be null");
         if (settings.seed() == null) {
             throw new IllegalArgumentException("seed must be explicit for the Ollama chat adapter");
         }
-        OllamaChatOptions options = OllamaChatOptions.builder()
-                .model(modelIdentity.requestedModel())
-                .temperature(settings.temperature())
-                .seed(settings.seed())
-                .numPredict(settings.maxOutputTokens())
+        OllamaChatOptions options = OllamaReasoningOptions.apply(
+                        OllamaChatOptions.builder()
+                                .model(modelIdentity.requestedModel())
+                                .temperature(settings.temperature())
+                                .seed(settings.seed())
+                                .numPredict(settings.maxOutputTokens()),
+                        reasoningPolicy)
                 .build();
         return createNoPullModel(ollamaApi, options, settings.requestTimeout(), settings.maxAttempts());
     }
@@ -81,10 +92,20 @@ public final class OllamaChatModelFactory {
             OllamaChatModelIdentity modelIdentity,
             ChatGenerationSettings settings
     ) {
+        return createInvocation(ollamaApi, modelIdentity, settings, ChatReasoningPolicy.PROVIDER_DEFAULT);
+    }
+
+    public ChatInvocation createInvocation(
+            OllamaApi ollamaApi,
+            OllamaChatModelIdentity modelIdentity,
+            ChatGenerationSettings settings,
+            ChatReasoningPolicy reasoningPolicy
+    ) {
         return new OllamaChatInvocation(
-                create(ollamaApi, modelIdentity, settings),
+                create(ollamaApi, modelIdentity, settings, reasoningPolicy),
                 modelIdentity,
-                settings);
+                settings,
+                reasoningPolicy);
     }
 
     public OllamaApi createApi(String baseUrl, Duration timeout) {

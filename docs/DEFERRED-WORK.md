@@ -242,6 +242,27 @@ replacement, reanalysis, or mutation, and it does not weaken any closeout gate,
 retention rule, or interpretation boundary. It authorizes no model pull, remote
 provider, credential, Docker use, spending, release, tag, or push.
 
+## Reasoning Policy in the Existing Suites
+
+The chat matrix, Anthropic portability matrix, Phase 5 answer matrix, and the
+fact-check suites all send no explicit reasoning policy, so each inherits
+whatever its model does by default. For a thinking-capable Ollama artifact that
+default is to think, which means a small output budget can be spent on
+reasoning before any visible content appears.
+
+This is now a recorded limitation rather than an unnoticed one, and it is
+deliberately not fixed in place. Making reasoning explicit in those suites
+would change their protocol identity and, because their verifiers compare
+manifest settings as an exact JSON string and regenerate `SUMMARY.md`
+byte-for-byte, it would also stop every retained manifest in those suites from
+verifying. Adding a constant to `ChatGenerationOption` would go further and make
+retained chat and answer raw JSON undeserializable, because
+`ChatProviderOptionSupport` requires every constant to be classified.
+
+Changing any of that needs its own explicit scope start and its own evidence
+decision. Nothing here authorizes a rerun, repair, replacement, or reanalysis
+of any retained evidence, and no closeout is withdrawn.
+
 ## Deferred Through the Current Roadmap
 
 The following do not enter the current three-phase path unless the plan is

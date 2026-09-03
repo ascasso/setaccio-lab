@@ -187,6 +187,55 @@ only their deterministic `SUMMARY.md` regenerated with
 manifests and the earlier unversioned legacy-v0 manifest, and never start Spring
 or contact Ollama.
 
+## Reasoning and Empty-Content Diagnostic
+
+Spring AI's `OllamaChatModel` maps Ollama's `message.thinking` field into the
+assistant message's properties under the key `thinking`, and maps
+`message.content` into the assistant text. A boundary that reads only
+`getOutput().getText()` therefore sees an empty response when a model returns
+reasoning and no visible content, and Spring AI documents that a
+thinking-capable model auto-enables thinking when no policy is sent. The
+inspection behind that statement is recorded in
+[`docs/logs/2026-09-03-thinking-field-inspection.md`](logs/2026-09-03-thinking-field-inspection.md).
+
+Both local chat boundaries now record the response as separate dimensions
+through one shared `ChatResponseCapture`: assistant content, any reasoning
+field, whether reasoning was present, absent, or unavailable, the generation
+finish reason, the evaluated output-token count, the explicitly requested
+reasoning policy, and how the adapter handled that policy. Content and
+reasoning are never concatenated, substituted, or merged.
+
+Reasoning is an explicit recorded option rather than an inherited default. The
+provider-neutral `ChatReasoningPolicy` has `ENABLED`, `DISABLED`, and
+`PROVIDER_DEFAULT`; `OllamaReasoningOptions` maps it onto Spring AI's
+`ThinkOption`, which stays inside the Ollama adapter. `PROVIDER_DEFAULT` sends
+nothing and is not the same as `DISABLED`.
+
+The opt-in `thinkingDiagnostic` task is a new diagnostic protocol with its own
+suite, schema, and manifest settings. It reuses the tracked public-safe
+fact-check fixture catalog, its confirmed ordering, and the tracked
+`local-fact-check` prompt, but it is not a rerun, repair, replacement, or
+reanalysis of the Phase 4 fact-check evidence and it never writes into that
+suite. It locks five arms in a fixed order: a subject model with reasoning
+explicitly enabled and explicitly disabled at 64 output tokens, the same pair
+at 256, and a non-thinking control model with reasoning explicitly disabled at
+64. Each paired subject arm holds prompt, fixture order, seed, temperature,
+timeout, and every non-reasoning setting constant, so the only difference
+inside a pair is the reasoning policy. Every one of its 30 rows is one logical
+attempt at temperature `0.0`, seed `42`, `PT2M`, and pull strategy `never`,
+and every row is retained.
+
+`thinkingDiagnosticVerify` and `thinkingDiagnosticReanalyze` inspect saved
+diagnostic evidence offline without starting Spring or contacting a provider.
+Recorded content and reasoning stay in the ignored raw artifact; the
+deterministic summary reports per-arm aggregates only.
+
+The Phase 2 chat matrix, Phase 5 answer matrix, and Phase 4 fact-check suite
+keep their existing protocol versions and row schemas. They continue to send no
+reasoning policy, so their retained evidence still verifies and reanalyzes
+unchanged, and their inherited-default behavior is recorded as a named
+limitation rather than silently changed.
+
 ## Local Fixture Evaluation Benchmark
 
 `POST /api/lab/evaluations` runs under the `local` profile. It:

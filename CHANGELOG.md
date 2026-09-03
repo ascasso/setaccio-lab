@@ -9,6 +9,38 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Recorded the Spring AI reasoning-field inspection and implemented the
+  provider-free half of the empty-response diagnostic. Spring AI's
+  `OllamaChatModel` routes Ollama's `message.thinking` into assistant-message
+  properties under the key `thinking` while `getOutput().getText()` returns
+  `message.content` only, and Spring AI documents that a thinking-capable model
+  auto-enables thinking when no policy is sent. Verified identical in `2.0.0`
+  sources and `2.0.1` bytecode and recorded in
+  `docs/logs/2026-09-03-thinking-field-inspection.md`; the inspection stands
+  independently of any run. Both local chat boundaries — the shared
+  `OllamaChatInvocation` and the fact-check `RecordingChatModel`, which does not
+  go through it — now record content, reasoning, reasoning presence, finish
+  reason, evaluated output tokens, the requested reasoning policy, and the
+  adapter's handling of that policy through one shared `ChatResponseCapture`,
+  never merging content and reasoning. A provider-neutral `ChatReasoningPolicy`
+  makes reasoning explicit, with `OllamaReasoningOptions` keeping Spring AI's
+  `ThinkOption` inside the Ollama adapter; `PROVIDER_DEFAULT` sends nothing and
+  is deliberately distinct from `DISABLED`. The new opt-in `thinkingDiagnostic`,
+  `thinkingDiagnosticVerify`, and `thinkingDiagnosticReanalyze` tasks lock five
+  arms in a fixed order — a subject model with reasoning explicitly enabled and
+  explicitly disabled at `64` output tokens, the same pair at `256`, and a
+  non-thinking control at `64` — over the tracked public-safe fact-check fixture
+  catalog in its confirmed order at temperature `0.0`, seed `42`, `PT2M`, one
+  attempt per row, no pull, and 30 retained rows, writing evidence under
+  `local/evidence/thinking-diagnostic/`. Recorded content and reasoning stay in
+  the ignored raw artifact; the deterministic summary carries per-arm aggregates
+  only. Per the owner's schema and protocol decisions, the new fields and the
+  reasoning protocol setting exist only in the new suite: the chat, Anthropic,
+  answer, and fact-check suites keep their protocol versions and row schemas,
+  still send no reasoning policy, and their retained evidence still verifies and
+  reanalyzes. No model was called, and no evidence was run, rerun, repaired,
+  replaced, reanalyzed, or mutated.
+
 - Migrated the formal evidence lifecycle to a durable private root. Every
   suite now allocates new run evidence only under
   `setaccio-lab/local/evidence/<suite>/<run-id>/`, which is ignored but is not

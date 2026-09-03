@@ -146,6 +146,7 @@ why a publication copy deliberately will not pass the verification task.
 | Deterministic fixture evaluation | `POST /api/lab/evaluations` | — |
 | AI-judged fact checking | — | `localEvaluation`, `localEvaluationBudget` |
 | Retrieval (lexical, embedding, answer, relevancy) | — | `retrievalEvaluation`, `retrievalEmbedding`, `retrievalAnswerMatrix`, `retrievalRelevancyMatrix` |
+| Reasoning and empty-content diagnostic | — | `thinkingDiagnostic` + `Verify` / `Reanalyze` |
 
 Interactive endpoints run under the `local` profile. Every matrix task is
 opt-in, sequential, and outside `test`, `check`, `build`, application startup,

@@ -1015,6 +1015,68 @@ Testcontainers is deferred for this cycle because container provisioning would
 not answer that verdict-yield question. No additional environment variable,
 Docker setup, rerun, release, or tag is required by the A6 closeout.
 
+## Reasoning and Empty-Content Diagnostic
+
+`thinkingDiagnostic` is the only entry point for the reasoning diagnostic. It
+reads no environment variables: every model, option, runtime version, and
+output path is required on the command line so a formal run cannot silently
+change configuration. The output must be a new dated direct child of the
+private durable root `local/evidence/thinking-diagnostic/`.
+
+```bash
+./gradlew :setaccio-lab:thinkingDiagnostic \
+  --ollama-base-url=http://127.0.0.1:11434 \
+  --subject-model=<installed-thinking-capable-tag> \
+  --control-model=<installed-non-thinking-tag> \
+  --ollama-version=<observed-runtime-version> \
+  --output-dir=local/evidence/thinking-diagnostic/YYYY-MM-DD-thinking
+```
+
+| Option | Required | Meaning |
+| --- | --- | --- |
+| `--ollama-base-url` | Yes | Loopback Ollama URL. Never persisted into evidence. |
+| `--subject-model` | Yes | Already-installed subject tag. No pull, no substitution. |
+| `--control-model` | Yes | Already-installed non-thinking control tag. |
+| `--ollama-version` | Yes | The observed local runtime version, recorded with the run. |
+| `--output-dir` | Yes | One new dated direct child of `local/evidence/thinking-diagnostic/`. |
+
+The protocol is locked in code before any evidence directory is allocated: five
+arms in a fixed order (subject with reasoning explicitly enabled and explicitly
+disabled at `64` output tokens, the same pair at `256`, and the control with
+reasoning explicitly disabled at `64`), the tracked public-safe fact-check
+fixture catalog in its confirmed order, temperature `0.0`, seed `42`, `PT2M`,
+one attempt per row, pull strategy `never`, and 30 retained rows. The runner
+requires a clean worktree at a full Git commit, resolves both full immutable
+digests and their advertised capabilities before allocation, and re-checks both
+identities and the Git baseline before writing evidence.
+
+Offline inspection is provider-free and never starts Spring:
+
+```bash
+./gradlew :setaccio-lab:thinkingDiagnosticVerify \
+  --run-dir=local/evidence/thinking-diagnostic/<saved-run>
+./gradlew :setaccio-lab:thinkingDiagnosticReanalyze \
+  --run-dir=local/evidence/thinking-diagnostic/<saved-run>
+```
+
+Recorded assistant content and reasoning text stay in the ignored raw artifact.
+The deterministic `SUMMARY.md` carries per-arm aggregates only.
+
+### Reasoning policy across the other suites
+
+The provider-neutral `ChatReasoningPolicy` has three values, and
+`PROVIDER_DEFAULT` is not the same as `DISABLED`: it sends no option, so the
+model's own default applies, and Spring AI documents that a thinking-capable
+Ollama model auto-enables thinking in that case.
+
+`chatMatrix`, `anthropicChatMatrix`, `retrievalAnswerMatrix`,
+`localEvaluation`, `localEvaluationBudget`, and `localEvaluationBreakpoint`
+deliberately keep sending `PROVIDER_DEFAULT`. Their protocol versions, manifest
+settings, and row schemas are unchanged, so their retained evidence still
+verifies and reanalyzes. That inherited default is a recorded limitation of
+those suites, not a silent choice; changing it requires its own scope start,
+because it would change their protocol identity.
+
 ## Standing Local Ollama Authorization
 
 As of 2026-09-01, all explicitly requested work in this repository has

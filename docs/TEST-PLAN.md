@@ -200,6 +200,46 @@ No completed phase places a live model call in default tests or CI.
 - Keep existing endpoint request/response behavior unchanged unless dedicated
   parity tests justify migration to the new boundary.
 
+## Reasoning and Empty-Content Diagnostic
+
+- Cover the shared response capture independently of any suite: populated
+  reasoning with non-empty content, populated reasoning with empty content,
+  absent reasoning, blank reasoning treated as absent, finish-reason capture,
+  evaluated output-token capture, unavailable capture when no response was
+  obtained, and the record invariants that keep those states consistent.
+- Assert strict separation: recorded content never contains the recorded
+  reasoning text and recorded reasoning never contains the content, on every
+  path that records both.
+- Cover the Ollama mapping for an explicitly enabled policy, an explicitly
+  disabled policy, and `PROVIDER_DEFAULT`, including that `PROVIDER_DEFAULT`
+  sends no option at all and that applying a policy to an already-built options
+  object preserves model, temperature, seed, and output budget.
+- Cover the fact-check `RecordingChatModel` path directly, because it does not
+  go through the chat invocation boundary: capture of reasoning, finish reason,
+  and evaluated tokens before `FactCheckingEvaluator` consumes the response;
+  the explicit policy reaching every judge request; and the unchanged
+  no-policy default.
+- Cover the diagnostic protocol lock: five arms in a fixed order, every arm
+  carrying an explicit policy, each paired arm differing only in that policy,
+  and every tracked fixture scheduled once per arm in catalog order.
+- Cover diagnostic execution provider-free through an injected model factory:
+  all four content/reasoning outcome combinations, retention of failed rows
+  without retry or omission, one attempt per row, and per-row recording of the
+  advertised thinking capability.
+- Cover the diagnostic evidence round trip: write, verify, deterministic
+  reanalysis producing a byte-identical summary, rejection of a tampered raw
+  artifact, a drifted summary, an unexpected extra artifact, an incomplete run,
+  and a row that drifted from its locked schedule position.
+- Cover evidence compatibility for the suites that were deliberately left
+  alone: the chat and fact-check row schemas carry no reasoning field, project
+  identically whether or not an outcome carries a capture, and still
+  deserialize rows serialized before the capture existed. The
+  `ChatGenerationOption` vocabulary must stay unchanged, because adding a
+  constant would make retained chat and answer evidence undeserializable.
+- Keep the diagnostic outside the default lifecycle: no endpoint, model, or
+  credential default; every option explicit; the model factory injected; and
+  `check` and `build` must not reach any diagnostic task.
+
 ## Optional Integration Tests
 
 - Keep live Ollama and remote-provider tests opt-in behind a dedicated Gradle property or profile.
