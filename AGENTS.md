@@ -444,6 +444,21 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   add a constant to `ChatGenerationOption`: `ChatProviderOptionSupport` requires
   every constant to be classified, so a new one would make retained chat and
   answer raw JSON undeserializable.
+- One controlled reasoning diagnostic completed on 2026-09-03 from clean commit
+  `4e766b7a6345ba1a8af9ee1e354c2ba027e1573a` under Ollama `0.33.3`, retaining all
+  30 rows with no failure, timeout, retry, or omission. With reasoning explicitly
+  enabled at `64` output tokens, `gemma4:e2b` at digest `7fbdbf8f5e45` returned
+  empty content with a populated reasoning field, the full `64` evaluated tokens,
+  and finish reason `length` in five of six rows; the paired explicitly disabled
+  arm answered in two tokens in all six; at `256` tokens reasoning fit and every
+  row produced content; the non-thinking control produced content in all six.
+  This is a mechanism consistent with and explanatory of the Phase 4
+  output-budget association, which stands exactly as recorded. Two limits are
+  part of the result: the retained runs sent no policy rather than an enabled
+  one and this diagnostic has no unset-policy arm, and only the fact-check
+  boundary was exercised live. No quality, factuality, reliability, ranking, or
+  model-selection claim follows, no closeout is withdrawn, and no rerun of
+  retained evidence is authorized.
 - Tracked documentation splits the front door from the detail: `README.md`
   leads with findings and the evidence model, `docs/CAPABILITIES.md` carries
   the slice-by-slice surface description, and `docs/evidence/` holds published

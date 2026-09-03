@@ -9,6 +9,31 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Completed the one authorized reasoning diagnostic on 2026-09-03 from clean
+  commit `4e766b7` under Ollama `0.33.3`, retaining all 30 rows with no failure,
+  timeout, retry, replacement, or omission. With reasoning explicitly enabled at
+  `64` output tokens, `gemma4:e2b` at digest `7fbdbf8f5e45` returned empty
+  assistant content alongside a populated reasoning field, the full `64`
+  evaluated output tokens, and finish reason `length` in five of six rows. The
+  paired arm held prompt, fixture order, seed, temperature, timeout, and budget
+  constant and changed only the reasoning policy: with reasoning explicitly
+  disabled, all six rows returned visible content in two evaluated tokens with
+  finish reason `stop`. At `256` tokens with reasoning enabled, reasoning fit
+  within budget and every row produced visible content. The non-thinking control
+  `granite4.1:3b` produced content in all six rows. The evidence verified and
+  reanalyzed offline byte-for-byte and stays ignored under
+  `local/evidence/thinking-diagnostic/`. This is a mechanism consistent with and
+  explanatory of the Phase 4 output-budget association; that curve stands exactly
+  as recorded and is neither replaced nor corrected. Two limits are part of the
+  result and are recorded with it: the retained runs sent no reasoning policy
+  rather than an enabled one and this diagnostic has no unset-policy arm, and
+  only the fact-check boundary was exercised live, so the chat and answer-matrix
+  empty responses are consistent with but untested by it. No quality,
+  factuality, reliability, ranking, or model-selection claim follows, no closeout
+  is withdrawn, no adopt/revise/reject decision is made for the closed Phase 4
+  cycle, and no retained evidence was rerun, repaired, replaced, reanalyzed, or
+  mutated. Recorded in `docs/logs/2026-09-03-thinking-diagnostic-run.md`.
+
 - Recorded the Spring AI reasoning-field inspection and implemented the
   provider-free half of the empty-response diagnostic. Spring AI's
   `OllamaChatModel` routes Ollama's `message.thinking` into assistant-message

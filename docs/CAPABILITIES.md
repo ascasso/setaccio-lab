@@ -230,6 +230,18 @@ diagnostic evidence offline without starting Spring or contacting a provider.
 Recorded content and reasoning stay in the ignored raw artifact; the
 deterministic summary reports per-arm aggregates only.
 
+One diagnostic suite completed on 2026-09-03 under Ollama `0.33.3`, retaining
+all 30 rows. With reasoning explicitly enabled at `64` output tokens, the
+subject artifact returned empty content with a populated reasoning field, the
+full budget in evaluated tokens, and finish reason `length` in five of six rows;
+the paired explicitly disabled arm produced visible content in two tokens in all
+six. At `256` tokens reasoning fit within budget and every row produced content.
+The evidence verified and reanalyzed offline. This explains a plausible cause of
+the Phase 4 output-budget association without replacing or correcting it, and it
+does not test the unset-policy behavior the retained runs actually used. The
+bounded closeout is in
+[`docs/logs/2026-09-03-thinking-diagnostic-run.md`](logs/2026-09-03-thinking-diagnostic-run.md).
+
 The Phase 2 chat matrix, Phase 5 answer matrix, and Phase 4 fact-check suite
 keep their existing protocol versions and row schemas. They continue to send no
 reasoning policy, so their retained evidence still verifies and reanalyzes

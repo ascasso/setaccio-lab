@@ -18,8 +18,8 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 Each result below is bounded by the closeout that produced it. The qualifying
 language is part of the record, not hedging: these are small, controlled,
 single-run observations, and none of them ranks or selects a model. The two
-open questions at the end are explicitly not results — they have no closeout
-and no controlled protocol.
+open question at the end is explicitly not a result — it has no closeout and no
+controlled protocol.
 
 ### Output budget and fact-check verdict yield
 
@@ -31,9 +31,10 @@ This is a protocol-specific association, not evidence of a causal threshold, a
 generally optimal budget, or model reliability. Completion-token counts remain
 only an output-limit proxy.
 
-The study's judge advertises a `thinking` capability, which registers a
-candidate mechanism for the association — see the open question below. That
-mechanism is untested, and the finding above stands as recorded either way.
+The study's judge advertises a `thinking` capability. A later controlled
+diagnostic tested that mechanism directly and found it real for this artifact —
+see the next finding. The curve above stands exactly as recorded: the diagnostic
+explains a plausible cause of its shape, it does not replace or correct it.
 
 ### Only one tested artifact cleared the tool-calling protocol
 
@@ -59,29 +60,34 @@ discovered-not-executed and output-contract diagnostics.
 The result does not choose another index or provider. It supports only a future
 bounded discovery-focused experiment, not a generic Tool Search expansion.
 
-### Open question: empty responses from one thinking-capable model
+### Reasoning can consume a small output budget before any visible content
 
-Across three unrelated task surfaces, one artifact completed its provider
-invocation with no classified failure and returned no content. This is
-cross-surface but **single-model**: every run below used `gemma4:e2b` at the
-same digest `7fbdbf8f5e45`, which advertises a `thinking` capability.
+A controlled 30-row diagnostic paired one thinking-capable artifact against
+itself, changing only whether reasoning was explicitly enabled or explicitly
+disabled, at two output budgets, with prompt, fixture order, seed, temperature,
+and timeout held constant.
 
-| Run | Model | Budget | Empty responses |
-| --- | --- | --- | --- |
-| Phase 2 chat matrix | `gemma4:e2b` | 128 | 6 of 6 |
-| Fact-check A5 | `gemma4:e2b` | 64 | 10 of 12 |
-| Phase 5 R5 answer matrix | `gemma4:e2b` | 256 | 4 of 14 |
-| Phase 5 R6 relevancy matrix | `granite4.1:3b` | 64 | 0 of 8 eligible |
+| Arm | Reasoning | Budget | Rows with content | Rows with reasoning | Rows at budget |
+| --- | --- | --- | --- | --- | --- |
+| `gemma4:e2b` | enabled | 64 | 1 of 6 | 5 of 6 | 5 of 6 |
+| `gemma4:e2b` | disabled | 64 | 6 of 6 | 0 of 6 | 0 of 6 |
+| `gemma4:e2b` | enabled | 256 | 6 of 6 | 5 of 6 | 0 of 6 |
+| `gemma4:e2b` | disabled | 256 | 6 of 6 | 0 of 6 | 0 of 6 |
+| `granite4.1:3b` | disabled | 64 | 6 of 6 | 0 of 6 | 0 of 6 |
 
-The last row is the contrast. R6 ran at the same `64`-token budget that
-produced ten empty responses in A5, against a model that does not advertise
-`thinking`, and recorded no empty response at all.
+With reasoning enabled at `64` tokens, five of six rows spent the entire budget
+on reasoning, returned empty assistant content, and finished with `length`. The
+same artifact at the same budget with reasoning explicitly disabled answered in
+two tokens every time. At `256` tokens reasoning fit inside the budget and every
+row produced visible content.
 
-That suggests reasoning tokens may consume a small output budget before any
-assistant content is produced. It is a hypothesis from read-only capability
-metadata, not a tested result, and it is the most obvious candidate for the
-next controlled study. See
-[`docs/logs/2026-09-02-model-capability-observations.md`](docs/logs/2026-09-02-model-capability-observations.md).
+Two limits are part of the result. The retained runs that produced empty
+responses sent **no** reasoning policy rather than an enabled one, and this
+diagnostic has no unset-policy arm, so the link to those runs rests on Spring
+AI's documented default rather than on measurement. And only the fact-check
+boundary was exercised live, so the chat and answer-matrix empties are
+consistent with this mechanism but untested by it. See
+[`docs/logs/2026-09-03-thinking-diagnostic-run.md`](docs/logs/2026-09-03-thinking-diagnostic-run.md).
 
 ### Open question: first-turn failures against a completion-only artifact
 
@@ -97,7 +103,7 @@ against it. This is a separate phenomenon from the empty responses above, with a
 separate candidate explanation, and the same caveat applies: the capability
 string was read under a later Ollama runtime than the one those phases used.
 
-Neither open question has a closeout, a controlled protocol, or an
+The remaining open question has no closeout, no controlled protocol, and no
 interpretation of its own.
 
 ## How evidence works

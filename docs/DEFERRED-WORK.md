@@ -259,6 +259,18 @@ verifying. Adding a constant to `ChatGenerationOption` would go further and make
 retained chat and answer raw JSON undeserializable, because
 `ChatProviderOptionSupport` requires every constant to be classified.
 
+The 2026-09-03 diagnostic makes this concrete rather than theoretical: with
+reasoning explicitly enabled at a `64`-token budget, the artifact those suites
+used spent the whole budget on reasoning and returned empty content in five of
+six rows.
+
+Two follow-ups are therefore registered and unstarted. First, whether those
+suites should send an explicit policy, with the retained-manifest cost above.
+Second, whether a `PROVIDER_DEFAULT` arm and a chat-invocation-boundary arm are
+worth a second diagnostic: the retained runs sent no policy rather than an
+enabled one, and only the fact-check boundary was exercised live, so both links
+currently rest on documented framework behavior rather than measurement.
+
 Changing any of that needs its own explicit scope start and its own evidence
 decision. Nothing here authorizes a rerun, repair, replacement, or reanalysis
 of any retained evidence, and no closeout is withdrawn.
