@@ -9,6 +9,32 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Completed a small standalone LFM tool-capability diagnostic on 2026-09-03
+  against the currently installed Phase 1/Phase 2 artifact
+  `hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0` (full digest
+  `2c88e114a368b8500aabb7cf32e8a16c274d2265b640c601198a784a559bc5ed`), no pull,
+  rename, or modification. Confirmed live under Ollama `0.33.3` that the
+  artifact still advertises `completion` only. Made exactly two direct,
+  non-streaming, non-retried `POST /api/chat` calls at the provider boundary
+  (temperature `0.0`, seed `42`, `512` output tokens, otherwise identical
+  message and settings), differing only in whether a single minimal
+  zero-argument tool definition was attached. The tool-bearing call was
+  rejected synchronously with HTTP `400` and an explicit provider error
+  stating the model does not support tools; the tool-free call succeeded with
+  HTTP `200` and a complete response. The currently deployed artifact/runtime
+  rejects tool-bearing requests at the provider boundary. This is consistent
+  with the historical Phase 1 (16 rows) and Phase 2 (32 interleaved attempts)
+  `PROVIDER_FAILURE` observations but does not establish their historical
+  cause — this diagnostic ran under a later Ollama runtime than either closed
+  phase — and it is not evidence about the underlying model architecture's
+  latent tool-calling ability. Verbatim request/response bodies, HTTP status
+  codes, and SHA-256 checksums are retained in the ignored bundle under
+  `local/evidence/lfm-tool-capability/2026-09-03-lfm-tool-capability/`; no raw
+  payload is published in tracked files. No Phase 1 or Phase 2 evidence or
+  closeout was rerun, repaired, replaced, reinterpreted, or rewritten, and no
+  model was pulled or substituted. Recorded in
+  `docs/logs/2026-09-03-lfm-tool-capability-check.md`.
+
 - Completed the one authorized reasoning diagnostic on 2026-09-03 from clean
   commit `4e766b7` under Ollama `0.33.3`, retaining all 30 rows with no failure,
   timeout, retry, replacement, or omission. With reasoning explicitly enabled at

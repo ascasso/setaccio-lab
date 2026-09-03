@@ -459,6 +459,23 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   boundary was exercised live. No quality, factuality, reliability, ranking, or
   model-selection claim follows, no closeout is withdrawn, and no rerun of
   retained evidence is authorized.
+- A small standalone diagnostic on 2026-09-03 tested the currently installed
+  Phase 1/Phase 2 artifact
+  (`hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0`, digest
+  `2c88e114a368`) directly against the Ollama provider boundary under Ollama
+  `0.33.3`. Two otherwise byte-identical direct `/api/chat` calls, differing
+  only in the presence of one minimal tool definition, showed the tool-bearing
+  call rejected synchronously (HTTP `400`, explicit provider error stating the
+  model does not support tools) while the tool-free call succeeded (HTTP `200`,
+  complete response). The currently deployed artifact/runtime rejects
+  tool-bearing requests at the provider boundary; this is consistent with the
+  historical Phase 1/Phase 2 `PROVIDER_FAILURE` observations but does not
+  establish their historical cause (this ran under a later runtime) and is not
+  evidence about the underlying model architecture's latent tool-calling
+  ability. No Phase 1 or Phase 2 evidence or closeout was touched. Recorded in
+  `docs/logs/2026-09-03-lfm-tool-capability-check.md`; the verbatim request/
+  response bundle is ignored under
+  `setaccio-lab/local/evidence/lfm-tool-capability/`.
 - Tracked documentation splits the front door from the detail: `README.md`
   leads with findings and the evidence model, `docs/CAPABILITIES.md` carries
   the slice-by-slice surface description, and `docs/evidence/` holds published

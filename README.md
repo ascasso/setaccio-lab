@@ -17,9 +17,7 @@ This repository is Apache-2.0 licensed and intentionally public-safe. Private Se
 
 Each result below is bounded by the closeout that produced it. The qualifying
 language is part of the record, not hedging: these are small, controlled,
-single-run observations, and none of them ranks or selects a model. The two
-open question at the end is explicitly not a result — it has no closeout and no
-controlled protocol.
+single-run observations, and none of them ranks or selects a model.
 
 ### Output budget and fact-check verdict yield
 
@@ -89,22 +87,32 @@ boundary was exercised live, so the chat and answer-matrix empties are
 consistent with this mechanism but untested by it. See
 [`docs/logs/2026-09-03-thinking-diagnostic-run.md`](docs/logs/2026-09-03-thinking-diagnostic-run.md).
 
-### Open question: first-turn failures against a completion-only artifact
+### The tool-calling artifact rejects tool-bearing requests today
 
 Phase 1's 16 tool-compatibility rows and Phase 2's 32 interleaved attempts
 stopped at the same first `PROVIDER_FAILURE` turn, in both the untreated and
-prompted conditions. No tool call, final response, usage, output-limit, or
-visible-reasoning observation was retained, and the retained evidence does not
-identify the underlying cause.
+prompted conditions, against
+`hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0`. No tool call,
+final response, usage, output-limit, or visible-reasoning observation was
+retained, and the retained evidence does not identify the underlying cause.
 
-That artifact currently advertises `completion` only — it does not advertise
-`tools` — while both phases exercised Spring AI's standard `ToolCallingAdvisor`
-against it. This is a separate phenomenon from the empty responses above, with a
-separate candidate explanation, and the same caveat applies: the capability
-string was read under a later Ollama runtime than the one those phases used.
+A small standalone diagnostic tested the currently deployed artifact directly.
+Two otherwise byte-identical, non-streaming, direct Ollama `/api/chat` calls —
+temperature `0.0`, seed `42`, `512` output tokens, no retries — differed only
+in whether a single minimal tool definition was attached. The tool-bearing call
+was rejected synchronously with HTTP `400` and an explicit provider error
+stating the model does not support tools; the tool-free call succeeded (HTTP
+`200`, complete response).
 
-The remaining open question has no closeout, no controlled protocol, and no
-interpretation of its own.
+The currently deployed artifact/runtime rejects this tool-bearing request at
+the provider boundary. This is consistent with the historical Phase 1 and
+Phase 2 `PROVIDER_FAILURE` observations, but it does not prove that boundary
+rejection was their historical cause — this diagnostic ran under Ollama
+`0.33.3`, a later runtime than either closed phase used — and it is not proof
+about the underlying model architecture's latent tool-calling ability, since
+the rejection may originate in this specific GGUF conversion or its imported
+template rather than the architecture itself. See
+[`docs/logs/2026-09-03-lfm-tool-capability-check.md`](docs/logs/2026-09-03-lfm-tool-capability-check.md).
 
 ## How evidence works
 

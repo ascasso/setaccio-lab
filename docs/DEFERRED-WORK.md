@@ -160,6 +160,22 @@ installed-model inspection. Exact identity lock, model invocation, and live
 execution remain deferred until owner identity approval and the remaining live
 runner gate are complete.
 
+The retained Phase 1 and Phase 2 evidence and closeouts above are unchanged and
+still do not identify the underlying provider failure cause. Separately, on
+2026-09-03 a small standalone diagnostic tested the currently installed and
+still tagged/digest-matching LFM2.5 artifact directly against the Ollama
+provider boundary (not through Spring AI), under the current Ollama runtime.
+Two otherwise-identical direct `/api/chat` calls differing only in the presence
+of a minimal tool definition showed the tool-bearing call rejected
+synchronously (HTTP `400`, explicit provider error) while the tool-free call
+succeeded. This is consistent with the historical `PROVIDER_FAILURE`
+observations above but does not establish their historical cause, since this
+diagnostic ran under a later runtime, and it is not evidence about the
+underlying model architecture's latent tool-calling ability. See
+[logs/2026-09-03-lfm-tool-capability-check.md](logs/2026-09-03-lfm-tool-capability-check.md).
+No Phase 1 or Phase 2 evidence or closeout was rerun, repaired, replaced,
+reinterpreted, or rewritten by that diagnostic.
+
 ## Deferred From the August Cycle
 
 | Item | Status and reason | Required gate before work begins |
