@@ -29,7 +29,7 @@ class ToolCompatibilityPreflightTest {
         AtomicInteger sessions = new AtomicInteger();
 
         ToolCompatibilityPreflight.Prepared prepared = new ToolCompatibilityPreflight().prepare(
-                input(project, "build/tool-compatibility/2026-08-18-provider-free"),
+                input(project, "local/evidence/tool-compatibility/2026-08-18-provider-free"),
                 (baseUrl, timeout) -> {
                     sessions.incrementAndGet();
                     assertThat(baseUrl).isEqualTo("http://localhost:11434");
@@ -62,7 +62,7 @@ class ToolCompatibilityPreflightTest {
                         "another:model",
                         "512",
                         "PT2M",
-                        "build/tool-compatibility/2026-08-18-wrong-model"),
+                        "local/evidence/tool-compatibility/2026-08-18-wrong-model"),
                 factory))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("locked Phase 1 model");
@@ -119,7 +119,7 @@ class ToolCompatibilityPreflightTest {
         Path project = Files.createDirectory(temporaryDirectory.resolve("allocation-project"));
         Path output = ToolCompatibilityPreflight.resolveNewOutputDirectory(
                 project,
-                "build/tool-compatibility/2026-08-18-fresh");
+                "local/evidence/tool-compatibility/2026-08-18-fresh");
 
         Path allocated = ToolCompatibilityPreflight.allocate(output);
 
@@ -134,7 +134,7 @@ class ToolCompatibilityPreflightTest {
                 .hasMessageContaining("directly under");
         assertThatThrownBy(() -> ToolCompatibilityPreflight.resolveNewOutputDirectory(
                 project,
-                "build/tool-compatibility/not-dated"))
+                "local/evidence/tool-compatibility/not-dated"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("YYYY-MM-DD");
     }
@@ -142,24 +142,24 @@ class ToolCompatibilityPreflightTest {
     @Test
     void rejectsSymbolicLinksInTheOutputPath() throws Exception {
         Path project = Files.createDirectory(temporaryDirectory.resolve("symlink-project"));
-        Path root = Files.createDirectories(project.resolve("build/tool-compatibility"));
+        Path root = Files.createDirectories(project.resolve("local/evidence/tool-compatibility"));
         Path target = Files.createDirectory(temporaryDirectory.resolve("symlink-target"));
         Files.createSymbolicLink(root.resolve("2026-08-18-linked"), target);
 
         assertThatThrownBy(() -> ToolCompatibilityPreflight.resolveNewOutputDirectory(
                 project,
-                "build/tool-compatibility/2026-08-18-linked"))
+                "local/evidence/tool-compatibility/2026-08-18-linked"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("symbolic links");
 
         Path parentLinkedProject = Files.createDirectory(
                 temporaryDirectory.resolve("parent-linked-project"));
-        Path redirectedBuild = Files.createDirectory(
-                temporaryDirectory.resolve("redirected-build"));
-        Files.createSymbolicLink(parentLinkedProject.resolve("build"), redirectedBuild);
+        Path redirectedLocal = Files.createDirectory(
+                temporaryDirectory.resolve("redirected-local"));
+        Files.createSymbolicLink(parentLinkedProject.resolve("local"), redirectedLocal);
         assertThatThrownBy(() -> ToolCompatibilityPreflight.resolveNewOutputDirectory(
                 parentLinkedProject,
-                "build/tool-compatibility/2026-08-18-parent-linked"))
+                "local/evidence/tool-compatibility/2026-08-18-parent-linked"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("symbolic links");
     }
@@ -184,7 +184,7 @@ class ToolCompatibilityPreflightTest {
                         ToolCompatibilityProtocol.INITIAL_MODEL,
                         "512",
                         "PT2M",
-                        "build/tool-compatibility/2026-08-18-invalid-endpoint"),
+                        "local/evidence/tool-compatibility/2026-08-18-invalid-endpoint"),
                 (ignoredBaseUrl, ignoredTimeout) -> {
                     throw new AssertionError("Invalid endpoints must fail before session creation");
                 }))

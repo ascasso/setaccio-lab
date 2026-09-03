@@ -30,13 +30,13 @@ public abstract class RetrievalRelevancyOfflineTask extends DefaultTask {
     @Input public abstract Property<String> getJavaExecutable();
     @Input public abstract Property<String> getMode();
     @Input @Optional public String getRunDir() { return runDir; }
-    @Option(option = "run-dir", description = "Required saved directory directly under build/retrieval-relevancy/.")
+    @Option(option = "run-dir", description = "Required saved directory directly under local/evidence/retrieval-relevancy/.")
     public void setRunDir(String value) { runDir = value; }
 
     @TaskAction
     public void inspectEvidence() {
         if (runDir == null || runDir.isBlank()) {
-            throw new GradleException(getName() + " requires --run-dir=<saved-build-directory>");
+            throw new GradleException(getName() + " requires --run-dir=<saved-evidence-directory>");
         }
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());

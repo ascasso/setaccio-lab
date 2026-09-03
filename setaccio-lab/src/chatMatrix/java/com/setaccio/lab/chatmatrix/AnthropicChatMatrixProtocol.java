@@ -3,6 +3,7 @@ package com.setaccio.lab.chatmatrix;
 import com.setaccio.lab.chat.AnthropicChatModelIdentity;
 import com.setaccio.lab.chat.ChatGenerationOption;
 import com.setaccio.lab.chat.ChatProviderOptionSupport;
+import com.setaccio.lab.evidence.EvidenceSuiteRoot;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
@@ -14,6 +15,7 @@ final class AnthropicChatMatrixProtocol {
 
     static final int VERSION = 1;
     static final String SUITE = "anthropic-chat-matrix";
+    static final EvidenceSuiteRoot EVIDENCE_ROOT = EvidenceSuiteRoot.of("anthropic-chat-matrix");
     static final String PROVIDER = "anthropic";
     static final String ENDPOINT_CATEGORY = "remote";
     static final String EXECUTION_STRATEGY = "sequential";

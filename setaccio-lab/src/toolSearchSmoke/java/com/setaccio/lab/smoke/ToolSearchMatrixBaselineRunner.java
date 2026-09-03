@@ -81,18 +81,15 @@ public final class ToolSearchMatrixBaselineRunner {
 
     private static String parseOutputDir(String[] args) {
         if (args.length != 2 || !"--output-dir".equals(args[0]) || args[1].isBlank()) {
-            throw new IllegalArgumentException("Expected --output-dir <dated-build-directory>");
+            throw new IllegalArgumentException("Expected --output-dir <new-dated-directory-under-"
+                    + ToolSearchMatrixProtocol.EVIDENCE_ROOT.durableRelativePath() + ">");
         }
         return args[1];
     }
 
     private static Path resolveNewOutputDir(String value) {
-        Path projectDir = Path.of("").toAbsolutePath().normalize();
-        Path matrixRoot = projectDir.resolve("build/tool-search-matrix").normalize();
-        Path output = projectDir.resolve(value).normalize();
-        if (!output.startsWith(matrixRoot)) {
-            throw new IllegalArgumentException("Output must be under build/tool-search-matrix/");
-        }
+        Path output = ToolSearchMatrixProtocol.EVIDENCE_ROOT.resolveNewRunDirectory(
+                Path.of(""), value, "Output directory");
         if (Files.exists(output)) {
             throw new IllegalArgumentException("Output directory already exists: " + output);
         }

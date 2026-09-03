@@ -159,7 +159,7 @@ public final class ToolCompatibilityMatrixRunner {
             return new IllegalArgumentException(
                     "Expected --ollama-base-url <explicit-loopback-url> "
                             + "--model <locked-installed-tag> --max-tokens 512 "
-                            + "--timeout PT2M --output-dir <new-dated-build-directory>");
+                            + "--timeout PT2M --output-dir <new-dated-evidence-directory>");
         }
     }
 }

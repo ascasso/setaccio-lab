@@ -39,7 +39,7 @@ public final class ToolCompatibilityCohortFrontierRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --run-dir <saved-build-directory>");
+                    "Expected --run-dir <saved-evidence-directory>");
         }
     }
 }

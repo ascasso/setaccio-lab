@@ -17,27 +17,27 @@ class ToolCompatibilityHumanReviewPrepareRunnerTest {
     @Test
     void requiresEveryExplicitWorksheetBindingOptionExactlyOnce() {
         assertThat(ToolCompatibilityHumanReviewPrepareRunner.Arguments.parse(new String[] {
-                "--output-root", "build/tool-compatibility-human-review",
+                "--output-root", "local/evidence/tool-compatibility-human-review",
                 "--review-date", "2026-08-21",
-                "--candidate-run", "build/tool-compatibility/2026-08-21-prompted",
-                "--baseline-run", "build/tool-compatibility/2026-08-21-baseline"
+                "--candidate-run", "local/evidence/tool-compatibility/2026-08-21-prompted",
+                "--baseline-run", "local/evidence/tool-compatibility/2026-08-21-baseline"
         })).isEqualTo(new ToolCompatibilityHumanReviewPrepareRunner.Arguments(
-                "build/tool-compatibility/2026-08-21-baseline",
-                "build/tool-compatibility/2026-08-21-prompted",
+                "local/evidence/tool-compatibility/2026-08-21-baseline",
+                "local/evidence/tool-compatibility/2026-08-21-prompted",
                 "2026-08-21",
-                "build/tool-compatibility-human-review"));
+                "local/evidence/tool-compatibility-human-review"));
 
         assertThatThrownBy(() -> ToolCompatibilityHumanReviewPrepareRunner.Arguments.parse(new String[] {
-                "--baseline-run", "build/tool-compatibility/2026-08-21-baseline",
-                "--candidate-run", "build/tool-compatibility/2026-08-21-prompted",
+                "--baseline-run", "local/evidence/tool-compatibility/2026-08-21-baseline",
+                "--candidate-run", "local/evidence/tool-compatibility/2026-08-21-prompted",
                 "--review-date", "2026-08-21",
                 "--review-date", "2026-08-22"
         })).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> ToolCompatibilityHumanReviewPrepareRunner.Arguments.parse(new String[] {
-                "--baseline-run", "build/tool-compatibility/2026-08-21-baseline",
-                "--candidate-run", " build/tool-compatibility/2026-08-21-prompted ",
+                "--baseline-run", "local/evidence/tool-compatibility/2026-08-21-baseline",
+                "--candidate-run", " local/evidence/tool-compatibility/2026-08-21-prompted ",
                 "--review-date", "2026-08-21",
-                "--output-root", "build/tool-compatibility-human-review"
+                "--output-root", "local/evidence/tool-compatibility-human-review"
         })).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -46,12 +46,12 @@ class ToolCompatibilityHumanReviewPrepareRunnerTest {
         Path project = Files.createDirectory(temporaryDirectory.resolve("project"));
 
         assertThat(ToolCompatibilityHumanReviewPrepareRunner.resolveReviewRoot(
-                project, "build/tool-compatibility-human-review"))
-                .isEqualTo(project.resolve("build/tool-compatibility-human-review"));
+                project, "local/evidence/tool-compatibility-human-review"))
+                .isEqualTo(project.resolve("local/evidence/tool-compatibility-human-review"));
         assertThatThrownBy(() -> ToolCompatibilityHumanReviewPrepareRunner.resolveReviewRoot(
                 project, "build/other-review-root"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("fixed build/tool-compatibility-human-review");
+                .hasMessageContaining("fixed local/evidence/tool-compatibility-human-review");
         assertThat(ToolCompatibilityHumanReviewPrepareRunner.parseReviewDate("2026-08-21"))
                 .isEqualTo(LocalDate.parse("2026-08-21"));
         assertThatThrownBy(() -> ToolCompatibilityHumanReviewPrepareRunner.parseReviewDate("2026-02-30"))
@@ -62,13 +62,13 @@ class ToolCompatibilityHumanReviewPrepareRunnerTest {
     @Test
     void derivesOneSafeNonOverwritingWorksheetIdentityFromBothRunsAndTheDate() {
         assertThat(ToolCompatibilityHumanReviewPrepareRunner.reviewId(
-                Path.of("build/tool-compatibility/2026-08-21-baseline"),
-                Path.of("build/tool-compatibility/2026-08-21-prompted"),
+                Path.of("local/evidence/tool-compatibility/2026-08-21-baseline"),
+                Path.of("local/evidence/tool-compatibility/2026-08-21-prompted"),
                 LocalDate.parse("2026-08-21")))
                 .isEqualTo("2026-08-21-baseline--vs--2026-08-21-prompted--review-2026-08-21");
         assertThatThrownBy(() -> ToolCompatibilityHumanReviewPrepareRunner.reviewId(
-                Path.of("build/tool-compatibility/.unsafe"),
-                Path.of("build/tool-compatibility/2026-08-21-prompted"),
+                Path.of("local/evidence/tool-compatibility/.unsafe"),
+                Path.of("local/evidence/tool-compatibility/2026-08-21-prompted"),
                 LocalDate.parse("2026-08-21")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("safe path segments");

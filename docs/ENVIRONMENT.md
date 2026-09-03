@@ -4,6 +4,53 @@ This project should keep default builds local-safe. Unit tests and smoke tests m
 
 Live provider checks are opt-in and should use environment variables or ignored local config only. Do not commit `.env`, credentials, generated audio/image outputs, or provider response payloads outside ignored build directories.
 
+## Durable Formal Evidence Root
+
+Formal run evidence is allocated only under the private, ignored durable root
+
+```
+setaccio-lab/local/evidence/<suite>/<run-id>/
+```
+
+It is not a Gradle output directory, so `./gradlew clean` does not remove it.
+The opt-in matrix, verify, reanalyze, comparison, frontier, and human-review
+tasks execute with the `setaccio-lab` module directory as their working
+directory, so a Gradle command run from the repository root passes a
+module-relative path:
+
+```bash
+./gradlew :setaccio-lab:retrievalEmbeddingVerify \
+  --run-dir=local/evidence/retrieval-embedding/<run-id>
+```
+
+The CLI option names are unchanged. Callers still supply `--output-dir`,
+`--run-dir`, `--baseline-run-dir`, `--candidate-run-dir`, `--baseline-run`,
+`--candidate-run`, `--source-retrieval-run-dir`, `--source-answer-run-dir`,
+`--ollama-run-dir`, `--output-root`, the multi-arm `--output-dir-<tokens>` and
+`--run-dir-<tokens>` options, and the budget `--budget-64-run-dir` /
+`--budget-256-run-dir` options; only the root they point at changed.
+
+The suite directories are `chat-matrix`, `anthropic-chat-matrix`,
+`evaluation-matrix`, `retrieval-evaluation`, `retrieval-embedding`,
+`retrieval-answer`, `retrieval-relevancy`, `tool-compatibility`,
+`tool-compatibility-human-review`, `tool-search-matrix`, `vision-matrix`, and
+`vision-human-review`. One shared contract owns the policy for all of them:
+
+- a new run directory must be a direct child of the durable suite root, must be
+  one safe path segment, and must satisfy its suite's date/run-id rule;
+- writers never allocate under `build/`, never overwrite, and never reuse a
+  directory;
+- readers also accept a legacy `build/<suite>/<run-id>` path so evidence saved
+  before this change can still be verified, reanalyzed, compared, and consumed;
+- legacy acceptance is read-only. It never authorizes rewriting, repairing,
+  reanalyzing into, or moving old evidence.
+
+Ordinary interactive endpoint output is unaffected and stays under
+`build/lab-results/` through `SETACCIO_LAB_OUTPUT_DIR`. Tracked
+`docs/evidence/` holds only permitted publication copies of deterministic
+summaries and manifests; it is a partial copy, is never a task input, and is
+not the source for offline verification.
+
 ## Local and Planned Variables
 
 These variables are supported by the current `setaccio-lab` application config, used by the documented local workflow, or reserved for the planned provider sections below.
@@ -127,7 +174,7 @@ The offline evidence layer now locks the twelve-row protocol, BLAKE3
 document/claim identities, prompt/catalog/human-review digests, full judge
 identity, generation settings, raw outcomes, response metadata, available
 usage, latency, attempts, and classified diagnostics. A saved run directory is
-a direct child of ignored `build/evaluation-matrix/` and contains exactly
+a direct child of ignored `local/evidence/evaluation-matrix/` and contains exactly
 `local-evaluation-results.json`, shared v1 `manifest.json`, and deterministic
 `SUMMARY.md`.
 
@@ -140,7 +187,7 @@ and replace the example tag/output name deliberately:
   --judge-model=YOUR_INSTALLED_TAG \
   --max-tokens=64 \
   --timeout=PT30S \
-  --output-dir=build/evaluation-matrix/YYYY-MM-DD-local
+  --output-dir=local/evidence/evaluation-matrix/YYYY-MM-DD-local
 ```
 
 | Option | Required | Contract |
@@ -149,7 +196,7 @@ and replace the example tag/output name deliberately:
 | `--judge-model` | Yes | One already-installed Ollama tag. No environment or application default is used. |
 | `--max-tokens` | Yes | Positive integer from `1` through `32768`. |
 | `--timeout` | Yes | Positive ISO-8601 duration, such as `PT30S`, no greater than `PT10M`. |
-| `--output-dir` | Yes | One nonexistent dated child of `build/evaluation-matrix/`. |
+| `--output-dir` | Yes | One nonexistent dated child of `local/evidence/evaluation-matrix/`. |
 
 Before creating the output directory, preflight validates the loopback
 boundary, locked prompt/catalog/review digests and confirmation, option bounds,
@@ -164,7 +211,7 @@ Verify saved evidence without starting Spring or contacting Ollama:
 
 ```bash
 ./gradlew :setaccio-lab:localEvaluationVerify \
-  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+  --run-dir=local/evidence/evaluation-matrix/YYYY-MM-DD-local
 ```
 
 Regenerate only `SUMMARY.md` after the immutable raw result and manifest pass
@@ -172,7 +219,7 @@ offline inspection:
 
 ```bash
 ./gradlew :setaccio-lab:localEvaluationReanalyze \
-  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+  --run-dir=local/evidence/evaluation-matrix/YYYY-MM-DD-local
 ```
 
 The verify/reanalyze tasks have no model or endpoint options and remain fully
@@ -293,7 +340,7 @@ name as needed:
   --corpus-dir=local/vision-corpus \
   --models=gemma4:e2b \
   --max-tokens=none \
-  --output-dir=build/vision-matrix/2026-07-26-local \
+  --output-dir=local/evidence/vision-matrix/2026-07-26-local \
   --prompt-version=2
 ```
 
@@ -302,7 +349,7 @@ name as needed:
 | `--corpus-dir` | Yes | Must resolve to the fixed ignored `local/vision-corpus` directory inside the `setaccio-lab` module. |
 | `--models` | Yes | Comma-separated, unique, already-installed Ollama tags. No model is selected implicitly. |
 | `--max-tokens` | Yes | `none` or one integer from `1` through `32768`, locked for every row. |
-| `--output-dir` | Yes | A new direct child of `build/vision-matrix/` whose name contains a `YYYY-MM-DD` date. Existing directories are never reused. |
+| `--output-dir` | Yes | A new direct child of `local/evidence/vision-matrix/` whose name contains a `YYYY-MM-DD` date. Existing directories are never reused. |
 | `--prompt-version` | Yes | A supported tracked prompt version, currently `1` or `2`; it is recorded in every row and the evidence manifest. |
 | `--case-ids` | No | Comma-separated, unique approved case IDs for a controlled subset, preserved in the supplied order. Omit it to run the full approved corpus. |
 
@@ -329,14 +376,14 @@ Verify a saved run without Spring, the private corpus, or Ollama:
 
 ```bash
 ./gradlew :setaccio-lab:visionMatrixVerify \
-  --run-dir=build/vision-matrix/2026-07-25-local
+  --run-dir=local/evidence/vision-matrix/2026-07-25-local
 ```
 
 Regenerate only `SUMMARY.md` from verified immutable raw evidence:
 
 ```bash
 ./gradlew :setaccio-lab:visionMatrixReanalyze \
-  --run-dir=build/vision-matrix/2026-07-25-local
+  --run-dir=local/evidence/vision-matrix/2026-07-25-local
 ```
 
 Compare two already-verified saved runs without Spring, corpus access, Ollama,
@@ -344,8 +391,8 @@ or a remote provider:
 
 ```bash
 ./gradlew :setaccio-lab:visionMatrixCompare \
-  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
-  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+  --baseline-run-dir=local/evidence/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=local/evidence/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
 ```
 
 The comparison verifies both inputs before rendering deterministic Markdown to
@@ -369,8 +416,8 @@ runs are restored. Confirm that they are present before continuing:
 
 ```bash
 ls -d \
-  setaccio-lab/build/vision-matrix/2026-07-25-controlled-four-case \
-  setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+  setaccio-lab/local/evidence/vision-matrix/2026-07-25-controlled-four-case \
+  setaccio-lab/local/evidence/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
 ```
 
 If either exact directory is missing, stop. Do not recreate or replace evidence
@@ -379,8 +426,8 @@ command without changing the paths:
 
 ```bash
 ./gradlew :setaccio-lab:visionHumanReviewPrepare \
-  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
-  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
+  --baseline-run-dir=local/evidence/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=local/evidence/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
   --corpus-dir=local/vision-corpus
 ```
 
@@ -395,7 +442,7 @@ and validates that the current private corpus cases still match the saved MIME
 and BLAKE3 input identities. It then writes:
 
 ```text
-setaccio-lab/build/vision-human-review/
+setaccio-lab/local/evidence/vision-human-review/
 └── 2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/
     └── HUMAN-REVIEW.md
 ```
@@ -488,11 +535,11 @@ for already-installed loopback models documented below:
   --model=<already-installed-model-tag> \
   --max-tokens=<positive-limit-1-through-32768> \
   --timeout=<positive-ISO-8601-duration-up-to-PT10M> \
-  --output-dir=build/chat-matrix/2026-08-04-<run-id>
+  --output-dir=local/evidence/chat-matrix/2026-08-04-<run-id>
 ```
 
 The output directory must be new, dated, and directly under ignored
-`build/chat-matrix/`. The task never pulls a model and is not attached to
+`local/evidence/chat-matrix/`. The task never pulls a model and is not attached to
 `test`, `check`, `build`, application startup, or CI. A failed invocation is
 retained as its scheduled row without retry or replacement.
 
@@ -501,10 +548,10 @@ or contacting Ollama:
 
 ```bash
 ./gradlew :setaccio-lab:chatMatrixVerify \
-  --run-dir=build/chat-matrix/<saved-run>
+  --run-dir=local/evidence/chat-matrix/<saved-run>
 
 ./gradlew :setaccio-lab:chatMatrixReanalyze \
-  --run-dir=build/chat-matrix/<saved-run>
+  --run-dir=local/evidence/chat-matrix/<saved-run>
 ```
 
 `SUMMARY.md` reports only protocol integrity, invocation completion, available
@@ -536,21 +583,21 @@ the task with an explicit budget ceiling and fresh dated output directory:
   --max-tokens=128 \
   --timeout=PT2M \
   --max-cost-usd=<explicit-authorized-usd-not-over-3.00> \
-  --output-dir=build/anthropic-chat-matrix/<new-dated-run> \
-  --ollama-run-dir=build/chat-matrix/<verified-matching-run>
+  --output-dir=local/evidence/anthropic-chat-matrix/<new-dated-run> \
+  --ollama-run-dir=local/evidence/chat-matrix/<verified-matching-run>
 ```
 
 The runner refuses an output directory that already exists and writes its raw
 provider result, raw-output-free portability snapshot, manifest, and summary
-only under the ignored `build/anthropic-chat-matrix/` root. These operations
+only under the ignored `local/evidence/anthropic-chat-matrix/` root. These operations
 remain provider-free and do not read a credential:
 
 ```bash
 ./gradlew :setaccio-lab:anthropicChatMatrixVerify \
-  --run-dir=build/anthropic-chat-matrix/<saved-run>
+  --run-dir=local/evidence/anthropic-chat-matrix/<saved-run>
 
 ./gradlew :setaccio-lab:anthropicChatMatrixReanalyze \
-  --run-dir=build/anthropic-chat-matrix/<saved-run>
+  --run-dir=local/evidence/anthropic-chat-matrix/<saved-run>
 ```
 
 The one authorized Phase 3 run completed on 2026-08-05 from clean commit
@@ -656,7 +703,7 @@ application defaults or environment model selection:
   --model=hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0 \
   --max-tokens=512 \
   --timeout=PT2M \
-  --output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline
+  --output-dir=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-baseline
 ```
 
 That task must reject missing or extra options, non-loopback or structured
@@ -672,7 +719,7 @@ pull, and a reused or unsafe output path before allocation. Its protocol locks:
 - ordered per-turn/per-call evidence plus the plan's exact
   `tool-case-oracle` semantic call/argument contract;
 - exactly 16 sequential rows and pull strategy `never`;
-- one new direct child under ignored `build/tool-compatibility/` containing
+- one new direct child under ignored `local/evidence/tool-compatibility/` containing
   `tool-compatibility-results.json`, `manifest.json`, and `SUMMARY.md`.
 
 The planned provider-free and offline commands are:
@@ -680,16 +727,16 @@ The planned provider-free and offline commands are:
 ```bash
 ./gradlew :setaccio-lab:toolCompatibilityTest
 ./gradlew :setaccio-lab:toolCompatibilityVerify \
-  --run-dir=build/tool-compatibility/<saved-run>
+  --run-dir=local/evidence/tool-compatibility/<saved-run>
 ./gradlew :setaccio-lab:toolCompatibilityReanalyze \
-  --run-dir=build/tool-compatibility/<saved-run>
+  --run-dir=local/evidence/tool-compatibility/<saved-run>
 ```
 
 Phase 2 uses a separate locked paired-runner interface so the Phase 1 CLI does
 not change. The completed 2026-08-21 run used the same clean commit, model
 digest, and settings for both conditions and wrote these ignored directories:
-`build/tool-compatibility/2026-08-21-lfm-prompt-untreated` and
-`build/tool-compatibility/2026-08-21-lfm-prompted`.
+`local/evidence/tool-compatibility/2026-08-21-lfm-prompt-untreated` and
+`local/evidence/tool-compatibility/2026-08-21-lfm-prompted`.
 
 ```bash
 ./gradlew :setaccio-lab:toolCompatibilityPromptMatrix \
@@ -697,8 +744,8 @@ digest, and settings for both conditions and wrote these ignored directories:
   --model=hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0 \
   --max-tokens=512 \
   --timeout=PT2M \
-  --baseline-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline \
-  --candidate-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
+  --baseline-output-dir=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-baseline \
+  --candidate-output-dir=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-prompted
 ```
 
 The task preflights both fresh direct-child output paths before
@@ -712,8 +759,8 @@ comparison:
 
 ```bash
 ./gradlew :setaccio-lab:toolCompatibilityCompare \
-  --baseline-run=build/tool-compatibility/YYYY-MM-DD-lfm-baseline \
-  --candidate-run=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
+  --baseline-run=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-baseline \
+  --candidate-run=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-prompted
 ```
 
 Phase 1 completed on 2026-08-20 from clean commit `62181fb` with the installed
@@ -743,16 +790,16 @@ The provider-free cohort evidence tasks are available without a live runner:
 
 ```bash
 ./gradlew :setaccio-lab:toolCompatibilityCohortVerify \
-  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+  --run-dir=local/evidence/tool-compatibility/YYYY-MM-DD-cohort
 
 ./gradlew :setaccio-lab:toolCompatibilityCohortReanalyze \
-  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+  --run-dir=local/evidence/tool-compatibility/YYYY-MM-DD-cohort
 
 ./gradlew :setaccio-lab:toolCompatibilityCohortCompare \
-  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+  --run-dir=local/evidence/tool-compatibility/YYYY-MM-DD-cohort
 
 ./gradlew :setaccio-lab:toolCompatibilityCohortFrontier \
-  --run-dir=build/tool-compatibility/YYYY-MM-DD-cohort
+  --run-dir=local/evidence/tool-compatibility/YYYY-MM-DD-cohort
 ```
 
 All four tasks are strict and provider-free: they do not start Spring or
@@ -848,17 +895,17 @@ The protocol is locked in code and the task rejects internal drift:
 
 The runner selects prompts and expectations directly from `ToolBenchmarkCases.defaults()`. In particular, the deterministic failure contract comes from `FailureBenchmarkTools.FAILURE_MARKER` (`fixture-tool-failure`); no request JSON transcribes that expectation.
 
-Before running, confirm that all three exact IDs already appear in `ollama list`. Then supply a new, dated directory under `build/tool-search-matrix/`:
+Before running, confirm that all three exact IDs already appear in `ollama list`. Then supply a new, dated directory under `local/evidence/tool-search-matrix/`:
 
 ```bash
 ./gradlew toolSearchMatrixBaseline \
-  --output-dir=build/tool-search-matrix/2026-07-13-post-fix-baseline
+  --output-dir=local/evidence/tool-search-matrix/2026-07-13-post-fix-baseline
 ```
 
 The task refuses an existing directory so a prior baseline cannot be overwritten. It forces `spring.ai.ollama.init.pull-model-strategy=never` and writes:
 
 ```text
-build/tool-search-matrix/YYYY-MM-DD-post-fix-baseline/
+local/evidence/tool-search-matrix/YYYY-MM-DD-post-fix-baseline/
 ├── <timestamp>-tool-calling-comparison.json
 ├── manifest.json
 └── SUMMARY.md
@@ -893,7 +940,7 @@ model provider:
 
 ```bash
 ./gradlew toolSearchMatrixVerify \
-  --run-dir=build/tool-search-matrix/2026-07-13-post-fix-baseline
+  --run-dir=local/evidence/tool-search-matrix/2026-07-13-post-fix-baseline
 ```
 
 Verification checks the manifest contract, locked protocol metadata, raw
@@ -905,7 +952,7 @@ To regenerate only `SUMMARY.md` from an intact saved raw result:
 
 ```bash
 ./gradlew toolSearchMatrixReanalyze \
-  --run-dir=build/tool-search-matrix/2026-07-13-post-fix-baseline
+  --run-dir=local/evidence/tool-search-matrix/2026-07-13-post-fix-baseline
 ```
 
 Reanalysis verifies the immutable manifest and raw JSON before replacing the
@@ -1005,8 +1052,8 @@ preflight, but not another local-call or local-run authorization.
 environment variables: require every model, option, source run, and output
 path on the command line so a formal run cannot silently change configuration.
 The source directory must be a verified clean-baseline R3 run directly under
-ignored `build/retrieval-evaluation/`; the output must be a new dated direct
-child of ignored `build/retrieval-answer/`.
+ignored `local/evidence/retrieval-evaluation/`; the output must be a new dated direct
+child of ignored `local/evidence/retrieval-answer/`.
 
 ```bash
 ./gradlew :setaccio-lab:retrievalAnswerMatrix \
@@ -1015,8 +1062,8 @@ child of ignored `build/retrieval-answer/`.
   --max-output-tokens=256 \
   --seed=42 \
   --timeout=PT2M \
-  --source-retrieval-run-dir=build/retrieval-evaluation/<verified-r3-run> \
-  --output-dir=build/retrieval-answer/YYYY-MM-DD-r5
+  --source-retrieval-run-dir=local/evidence/retrieval-evaluation/<verified-r3-run> \
+  --output-dir=local/evidence/retrieval-answer/YYYY-MM-DD-r5
 ```
 
 The task preflights the loopback URL, source evidence, clean Git baseline,
@@ -1045,8 +1092,8 @@ ignored and must not be rerun, repaired, replaced, or published.
 `retrievalRelevancyMatrix` is the only R6 live entry point. It does not read
 environment variables: provide its model, options, source run, and output path
 on the command line. The source must be a verified clean-baseline R5 run
-directly under ignored `build/retrieval-answer/`; the output must be a new
-dated direct child of ignored `build/retrieval-relevancy/`.
+directly under ignored `local/evidence/retrieval-answer/`; the output must be a new
+dated direct child of ignored `local/evidence/retrieval-relevancy/`.
 
 ```bash
 ./gradlew :setaccio-lab:retrievalRelevancyMatrix \
@@ -1055,8 +1102,8 @@ dated direct child of ignored `build/retrieval-relevancy/`.
   --max-output-tokens=64 \
   --seed=42 \
   --timeout=PT2M \
-  --source-answer-run-dir=build/retrieval-answer/<verified-r5-run> \
-  --output-dir=build/retrieval-relevancy/YYYY-MM-DD-r6
+  --source-answer-run-dir=local/evidence/retrieval-answer/<verified-r5-run> \
+  --output-dir=local/evidence/retrieval-relevancy/YYYY-MM-DD-r6
 ```
 
 The task preflights the loopback URL, source evidence, clean Git baseline,

@@ -39,6 +39,9 @@ plan/
 # Private local vision corpus
 /setaccio-lab/local/vision-corpus/
 
+# Private durable formal evidence root
+/setaccio-lab/local/evidence/
+
 # macOS
 .DS_Store
 .idea/

@@ -175,7 +175,7 @@ class ToolCompatibilityEvidenceTest {
     @Test
     void standaloneRunnerVerifiesAndReanalyzesWithoutStartingSpring() throws Exception {
         Path project = Path.of("").toAbsolutePath().normalize();
-        Path root = project.resolve("build/tool-compatibility");
+        Path root = project.resolve("local/evidence/tool-compatibility");
         Files.createDirectories(root);
         Path run = Files.createDirectory(root.resolve("offline-test-" + UUID.randomUUID()));
         try {
@@ -207,7 +207,7 @@ class ToolCompatibilityEvidenceTest {
         assertThatThrownBy(() -> ToolCompatibilityOfflineRunner.resolveRunDirectory(
                 Path.of(""), temporaryDirectory.toString()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("directly under build/tool-compatibility");
+                .hasMessageContaining("directly under local/evidence/tool-compatibility");
     }
 
     private Fixture writeFixture(String runId) throws Exception {

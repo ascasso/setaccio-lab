@@ -40,8 +40,8 @@ public final class VisionMatrixComparisonRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --baseline-run-dir <saved-build-directory> "
-                            + "--candidate-run-dir <saved-build-directory>");
+                    "Expected --baseline-run-dir <saved-evidence-directory> "
+                            + "--candidate-run-dir <saved-evidence-directory>");
         }
     }
 }

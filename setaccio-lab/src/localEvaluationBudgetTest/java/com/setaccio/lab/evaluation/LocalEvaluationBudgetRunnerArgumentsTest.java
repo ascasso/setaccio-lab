@@ -11,24 +11,24 @@ class LocalEvaluationBudgetRunnerArgumentsTest {
     void requiresBothFreshArmDirectoriesAndDoesNotAcceptAFreeTokenLimit() {
         LocalEvaluationBudgetRunner.Arguments parsed = LocalEvaluationBudgetRunner.Arguments.parse(new String[] {
                 "--judge-model", "judge-model",
-                "--output-dir-256", "build/evaluation-matrix/2026-08-25-budget-256",
+                "--output-dir-256", "local/evidence/evaluation-matrix/2026-08-25-budget-256",
                 "--ollama-base-url", "http://localhost:11434",
-                "--output-dir-64", "build/evaluation-matrix/2026-08-25-budget-64"
+                "--output-dir-64", "local/evidence/evaluation-matrix/2026-08-25-budget-64"
         });
 
         assertThat(parsed.ollamaBaseUrl()).isEqualTo("http://localhost:11434");
         assertThat(parsed.judgeModel()).isEqualTo("judge-model");
         assertThat(parsed.outputDirectory64())
-                .isEqualTo("build/evaluation-matrix/2026-08-25-budget-64");
+                .isEqualTo("local/evidence/evaluation-matrix/2026-08-25-budget-64");
         assertThat(parsed.outputDirectory256())
-                .isEqualTo("build/evaluation-matrix/2026-08-25-budget-256");
+                .isEqualTo("local/evidence/evaluation-matrix/2026-08-25-budget-256");
 
         assertThatThrownBy(() -> LocalEvaluationBudgetRunner.Arguments.parse(new String[] {
                 "--ollama-base-url", "http://localhost:11434",
                 "--judge-model", "judge-model",
                 "--max-tokens", "128",
-                "--output-dir-64", "build/evaluation-matrix/2026-08-25-budget-64",
-                "--output-dir-256", "build/evaluation-matrix/2026-08-25-budget-256"
+                "--output-dir-64", "local/evidence/evaluation-matrix/2026-08-25-budget-64",
+                "--output-dir-256", "local/evidence/evaluation-matrix/2026-08-25-budget-256"
         })).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -37,14 +37,14 @@ class LocalEvaluationBudgetRunnerArgumentsTest {
         assertThatThrownBy(() -> LocalEvaluationBudgetRunner.Arguments.parse(new String[] {
                 "--ollama-base-url", "http://localhost:11434",
                 "--judge-model", "judge-model",
-                "--output-dir-64", "build/evaluation-matrix/2026-08-25-budget-64",
-                "--output-dir-64", "build/evaluation-matrix/2026-08-25-budget-256"
+                "--output-dir-64", "local/evidence/evaluation-matrix/2026-08-25-budget-64",
+                "--output-dir-64", "local/evidence/evaluation-matrix/2026-08-25-budget-256"
         })).isInstanceOf(IllegalArgumentException.class);
 
         assertThatThrownBy(() -> LocalEvaluationBudgetRunner.Arguments.parse(new String[] {
                 "--ollama-base-url", "http://localhost:11434",
                 "--judge-model", "judge-model",
-                "--output-dir-64", "build/evaluation-matrix/2026-08-25-budget-64",
+                "--output-dir-64", "local/evidence/evaluation-matrix/2026-08-25-budget-64",
                 "--output-dir-256", ""
         })).isInstanceOf(IllegalArgumentException.class);
     }

@@ -13,7 +13,7 @@ import org.springframework.ai.ollama.api.OllamaApi;
 
 class LocalEvaluationPreflightTest {
 
-    private static final String RUN = "build/evaluation-matrix/2026-08-03-a4-test";
+    private static final String RUN = "local/evidence/evaluation-matrix/2026-08-03-a4-test";
     private static final LocalEvaluationModelIdentity MODEL = new LocalEvaluationModelIdentity(
             "judge-model",
             "judge-model:latest",
@@ -105,10 +105,10 @@ class LocalEvaluationPreflightTest {
                     sessions)).isInstanceOf(IllegalArgumentException.class);
         }
         for (String output : List.of(
-                "build/evaluation-matrix/no-date",
-                "build/evaluation-matrix/2026-99-99-run",
-                "build/evaluation-matrix/nested/2026-08-03-run",
-                "../build/evaluation-matrix/2026-08-03-run")) {
+                "local/evidence/evaluation-matrix/no-date",
+                "local/evidence/evaluation-matrix/2026-99-99-run",
+                "local/evidence/evaluation-matrix/nested/2026-08-03-run",
+                "../local/evidence/evaluation-matrix/2026-08-03-run")) {
             assertThatThrownBy(() -> preflight.prepare(
                     input("http://localhost:11434", "judge-model", "64", "PT30S", output),
                     this::trackedContract,
@@ -268,7 +268,7 @@ class LocalEvaluationPreflightTest {
     }
 
     private Path outputRoot() {
-        return projectDirectory.resolve("build/evaluation-matrix");
+        return projectDirectory.resolve("local/evidence/evaluation-matrix");
     }
 
     private static LocalEvaluationContract.Identity copyIdentity(

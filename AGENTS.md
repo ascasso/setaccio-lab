@@ -37,6 +37,9 @@ untracked; do not bypass or weaken those rules without explicit instruction.
 - Never make `setaccio-lab` depend on `setaccio-testcontainers`.
 - Never push without explicit user instruction, in any session, including
   immediately after committing completed work.
+- Never allocate new formal run evidence under `build/`. The durable root is
+  `setaccio-lab/local/evidence/<suite>/<run-id>/`; `build/` paths are accepted
+  for reading already-saved evidence only.
 
 ## Standing Local Ollama Authorization
 
@@ -170,7 +173,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-09-02)
+## Current State Snapshot (as of 2026-09-03)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -191,7 +194,7 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   approved corpus. It resolves full immutable Ollama model
   digests, writes suite-specific raw JSON, a shared v1 manifest, and
   deterministic summary under a new dated
-  `build/vision-matrix/` directory.
+  `local/evidence/vision-matrix/` directory.
 - `visionMatrixVerify` and `visionMatrixReanalyze` inspect saved vision
   evidence without starting Spring, reading the private corpus, or contacting
   a provider, selecting the saved supported prompt version from raw evidence.
@@ -206,7 +209,7 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   ignored local corpus, verifies the saved evidence and deterministic
   comparability, validates corpus input identities, and writes one private,
   non-overwriting Markdown worksheet under ignored
-  `build/vision-human-review/`. It organizes paired evidence but does not make
+  `local/evidence/vision-human-review/`. It organizes paired evidence but does not make
   semantic judgments or a prompt decision.
 - A controlled local vision matrix completed from clean commit `11e2fa7`
   across three installed model families, four reviewed private cases, and two
@@ -413,12 +416,26 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   smallest-capable, ranking, or selection claim. Every new run remains
   separately unauthorized; do not rerun, replace, repair, pull, or customize
   any cohort model.
+- Formal run evidence is durable and private. Every suite writes new evidence
+  only under `setaccio-lab/local/evidence/<suite>/<run-id>/`, which is ignored
+  but is not a Gradle output directory, so `clean` cannot delete it. One shared
+  `EvidenceSuiteRoot` contract owns the root, direct-child, traversal, and
+  symlink policy for all twelve suite roots; suites keep only their own
+  date/run-id rules. Readers still accept a legacy `build/<suite>/<run-id>`
+  path so evidence saved before 2026-09-03 can be verified, reanalyzed,
+  compared, and consumed, and that acceptance is read-only. Ordinary
+  interactive endpoint output is unaffected and stays under
+  `build/lab-results/`. See the durable evidence root section of
+  `docs/ENVIRONMENT.md`.
 - Tracked documentation splits the front door from the detail: `README.md`
   leads with findings and the evidence model, `docs/CAPABILITIES.md` carries
   the slice-by-slice surface description, and `docs/evidence/` holds published
   copies of deterministic summaries and manifests under the Publication
-  Boundary. A publication copy omits its raw artifact and therefore does not
-  pass the suite's offline verifier; that is intended.
+  Boundary. `docs/evidence/` is a tracked, partial publication copy of
+  permitted summaries and manifests only: it is never a task input and is not
+  the source for offline verification. A publication copy omits its raw
+  artifact and therefore does not pass the suite's offline verifier; that is
+  intended.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,

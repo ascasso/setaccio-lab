@@ -97,16 +97,9 @@ public final class ToolCompatibilityOfflineRunner {
         if (projectDirectory == null) {
             throw new IllegalArgumentException("projectDirectory must not be null");
         }
-        if (value == null || value.isBlank() || !value.equals(value.strip())) {
-            throw new IllegalArgumentException("--run-dir must be nonblank and trimmed");
-        }
         Path project = projectDirectory.toAbsolutePath().normalize();
-        Path evidenceRoot = project.resolve("build/tool-compatibility").normalize();
-        Path runDirectory = project.resolve(value).normalize();
-        if (!evidenceRoot.equals(runDirectory.getParent())) {
-            throw new IllegalArgumentException(
-                    "Run directory must be directly under build/tool-compatibility/.");
-        }
+        Path runDirectory = ToolCompatibilityProtocol.EVIDENCE_ROOT.resolveSavedRunDirectory(
+                project, value, "Run directory");
         ToolCompatibilityPreflight.requireNoSymbolicLinks(project, runDirectory);
         if (Files.isSymbolicLink(runDirectory)
                 || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {
@@ -181,6 +174,6 @@ public final class ToolCompatibilityOfflineRunner {
 
     private static IllegalArgumentException usage() {
         return new IllegalArgumentException(
-                "Expected --mode <verify|reanalyze> --run-dir <saved-build-directory>");
+                "Expected --mode <verify|reanalyze> --run-dir <saved-evidence-directory>");
     }
 }

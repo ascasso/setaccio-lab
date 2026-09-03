@@ -102,12 +102,18 @@ class RetrievalEvaluationTest {
     @Test
     void restrictsNewEvidenceOutputToTheDedicatedDatedRoot() {
         assertThat(RetrievalEvaluationRunner.resolveNewOutputDirectory(
-                "build/retrieval-evaluation/2026-08-28-r3").getFileName().toString())
+                "local/evidence/retrieval-evaluation/2026-08-28-r3").getFileName().toString())
                 .isEqualTo("2026-08-28-r3");
-        assertThatThrownBy(() -> RetrievalEvaluationRunner.resolveNewOutputDirectory("build/elsewhere/2026-08-28-r3"))
+        assertThatThrownBy(() -> RetrievalEvaluationRunner.resolveNewOutputDirectory(
+                "local/evidence/elsewhere/2026-08-28-r3"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("build/retrieval-evaluation");
-        assertThatThrownBy(() -> RetrievalEvaluationRunner.resolveNewOutputDirectory("build/retrieval-evaluation/not-dated"))
+                .hasMessageContaining("local/evidence/retrieval-evaluation");
+        assertThatThrownBy(() -> RetrievalEvaluationRunner.resolveNewOutputDirectory(
+                "build/retrieval-evaluation/2026-08-28-r3"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("local/evidence/retrieval-evaluation");
+        assertThatThrownBy(() -> RetrievalEvaluationRunner.resolveNewOutputDirectory(
+                "local/evidence/retrieval-evaluation/not-dated"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("YYYY-MM-DD");
     }

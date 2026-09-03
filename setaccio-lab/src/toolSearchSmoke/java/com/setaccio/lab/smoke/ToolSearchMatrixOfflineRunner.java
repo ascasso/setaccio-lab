@@ -1,8 +1,6 @@
 package com.setaccio.lab.smoke;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -31,17 +29,8 @@ public final class ToolSearchMatrixOfflineRunner {
     }
 
     private static Path resolveRunDirectory(String value) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path matrixRoot = projectDirectory.resolve("build/tool-search-matrix").normalize();
-        Path runDirectory = projectDirectory.resolve(value).normalize();
-        if (!runDirectory.startsWith(matrixRoot)) {
-            throw new IllegalArgumentException("Run directory must be under build/tool-search-matrix/");
-        }
-        if (Files.isSymbolicLink(runDirectory)
-                || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("Run directory does not exist or is unsafe.");
-        }
-        return runDirectory;
+        return ToolSearchMatrixProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                Path.of(""), value, "Run directory");
     }
 
     private enum Mode {
@@ -68,7 +57,7 @@ public final class ToolSearchMatrixOfflineRunner {
         private static Arguments parse(String[] args) {
             if (args.length != 4) {
                 throw new IllegalArgumentException(
-                        "Expected --mode <verify|reanalyze> --run-dir <saved-build-directory>");
+                        "Expected --mode <verify|reanalyze> --run-dir <saved-evidence-directory>");
             }
             List<String> values = List.of(args);
             int modeIndex = values.indexOf("--mode");
@@ -76,7 +65,7 @@ public final class ToolSearchMatrixOfflineRunner {
             if (modeIndex < 0 || runDirectoryIndex < 0
                     || modeIndex == values.size() - 1 || runDirectoryIndex == values.size() - 1) {
                 throw new IllegalArgumentException(
-                        "Expected --mode <verify|reanalyze> --run-dir <saved-build-directory>");
+                        "Expected --mode <verify|reanalyze> --run-dir <saved-evidence-directory>");
             }
             String runDirectory = values.get(runDirectoryIndex + 1);
             if (runDirectory.isBlank()) {

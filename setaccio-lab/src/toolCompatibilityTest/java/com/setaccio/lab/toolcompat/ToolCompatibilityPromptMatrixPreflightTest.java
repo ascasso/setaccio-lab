@@ -58,7 +58,7 @@ class ToolCompatibilityPromptMatrixPreflightTest {
     void rejectsEitherOutputCollisionAndDirtyRepositoryBeforeCreatingASession() throws Exception {
         Path project = Files.createDirectory(temporaryDirectory.resolve("strict-project"));
         Path existing = Files.createDirectories(project.resolve(
-                "build/tool-compatibility/2026-08-21-existing"));
+                "local/evidence/tool-compatibility/2026-08-21-existing"));
         AtomicInteger sessions = new AtomicInteger();
         ToolCompatibilityPreflight.SessionFactory factory = (baseUrl, timeout) -> {
             sessions.incrementAndGet();
@@ -138,8 +138,8 @@ class ToolCompatibilityPromptMatrixPreflightTest {
                 ToolCompatibilityProtocol.INITIAL_MODEL,
                 "512",
                 "PT2M",
-                "build/tool-compatibility/" + baselineRunId,
-                "build/tool-compatibility/" + candidateRunId);
+                "local/evidence/tool-compatibility/" + baselineRunId,
+                "local/evidence/tool-compatibility/" + candidateRunId);
     }
 
     private static ToolCompatibilityPreflight.Session session() {

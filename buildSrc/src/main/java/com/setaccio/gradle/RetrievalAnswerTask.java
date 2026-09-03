@@ -62,11 +62,11 @@ public abstract class RetrievalAnswerTask extends DefaultTask {
     public void setTimeout(String value) { timeout = value; }
 
     @Input @Optional public String getSourceRetrievalRunDir() { return sourceRetrievalRunDir; }
-    @Option(option = "source-retrieval-run-dir", description = "Required verified R3 run directly under build/retrieval-evaluation/.")
+    @Option(option = "source-retrieval-run-dir", description = "Required verified R3 run directly under local/evidence/retrieval-evaluation/.")
     public void setSourceRetrievalRunDir(String value) { sourceRetrievalRunDir = value; }
 
     @Input @Optional public String getOutputDir() { return outputDir; }
-    @Option(option = "output-dir", description = "Required fresh dated directory directly under build/retrieval-answer/.")
+    @Option(option = "output-dir", description = "Required fresh dated directory directly under local/evidence/retrieval-answer/.")
     public void setOutputDir(String value) { outputDir = value; }
 
     @TaskAction

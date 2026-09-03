@@ -2,6 +2,7 @@ package com.setaccio.lab.smoke;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.evidence.EvidenceIntegrity;
+import com.setaccio.lab.evidence.EvidenceSuiteRoot;
 import com.setaccio.lab.fixture.ToolBenchmarkCases;
 import com.setaccio.lab.model.ToolBenchmarkComparisonOrder;
 import com.setaccio.lab.model.ToolBenchmarkComparisonResult;
@@ -17,6 +18,7 @@ import java.util.Map;
 final class ToolSearchMatrixProtocol {
 
     static final String SUITE = "tool-search-matrix";
+    static final EvidenceSuiteRoot EVIDENCE_ROOT = EvidenceSuiteRoot.of("tool-search-matrix");
     static final String EXECUTION_ENGINE = "spring-ai-direct";
     static final String EXECUTION_STRATEGY = "paired_sequential";
     static final String INDEX_TYPE = "regex";

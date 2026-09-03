@@ -39,6 +39,16 @@ No completed phase places a live model call in default tests or CI.
   demonstrated by real consumers.
 - Keep the locked Tool Search matrix on the shared v1 manifest while retaining
   legacy-v0 reads for existing unversioned matrix directories.
+- Cover the shared durable suite-root contract independently of any suite:
+  the durable and legacy root strings, rejection of unsafe suite names,
+  new-run allocation restricted to a direct child of
+  `local/evidence/<suite>/`, refusal of a `build/<suite>/` write target,
+  refusal of nested and parent-traversing targets, blank or untrimmed values,
+  saved-run reads that accept both the durable root and the read-only legacy
+  root, refusal of missing, symlinked, and foreign-root saved runs, and fixed
+  worksheet roots pinned to the durable root.
+- Keep every suite's own date and run-id rule in that suite. The shared
+  contract owns only root, direct-child, traversal, and symlink policy.
 - Do not describe vision, chat, or evaluation output as using the shared
   manifest until each writer is migrated and tested separately.
 
@@ -123,7 +133,7 @@ No completed phase places a live model call in default tests or CI.
 - Prepare human review only after that offline comparison gate passes. Validate
   the private corpus against saved MIME/BLAKE3 identities, group both prompt
   versions by model/case, collapse exact successful repetitions, retain
-  differing repetitions, write only under ignored `build/vision-human-review/`,
+  differing repetitions, write only under ignored `local/evidence/vision-human-review/`,
   refuse overwrite, and leave every semantic field blank for a human.
 
 ## Chat Benchmark Phase
@@ -242,7 +252,7 @@ No completed phase places a live model call in default tests or CI.
   attempt, retain a failed reservation as non-reusable diagnostic state, and
   re-check the installed full model identity before writing evidence. Retain
   ignored vectors and ranked document identities under
-  `build/retrieval-embedding/`; verify/reanalyze saved evidence offline.
+  `local/evidence/retrieval-embedding/`; verify/reanalyze saved evidence offline.
   Provider-free tests must cover dimensions, normalization, stable ranks,
   provider-response and post-request installed-identity drift, output
   reservation, vector-count/dimension failures,
@@ -256,7 +266,7 @@ No completed phase places a live model call in default tests or CI.
   output-token limit, timeout, and no-pull policy. Retain raw answer text,
   reference syntax, explicit `NO_SUPPORT` abstention, available usage, and
   invocation failure separately from retrieval observations under ignored
-  `build/retrieval-answer/`; `retrievalAnswerVerify` and
+  `local/evidence/retrieval-answer/`; `retrievalAnswerVerify` and
   `retrievalAnswerReanalyze` stay provider-free. A bracketed document ID is
   not proof that an answer is supported, and unsupported assertions remain
   unassessed until R6 or human review.
@@ -279,7 +289,7 @@ No completed phase places a live model call in default tests or CI.
   seed, output-token limit, timeout, and no-pull one-attempt policy. Record
   deterministic retrieval expectation, evaluator invocation/verdict/score,
   self-evaluation flag, human support judgment, and answer correctness as
-  distinct fields under ignored `build/retrieval-relevancy/`;
+  distinct fields under ignored `local/evidence/retrieval-relevancy/`;
   `retrievalRelevancyVerify` and `retrievalRelevancyReanalyze` remain
   provider-free. Missing context and unavailable answers must not invoke the
   evaluator. An evaluator verdict is not ground truth or an answer-quality
@@ -369,7 +379,7 @@ No completed phase places a live model call in default tests or CI.
 - Keep `toolSearchSmokeTest` offline. Cover semantic and ordinal case selection, live-wrapper parsing fixtures, raw-to-normalized discovery comparison, malformed results, trace-linkage failures, and every console summary bucket without starting Ollama.
 - Fail the live smoke task only for startup/invocation failures, malformed results, missing trace linkages, or raw-versus-normalized discovery mismatches. Treat missing searches, zero matches, required-but-unexecuted tools, and output-contract failures as diagnostic model behavior unless an explicit hypothesis says otherwise.
 - Keep the post-fix three-model baseline in the separate `toolSearchMatrixBaseline` task with the July 12 models, five canonical case IDs, two repetitions, seeds 42/43, temperature 0.0, no token ceiling, alternate order, paired sequential execution, and complete fixture tool list locked in code.
-- Require a new dated `build/tool-search-matrix/` output directory and retain one raw comparison JSON, shared v1 `manifest.json`, and `SUMMARY.md`; refuse overwrites and verify both generated artifacts by size and SHA-256.
+- Require a new dated `local/evidence/tool-search-matrix/` output directory and retain one raw comparison JSON, shared v1 `manifest.json`, and `SUMMARY.md`; refuse overwrites and verify both generated artifacts by size and SHA-256.
 - Keep `toolSearchMatrixVerify` and `toolSearchMatrixReanalyze` standalone and
   offline: neither may start Spring, contact a provider, or join the default
   Gradle lifecycle.
@@ -425,7 +435,8 @@ No completed phase places a live model call in default tests or CI.
   unavailable qualifying size, an ambiguous minimum, missing evidence, and the
   exact one-directory CLI boundary.
 - The completed Phase 1 baseline is recorded under the ignored
-  `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory.
+  `setaccio-lab/build/tool-compatibility/2026-08-20-lfm-baseline/` directory,
+  which was the evidence root in use at that time.
   Its public-safe interpretation is limited to the observed provider-turn
   failure boundary; no quality, reliability, production, or ranking claim is
   allowed. The authorized Phase 2 paired run is recorded under the two ignored

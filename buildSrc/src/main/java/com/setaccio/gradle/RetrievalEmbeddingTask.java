@@ -77,7 +77,7 @@ public abstract class RetrievalEmbeddingTask extends DefaultTask {
         return outputDir;
     }
 
-    @Option(option = "output-dir", description = "Required new dated directory directly under build/retrieval-embedding/.")
+    @Option(option = "output-dir", description = "Required new dated directory directly under local/evidence/retrieval-embedding/.")
     public void setOutputDir(String outputDir) {
         this.outputDir = outputDir;
     }

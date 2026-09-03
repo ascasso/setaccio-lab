@@ -13,7 +13,6 @@ import com.setaccio.lab.evidence.EvidenceManifestStore;
 import com.setaccio.lab.evidence.EvidenceProvenance;
 import com.setaccio.lab.evidence.EvidenceRunDirectory;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
@@ -69,36 +68,17 @@ public final class RetrievalRelevancyRunner {
     }
 
     static Path resolveNewOutputDirectory(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Output directory must not be blank.");
-        }
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/retrieval-relevancy").normalize();
-        Path outputDirectory = projectDirectory.resolve(value).normalize();
-        if (!evidenceRoot.equals(outputDirectory.getParent())) {
-            throw new IllegalArgumentException("Output directory must be directly under build/retrieval-relevancy/.");
-        }
-        Path fileName = outputDirectory.getFileName();
-        if (fileName == null || !fileName.toString().matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
+        Path outputDirectory = RetrievalRelevancyProtocol.EVIDENCE_ROOT.resolveNewRunDirectory(
+                Path.of(""), value, "Output directory");
+        if (!outputDirectory.getFileName().toString().matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
             throw new IllegalArgumentException("Output directory must contain a YYYY-MM-DD date.");
         }
         return outputDirectory;
     }
 
     static Path resolveSourceRunDirectory(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Source answer run directory must not be blank.");
-        }
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path sourceRoot = projectDirectory.resolve("build/retrieval-answer").normalize();
-        Path runDirectory = projectDirectory.resolve(value).normalize();
-        if (!sourceRoot.equals(runDirectory.getParent())
-                || Files.isSymbolicLink(runDirectory)
-                || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException(
-                    "Source answer run directory must be an existing direct child of build/retrieval-answer/.");
-        }
-        return runDirectory;
+        return RetrievalAnswerProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                Path.of(""), value, "Source answer run directory");
     }
 
     private static Source loadVerifiedSource(
@@ -223,7 +203,7 @@ public final class RetrievalRelevancyRunner {
                     "Expected --ollama-base-url <loopback-url> --evaluator-model <installed-tag> "
                             + "--max-output-tokens <positive-integer> --seed <non-negative-integer> "
                             + "--timeout <ISO-8601-duration> --source-answer-run-dir <verified-r5-directory> "
-                            + "--output-dir <new-dated-build-directory>");
+                            + "--output-dir <new-dated-evidence-directory>");
         }
     }
 }

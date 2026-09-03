@@ -71,7 +71,7 @@ public abstract class ToolCompatibilityCohortTask extends DefaultTask {
     @Optional
     public abstract Property<String> getOutputDir();
 
-    @Option(option = "output-dir", description = "Required new dated directory directly under build/tool-compatibility/.")
+    @Option(option = "output-dir", description = "Required new dated directory directly under local/evidence/tool-compatibility/.")
     public void setOutputDirOption(String value) {
         getOutputDir().set(value);
     }

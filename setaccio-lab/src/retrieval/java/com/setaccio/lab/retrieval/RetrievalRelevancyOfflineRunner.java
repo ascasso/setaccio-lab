@@ -2,8 +2,6 @@ package com.setaccio.lab.retrieval;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -32,16 +30,7 @@ public final class RetrievalRelevancyOfflineRunner {
     }
 
     static Path resolveRunDirectory(String value) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/retrieval-relevancy").normalize();
-        Path runDirectory = projectDirectory.resolve(value).normalize();
-        if (!evidenceRoot.equals(runDirectory.getParent())
-                || Files.isSymbolicLink(runDirectory)
-                || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException(
-                    "Run directory must be an existing direct child of build/retrieval-relevancy/.");
-        }
-        return runDirectory;
+        return RetrievalRelevancyProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(Path.of(""), value, "Run directory");
     }
 
     private enum Mode {
@@ -83,7 +72,9 @@ public final class RetrievalRelevancyOfflineRunner {
         }
 
         private static IllegalArgumentException usage() {
-            return new IllegalArgumentException("Expected --mode <verify|reanalyze> --run-dir <saved-build-directory>");
+            return new IllegalArgumentException(
+                    "Expected --mode <verify|reanalyze> --run-dir <saved-evidence-directory-under-"
+                            + RetrievalRelevancyProtocol.EVIDENCE_ROOT.durableRelativePath() + ">");
         }
     }
 }

@@ -23,7 +23,7 @@ class ToolCompatibilityCohortLockTest {
                 new ToolCompatibilityCohortPreflight().prepareApproved(
                         project,
                         "http://localhost:11434",
-                        "build/tool-compatibility/2026-08-23-approved-cohort",
+                        "local/evidence/tool-compatibility/2026-08-23-approved-cohort",
                         () -> approvedInventory(ToolCompatibilityCohortLock.OLLAMA_RUNTIME_VERSION));
 
         assertThat(ToolCompatibilityCohortLock.APPROVAL_DATE).isEqualTo("2026-08-23");
@@ -95,13 +95,13 @@ class ToolCompatibilityCohortLockTest {
     @Test
     void rejectsRuntimeDigestAndMetadataDriftBeforeAllocation() throws Exception {
         Path project = Files.createDirectory(temporaryDirectory.resolve("drift-project"));
-        Path output = project.resolve("build/tool-compatibility/2026-08-23-approved-cohort");
+        Path output = project.resolve("local/evidence/tool-compatibility/2026-08-23-approved-cohort");
         ToolCompatibilityCohortPreflight preflight = new ToolCompatibilityCohortPreflight();
 
         assertThatThrownBy(() -> preflight.prepareApproved(
                 project,
                 "http://localhost:11434",
-                "build/tool-compatibility/2026-08-23-approved-cohort",
+                "local/evidence/tool-compatibility/2026-08-23-approved-cohort",
                 () -> approvedInventory("0.32.16")))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("owner-approved T3.1 lock");
@@ -109,7 +109,7 @@ class ToolCompatibilityCohortLockTest {
         assertThatThrownBy(() -> preflight.prepareApproved(
                 project,
                 "http://localhost:11434",
-                "build/tool-compatibility/2026-08-23-approved-cohort",
+                "local/evidence/tool-compatibility/2026-08-23-approved-cohort",
                 () -> inventoryWithDigestDrift()))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("position 2");
@@ -117,7 +117,7 @@ class ToolCompatibilityCohortLockTest {
         assertThatThrownBy(() -> preflight.prepareApproved(
                 project,
                 "http://localhost:11434",
-                "build/tool-compatibility/2026-08-23-approved-cohort",
+                "local/evidence/tool-compatibility/2026-08-23-approved-cohort",
                 () -> inventoryWithMetadataDrift()))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("position 3");
@@ -125,7 +125,7 @@ class ToolCompatibilityCohortLockTest {
         assertThatThrownBy(() -> preflight.prepareApproved(
                 project,
                 "http://localhost:11434",
-                "build/tool-compatibility/2026-08-23-approved-cohort",
+                "local/evidence/tool-compatibility/2026-08-23-approved-cohort",
                 () -> inventoryWithSeedDrift()))
                 .isInstanceOf(ToolCompatibilityProtocolIntegrityException.class)
                 .hasMessageContaining("position 4");

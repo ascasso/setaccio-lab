@@ -21,8 +21,8 @@ class AnthropicChatMatrixRunnerTest {
                 "--max-tokens", "128",
                 "--timeout", "PT2M",
                 "--max-cost-usd", "3.00",
-                "--output-dir", "build/anthropic-chat-matrix/2026-08-05-haiku-o3",
-                "--ollama-run-dir", "build/chat-matrix/2026-08-05-gemma-s3"
+                "--output-dir", "local/evidence/anthropic-chat-matrix/2026-08-05-haiku-o3",
+                "--ollama-run-dir", "local/evidence/chat-matrix/2026-08-05-gemma-s3"
         });
 
         assertThat(arguments.maxTokens()).isEqualTo("128");
@@ -60,22 +60,22 @@ class AnthropicChatMatrixRunnerTest {
     @Test
     void confinesInputAndOutputDirectoriesToTheirDedicatedIgnoredRoots() throws Exception {
         Path output = AnthropicChatMatrixRunner.resolveNewOutputDirectory(
-                projectDirectory, "build/anthropic-chat-matrix/2026-08-05-haiku-o3");
-        assertThat(output).isEqualTo(projectDirectory.resolve("build/anthropic-chat-matrix/2026-08-05-haiku-o3"));
+                projectDirectory, "local/evidence/anthropic-chat-matrix/2026-08-05-haiku-o3");
+        assertThat(output).isEqualTo(projectDirectory.resolve("local/evidence/anthropic-chat-matrix/2026-08-05-haiku-o3"));
         Files.createDirectories(output);
         assertThatThrownBy(() -> AnthropicChatMatrixRunner.resolveNewOutputDirectory(
-                projectDirectory, "build/anthropic-chat-matrix/2026-08-05-haiku-o3"))
+                projectDirectory, "local/evidence/anthropic-chat-matrix/2026-08-05-haiku-o3"))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("already exists");
         assertThatThrownBy(() -> AnthropicChatMatrixRunner.resolveNewOutputDirectory(
-                projectDirectory, "build/chat-matrix/2026-08-05-wrong-root"))
+                projectDirectory, "local/evidence/chat-matrix/2026-08-05-wrong-root"))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("directly under");
 
-        Path ollama = projectDirectory.resolve("build/chat-matrix/2026-08-05-gemma-s3");
+        Path ollama = projectDirectory.resolve("local/evidence/chat-matrix/2026-08-05-gemma-s3");
         Files.createDirectories(ollama);
         assertThat(AnthropicChatMatrixRunner.resolveOllamaRunDirectory(
-                projectDirectory, "build/chat-matrix/2026-08-05-gemma-s3")).isEqualTo(ollama);
+                projectDirectory, "local/evidence/chat-matrix/2026-08-05-gemma-s3")).isEqualTo(ollama);
         assertThatThrownBy(() -> AnthropicChatMatrixRunner.resolveOllamaRunDirectory(
-                projectDirectory, "build/anthropic-chat-matrix/2026-08-05-haiku-o3"))
+                projectDirectory, "local/evidence/anthropic-chat-matrix/2026-08-05-haiku-o3"))
                 .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("directly under");
     }
 }

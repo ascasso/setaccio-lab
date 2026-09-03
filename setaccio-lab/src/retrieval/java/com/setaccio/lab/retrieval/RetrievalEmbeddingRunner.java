@@ -68,18 +68,9 @@ public final class RetrievalEmbeddingRunner {
     }
 
     static Path resolveNewOutputDirectory(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Output directory must not be blank.");
-        }
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/retrieval-embedding").normalize();
-        Path outputDirectory = projectDirectory.resolve(value).normalize();
-        if (!evidenceRoot.equals(outputDirectory.getParent())) {
-            throw new IllegalArgumentException(
-                    "Output directory must be directly under build/retrieval-embedding/.");
-        }
-        Path fileName = outputDirectory.getFileName();
-        if (fileName == null || !fileName.toString().matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
+        Path outputDirectory = RetrievalEmbeddingProtocol.EVIDENCE_ROOT.resolveNewRunDirectory(
+                Path.of(""), value, "Output directory");
+        if (!outputDirectory.getFileName().toString().matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
             throw new IllegalArgumentException("Output directory must contain a YYYY-MM-DD date.");
         }
         return outputDirectory;
@@ -180,7 +171,7 @@ public final class RetrievalEmbeddingRunner {
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
                     "Expected --ollama-base-url <loopback-url> --embedding-model <installed-tag> "
-                            + "--top-k <positive-integer> --output-dir <new-dated-build-directory>");
+                            + "--top-k <positive-integer> --output-dir <new-dated-evidence-directory>");
         }
     }
 }

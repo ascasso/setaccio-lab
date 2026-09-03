@@ -3,8 +3,6 @@ package com.setaccio.lab.vision;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.setaccio.lab.service.VisionPromptCatalog;
 import com.setaccio.lab.service.VisionPromptDefinition;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -34,18 +32,8 @@ public final class VisionMatrixOfflineRunner {
     }
 
     static Path resolveRunDirectory(String value) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path matrixRoot = projectDirectory.resolve("build/vision-matrix").normalize();
-        Path runDirectory = projectDirectory.resolve(value).normalize();
-        if (!matrixRoot.equals(runDirectory.getParent())) {
-            throw new IllegalArgumentException(
-                    "Run directory must be directly under build/vision-matrix/.");
-        }
-        if (Files.isSymbolicLink(runDirectory)
-                || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("Run directory does not exist or is unsafe.");
-        }
-        return runDirectory;
+        return VisionMatrixProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                Path.of(""), value, "Run directory");
     }
 
     static VisionPromptDefinition promptDefinitionFor(Path runDirectory) {
@@ -102,7 +90,7 @@ public final class VisionMatrixOfflineRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --mode <verify|reanalyze> --run-dir <saved-build-directory>");
+                    "Expected --mode <verify|reanalyze> --run-dir <saved-evidence-directory>");
         }
     }
 }

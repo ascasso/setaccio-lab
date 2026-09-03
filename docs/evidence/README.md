@@ -6,8 +6,10 @@ this lab produces without having to run anything.
 
 ## What is here, and what is not
 
-Each subdirectory is copied from an ignored run directory under
-`setaccio-lab/build/`. Only two artifact roles are copied:
+Each subdirectory is copied from an ignored run directory under the private
+durable evidence root `setaccio-lab/local/evidence/<suite>/`. (Runs saved before
+2026-09-03 lived under `setaccio-lab/build/<suite>/`, the evidence root in use
+at that time.) Only two artifact roles are copied:
 
 - `SUMMARY.md` — the deterministic, regenerable summary.
 - `manifest.json` — the versioned evidence envelope.
@@ -18,6 +20,11 @@ completed closeout requires. Nothing here was rerun, repaired, replaced,
 reanalyzed, or edited; the files are byte-identical copies.
 
 ## These are not runnable run directories
+
+This directory is a tracked, partial publication copy. It is never a task
+input, is not the source for offline verification, and is not the project's
+evidence store; the only runnable evidence store is the private, ignored
+`setaccio-lab/local/evidence/<suite>/` root.
 
 A published copy will **not** pass the suite's offline verification task. For
 the R4 example, `retrievalEmbeddingVerify` fails by design, because the

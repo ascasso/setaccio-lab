@@ -155,7 +155,10 @@ All benchmarks are local-first and offline-safe by default:
 
 - default builds and tests require no credentials or running Ollama instance,
 - live model runs require the `local` profile or explicit configuration,
-- generated benchmark outputs stay under ignored `build/` directories.
+- interactive endpoint output stays under ignored `build/lab-results/`, and
+  formal run evidence stays under the ignored, durable
+  `setaccio-lab/local/evidence/<suite>/` root that Gradle `clean` does not
+  remove.
 
 Result filenames include nanosecond timestamps and short run identifiers so repeated runs cannot overwrite one another when they start at the same instant.
 

@@ -2,8 +2,6 @@ package com.setaccio.lab.evaluation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -37,17 +35,10 @@ public final class LocalEvaluationBreakpointOfflineRunner {
     }
 
     static Map<Integer, Path> resolveRunDirectories(Map<Integer, String> values) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/evaluation-matrix").normalize();
         Map<Integer, Path> resolved = new LinkedHashMap<>();
         for (int tokens : LocalEvaluationBreakpointProtocol.MAX_TOKENS) {
-            Path directory = projectDirectory.resolve(values.get(tokens)).normalize();
-            if (!evidenceRoot.equals(directory.getParent()) || Files.isSymbolicLink(directory)
-                    || !Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
-                throw new IllegalArgumentException(
-                        "Breakpoint run directory must exist safely directly under build/evaluation-matrix/.");
-            }
-            resolved.put(tokens, directory);
+            resolved.put(tokens, LocalEvaluationProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                    Path.of(""), values.get(tokens), "Breakpoint run directory"));
         }
         return Map.copyOf(resolved);
     }

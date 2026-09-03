@@ -40,7 +40,7 @@ public abstract class ToolSearchMatrixBaselineTask extends DefaultTask {
         return outputDir;
     }
 
-    @Option(option = "output-dir", description = "Required new dated directory under build/tool-search-matrix/.")
+    @Option(option = "output-dir", description = "Required new dated directory under local/evidence/tool-search-matrix/.")
     public void setOutputDir(String outputDir) {
         this.outputDir = outputDir;
     }
@@ -48,7 +48,7 @@ public abstract class ToolSearchMatrixBaselineTask extends DefaultTask {
     @TaskAction
     public void runMatrix() {
         if (outputDir == null || outputDir.isBlank()) {
-            throw new GradleException("toolSearchMatrixBaseline requires --output-dir=<dated-build-directory>");
+            throw new GradleException("toolSearchMatrixBaseline requires --output-dir=<new-dated-evidence-directory>");
         }
         if (!outputDir.matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
             throw new GradleException("toolSearchMatrixBaseline output directory must contain a YYYY-MM-DD date");

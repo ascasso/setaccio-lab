@@ -94,7 +94,7 @@ class ToolCompatibilityPromptMatrixEvidenceTest {
     @Test
     void standaloneRunnerRoutesPromptMatrixEvidenceForVerificationAndReanalysis() throws Exception {
         Path project = Path.of("").toAbsolutePath().normalize();
-        Path root = project.resolve("build/tool-compatibility");
+        Path root = project.resolve("local/evidence/tool-compatibility");
         Files.createDirectories(root);
         Path run = Files.createDirectory(root.resolve("prompt-matrix-offline-test-" + UUID.randomUUID()));
         try {

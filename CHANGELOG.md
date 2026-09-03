@@ -9,6 +9,37 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Migrated the formal evidence lifecycle to a durable private root. Every
+  suite now allocates new run evidence only under
+  `setaccio-lab/local/evidence/<suite>/<run-id>/`, which is ignored but is not
+  a Gradle output directory, so `./gradlew clean` cannot remove it. A new
+  shared `EvidenceSuiteRoot` contract owns the root, direct-child, path
+  traversal, and symbolic-link policy for all twelve suite roots
+  (`chat-matrix`, `anthropic-chat-matrix`, `evaluation-matrix`,
+  `retrieval-evaluation`, `retrieval-embedding`, `retrieval-answer`,
+  `retrieval-relevancy`, `tool-compatibility`,
+  `tool-compatibility-human-review`, `tool-search-matrix`, `vision-matrix`,
+  `vision-human-review`), replacing twenty-plus independent reimplementations;
+  each suite keeps only its own date and run-id rule. Every writer, verifier,
+  reanalyzer, comparison, cohort frontier, human-review preparer, paired-arm,
+  multi-arm, and downstream source-evidence consumer now resolves through it.
+  CLI option names and explicit-path behavior are unchanged. Readers still
+  accept a legacy `build/<suite>/<run-id>` path so evidence saved before this
+  change can be verified, reanalyzed, compared, and consumed; that acceptance
+  is read-only and authorizes no rewrite, repair, reanalysis into, or move of
+  old evidence. Direct-child, date/run-id, traversal, symlink, non-overwrite,
+  and fresh-allocation safeguards are preserved, and the Tool Search reader,
+  previously the loosest, is now held to the same direct-child rule. Ordinary
+  interactive endpoint output under `build/lab-results/`, compilation output,
+  and unrelated generated files are untouched. Before the path change the
+  surviving Phase 5 R4 run was copied byte-for-byte from
+  `setaccio-lab/build/retrieval-embedding/2026-09-02-r4-qwen3-embedding-0-6b/`
+  into the durable root; both manifest-listed artifacts verified against the
+  copied manifest, all three files compared identical, and the recomputed
+  source hashes were unchanged. No run, rerun, reanalysis, verifier
+  invocation, model call, or evidence mutation occurred. Recorded in
+  `docs/logs/2026-09-03-durable-evidence-retention.md`.
+
 - Recorded read-only `ollama show` capability observations for the four
   already-installed artifacts that appear in retained closeouts, in
   `docs/logs/2026-09-02-model-capability-observations.md`. Every empty-response

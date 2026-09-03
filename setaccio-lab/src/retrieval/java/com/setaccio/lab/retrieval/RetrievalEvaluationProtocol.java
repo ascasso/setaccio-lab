@@ -1,5 +1,6 @@
 package com.setaccio.lab.retrieval;
 
+import com.setaccio.lab.evidence.EvidenceSuiteRoot;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -8,6 +9,7 @@ final class RetrievalEvaluationProtocol {
 
     static final int VERSION = 1;
     static final String SUITE = "public-safe-retrieval-evaluation";
+    static final EvidenceSuiteRoot EVIDENCE_ROOT = EvidenceSuiteRoot.of("retrieval-evaluation");
     static final String EXECUTION_ENGINE = "plain-java-exact-distinct-query-coverage";
     static final String EXECUTION_STRATEGY = "sequential-single-pass-with-immediate-repeatability-check";
     static final String RAW_FILENAME = "retrieval-evaluation-results.json";

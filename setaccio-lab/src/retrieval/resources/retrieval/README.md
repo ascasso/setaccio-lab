@@ -132,7 +132,7 @@ full lexical result, and the complete text of every returned public corpus
 document alongside its ID, rank, SHA-256, exact score fields, and matched terms.
 
 `retrievalEvaluation` writes a new dated directory directly under
-`build/retrieval-evaluation/`. The manifest declares only the raw JSON and
+`local/evidence/retrieval-evaluation/`. The manifest declares only the raw JSON and
 deterministic `SUMMARY.md`; all writes are non-overwriting. The offline
 `retrievalEvaluationVerify`, `retrievalEvaluationReanalyze`, and
 `retrievalEvaluationCompare` tasks require saved directories under that same
@@ -153,7 +153,7 @@ R4 adds one explicit, opt-in local Ollama embedding boundary. It is not part
 of the default build or test lifecycle. The generation task requires all of
 the following at invocation time: a loopback-only Ollama URL, one already
 installed embedding-model tag, a positive top-K value, and one new dated
-directory directly under `build/retrieval-embedding/`. It first requires a
+directory directly under `local/evidence/retrieval-embedding/`. It first requires a
 clean full Git commit, validates the approved corpus and confirmed query
 catalog, resolves the exact installed tag and full digest from the local
 inventory, and atomically reserves the output directory before sending one
@@ -180,7 +180,7 @@ configuration also locks `whole-document-v1` chunking, `unit-l2-v1`
 normalization, `cosine-descending-document-id` ranking, one batch, one attempt,
 and a two-minute request timeout.
 
-The runner writes only under ignored `build/retrieval-embedding/`, retaining a
+The runner writes only under ignored `local/evidence/retrieval-embedding/`, retaining a
 non-overwriting raw JSON result, shared-v1 manifest, and deterministic
 `SUMMARY.md`. Raw evidence retains the provider and endpoint category,
 requested/effective model and full digest, corpus/query identities, provider
@@ -207,7 +207,7 @@ build or test lifecycle, and it does not re-run retrieval. The
 `retrievalAnswerMatrix` task requires a loopback-only Ollama URL, one explicit
 already-installed answer-model tag, explicit maximum output tokens, seed, and
 timeout, a verified clean-baseline R3 saved run, and a new dated directory
-directly under `build/retrieval-answer/`. Before reserving output it verifies
+directly under `local/evidence/retrieval-answer/`. Before reserving output it verifies
 the R3 evidence against the current approved corpus and confirmed catalog,
 requires its clean source baseline, loads the tracked
 `retrieval-grounded-answer-v1` prompt, resolves the requested/effective answer
@@ -227,7 +227,7 @@ review. A correct-looking citation does not prove semantic support.
 
 The answer run writes only a non-overwriting raw JSON result, shared-v1
 manifest, and deterministic `SUMMARY.md` under ignored
-`build/retrieval-answer/`. `retrievalAnswerVerify` and
+`local/evidence/retrieval-answer/`. `retrievalAnswerVerify` and
 `retrievalAnswerReanalyze` operate offline; they validate source-row
 preservation, prompt/model/settings identity, reference/abstention
 recomputation, hashes, layout, and summary drift without starting Spring or
@@ -245,7 +245,7 @@ actual retrieved documents before it can call the evaluator. The
 `retrievalRelevancyMatrix` task requires a loopback-only Ollama URL, one
 explicit already-installed evaluator-model tag, explicit maximum output tokens,
 seed, and timeout, a verified clean-baseline R5 saved run, and a new dated
-directory directly under `build/retrieval-relevancy/`. It locks the tracked
+directory directly under `local/evidence/retrieval-relevancy/`. It locks the tracked
 `retrieval-relevancy-evaluator-v1` prompt, requested/effective evaluator model
 and full digest, temperature `0.0`, one attempt, and pull strategy `never`
 before reserving output.
@@ -262,7 +262,7 @@ empty R5 answer are explicitly not attempted.
 
 The evaluator run writes only a non-overwriting raw JSON result, shared-v1
 manifest, and deterministic `SUMMARY.md` under ignored
-`build/retrieval-relevancy/`. `retrievalRelevancyVerify` and
+`local/evidence/retrieval-relevancy/`. `retrievalRelevancyVerify` and
 `retrievalRelevancyReanalyze` operate offline. An AI evaluator is not ground
 truth: R6 does not turn a verdict into an expectation match, make a human
 support or answer-correctness claim, merge outcomes into a score, rank a model,

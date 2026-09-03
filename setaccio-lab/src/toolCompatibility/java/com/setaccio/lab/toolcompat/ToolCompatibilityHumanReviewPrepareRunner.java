@@ -1,8 +1,6 @@
 package com.setaccio.lab.toolcompat;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -12,7 +10,8 @@ import java.util.List;
 /** Standalone offline entry point for one private, owner-completed Phase 2 review worksheet. */
 public final class ToolCompatibilityHumanReviewPrepareRunner {
 
-    static final String OUTPUT_ROOT = "build/tool-compatibility-human-review";
+    static final String OUTPUT_ROOT =
+            ToolCompatibilityProtocol.HUMAN_REVIEW_ROOT.durableRelativePath();
     private static final String SAFE_SEGMENT = "[A-Za-z0-9][A-Za-z0-9._-]*";
 
     private ToolCompatibilityHumanReviewPrepareRunner() {}
@@ -39,21 +38,10 @@ public final class ToolCompatibilityHumanReviewPrepareRunner {
         if (projectDirectory == null) {
             throw new IllegalArgumentException("projectDirectory must not be null");
         }
-        if (value == null || value.isBlank() || !value.equals(value.strip())) {
-            throw new IllegalArgumentException("--output-root must be nonblank and trimmed");
-        }
         Path project = projectDirectory.toAbsolutePath().normalize();
-        Path expected = project.resolve(OUTPUT_ROOT).normalize();
-        Path actual = project.resolve(value).normalize();
-        if (!actual.equals(expected)) {
-            throw new IllegalArgumentException(
-                    "Review output root must be the fixed " + OUTPUT_ROOT + " directory.");
-        }
+        Path actual = ToolCompatibilityProtocol.HUMAN_REVIEW_ROOT.resolveFixedDurableRoot(
+                project, value, "Review output root");
         ToolCompatibilityPreflight.requireNoSymbolicLinks(project, actual);
-        if (Files.exists(actual, LinkOption.NOFOLLOW_LINKS)
-                && !Files.isDirectory(actual, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("Review output root is unsafe.");
-        }
         return actual;
     }
 
@@ -119,8 +107,8 @@ public final class ToolCompatibilityHumanReviewPrepareRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --baseline-run <saved-build-directory> "
-                            + "--candidate-run <saved-build-directory> "
+                    "Expected --baseline-run <saved-evidence-directory> "
+                            + "--candidate-run <saved-evidence-directory> "
                             + "--review-date <YYYY-MM-DD> "
                             + "--output-root <private-review-root>");
         }
