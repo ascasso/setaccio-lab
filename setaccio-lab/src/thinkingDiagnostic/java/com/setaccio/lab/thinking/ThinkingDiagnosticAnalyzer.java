@@ -1,7 +1,11 @@
 package com.setaccio.lab.thinking;
 
+import com.setaccio.core.service.ApacheCommonsBlake3HashingServiceImpl;
+import com.setaccio.core.service.Blake3HashingService;
+import com.setaccio.lab.chat.ChatThinkingPresence;
 import com.setaccio.lab.evaluation.LocalFactCheckFixture;
 import com.setaccio.lab.evaluation.LocalFactCheckFixtureCatalog;
+import com.setaccio.lab.evaluation.LocalFactCheckPromptDefinition;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -12,10 +16,14 @@ import java.util.Objects;
 /** Deterministic, provider-free integrity checking and aggregation over one saved suite. */
 public final class ThinkingDiagnosticAnalyzer {
 
+    private static final Blake3HashingService BLAKE3 = new ApacheCommonsBlake3HashingServiceImpl();
+
     private final LocalFactCheckFixtureCatalog catalog;
+    private final LocalFactCheckPromptDefinition prompt;
 
     public ThinkingDiagnosticAnalyzer(LocalFactCheckFixtureCatalog catalog) {
         this.catalog = Objects.requireNonNull(catalog, "catalog must not be null");
+        this.prompt = new LocalFactCheckPromptDefinition();
     }
 
     public Analysis analyze(ThinkingDiagnosticResult result) {
@@ -25,6 +33,7 @@ public final class ThinkingDiagnosticAnalyzer {
             return new Analysis(List.copyOf(failures), List.of());
         }
 
+        validateLockedProtocol(result, failures);
         List<ThinkingDiagnosticScheduleEntry> expectedSchedule =
                 ThinkingDiagnosticProtocol.schedule(catalog);
         if (!expectedSchedule.equals(result.orderedSchedule())) {
@@ -93,9 +102,8 @@ public final class ThinkingDiagnosticAnalyzer {
                 }
             }
             LocalFactCheckFixture fixture = fixture(expected.fixtureId());
-            if (fixture != null && fixture.expectedVerdict() != row.expectedVerdict()) {
-                failures.add("Row " + position + " expected verdict drifted from the tracked catalog.");
-            }
+            validateFixtureIdentity(row, fixture, position, failures);
+            validateOutcome(row, position, failures);
             position++;
         }
 
@@ -107,6 +115,75 @@ public final class ThinkingDiagnosticAnalyzer {
             return catalog.require(fixtureId);
         } catch (RuntimeException exception) {
             return null;
+        }
+    }
+
+    private void validateLockedProtocol(ThinkingDiagnosticResult result, List<String> failures) {
+        if (result.protocolVersion() != ThinkingDiagnosticProtocol.VERSION
+                || !ThinkingDiagnosticProtocol.PROVIDER.equals(result.provider())
+                || !ThinkingDiagnosticProtocol.ENDPOINT_CATEGORY.equals(result.endpointCategory())
+                || !ThinkingDiagnosticProtocol.EXECUTION_STRATEGY.equals(result.executionStrategy())
+                || !ThinkingDiagnosticProtocol.PULL_MODEL_STRATEGY.equals(result.pullModelStrategy())
+                || Double.compare(ThinkingDiagnosticProtocol.TEMPERATURE, result.temperature()) != 0
+                || result.seed() != ThinkingDiagnosticProtocol.SEED
+                || result.maxAttempts() != ThinkingDiagnosticProtocol.MAX_ATTEMPTS
+                || result.requestTimeoutMillis() != ThinkingDiagnosticProtocol.REQUEST_TIMEOUT.toMillis()) {
+            failures.add("Retained diagnostic settings do not match the locked protocol.");
+        }
+        if (!prompt.id().equals(result.promptId())
+                || !prompt.version().equals(result.promptVersion())
+                || !prompt.sha256().equals(result.promptSha256())) {
+            failures.add("Retained diagnostic prompt identity does not match the tracked prompt.");
+        }
+    }
+
+    private static void validateFixtureIdentity(
+            ThinkingDiagnosticRow row,
+            LocalFactCheckFixture fixture,
+            int position,
+            List<String> failures
+    ) {
+        if (fixture == null) {
+            failures.add("Row " + position + " references an unknown tracked fixture.");
+            return;
+        }
+        if (fixture.expectedVerdict() != row.expectedVerdict()
+                || !BLAKE3.hashString(fixture.document()).equals(row.documentBlake3())
+                || !BLAKE3.hashString(fixture.claim()).equals(row.claimBlake3())) {
+            failures.add("Row " + position + " fixture identity drifted from the tracked catalog.");
+        }
+    }
+
+    private static void validateOutcome(
+            ThinkingDiagnosticRow row,
+            int position,
+            List<String> failures
+    ) {
+        if (row.attemptCount() != ThinkingDiagnosticProtocol.MAX_ATTEMPTS) {
+            failures.add("Row " + position + " does not retain the locked one-attempt policy.");
+        }
+        if (!row.invocationSucceeded()) {
+            boolean classifiedFailure = row.outcome() == ThinkingDiagnosticOutcome.MODEL_UNAVAILABLE
+                    || row.outcome() == ThinkingDiagnosticOutcome.TIMEOUT
+                    || row.outcome() == ThinkingDiagnosticOutcome.PROVIDER_FAILURE;
+            if (!classifiedFailure
+                    || row.normalizedJudgeVerdict() != null
+                    || row.expectedVerdictMatched() != null
+                    || row.error() == null
+                    || row.error().isBlank()) {
+                failures.add("Row " + position + " has an incoherent failed-invocation outcome.");
+            }
+            return;
+        }
+        ThinkingDiagnosticOutcome expected = row.contentPresent()
+                ? row.thinkingPresence() == ChatThinkingPresence.PRESENT
+                        ? ThinkingDiagnosticOutcome.CONTENT_WITH_THINKING
+                        : ThinkingDiagnosticOutcome.CONTENT_WITHOUT_THINKING
+                : row.thinkingPresence() == ChatThinkingPresence.PRESENT
+                        ? ThinkingDiagnosticOutcome.EMPTY_CONTENT_WITH_THINKING
+                        : ThinkingDiagnosticOutcome.EMPTY_CONTENT_WITHOUT_THINKING;
+        if (row.outcome() != expected) {
+            failures.add("Row " + position + " outcome does not match its retained response fields.");
         }
     }
 

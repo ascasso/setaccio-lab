@@ -108,8 +108,8 @@ and this project follows [Semantic Versioning](https://semver.org/).
   multi-arm, and downstream source-evidence consumer now resolves through it.
   CLI option names and explicit-path behavior are unchanged. Readers still
   accept a legacy `build/<suite>/<run-id>` path so evidence saved before this
-  change can be verified, reanalyzed, compared, and consumed; that acceptance
-  is read-only and authorizes no rewrite, repair, reanalysis into, or move of
+  change can be verified, compared, and consumed; that acceptance is read-only
+  and authorizes no rewrite, repair, reanalysis into, or move of
   old evidence. Direct-child, date/run-id, traversal, symlink, non-overwrite,
   and fresh-allocation safeguards are preserved, and the Tool Search reader,
   previously the loosest, is now held to the same direct-child rule. Ordinary
@@ -157,6 +157,16 @@ and this project follows [Semantic Versioning](https://semver.org/).
   and establishes no embedding quality, semantic relevance, or model ranking.
 
 ### Fixed
+
+- Kept legacy `build/<suite>/<run-id>` evidence strictly read-only. Every
+  offline reanalyzer now rejects it before it can rewrite a deterministic
+  `SUMMARY.md`; verifiers, comparisons, and source-evidence consumers retain
+  read-only legacy support. Hardened thinking-diagnostic offline analysis to
+  lock retained protocol and prompt identity, recompute each fixture document
+  and claim BLAKE3 identity, and reject incoherent outcome or attempt fields
+  before a summary can be rewritten. No evidence was read, changed, or
+  allocated, and no provider was contacted. Recorded in
+  `docs/logs/2026-09-03-pr77-evidence-review-followup.md`.
 
 - Corrected both human-review Gradle task defaults to pass their fixed durable
   roots: `local/evidence/tool-compatibility-human-review` for

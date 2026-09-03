@@ -17,7 +17,8 @@ public final class ToolCompatibilityOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path runDirectory = resolveRunDirectory(Path.of(""), parsed.runDirectory());
+        Path runDirectory = resolveRunDirectory(
+                Path.of(""), parsed.runDirectory(), parsed.mode() == Mode.REANALYZE);
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         OfflineResult result = inspect(runDirectory, parsed.mode(), objectMapper);
         if (!result.valid()) {
@@ -94,12 +95,23 @@ public final class ToolCompatibilityOfflineRunner {
     }
 
     static Path resolveRunDirectory(Path projectDirectory, String value) {
+        return resolveRunDirectory(projectDirectory, value, false);
+    }
+
+    private static Path resolveRunDirectory(
+            Path projectDirectory,
+            String value,
+            boolean requiresDurableEvidence
+    ) {
         if (projectDirectory == null) {
             throw new IllegalArgumentException("projectDirectory must not be null");
         }
         Path project = projectDirectory.toAbsolutePath().normalize();
-        Path runDirectory = ToolCompatibilityProtocol.EVIDENCE_ROOT.resolveSavedRunDirectory(
-                project, value, "Run directory");
+        Path runDirectory = requiresDurableEvidence
+                ? ToolCompatibilityProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        project, value, "Run directory")
+                : ToolCompatibilityProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                        project, value, "Run directory");
         ToolCompatibilityPreflight.requireNoSymbolicLinks(project, runDirectory);
         if (Files.isSymbolicLink(runDirectory)
                 || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {

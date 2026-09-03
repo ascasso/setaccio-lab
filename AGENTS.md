@@ -422,8 +422,9 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   `EvidenceSuiteRoot` contract owns the root, direct-child, traversal, and
   symlink policy for all twelve suite roots; suites keep only their own
   date/run-id rules. Readers still accept a legacy `build/<suite>/<run-id>`
-  path so evidence saved before 2026-09-03 can be verified, reanalyzed,
-  compared, and consumed, and that acceptance is read-only. Ordinary
+  path so evidence saved before 2026-09-03 can be verified, compared, and
+  consumed; reanalysis is durable-only because it rewrites `SUMMARY.md`.
+  Ordinary
   interactive endpoint output is unaffected and stays under
   `build/lab-results/`. See the durable evidence root section of
   `docs/ENVIRONMENT.md`.

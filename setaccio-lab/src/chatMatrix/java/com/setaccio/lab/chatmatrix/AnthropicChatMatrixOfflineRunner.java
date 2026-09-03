@@ -10,7 +10,10 @@ public final class AnthropicChatMatrixOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path run = resolveRunDirectory(parsed.runDirectory());
+        Path run = parsed.reanalyze()
+                ? AnthropicChatMatrixProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        Path.of(""), parsed.runDirectory(), "Run directory")
+                : resolveRunDirectory(parsed.runDirectory());
         AnthropicChatMatrixEvidence evidence = new AnthropicChatMatrixEvidence(JsonMapper.builder().findAndAddModules().build());
         AnthropicChatMatrixEvidence.OfflineResult result = parsed.reanalyze()
                 ? evidence.reanalyze(run) : evidence.verify(run);

@@ -10,7 +10,10 @@ public final class ToolSearchMatrixOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path runDirectory = resolveRunDirectory(parsed.runDirectory());
+        Path runDirectory = parsed.mode() == Mode.REANALYZE
+                ? ToolSearchMatrixProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        Path.of(""), parsed.runDirectory(), "Run directory")
+                : resolveRunDirectory(parsed.runDirectory());
         ToolSearchMatrixEvidence evidence = new ToolSearchMatrixEvidence(
                 JsonMapper.builder().findAndAddModules().build());
         ToolSearchMatrixEvidence.OfflineResult result = parsed.mode() == Mode.VERIFY

@@ -12,8 +12,8 @@ import java.nio.file.Path;
  * Gradle output directory, so {@code clean} cannot delete a saved run.
  *
  * <p>The legacy {@code build/<suite>/} root stays readable so already-saved runs can still be
- * verified, reanalyzed, compared, and consumed. It is read-only: no writer allocates there, and
- * nothing moves, repairs, or rewrites evidence that lives there.
+ * verified, compared, and consumed. It is read-only: no writer allocates there, and nothing
+ * moves, repairs, reanalyzes, or rewrites evidence that lives there.
  *
  * <p>Suites keep their own run-id date rules; this type owns only the root, direct-child,
  * traversal, and symlink policy so those are not reimplemented per runner.
@@ -105,6 +105,22 @@ public final class EvidenceSuiteRoot {
         Path target = resolveSavedRunDirectory(projectDirectory, value, label);
         if (Files.isSymbolicLink(target) || !Files.isDirectory(target, LinkOption.NOFOLLOW_LINKS)) {
             throw new IllegalArgumentException(label + " does not exist or is unsafe.");
+        }
+        return target;
+    }
+
+    /**
+     * Resolves one saved durable run for an operation that rewrites a derived artifact, such as
+     * deterministic summary reanalysis. Legacy evidence is intentionally read-only.
+     */
+    public Path requireReanalyzableRunDirectory(Path projectDirectory, String value, String label) {
+        Path project = project(projectDirectory);
+        Path target = requireSavedRunDirectory(project, value, label);
+        if (isLegacy(project, target)) {
+            throw new IllegalArgumentException(
+                    label + " is legacy " + legacyRelativePath()
+                            + " evidence and is read-only; reanalysis requires "
+                            + durableRelativePath() + "/.");
         }
         return target;
     }

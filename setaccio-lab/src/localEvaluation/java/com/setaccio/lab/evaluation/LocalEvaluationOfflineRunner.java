@@ -11,7 +11,10 @@ public final class LocalEvaluationOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path runDirectory = resolveRunDirectory(parsed.runDirectory());
+        Path runDirectory = parsed.mode() == Mode.REANALYZE
+                ? LocalEvaluationProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        Path.of(""), parsed.runDirectory(), "Run directory")
+                : resolveRunDirectory(parsed.runDirectory());
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         LocalFactCheckPromptDefinition prompt = new LocalFactCheckPromptDefinition();
         LocalFactCheckFixtureCatalog catalog = new LocalFactCheckFixtureCatalog(objectMapper);

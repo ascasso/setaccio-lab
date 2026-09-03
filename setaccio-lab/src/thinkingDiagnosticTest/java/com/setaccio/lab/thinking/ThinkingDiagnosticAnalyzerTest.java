@@ -60,6 +60,67 @@ class ThinkingDiagnosticAnalyzerTest {
                 .contains("does not match its locked schedule position");
     }
 
+    @Test
+    void rejectsDriftedTopLevelProtocolAndPromptIdentity() {
+        ThinkingDiagnosticResult complete = result();
+        ThinkingDiagnosticResult drifted = new ThinkingDiagnosticResult(
+                complete.protocolVersion(), "other-provider", complete.endpointCategory(),
+                complete.executionStrategy(), complete.pullModelStrategy(), complete.temperature(),
+                complete.seed(), complete.maxAttempts(), complete.requestTimeoutMillis(), complete.arms(),
+                complete.modelIdentities(), complete.ollamaVersion(), "other-prompt",
+                complete.promptVersion(), complete.promptSha256(), complete.fixtureCatalogId(),
+                complete.fixtureCatalogVersion(), complete.fixtureCatalogSha256(),
+                complete.orderedSchedule(), complete.rows());
+
+        ThinkingDiagnosticAnalyzer.Analysis analysis = analyzer.analyze(drifted);
+
+        assertThat(analysis.valid()).isFalse();
+        assertThat(String.join(" ", analysis.integrityFailures()))
+                .contains("settings do not match the locked protocol")
+                .contains("prompt identity does not match the tracked prompt");
+    }
+
+    @Test
+    void rejectsFixtureHashDriftAndIncoherentOutcome() {
+        ThinkingDiagnosticResult complete = result();
+        List<ThinkingDiagnosticRow> rows = new ArrayList<>(complete.rows());
+        ThinkingDiagnosticRow first = rows.getFirst();
+        ThinkingDiagnosticRow second = rows.get(1);
+        rows.set(0, copyRow(
+                first,
+                "f".repeat(64),
+                first.claimBlake3(),
+                ThinkingDiagnosticOutcome.CONTENT_WITHOUT_THINKING,
+                0));
+        rows.set(1, copyRow(
+                second,
+                second.documentBlake3(),
+                "e".repeat(64),
+                second.outcome(),
+                second.attemptCount()));
+
+        ThinkingDiagnosticAnalyzer.Analysis analysis = analyzer.analyze(withRows(complete, rows));
+
+        assertThat(analysis.valid()).isFalse();
+        assertThat(String.join(" ", analysis.integrityFailures()))
+                .contains("fixture identity drifted from the tracked catalog")
+                .contains("does not retain the locked one-attempt policy")
+                .contains("outcome does not match its retained response fields");
+    }
+
+    @Test
+    void rejectsAFailedInvocationWithoutARecordedError() {
+        ThinkingDiagnosticResult complete = result();
+        List<ThinkingDiagnosticRow> rows = new ArrayList<>(complete.rows());
+        rows.set(0, failedRowWithoutError(rows.getFirst()));
+
+        ThinkingDiagnosticAnalyzer.Analysis analysis = analyzer.analyze(withRows(complete, rows));
+
+        assertThat(analysis.valid()).isFalse();
+        assertThat(String.join(" ", analysis.integrityFailures()))
+                .contains("has an incoherent failed-invocation outcome");
+    }
+
     private ThinkingDiagnosticResult result() {
         return new ThinkingDiagnosticExecutor(
                 settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel(),
@@ -79,5 +140,36 @@ class ThinkingDiagnosticAnalyzerTest {
                 source.promptVersion(), source.promptSha256(), source.fixtureCatalogId(),
                 source.fixtureCatalogVersion(), source.fixtureCatalogSha256(),
                 source.orderedSchedule(), rows);
+    }
+
+    private static ThinkingDiagnosticRow copyRow(
+            ThinkingDiagnosticRow source,
+            String documentBlake3,
+            String claimBlake3,
+            ThinkingDiagnosticOutcome outcome,
+            int attemptCount
+    ) {
+        return new ThinkingDiagnosticRow(
+                source.sequence(), source.armId(), source.modelRole(), source.requestedModel(),
+                source.requestedReasoningPolicy(), source.reasoningPolicySupport(),
+                source.modelAdvertisesThinking(), source.maxOutputTokens(), source.seed(),
+                source.fixtureId(), source.pairId(), source.expectedVerdict(), documentBlake3,
+                claimBlake3, source.invocationSucceeded(), source.content(), source.thinking(),
+                source.thinkingPresence(), source.finishReason(), source.evaluatedOutputTokens(),
+                source.promptTokens(), source.totalTokens(), source.normalizedJudgeVerdict(),
+                source.expectedVerdictMatched(), outcome, source.latencyMillis(), attemptCount,
+                source.error());
+    }
+
+    private static ThinkingDiagnosticRow failedRowWithoutError(ThinkingDiagnosticRow source) {
+        return new ThinkingDiagnosticRow(
+                source.sequence(), source.armId(), source.modelRole(), source.requestedModel(),
+                source.requestedReasoningPolicy(), source.reasoningPolicySupport(),
+                source.modelAdvertisesThinking(), source.maxOutputTokens(), source.seed(),
+                source.fixtureId(), source.pairId(), source.expectedVerdict(), source.documentBlake3(),
+                source.claimBlake3(), false, null, null,
+                com.setaccio.lab.chat.ChatThinkingPresence.UNAVAILABLE, null, null, null, null,
+                null, null, ThinkingDiagnosticOutcome.PROVIDER_FAILURE, source.latencyMillis(),
+                ThinkingDiagnosticProtocol.MAX_ATTEMPTS, " ");
     }
 }

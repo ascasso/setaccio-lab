@@ -12,7 +12,10 @@ public final class RetrievalAnswerOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path runDirectory = resolveRunDirectory(parsed.runDirectory());
+        Path runDirectory = parsed.mode() == Mode.REANALYZE
+                ? RetrievalAnswerProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        Path.of(""), parsed.runDirectory(), "Run directory")
+                : resolveRunDirectory(parsed.runDirectory());
         RetrievalEvaluationRunner.Inputs inputs = RetrievalEvaluationRunner.loadInputs();
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         RetrievalAnswerEvidence evidence = new RetrievalAnswerEvidence(objectMapper, inputs.corpus(), inputs.catalog());

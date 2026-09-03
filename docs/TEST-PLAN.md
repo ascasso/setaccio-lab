@@ -45,7 +45,8 @@ No completed phase places a live model call in default tests or CI.
   `local/evidence/<suite>/`, refusal of a `build/<suite>/` write target,
   refusal of nested and parent-traversing targets, blank or untrimmed values,
   saved-run reads that accept both the durable root and the read-only legacy
-  root, refusal of missing, foreign-root, leaf-symlink, and every existing
+  root, explicit refusal to reanalyze legacy runs because reanalysis rewrites
+  `SUMMARY.md`, refusal of missing, foreign-root, leaf-symlink, and every existing
   root-to-run parent symlink (including `local`, `local/evidence`, suite, and
   legacy `build` components), and fixed worksheet roots pinned to the durable
   root with the same parent-chain protection.

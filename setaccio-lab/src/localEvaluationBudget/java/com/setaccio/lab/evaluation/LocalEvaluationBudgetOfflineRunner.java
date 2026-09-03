@@ -13,8 +13,8 @@ public final class LocalEvaluationBudgetOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path budget64 = resolveRunDirectory(parsed.budget64RunDirectory());
-        Path budget256 = resolveRunDirectory(parsed.budget256RunDirectory());
+        Path budget64 = resolveRunDirectory(parsed.budget64RunDirectory(), parsed.mode());
+        Path budget256 = resolveRunDirectory(parsed.budget256RunDirectory(), parsed.mode());
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         LocalFactCheckPromptDefinition prompt = new LocalFactCheckPromptDefinition();
         LocalFactCheckFixtureCatalog catalog = new LocalFactCheckFixtureCatalog(objectMapper);
@@ -39,6 +39,14 @@ public final class LocalEvaluationBudgetOfflineRunner {
     }
 
     static Path resolveRunDirectory(String value) {
+        return resolveRunDirectory(value, Mode.VERIFY);
+    }
+
+    private static Path resolveRunDirectory(String value, Mode mode) {
+        if (mode == Mode.REANALYZE) {
+            return LocalEvaluationProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                    Path.of(""), value, "F1 budget run directory");
+        }
         return LocalEvaluationProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
                 Path.of(""), value, "F1 budget run directory");
     }

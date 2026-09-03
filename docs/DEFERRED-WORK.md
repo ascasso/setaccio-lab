@@ -58,9 +58,9 @@ commands run from the repository root pass paths such as
 `local/evidence/retrieval-embedding/<run-id>`, because the opt-in tasks execute
 with the `setaccio-lab` module directory as their working directory. Readers
 still accept a legacy `build/<suite>/<run-id>` path so already-saved evidence
-can be verified, reanalyzed, compared, and consumed; no writer allocates there,
-and legacy acceptance never permits rewriting, repairing, or moving old
-evidence.
+can be verified, compared, and consumed. Reanalysis is rejected for legacy
+paths because it rewrites `SUMMARY.md`; no writer allocates there, and legacy
+acceptance never permits rewriting, repairing, or moving old evidence.
 
 Before that change the surviving Phase 5 R4 run was copied byte-for-byte from
 `setaccio-lab/build/retrieval-embedding/2026-09-02-r4-qwen3-embedding-0-6b/` to

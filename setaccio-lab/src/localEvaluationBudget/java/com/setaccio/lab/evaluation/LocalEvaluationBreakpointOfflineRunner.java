@@ -15,7 +15,7 @@ public final class LocalEvaluationBreakpointOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Map<Integer, Path> directories = resolveRunDirectories(parsed.runDirectories());
+        Map<Integer, Path> directories = resolveRunDirectories(parsed.runDirectories(), parsed.mode());
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         LocalFactCheckFixtureCatalog catalog = new LocalFactCheckFixtureCatalog(objectMapper);
         LocalEvaluationBreakpointEvidence evidence = new LocalEvaluationBreakpointEvidence(
@@ -35,10 +35,18 @@ public final class LocalEvaluationBreakpointOfflineRunner {
     }
 
     static Map<Integer, Path> resolveRunDirectories(Map<Integer, String> values) {
+        return resolveRunDirectories(values, Mode.VERIFY);
+    }
+
+    private static Map<Integer, Path> resolveRunDirectories(Map<Integer, String> values, Mode mode) {
         Map<Integer, Path> resolved = new LinkedHashMap<>();
         for (int tokens : LocalEvaluationBreakpointProtocol.MAX_TOKENS) {
-            resolved.put(tokens, LocalEvaluationProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
-                    Path.of(""), values.get(tokens), "Breakpoint run directory"));
+            Path runDirectory = mode == Mode.REANALYZE
+                    ? LocalEvaluationProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                            Path.of(""), values.get(tokens), "Breakpoint run directory")
+                    : LocalEvaluationProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                            Path.of(""), values.get(tokens), "Breakpoint run directory");
+            resolved.put(tokens, runDirectory);
         }
         return Map.copyOf(resolved);
     }

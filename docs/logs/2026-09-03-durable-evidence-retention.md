@@ -114,9 +114,10 @@ multi-arm budget and breakpoint run-directory arguments.
 ## Legacy acceptance
 
 Readers still accept `build/<suite>/<run-id>` so evidence saved before this
-change can be verified, reanalyzed, compared, and consumed. That acceptance is
-read-only: no writer allocates there, and it never authorizes rewriting,
-repairing, reanalyzing into, or moving old evidence.
+change can be verified, compared, and consumed. That acceptance is read-only:
+no writer allocates there, and it never authorizes rewriting, repairing,
+reanalyzing into, or moving old evidence. The follow-up repair records that
+legacy reanalysis is rejected before it can replace the derived `SUMMARY.md`.
 
 Direct-child, date/run-id, path-traversal, symlink, non-overwrite, and
 fresh-allocation safeguards are preserved. One of them needed repair rather

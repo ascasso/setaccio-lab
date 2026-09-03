@@ -59,6 +59,13 @@ class EvidenceSuiteRootTest {
                 .isEqualTo(durable);
         assertThat(SUITE.requireSavedRunDirectory(project, "build/retrieval-embedding/2026-09-02-r4", "Run"))
                 .isEqualTo(legacy);
+        assertThat(SUITE.requireReanalyzableRunDirectory(
+                project, "local/evidence/retrieval-embedding/2026-09-03-r4", "Run"))
+                .isEqualTo(durable);
+        assertThatThrownBy(() -> SUITE.requireReanalyzableRunDirectory(
+                project, "build/retrieval-embedding/2026-09-02-r4", "Run"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("legacy build/retrieval-embedding evidence and is read-only");
         assertThat(SUITE.isLegacy(project, legacy)).isTrue();
         assertThat(SUITE.isLegacy(project, durable)).isFalse();
     }

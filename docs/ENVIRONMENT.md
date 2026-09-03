@@ -45,7 +45,8 @@ The suite directories are `chat-matrix`, `anthropic-chat-matrix`,
 - writers never allocate under `build/`, never overwrite, and never reuse a
   directory;
 - readers also accept a legacy `build/<suite>/<run-id>` path so evidence saved
-  before this change can still be verified, reanalyzed, compared, and consumed;
+  before this change can still be verified, compared, and consumed; reanalysis
+  is rejected because it rewrites the derived `SUMMARY.md` artifact;
 - legacy acceptance is read-only. It never authorizes rewriting, repairing,
   reanalyzing into, or moving old evidence.
 

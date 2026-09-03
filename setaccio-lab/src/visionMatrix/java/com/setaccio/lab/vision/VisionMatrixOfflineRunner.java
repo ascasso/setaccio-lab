@@ -12,7 +12,10 @@ public final class VisionMatrixOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path runDirectory = resolveRunDirectory(parsed.runDirectory());
+        Path runDirectory = parsed.mode() == Mode.REANALYZE
+                ? VisionMatrixProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        Path.of(""), parsed.runDirectory(), "Run directory")
+                : resolveRunDirectory(parsed.runDirectory());
         VisionPromptDefinition promptDefinition = promptDefinitionFor(runDirectory);
         VisionMatrixEvidence evidence = new VisionMatrixEvidence(
                 JsonMapper.builder().findAndAddModules().build(),
