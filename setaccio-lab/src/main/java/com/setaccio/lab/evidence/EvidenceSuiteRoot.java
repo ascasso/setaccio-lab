@@ -75,6 +75,7 @@ public final class EvidenceSuiteRoot {
                     label + " must be one new directory directly under " + durableRelativePath() + "/.");
         }
         requireSafeName(target, label);
+        requireNoSymbolicLinks(project, target, label);
         return target;
     }
 
@@ -92,6 +93,7 @@ public final class EvidenceSuiteRoot {
                             + "/ (or legacy " + legacyRelativePath() + "/ for already-saved evidence).");
         }
         requireSafeName(target, label);
+        requireNoSymbolicLinks(project, target, label);
         return target;
     }
 
@@ -119,6 +121,7 @@ public final class EvidenceSuiteRoot {
             throw new IllegalArgumentException(
                     label + " must be the fixed " + durableRelativePath() + " directory.");
         }
+        requireNoSymbolicLinks(project, target, label);
         if (Files.isSymbolicLink(target)
                 || (Files.exists(target, LinkOption.NOFOLLOW_LINKS)
                         && !Files.isDirectory(target, LinkOption.NOFOLLOW_LINKS))) {
@@ -171,6 +174,20 @@ public final class EvidenceSuiteRoot {
         Path fileName = target.getFileName();
         if (fileName == null || !fileName.toString().matches(SAFE_SEGMENT)) {
             throw new IllegalArgumentException(label + " name must be one safe path segment.");
+        }
+    }
+
+    /**
+     * Rejects an existing symbolic link in the suite-root-to-run path before a writer can create
+     * directories through it or a reader can consume evidence through it.
+     */
+    private static void requireNoSymbolicLinks(Path project, Path target, String label) {
+        Path current = project;
+        for (Path segment : project.relativize(target)) {
+            current = current.resolve(segment);
+            if (Files.isSymbolicLink(current)) {
+                throw new IllegalArgumentException(label + " must not contain symbolic links.");
+            }
         }
     }
 }

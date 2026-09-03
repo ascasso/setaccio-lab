@@ -77,11 +77,45 @@ class EvidenceSuiteRootTest {
         assertThatThrownBy(() -> SUITE.requireSavedRunDirectory(
                 project, "local/evidence/retrieval-embedding/linked", "Run"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("does not exist or is unsafe");
+                .hasMessageContaining("must not contain symbolic links");
         assertThatThrownBy(() -> SUITE.requireSavedRunDirectory(
                 project, "elsewhere/2026-09-03-r4", "Run"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("local/evidence/retrieval-embedding");
+    }
+
+    @Test
+    void rejectsSymbolicLinksThroughoutTheDurableRootToRunPath(@TempDir Path project) throws IOException {
+        Path localProject = Files.createDirectory(project.resolve("local-project"));
+        Path evidenceProject = Files.createDirectory(project.resolve("evidence-project"));
+        Path suiteProject = Files.createDirectory(project.resolve("suite-project"));
+
+        assertRejectsDurableParentLink(localProject, localProject.resolve("local"));
+        assertRejectsDurableParentLink(evidenceProject, evidenceProject.resolve("local/evidence"));
+        assertRejectsDurableParentLink(
+                suiteProject, suiteProject.resolve("local/evidence/retrieval-embedding"));
+    }
+
+    @Test
+    void rejectsSymbolicLinksThroughoutTheLegacyRootToRunPath(@TempDir Path project) throws IOException {
+        Path buildProject = Files.createDirectory(project.resolve("build-project"));
+        Path suiteProject = Files.createDirectory(project.resolve("suite-project"));
+
+        assertRejectsLegacyParentLink(buildProject, buildProject.resolve("build"));
+        assertRejectsLegacyParentLink(suiteProject, suiteProject.resolve("build/retrieval-embedding"));
+    }
+
+    @Test
+    void rejectsSymbolicLinksAboveAFixedDurableWorksheetRoot(@TempDir Path project) throws IOException {
+        Path outside = Files.createDirectories(project.resolve("outside"));
+        Files.createDirectories(project.resolve("local"));
+        Files.createSymbolicLink(project.resolve("local/evidence"), outside);
+        EvidenceSuiteRoot review = EvidenceSuiteRoot.of("vision-human-review");
+
+        assertThatThrownBy(() -> review.resolveFixedDurableRoot(
+                project, "local/evidence/vision-human-review", "Review output root"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not contain symbolic links");
     }
 
     @Test
@@ -101,5 +135,37 @@ class EvidenceSuiteRootTest {
                 project, "build/vision-human-review", "Review output root"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("local/evidence/vision-human-review");
+    }
+
+    private void assertRejectsDurableParentLink(Path project, Path link) throws IOException {
+        Path parent = link.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        Path outside = Files.createDirectories(project.resolve("outside-" + link.getFileName()));
+        Files.createSymbolicLink(link, outside);
+
+        assertThatThrownBy(() -> SUITE.resolveNewRunDirectory(
+                project, "local/evidence/retrieval-embedding/2026-09-03-r4", "Output"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not contain symbolic links");
+        assertThatThrownBy(() -> SUITE.requireSavedRunDirectory(
+                project, "local/evidence/retrieval-embedding/2026-09-03-r4", "Run"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not contain symbolic links");
+    }
+
+    private void assertRejectsLegacyParentLink(Path project, Path link) throws IOException {
+        Path parent = link.getParent();
+        if (parent != null) {
+            Files.createDirectories(parent);
+        }
+        Path outside = Files.createDirectories(project.resolve("outside-" + link.getFileName()));
+        Files.createSymbolicLink(link, outside);
+
+        assertThatThrownBy(() -> SUITE.requireSavedRunDirectory(
+                project, "build/retrieval-embedding/2026-09-02-r4", "Run"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("must not contain symbolic links");
     }
 }

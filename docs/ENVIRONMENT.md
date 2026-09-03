@@ -38,12 +38,22 @@ The suite directories are `chat-matrix`, `anthropic-chat-matrix`,
 
 - a new run directory must be a direct child of the durable suite root, must be
   one safe path segment, and must satisfy its suite's date/run-id rule;
+- before allocation or saved-run use, every existing path component from
+  `local` (or legacy `build`) through the suite root and run leaf must be a
+  non-symbolic-link path; this also protects the fixed human-review worksheet
+  roots;
 - writers never allocate under `build/`, never overwrite, and never reuse a
   directory;
 - readers also accept a legacy `build/<suite>/<run-id>` path so evidence saved
   before this change can still be verified, reanalyzed, compared, and consumed;
 - legacy acceptance is read-only. It never authorizes rewriting, repairing,
   reanalyzing into, or moving old evidence.
+
+The `toolCompatibilityHumanReviewPrepare` and `visionHumanReviewPrepare` task
+defaults respectively pass the fixed durable roots
+`local/evidence/tool-compatibility-human-review` and
+`local/evidence/vision-human-review`; callers do not supply an output-root
+option for either task.
 
 Ordinary interactive endpoint output is unaffected and stays under
 `build/lab-results/` through `SETACCIO_LAB_OUTPUT_DIR`. Tracked

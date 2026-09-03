@@ -487,7 +487,7 @@ tasks.register('toolCompatibilityHumanReviewPrepare', ToolCompatibilityHumanRevi
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })
     workingDirectory.set(layout.projectDirectory)
-    reviewRoot.set(layout.projectDirectory.dir('build/tool-compatibility-human-review'))
+    reviewRoot.set(layout.projectDirectory.dir('local/evidence/tool-compatibility-human-review'))
 }
 
 tasks.register('toolCompatibilityVerify', ToolCompatibilityOfflineTask) {
@@ -774,7 +774,7 @@ tasks.register('visionHumanReviewPrepare', VisionHumanReviewPrepareTask) {
     classpath.from(sourceSets.visionMatrix.runtimeClasspath)
     mainClass.set('com.setaccio.lab.vision.VisionHumanReviewPrepareRunner')
     workingDirectory.set(layout.projectDirectory)
-    reviewRoot.set(layout.buildDirectory.dir('vision-human-review'))
+    reviewRoot.set(layout.projectDirectory.dir('local/evidence/vision-human-review'))
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })

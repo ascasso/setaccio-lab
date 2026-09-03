@@ -158,6 +158,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Corrected both human-review Gradle task defaults to pass their fixed durable
+  roots: `local/evidence/tool-compatibility-human-review` for
+  `toolCompatibilityHumanReviewPrepare` and
+  `local/evidence/vision-human-review` for `visionHumanReviewPrepare`. The
+  shared `EvidenceSuiteRoot` contract now rejects an existing symbolic link in
+  every root-to-run component before a writer can allocate through it or a
+  reader can use saved evidence, including durable `local`, `local/evidence`,
+  and suite components as well as legacy `build` components. Fixed worksheet
+  roots receive the same guard. No formal evidence was allocated, read,
+  changed, or published, and no provider was contacted. Recorded in
+  `docs/logs/2026-09-03-durable-evidence-root-followup.md`.
+
 - Treated Spring AI's `EmptyUsage` marker as unavailable in the vision
   invocation boundary instead of recording synthetic zero-token usage.
   `ChatResponseMetadata` defaults its usage field to `EmptyUsage`, so the
