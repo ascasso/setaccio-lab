@@ -159,11 +159,18 @@ class RetrievalAnswerTest {
     @Test
     void restrictsNewAnswerEvidenceToTheDedicatedDatedRoot() {
         assertThat(RetrievalAnswerRunner.resolveNewOutputDirectory(
-                "build/retrieval-answer/2026-08-28-r5").getFileName().toString()).isEqualTo("2026-08-28-r5");
-        assertThatThrownBy(() -> RetrievalAnswerRunner.resolveNewOutputDirectory("build/elsewhere/2026-08-28-r5"))
+                "local/evidence/retrieval-answer/2026-08-28-r5").getFileName().toString())
+                .isEqualTo("2026-08-28-r5");
+        assertThatThrownBy(() -> RetrievalAnswerRunner.resolveNewOutputDirectory(
+                "local/evidence/elsewhere/2026-08-28-r5"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("build/retrieval-answer");
-        assertThatThrownBy(() -> RetrievalAnswerRunner.resolveNewOutputDirectory("build/retrieval-answer/not-dated"))
+                .hasMessageContaining("local/evidence/retrieval-answer");
+        assertThatThrownBy(() -> RetrievalAnswerRunner.resolveNewOutputDirectory(
+                "build/retrieval-answer/2026-08-28-r5"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("local/evidence/retrieval-answer");
+        assertThatThrownBy(() -> RetrievalAnswerRunner.resolveNewOutputDirectory(
+                "local/evidence/retrieval-answer/not-dated"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("YYYY-MM-DD");
     }

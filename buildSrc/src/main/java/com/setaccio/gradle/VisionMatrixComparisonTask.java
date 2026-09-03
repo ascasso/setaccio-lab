@@ -41,7 +41,7 @@ public abstract class VisionMatrixComparisonTask extends DefaultTask {
         return baselineRunDir;
     }
 
-    @Option(option = "baseline-run-dir", description = "Required saved baseline directory under build/vision-matrix/.")
+    @Option(option = "baseline-run-dir", description = "Required saved baseline directory under local/evidence/vision-matrix/.")
     public void setBaselineRunDir(String baselineRunDir) {
         this.baselineRunDir = baselineRunDir;
     }
@@ -52,7 +52,7 @@ public abstract class VisionMatrixComparisonTask extends DefaultTask {
         return candidateRunDir;
     }
 
-    @Option(option = "candidate-run-dir", description = "Required saved candidate directory under build/vision-matrix/.")
+    @Option(option = "candidate-run-dir", description = "Required saved candidate directory under local/evidence/vision-matrix/.")
     public void setCandidateRunDir(String candidateRunDir) {
         this.candidateRunDir = candidateRunDir;
     }
@@ -74,7 +74,7 @@ public abstract class VisionMatrixComparisonTask extends DefaultTask {
 
     private static void requireOption(String value, String option) {
         if (value == null || value.isBlank()) {
-            throw new GradleException("visionMatrixCompare requires " + option + "=<saved-build-directory>");
+            throw new GradleException("visionMatrixCompare requires " + option + "=<saved-evidence-directory>");
         }
     }
 }

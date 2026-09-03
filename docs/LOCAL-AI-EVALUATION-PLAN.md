@@ -111,7 +111,7 @@ a model, attach live execution to a default lifecycle, or add a dependency.
 
 - `:setaccio-lab:localEvaluation` requires an explicit loopback URL, installed
   judge tag, positive token limit, ISO-8601 timeout up to ten minutes, and a
-  new dated child of ignored `build/evaluation-matrix/`.
+  new dated child of ignored `local/evidence/evaluation-matrix/`.
 - Preflight locks the A1 prompt/catalog/review digests and confirmed fixture
   order, validates every option and output path, and resolves the requested
   installed tag to its normalized name and full immutable Ollama digest before
@@ -263,7 +263,7 @@ for explicitly requested work using already-installed loopback models.
 - Preserve raw `yes` / `no` output separately from expectation agreement and
   repetition consistency. Do not coerce any other text into a verdict.
 - Write immutable raw JSON, a shared v1 evidence manifest, and deterministic
-  Markdown summary under ignored `build/evaluation-matrix/` output. Add
+  Markdown summary under ignored `local/evidence/evaluation-matrix/` output. Add
   standalone offline verification and reanalysis before the first controlled
   live run.
 - Treat a dirty worktree as diagnostic/non-final provenance, not as missing

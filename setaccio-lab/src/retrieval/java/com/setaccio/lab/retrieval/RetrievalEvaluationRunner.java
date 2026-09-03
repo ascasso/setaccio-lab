@@ -62,18 +62,9 @@ public final class RetrievalEvaluationRunner {
     }
 
     static Path resolveNewOutputDirectory(String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Output directory must not be blank.");
-        }
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/retrieval-evaluation").normalize();
-        Path outputDirectory = projectDirectory.resolve(value).normalize();
-        if (!evidenceRoot.equals(outputDirectory.getParent())) {
-            throw new IllegalArgumentException(
-                    "Output directory must be directly under build/retrieval-evaluation/.");
-        }
-        Path fileName = outputDirectory.getFileName();
-        if (fileName == null || !fileName.toString().matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
+        Path outputDirectory = RetrievalEvaluationProtocol.EVIDENCE_ROOT.resolveNewRunDirectory(
+                Path.of(""), value, "Output directory");
+        if (!outputDirectory.getFileName().toString().matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
             throw new IllegalArgumentException("Output directory must contain a YYYY-MM-DD date.");
         }
         return outputDirectory;
@@ -82,7 +73,8 @@ public final class RetrievalEvaluationRunner {
     private static String parseOutputDirectory(String[] args) {
         if (args == null || args.length != 2 || !"--output-dir".equals(args[0]) || args[1].isBlank()) {
             throw new IllegalArgumentException(
-                    "Expected --output-dir <new-directory-under-build/retrieval-evaluation>");
+                    "Expected --output-dir <new-dated-directory-under-"
+                            + RetrievalEvaluationProtocol.EVIDENCE_ROOT.durableRelativePath() + ">");
         }
         return args[1];
     }

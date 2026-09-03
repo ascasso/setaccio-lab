@@ -47,7 +47,7 @@ public abstract class VisionHumanReviewPrepareTask extends DefaultTask {
     @Optional
     public abstract Property<String> getBaselineRunDir();
 
-    @Option(option = "baseline-run-dir", description = "Required saved baseline directory under build/vision-matrix/.")
+    @Option(option = "baseline-run-dir", description = "Required saved baseline directory under local/evidence/vision-matrix/.")
     public void setBaselineRunDirOption(String value) {
         getBaselineRunDir().set(value);
     }
@@ -56,7 +56,7 @@ public abstract class VisionHumanReviewPrepareTask extends DefaultTask {
     @Optional
     public abstract Property<String> getCandidateRunDir();
 
-    @Option(option = "candidate-run-dir", description = "Required saved candidate directory under build/vision-matrix/.")
+    @Option(option = "candidate-run-dir", description = "Required saved candidate directory under local/evidence/vision-matrix/.")
     public void setCandidateRunDirOption(String value) {
         getCandidateRunDir().set(value);
     }
@@ -95,8 +95,8 @@ public abstract class VisionHumanReviewPrepareTask extends DefaultTask {
                 || isMissing(getCorpusDir())) {
             throw new GradleException("""
                     visionHumanReviewPrepare requires three explicit options:
-                      --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case
-                      --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+                      --baseline-run-dir=local/evidence/vision-matrix/2026-07-25-controlled-four-case
+                      --candidate-run-dir=local/evidence/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
                       --corpus-dir=local/vision-corpus
                     See docs/VISION-HUMAN-REVIEW.md for the three-step preparation workflow.
                     """.strip());

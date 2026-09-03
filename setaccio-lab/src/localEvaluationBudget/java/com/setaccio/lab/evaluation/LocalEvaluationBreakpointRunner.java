@@ -140,11 +140,11 @@ public final class LocalEvaluationBreakpointRunner {
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
                     "Expected --ollama-base-url <explicit-loopback-url> --judge-model <installed-tag> "
-                            + "--output-dir-64 <new-dated-build-directory> "
-                            + "--output-dir-96 <new-dated-build-directory> "
-                            + "--output-dir-128 <new-dated-build-directory> "
-                            + "--output-dir-192 <new-dated-build-directory> "
-                            + "--output-dir-256 <new-dated-build-directory>");
+                            + "--output-dir-64 <new-dated-evidence-directory> "
+                            + "--output-dir-96 <new-dated-evidence-directory> "
+                            + "--output-dir-128 <new-dated-evidence-directory> "
+                            + "--output-dir-192 <new-dated-evidence-directory> "
+                            + "--output-dir-256 <new-dated-evidence-directory>");
         }
     }
 }

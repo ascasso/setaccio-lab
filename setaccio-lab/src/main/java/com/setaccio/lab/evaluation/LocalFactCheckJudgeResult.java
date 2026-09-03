@@ -1,5 +1,6 @@
 package com.setaccio.lab.evaluation;
 
+import com.setaccio.lab.chat.ChatResponseCapture;
 import java.util.Objects;
 
 public record LocalFactCheckJudgeResult(
@@ -18,7 +19,8 @@ public record LocalFactCheckJudgeResult(
         Integer totalTokens,
         long latencyMillis,
         int attemptCount,
-        String error
+        String error,
+        ChatResponseCapture capture
 ) {
     public LocalFactCheckJudgeResult {
         if (fixtureId == null || fixtureId.isBlank()) {
@@ -35,5 +37,33 @@ public record LocalFactCheckJudgeResult(
         if (attemptCount < 0) {
             throw new IllegalArgumentException("attemptCount must not be negative");
         }
+    }
+
+    /**
+     * Retains the pre-capture argument order. The Phase 4 fact-check row schema projects only
+     * these fields, so its saved evidence is unchanged by the added capture.
+     */
+    public LocalFactCheckJudgeResult(
+            String fixtureId,
+            LocalFactCheckExpectedVerdict expectedVerdict,
+            LocalFactCheckJudgeSettings settings,
+            boolean invocationSucceeded,
+            Boolean springEvaluatorPassed,
+            LocalFactCheckJudgeVerdict normalizedJudgeVerdict,
+            Boolean expectedVerdictMatched,
+            LocalFactCheckDiagnosticCategory diagnosticCategory,
+            String rawResponse,
+            LocalFactCheckJudgeResponseMetadata responseMetadata,
+            Integer promptTokens,
+            Integer completionTokens,
+            Integer totalTokens,
+            long latencyMillis,
+            int attemptCount,
+            String error
+    ) {
+        this(fixtureId, expectedVerdict, settings, invocationSucceeded, springEvaluatorPassed,
+                normalizedJudgeVerdict, expectedVerdictMatched, diagnosticCategory, rawResponse,
+                responseMetadata, promptTokens, completionTokens, totalTokens, latencyMillis,
+                attemptCount, error, null);
     }
 }

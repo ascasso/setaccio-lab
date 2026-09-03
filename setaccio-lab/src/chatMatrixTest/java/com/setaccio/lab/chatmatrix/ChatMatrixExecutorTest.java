@@ -78,7 +78,7 @@ class ChatMatrixExecutorTest {
 
     private static ChatMatrixPreflight.Prepared prepared(ChatMatrixPreflight.Session session) {
         return new ChatMatrixPreflight.Prepared(
-                Path.of("build/chat-matrix/2026-08-04-test"),
+                Path.of("local/evidence/chat-matrix/2026-08-04-test"),
                 ChatMatrixTestFixtures.SETTINGS,
                 ChatMatrixTestFixtures.MODEL_IDENTITY,
                 ChatMatrixTestFixtures.CATALOG,

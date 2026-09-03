@@ -1,5 +1,6 @@
 package com.setaccio.lab.vision;
 
+import com.setaccio.lab.evidence.EvidenceSuiteRoot;
 import com.setaccio.lab.service.VisionPromptDefinition;
 import com.setaccio.lab.service.VisionPromptCatalog;
 import java.util.Collections;
@@ -10,6 +11,8 @@ import java.util.Map;
 final class VisionMatrixProtocol {
 
     static final String SUITE = "vision-matrix";
+    static final EvidenceSuiteRoot EVIDENCE_ROOT = EvidenceSuiteRoot.of("vision-matrix");
+    static final EvidenceSuiteRoot HUMAN_REVIEW_ROOT = EvidenceSuiteRoot.of("vision-human-review");
     static final String PROVIDER = "ollama";
     static final String HOST = "local";
     static final String EXECUTION_ENGINE = "spring-ai-direct";

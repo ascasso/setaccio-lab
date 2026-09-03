@@ -48,7 +48,7 @@ public abstract class ToolCompatibilityCohortFrontierTask extends DefaultTask {
 
     @Option(
             option = "run-dir",
-            description = "Required saved cohort directly under build/tool-compatibility/.")
+            description = "Required saved cohort directly under local/evidence/tool-compatibility/.")
     public void setRunDirOption(String value) {
         getRunDir().set(value);
     }
@@ -58,7 +58,7 @@ public abstract class ToolCompatibilityCohortFrontierTask extends DefaultTask {
         String runDirectory = getRunDir().getOrNull();
         if (runDirectory == null || runDirectory.isBlank()) {
             throw new GradleException(
-                    getName() + " requires --run-dir=<saved-build-directory>");
+                    getName() + " requires --run-dir=<saved-evidence-directory>");
         }
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());

@@ -42,7 +42,7 @@ public abstract class ToolSearchMatrixOfflineTask extends DefaultTask {
         return runDir;
     }
 
-    @Option(option = "run-dir", description = "Required saved directory under build/tool-search-matrix/.")
+    @Option(option = "run-dir", description = "Required saved directory under local/evidence/tool-search-matrix/.")
     public void setRunDir(String runDir) {
         this.runDir = runDir;
     }
@@ -50,7 +50,7 @@ public abstract class ToolSearchMatrixOfflineTask extends DefaultTask {
     @TaskAction
     public void inspectMatrix() {
         if (runDir == null || runDir.isBlank()) {
-            throw new GradleException(getName() + " requires --run-dir=<saved-build-directory>");
+            throw new GradleException(getName() + " requires --run-dir=<saved-evidence-directory>");
         }
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());

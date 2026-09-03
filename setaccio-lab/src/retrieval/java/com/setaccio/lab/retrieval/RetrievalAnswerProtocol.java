@@ -1,5 +1,6 @@
 package com.setaccio.lab.retrieval;
 
+import com.setaccio.lab.evidence.EvidenceSuiteRoot;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -9,6 +10,7 @@ final class RetrievalAnswerProtocol {
 
     static final int VERSION = 1;
     static final String SUITE = "public-safe-retrieval-answer";
+    static final EvidenceSuiteRoot EVIDENCE_ROOT = EvidenceSuiteRoot.of("retrieval-answer");
     static final String PROVIDER = "ollama";
     static final String ENDPOINT_CATEGORY = "loopback-local";
     static final String EXECUTION_ENGINE = "spring-ai-provider-neutral-chat-invocation";

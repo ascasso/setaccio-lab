@@ -36,7 +36,7 @@ in [DEFERRED-WORK.md](DEFERRED-WORK.md).
 - Keep source images, raw responses, reference observations, expected concepts,
   unsupported-detail notes, filenames, and local paths private.
 - Edit only the ignored worksheet under
-  `setaccio-lab/build/vision-human-review/`; do not move it into tracked
+  `setaccio-lab/local/evidence/vision-human-review/`; do not move it into tracked
   documentation.
 - The documented Prompt v1/v2 pair contains 3 models × 4 cases, so the worksheet
   has 12 model/case sections followed by one final decision.
@@ -59,8 +59,8 @@ not guess which private evidence should be compared.
 
    ```bash
    ls -d \
-     setaccio-lab/build/vision-matrix/2026-07-25-controlled-four-case \
-     setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+     setaccio-lab/local/evidence/vision-matrix/2026-07-25-controlled-four-case \
+     setaccio-lab/local/evidence/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
    ```
 
    The command must print both directories. If either directory reports
@@ -72,8 +72,8 @@ not guess which private evidence should be compared.
 
    ```bash
    ./gradlew :setaccio-lab:visionHumanReviewPrepare \
-     --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
-     --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
+     --baseline-run-dir=local/evidence/vision-matrix/2026-07-25-controlled-four-case \
+     --candidate-run-dir=local/evidence/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
      --corpus-dir=local/vision-corpus
    ```
 
@@ -81,7 +81,7 @@ not guess which private evidence should be compared.
 
    ```bash
    open \
-     setaccio-lab/build/vision-human-review/2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/HUMAN-REVIEW.md
+     setaccio-lab/local/evidence/vision-human-review/2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/HUMAN-REVIEW.md
    ```
 
    On other systems, open the same path or the path printed by the successful

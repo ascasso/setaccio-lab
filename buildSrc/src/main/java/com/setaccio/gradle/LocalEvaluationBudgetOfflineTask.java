@@ -44,7 +44,7 @@ public abstract class LocalEvaluationBudgetOfflineTask extends DefaultTask {
         return budget64RunDir;
     }
 
-    @Option(option = "budget-64-run-dir", description = "Required saved 64-token arm under build/evaluation-matrix/.")
+    @Option(option = "budget-64-run-dir", description = "Required saved 64-token arm under local/evidence/evaluation-matrix/.")
     public void setBudget64RunDir(String budget64RunDir) {
         this.budget64RunDir = budget64RunDir;
     }
@@ -55,7 +55,7 @@ public abstract class LocalEvaluationBudgetOfflineTask extends DefaultTask {
         return budget256RunDir;
     }
 
-    @Option(option = "budget-256-run-dir", description = "Required saved 256-token arm under build/evaluation-matrix/.")
+    @Option(option = "budget-256-run-dir", description = "Required saved 256-token arm under local/evidence/evaluation-matrix/.")
     public void setBudget256RunDir(String budget256RunDir) {
         this.budget256RunDir = budget256RunDir;
     }
@@ -78,7 +78,7 @@ public abstract class LocalEvaluationBudgetOfflineTask extends DefaultTask {
 
     private void requireOption(String value, String option) {
         if (value == null || value.isBlank()) {
-            throw new GradleException(getName() + " requires " + option + "=<saved-build-directory>");
+            throw new GradleException(getName() + " requires " + option + "=<saved-evidence-directory>");
         }
     }
 }

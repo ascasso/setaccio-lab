@@ -37,6 +37,9 @@ untracked; do not bypass or weaken those rules without explicit instruction.
 - Never make `setaccio-lab` depend on `setaccio-testcontainers`.
 - Never push without explicit user instruction, in any session, including
   immediately after committing completed work.
+- Never allocate new formal run evidence under `build/`. The durable root is
+  `setaccio-lab/local/evidence/<suite>/<run-id>/`; `build/` paths are accepted
+  for reading already-saved evidence only.
 
 ## Standing Local Ollama Authorization
 
@@ -170,7 +173,7 @@ Not allowed:
 - Docker or Testcontainers being required for default `setaccio-lab` builds.
 - Container tests that run without an explicit task, profile, or property.
 
-## Current State Snapshot (as of 2026-09-02)
+## Current State Snapshot (as of 2026-09-03)
 
 This repo was bootstrapped from the Setaccio monorepo but has been intentionally reduced:
 
@@ -191,7 +194,7 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   approved corpus. It resolves full immutable Ollama model
   digests, writes suite-specific raw JSON, a shared v1 manifest, and
   deterministic summary under a new dated
-  `build/vision-matrix/` directory.
+  `local/evidence/vision-matrix/` directory.
 - `visionMatrixVerify` and `visionMatrixReanalyze` inspect saved vision
   evidence without starting Spring, reading the private corpus, or contacting
   a provider, selecting the saved supported prompt version from raw evidence.
@@ -206,7 +209,7 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   ignored local corpus, verifies the saved evidence and deterministic
   comparability, validates corpus input identities, and writes one private,
   non-overwriting Markdown worksheet under ignored
-  `build/vision-human-review/`. It organizes paired evidence but does not make
+  `local/evidence/vision-human-review/`. It organizes paired evidence but does not make
   semantic judgments or a prompt decision.
 - A controlled local vision matrix completed from clean commit `11e2fa7`
   across three installed model families, four reviewed private cases, and two
@@ -413,12 +416,76 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   smallest-capable, ranking, or selection claim. Every new run remains
   separately unauthorized; do not rerun, replace, repair, pull, or customize
   any cohort model.
+- Formal run evidence is durable and private. Every suite writes new evidence
+  only under `setaccio-lab/local/evidence/<suite>/<run-id>/`, which is ignored
+  but is not a Gradle output directory, so `clean` cannot delete it. One shared
+  `EvidenceSuiteRoot` contract owns the root, direct-child, traversal, and
+  symlink policy for all twelve suite roots; suites keep only their own
+  date/run-id rules. Readers still accept a legacy `build/<suite>/<run-id>`
+  path so evidence saved before 2026-09-03 can be verified, compared, and
+  consumed; reanalysis is durable-only because it rewrites `SUMMARY.md`.
+  Ordinary
+  interactive endpoint output is unaffected and stays under
+  `build/lab-results/`. See the durable evidence root section of
+  `docs/ENVIRONMENT.md`.
+- Both local chat boundaries record provider responses as separate dimensions
+  through one shared `ChatResponseCapture`: assistant content, any reasoning
+  field, reasoning presence, finish reason, evaluated output tokens, the
+  explicitly requested `ChatReasoningPolicy`, and how the adapter handled it.
+  Content and reasoning are never merged. `OllamaReasoningOptions` maps the
+  provider-neutral policy onto Spring AI's `ThinkOption`, which stays inside the
+  Ollama adapter. The opt-in `thinkingDiagnostic` suite is a new diagnostic
+  protocol with its own schema under
+  `local/evidence/thinking-diagnostic/`; it reuses the tracked fact-check
+  fixture catalog and prompt but is not a rerun, repair, replacement, or
+  reanalysis of Phase 4 evidence and never writes into that suite. Every other
+  suite deliberately keeps sending `PROVIDER_DEFAULT`, so its protocol identity,
+  manifest settings, row schema, and retained evidence are unchanged; that
+  inherited default is a recorded limitation in `docs/DEFERRED-WORK.md`. Do not
+  add a constant to `ChatGenerationOption`: `ChatProviderOptionSupport` requires
+  every constant to be classified, so a new one would make retained chat and
+  answer raw JSON undeserializable.
+- One controlled reasoning diagnostic completed on 2026-09-03 from clean commit
+  `4e766b7a6345ba1a8af9ee1e354c2ba027e1573a` under Ollama `0.33.3`, retaining all
+  30 rows with no failure, timeout, retry, or omission. With reasoning explicitly
+  enabled at `64` output tokens, `gemma4:e2b` at digest `7fbdbf8f5e45` returned
+  empty content with a populated reasoning field, the full `64` evaluated tokens,
+  and finish reason `length` in five of six rows; the paired explicitly disabled
+  arm answered in two tokens in all six; at `256` tokens reasoning fit and every
+  row produced content; the non-thinking control produced content in all six.
+  This is a mechanism consistent with and explanatory of the Phase 4
+  output-budget association, which stands exactly as recorded. Two limits are
+  part of the result: the retained runs sent no policy rather than an enabled
+  one and this diagnostic has no unset-policy arm, and only the fact-check
+  boundary was exercised live. No quality, factuality, reliability, ranking, or
+  model-selection claim follows, no closeout is withdrawn, and no rerun of
+  retained evidence is authorized.
+- A small standalone diagnostic on 2026-09-03 tested the currently installed
+  Phase 1/Phase 2 artifact
+  (`hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0`, digest
+  `2c88e114a368`) directly against the Ollama provider boundary under Ollama
+  `0.33.3`. Two otherwise byte-identical direct `/api/chat` calls, differing
+  only in the presence of one minimal tool definition, showed the tool-bearing
+  call rejected synchronously (HTTP `400`, explicit provider error stating the
+  model does not support tools) while the tool-free call succeeded (HTTP `200`,
+  complete response). The currently deployed artifact/runtime rejects
+  tool-bearing requests at the provider boundary; this is consistent with the
+  historical Phase 1/Phase 2 `PROVIDER_FAILURE` observations but does not
+  establish their historical cause (this ran under a later runtime) and is not
+  evidence about the underlying model architecture's latent tool-calling
+  ability. No Phase 1 or Phase 2 evidence or closeout was touched. Recorded in
+  `docs/logs/2026-09-03-lfm-tool-capability-check.md`; the verbatim request/
+  response bundle is ignored under
+  `setaccio-lab/local/evidence/lfm-tool-capability/`.
 - Tracked documentation splits the front door from the detail: `README.md`
   leads with findings and the evidence model, `docs/CAPABILITIES.md` carries
   the slice-by-slice surface description, and `docs/evidence/` holds published
   copies of deterministic summaries and manifests under the Publication
-  Boundary. A publication copy omits its raw artifact and therefore does not
-  pass the suite's offline verifier; that is intended.
+  Boundary. `docs/evidence/` is a tracked, partial publication copy of
+  permitted summaries and manifests only: it is never a task input and is not
+  the source for offline verification. A publication copy omits its raw
+  artifact and therefore does not pass the suite's offline verifier; that is
+  intended.
 - `setaccio-testcontainers` remains an optional skeleton. Slice A6 deferred a
   fact-check container path because provisioning would not answer the observed
   verdict-yield question; any later container work must remain a separate,
@@ -446,6 +513,7 @@ Relevant upgrade concerns for this repo:
 - Keep future Spring AI upgrades focused and separate from mechanical repo split work.
 - Watch direct `ChatModel.call(Prompt)` usage with per-request options. `OllamaChatModel.buildRequestPrompt` substitutes the model's default options only when the prompt carries none; a non-null partial options object is used verbatim and every configured default is dropped. This is identical in Spring AI `2.0.0` and `2.0.1`, so it is a standing hazard rather than an upgrade regression. Prefer `ChatClient`, which merges the runtime options onto `chatModel.getOptions()`, or materialize a complete options object first. The vision boundary does the latter through `ollamaChatModel.getOptions().mutate()`, which keeps its direct-call protocol instead of gaining `ChatClient`'s auto-registered tool-calling advisor.
 - Spring AI `2.0.1` made tool-call limits configurable, defaulting to 40 calls per tool and 150 total with `ToolCallLimitBehavior.THROW`; exceeding either limit aborts the invocation instead of truncating it. `ToolCallLimitPolicy` pins those values for both tool paths so a later framework default cannot change the protocol silently. They are deliberately not written into saved evidence: Tool Search matrix verification compares the exact manifest settings key set, so adding a key would invalidate every retained manifest.
+- Spring AI's `OllamaChatModel` maps Ollama's `message.thinking` into the assistant message's properties under the key `thinking`, and `message.content` into the assistant text; `getOutput().getText()` therefore returns content only. Generation metadata carries the finish reason and a duplicate `thinking` entry, but only when both `prompt_eval_count` and `eval_count` are present; otherwise it is `ChatGenerationMetadata.NULL`. `Usage.getCompletionTokens()` is Ollama's `eval_count`, which counts reasoning tokens too. `OllamaChatOptions.thinkOption` controls the request's `think` field, and Spring AI documents that a thinking-capable model auto-enables thinking when it is unset, so sending nothing is not the same as disabling. Verified identical in `2.0.0` sources and `2.0.1` bytecode; recorded in `docs/logs/2026-09-03-thinking-field-inspection.md`.
 - The long-term harness should cover Spring AI's major provider surface: Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama.
 - The long-term harness should cover Spring AI model types: chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Provider-backed tests must be opt-in and must not run by default in CI.

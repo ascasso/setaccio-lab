@@ -41,7 +41,7 @@ public abstract class RetrievalEvaluationTask extends DefaultTask {
         return outputDir;
     }
 
-    @Option(option = "output-dir", description = "Required new dated directory directly under build/retrieval-evaluation/.")
+    @Option(option = "output-dir", description = "Required new dated directory directly under local/evidence/retrieval-evaluation/.")
     public void setOutputDir(String outputDir) {
         this.outputDir = outputDir;
     }
@@ -49,7 +49,7 @@ public abstract class RetrievalEvaluationTask extends DefaultTask {
     @TaskAction
     public void runEvaluation() {
         if (outputDir == null || outputDir.isBlank()) {
-            throw new GradleException("retrievalEvaluation requires --output-dir=<new-saved-build-directory>");
+            throw new GradleException("retrievalEvaluation requires --output-dir=<new-dated-evidence-directory>");
         }
         if (!outputDir.matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
             throw new GradleException("retrievalEvaluation output directory must contain a YYYY-MM-DD date");

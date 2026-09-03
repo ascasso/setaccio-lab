@@ -57,11 +57,11 @@ public abstract class RetrievalRelevancyTask extends DefaultTask {
     public void setTimeout(String value) { timeout = value; }
 
     @Input @Optional public String getSourceAnswerRunDir() { return sourceAnswerRunDir; }
-    @Option(option = "source-answer-run-dir", description = "Required verified R5 run directly under build/retrieval-answer/.")
+    @Option(option = "source-answer-run-dir", description = "Required verified R5 run directly under local/evidence/retrieval-answer/.")
     public void setSourceAnswerRunDir(String value) { sourceAnswerRunDir = value; }
 
     @Input @Optional public String getOutputDir() { return outputDir; }
-    @Option(option = "output-dir", description = "Required fresh dated directory directly under build/retrieval-relevancy/.")
+    @Option(option = "output-dir", description = "Required fresh dated directory directly under local/evidence/retrieval-relevancy/.")
     public void setOutputDir(String value) { outputDir = value; }
 
     @TaskAction

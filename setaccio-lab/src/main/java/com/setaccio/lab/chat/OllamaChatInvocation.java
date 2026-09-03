@@ -21,15 +21,26 @@ final class OllamaChatInvocation implements ChatInvocation {
     private final ChatModel chatModel;
     private final OllamaChatModelIdentity modelIdentity;
     private final ChatGenerationSettings settings;
+    private final ChatReasoningPolicy reasoningPolicy;
 
     OllamaChatInvocation(
             ChatModel chatModel,
             OllamaChatModelIdentity modelIdentity,
             ChatGenerationSettings settings
     ) {
+        this(chatModel, modelIdentity, settings, ChatReasoningPolicy.PROVIDER_DEFAULT);
+    }
+
+    OllamaChatInvocation(
+            ChatModel chatModel,
+            OllamaChatModelIdentity modelIdentity,
+            ChatGenerationSettings settings,
+            ChatReasoningPolicy reasoningPolicy
+    ) {
         this.chatModel = Objects.requireNonNull(chatModel, "chatModel must not be null");
         this.modelIdentity = Objects.requireNonNull(modelIdentity, "modelIdentity must not be null");
         this.settings = Objects.requireNonNull(settings, "settings must not be null");
+        this.reasoningPolicy = Objects.requireNonNull(reasoningPolicy, "reasoningPolicy must not be null");
         if (settings.seed() == null) {
             throw new IllegalArgumentException("seed must be explicit for the Ollama chat adapter");
         }
@@ -48,32 +59,38 @@ final class OllamaChatInvocation implements ChatInvocation {
             throw new IllegalArgumentException("request settings must match the bound Ollama model settings");
         }
 
-        OllamaChatOptions options = OllamaChatOptions.builder()
-                .model(modelIdentity.requestedModel())
-                .temperature(settings.temperature())
-                .seed(settings.seed())
-                .numPredict(settings.maxOutputTokens())
+        OllamaChatOptions options = OllamaReasoningOptions.apply(
+                        OllamaChatOptions.builder()
+                                .model(modelIdentity.requestedModel())
+                                .temperature(settings.temperature())
+                                .seed(settings.seed())
+                                .numPredict(settings.maxOutputTokens()),
+                        reasoningPolicy)
                 .build();
         Prompt prompt = new Prompt(List.of(new UserMessage(request.prompt().text())), options);
         long startedNanos = System.nanoTime();
         try {
             ChatResponse response = chatModel.call(prompt);
-            return completed(request, response, elapsedMillis(startedNanos));
+            return completed(request, response, elapsedMillis(startedNanos), reasoningPolicy);
         } catch (RuntimeException exception) {
-            return failed(request, category(exception), safeMessage(exception), elapsedMillis(startedNanos));
+            return failed(
+                    request,
+                    category(exception),
+                    safeMessage(exception),
+                    elapsedMillis(startedNanos),
+                    reasoningPolicy);
         }
     }
 
     private static ChatInvocationOutcome completed(
             ChatInvocationRequest request,
             ChatResponse response,
-            long latencyMillis
+            long latencyMillis,
+            ChatReasoningPolicy reasoningPolicy
     ) {
-        String rawResponse = response == null
-                || response.getResult() == null
-                || response.getResult().getOutput() == null
-                ? null
-                : response.getResult().getOutput().getText();
+        ChatResponseCapture capture = ChatResponseCapture.from(
+                response, reasoningPolicy, OllamaReasoningOptions.support(reasoningPolicy));
+        String rawResponse = capture.content();
         ChatResponseMetadata metadata = response == null ? null : response.getMetadata();
         Usage usage = metadata == null ? null : metadata.getUsage();
         boolean usageAvailable = usage != null && !(usage instanceof EmptyUsage);
@@ -93,14 +110,16 @@ final class OllamaChatInvocation implements ChatInvocation {
                 latencyMillis,
                 1,
                 category,
-                null);
+                null,
+                capture);
     }
 
     private static ChatInvocationOutcome failed(
             ChatInvocationRequest request,
             ChatInvocationFailureCategory category,
             String error,
-            long latencyMillis
+            long latencyMillis,
+            ChatReasoningPolicy reasoningPolicy
     ) {
         return new ChatInvocationOutcome(
                 request.modelIdentity(),
@@ -115,7 +134,9 @@ final class OllamaChatInvocation implements ChatInvocation {
                 latencyMillis,
                 1,
                 category,
-                error);
+                error,
+                ChatResponseCapture.unavailable(
+                        reasoningPolicy, OllamaReasoningOptions.support(reasoningPolicy)));
     }
 
     private static ChatInvocationFailureCategory category(RuntimeException exception) {

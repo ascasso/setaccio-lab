@@ -36,9 +36,9 @@ class LocalEvaluationBudgetPreflightTest {
                 session);
 
         assertThat(prepared.outputDirectory64()).isEqualTo(projectDirectory.resolve(
-                "build/evaluation-matrix/2026-08-25-budget-64").toAbsolutePath().normalize());
+                "local/evidence/evaluation-matrix/2026-08-25-budget-64").toAbsolutePath().normalize());
         assertThat(prepared.outputDirectory256()).isEqualTo(projectDirectory.resolve(
-                "build/evaluation-matrix/2026-08-25-budget-256").toAbsolutePath().normalize());
+                "local/evidence/evaluation-matrix/2026-08-25-budget-256").toAbsolutePath().normalize());
         assertThat(prepared.budget64().maxTokens()).isEqualTo(64);
         assertThat(prepared.budget256().maxTokens()).isEqualTo(256);
         assertThat(prepared.budget64().timeoutMillis()).isEqualTo(Duration.ofMinutes(2).toMillis());
@@ -113,8 +113,8 @@ class LocalEvaluationBudgetPreflightTest {
                         projectDirectory,
                         "http://localhost:11434",
                         "judge-model",
-                        "build/evaluation-matrix/2026-08-25-budget-64",
-                        "build/evaluation-matrix/2026-08-25-budget-256"),
+                        "local/evidence/evaluation-matrix/2026-08-25-budget-64",
+                        "local/evidence/evaluation-matrix/2026-08-25-budget-256"),
                 () -> LocalEvaluationContract.load(OBJECT_MAPPER),
                 repository,
                 (baseUrl, timeout) -> {

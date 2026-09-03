@@ -12,7 +12,7 @@ class ToolCompatibilityCohortRunnerArgumentsTest {
     void parsesOnlyExplicitProtocolAndOutputOptionsBecauseModelIdentityIsSuiteOwned() {
         ToolCompatibilityCohortRunner.Arguments arguments =
                 ToolCompatibilityCohortRunner.Arguments.parse(new String[] {
-                        "--output-dir", "build/tool-compatibility/2026-08-23-cohort",
+                        "--output-dir", "local/evidence/tool-compatibility/2026-08-23-cohort",
                         "--timeout", "PT2M",
                         "--ollama-base-url", "http://localhost:11434",
                         "--max-tokens", "512"
@@ -22,7 +22,7 @@ class ToolCompatibilityCohortRunnerArgumentsTest {
         assertThat(arguments.maxTokens()).isEqualTo("512");
         assertThat(arguments.timeout()).isEqualTo("PT2M");
         assertThat(arguments.outputDirectory())
-                .isEqualTo("build/tool-compatibility/2026-08-23-cohort");
+                .isEqualTo("local/evidence/tool-compatibility/2026-08-23-cohort");
     }
 
     @Test

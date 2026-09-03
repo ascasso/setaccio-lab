@@ -148,7 +148,7 @@ class ToolCompatibilityCohortExecutorTest {
                                 "http://localhost:11434",
                                 List.of(PEER_ONE, PEER_TWO),
                                 REFERENCE,
-                                "build/tool-compatibility/2026-08-23-cohort"),
+                                "local/evidence/tool-compatibility/2026-08-23-cohort"),
                         () -> new ToolCompatibilityCohortInventory(
                                 RUNTIME_VERSION,
                                 List.of(

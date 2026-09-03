@@ -39,7 +39,7 @@ default chat prompts are locked in one tracked v1 catalog with catalog and
 per-prompt SHA-256 identities, and a dedicated `chatMatrix` task executes the
 fixed six-row protocol through the S2 boundary. Suite-specific raw JSON,
 shared-v1 manifest, deterministic summary, and standalone `chatMatrixVerify`
-and `chatMatrixReanalyze` tasks stay under ignored `build/chat-matrix/`. One
+and `chatMatrixReanalyze` tasks stay under ignored `local/evidence/chat-matrix/`. One
 clean-baseline local run from commit `51025cf` used `gemma4:e2b`, its full
 digest, `128` output tokens, `PT2M`, and the locked six-row schedule. The
 evidence verified and reanalyzed offline; all six rows had complete usage but
@@ -108,7 +108,7 @@ model, and fails before creating the run directory when a requested tag is
 missing or its identity is incomplete. The task writes the selected prompt and
 resolved model identities into suite-specific raw JSON, the shared v1 evidence
 manifest, and `SUMMARY.md` under a required new dated
-`build/vision-matrix/` directory.
+`local/evidence/vision-matrix/` directory.
 
 Saved runs can be checked with `visionMatrixVerify` or have only their
 deterministic summary regenerated with `visionMatrixReanalyze`. Both paths are
@@ -122,7 +122,7 @@ is written to standard output and does not assess image semantics or copy
 private corpus metadata.
 The offline `visionHumanReviewPrepare` task builds on that comparison gate and
 the ignored local corpus to produce one private, non-overwriting Markdown
-worksheet under `build/vision-human-review/`. It groups baseline and candidate
+worksheet under `local/evidence/vision-human-review/`. It groups baseline and candidate
 responses by model and case, includes both repetitions only when they differ,
 and leaves all semantic judgments and the final prompt decision to the human
 reviewer.
@@ -179,13 +179,74 @@ Tool Search comparison is disabled by default and currently supports the in-memo
 
 An explicitly opt-in `toolSearchSmoke` Gradle task validates the live Tool Search response wrapper and raw-to-normalized trace linkage against one already-installed Ollama model. It is not connected to `test`, `check`, or `build`, enforces Ollama's `never` pull strategy, and treats model behavior categories as diagnostic output rather than merge gates. See [docs/ENVIRONMENT.md](ENVIRONMENT.md#opt-in-tool-search-smoke-automation) for invocation and case-selection details.
 
-The separate `toolSearchMatrixBaseline` task reproduces the locked July 12 three-model/five-case protocol from canonical Java cases and writes a raw trace, shared v1 evidence manifest, and Markdown comparison under a new dated `build/tool-search-matrix/` directory. It verifies every raw-to-normalized discovery linkage and classifies contract failures into six explicit diagnostic categories. Its report compares both the originally recorded and corrected July 12 counts, with the request-construction correction called out as a confounder.
+The separate `toolSearchMatrixBaseline` task reproduces the locked July 12 three-model/five-case protocol from canonical Java cases and writes a raw trace, shared v1 evidence manifest, and Markdown comparison under a new dated `local/evidence/tool-search-matrix/` directory. It verifies every raw-to-normalized discovery linkage and classifies contract failures into six explicit diagnostic categories. Its report compares both the originally recorded and corrected July 12 counts, with the request-construction correction called out as a confounder.
 
 Saved matrix directories can be checked with `toolSearchMatrixVerify` or have
 only their deterministic `SUMMARY.md` regenerated with
 `toolSearchMatrixReanalyze`. Both commands are offline, accept current v1
 manifests and the earlier unversioned legacy-v0 manifest, and never start Spring
 or contact Ollama.
+
+## Reasoning and Empty-Content Diagnostic
+
+Spring AI's `OllamaChatModel` maps Ollama's `message.thinking` field into the
+assistant message's properties under the key `thinking`, and maps
+`message.content` into the assistant text. A boundary that reads only
+`getOutput().getText()` therefore sees an empty response when a model returns
+reasoning and no visible content, and Spring AI documents that a
+thinking-capable model auto-enables thinking when no policy is sent. The
+inspection behind that statement is recorded in
+[`docs/logs/2026-09-03-thinking-field-inspection.md`](logs/2026-09-03-thinking-field-inspection.md).
+
+Both local chat boundaries now record the response as separate dimensions
+through one shared `ChatResponseCapture`: assistant content, any reasoning
+field, whether reasoning was present, absent, or unavailable, the generation
+finish reason, the evaluated output-token count, the explicitly requested
+reasoning policy, and how the adapter handled that policy. Content and
+reasoning are never concatenated, substituted, or merged.
+
+Reasoning is an explicit recorded option rather than an inherited default. The
+provider-neutral `ChatReasoningPolicy` has `ENABLED`, `DISABLED`, and
+`PROVIDER_DEFAULT`; `OllamaReasoningOptions` maps it onto Spring AI's
+`ThinkOption`, which stays inside the Ollama adapter. `PROVIDER_DEFAULT` sends
+nothing and is not the same as `DISABLED`.
+
+The opt-in `thinkingDiagnostic` task is a new diagnostic protocol with its own
+suite, schema, and manifest settings. It reuses the tracked public-safe
+fact-check fixture catalog, its confirmed ordering, and the tracked
+`local-fact-check` prompt, but it is not a rerun, repair, replacement, or
+reanalysis of the Phase 4 fact-check evidence and it never writes into that
+suite. It locks five arms in a fixed order: a subject model with reasoning
+explicitly enabled and explicitly disabled at 64 output tokens, the same pair
+at 256, and a non-thinking control model with reasoning explicitly disabled at
+64. Each paired subject arm holds prompt, fixture order, seed, temperature,
+timeout, and every non-reasoning setting constant, so the only difference
+inside a pair is the reasoning policy. Every one of its 30 rows is one logical
+attempt at temperature `0.0`, seed `42`, `PT2M`, and pull strategy `never`,
+and every row is retained.
+
+`thinkingDiagnosticVerify` and `thinkingDiagnosticReanalyze` inspect saved
+diagnostic evidence offline without starting Spring or contacting a provider.
+Recorded content and reasoning stay in the ignored raw artifact; the
+deterministic summary reports per-arm aggregates only.
+
+One diagnostic suite completed on 2026-09-03 under Ollama `0.33.3`, retaining
+all 30 rows. With reasoning explicitly enabled at `64` output tokens, the
+subject artifact returned empty content with a populated reasoning field, the
+full budget in evaluated tokens, and finish reason `length` in five of six rows;
+the paired explicitly disabled arm produced visible content in two tokens in all
+six. At `256` tokens reasoning fit within budget and every row produced content.
+The evidence verified and reanalyzed offline. This explains a plausible cause of
+the Phase 4 output-budget association without replacing or correcting it, and it
+does not test the unset-policy behavior the retained runs actually used. The
+bounded closeout is in
+[`docs/logs/2026-09-03-thinking-diagnostic-run.md`](logs/2026-09-03-thinking-diagnostic-run.md).
+
+The Phase 2 chat matrix, Phase 5 answer matrix, and Phase 4 fact-check suite
+keep their existing protocol versions and row schemas. They continue to send no
+reasoning policy, so their retained evidence still verifies and reanalyzes
+unchanged, and their inherited-default behavior is recorded as a named
+limitation rather than silently changed.
 
 ## Local Fixture Evaluation Benchmark
 
@@ -223,7 +284,7 @@ Slice A3 adds the offline evidence lifecycle before any live runner. It locks
 the exact twelve-row order, stores BLAKE3 document/claim identities instead of
 duplicating fixture text, binds the prompt/catalog/human-review and immutable
 judge identities, and writes suite-specific raw JSON, a shared v1 manifest,
-and deterministic `SUMMARY.md` under ignored `build/evaluation-matrix/`
+and deterministic `SUMMARY.md` under ignored `local/evidence/evaluation-matrix/`
 directories. The summary keeps supported and unsupported agreement,
 repetition consistency, verdict tendency, formatting outcomes, token
 availability, latency, attempts, and infrastructure failures separate and
@@ -234,9 +295,9 @@ regenerated with the standalone offline tasks:
 
 ```bash
 ./gradlew :setaccio-lab:localEvaluationVerify \
-  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+  --run-dir=local/evidence/evaluation-matrix/YYYY-MM-DD-local
 ./gradlew :setaccio-lab:localEvaluationReanalyze \
-  --run-dir=build/evaluation-matrix/YYYY-MM-DD-local
+  --run-dir=local/evidence/evaluation-matrix/YYYY-MM-DD-local
 ```
 
 Slice A4 adds one explicitly invoked host-Ollama runner. It requires a
@@ -252,7 +313,7 @@ twelve rows sequentially with one attempt per row and pull strategy `never`:
   --judge-model=YOUR_INSTALLED_TAG \
   --max-tokens=64 \
   --timeout=PT30S \
-  --output-dir=build/evaluation-matrix/YYYY-MM-DD-local
+  --output-dir=local/evidence/evaluation-matrix/YYYY-MM-DD-local
 ```
 
 The task is not connected to `test`, `check`, `build`, application startup, or
@@ -294,7 +355,10 @@ All benchmarks are local-first and offline-safe by default:
 
 - default builds and tests require no credentials or running Ollama instance,
 - live model runs require the `local` profile or explicit configuration,
-- generated benchmark outputs stay under ignored `build/` directories.
+- interactive endpoint output stays under ignored `build/lab-results/`, and
+  formal run evidence stays under the ignored, durable
+  `setaccio-lab/local/evidence/<suite>/` root that Gradle `clean` does not
+  remove.
 
 Result filenames include nanosecond timestamps and short run identifiers so repeated runs cannot overwrite one another when they start at the same instant.
 

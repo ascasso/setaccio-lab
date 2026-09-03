@@ -420,7 +420,7 @@ uses it:
 | Manifest suite ID | `ollama-tool-compatibility` |
 | Execution engine | `spring-ai-standard-tool-calling-advisor` |
 | Evidence files | Exactly the raw result, `manifest.json`, and deterministic `SUMMARY.md` |
-| Output root | `setaccio-lab/build/tool-compatibility/`; each run is one new dated direct child |
+| Output root | `setaccio-lab/local/evidence/tool-compatibility/`; each run is one new dated direct child |
 | Source sets | `toolCompatibility` and `toolCompatibilityTest` |
 | Base package | `com.setaccio.lab.toolcompat` |
 | Untreated system prompt | ID `tool-system-none`, version `1`, empty UTF-8 text, `present=false`, SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
@@ -944,13 +944,13 @@ Required task names:
   --model=hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0 \
   --max-tokens=512 \
   --timeout=PT2M \
-  --output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline
+  --output-dir=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-baseline
 
 ./gradlew :setaccio-lab:toolCompatibilityVerify \
-  --run-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline
+  --run-dir=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-baseline
 
 ./gradlew :setaccio-lab:toolCompatibilityReanalyze \
-  --run-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline
+  --run-dir=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-baseline
 ```
 
 The live task must require every option shown above.
@@ -1203,8 +1203,8 @@ Add one dedicated paired live task without changing the locked Phase 1
   --model=hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0 \
   --max-tokens=512 \
   --timeout=PT2M \
-  --baseline-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-baseline \
-  --candidate-output-dir=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
+  --baseline-output-dir=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-baseline \
+  --candidate-output-dir=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-prompted
 ```
 
 The task must preflight the complete protocol, clean Git state, installed model
@@ -1235,8 +1235,8 @@ Add:
 
 ```bash
 ./gradlew :setaccio-lab:toolCompatibilityCompare \
-  --baseline-run=build/tool-compatibility/YYYY-MM-DD-lfm-baseline \
-  --candidate-run=build/tool-compatibility/YYYY-MM-DD-lfm-prompted
+  --baseline-run=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-baseline \
+  --candidate-run=local/evidence/tool-compatibility/YYYY-MM-DD-lfm-prompted
 ```
 
 The comparison must reject mismatches in:
@@ -1757,8 +1757,8 @@ Do not reuse, overwrite, or modify the previous A5 evidence. The historic A5 run
 Suggested names:
 
 ```text
-build/evaluation-matrix/YYYY-MM-DD-budget-64
-build/evaluation-matrix/YYYY-MM-DD-budget-256
+local/evidence/evaluation-matrix/YYYY-MM-DD-budget-64
+local/evidence/evaluation-matrix/YYYY-MM-DD-budget-256
 ```
 
 Both the fresh 64-token arm and the fresh 256-token arm are new paired runs from the identical clean commit. Neither fresh arm may be compared against the historic 64-token A5 run as if it were a controlled pair.
@@ -1827,7 +1827,7 @@ experimental scope. Once started, the standing local Ollama authorization
 covers its local calls without another per-run approval.
 
 The breakpoint study started and completed its fresh five-arm execution on 2026-08-26. It uses five fresh, distinct
-ignored output directories under `build/evaluation-matrix/`, runs each locked
+ignored output directories under `local/evidence/evaluation-matrix/`, runs each locked
 token arm in order with the same six-fixture, two-repetition schedule (60 rows
 total), and requires the same clean Git commit and installed full judge digest
 before allocation and between every arm. The runner persists each arm after
@@ -2007,8 +2007,8 @@ Each answer row should retain:
 Do not merge retrieval success and answer correctness.
 
 The dedicated `retrievalAnswerMatrix` task must accept only a verified,
-clean-baseline R3 directory directly under `build/retrieval-evaluation/`, then
-write a fresh, ignored directory directly under `build/retrieval-answer/`.
+clean-baseline R3 directory directly under `local/evidence/retrieval-evaluation/`, then
+write a fresh, ignored directory directly under `local/evidence/retrieval-answer/`.
 It locks the tracked `retrieval-grounded-answer-v1` prompt, the requested and
 effective local model plus full digest, temperature `0.0`, explicit seed,
 explicit maximum output tokens, timeout, one attempt, and no-pull policy
@@ -2039,8 +2039,8 @@ Keep separate:
 An AI evaluator is not ground truth.
 
 The dedicated `retrievalRelevancyMatrix` task accepts only a verified,
-clean-baseline R5 directory directly under `build/retrieval-answer/`, then
-writes a fresh ignored directory directly under `build/retrieval-relevancy/`.
+clean-baseline R5 directory directly under `local/evidence/retrieval-answer/`, then
+writes a fresh ignored directory directly under `local/evidence/retrieval-relevancy/`.
 It locks the tracked `retrieval-relevancy-evaluator-v1` prompt, requested and
 effective local evaluator model plus full digest, temperature `0.0`, explicit
 seed, explicit maximum output tokens, timeout, one attempt, and no-pull policy

@@ -155,7 +155,7 @@ public final class ChatMatrixRunner {
             return new IllegalArgumentException(
                     "Expected --ollama-base-url <explicit-loopback-url> --model <installed-tag> "
                             + "--max-tokens <1..32768> --timeout <ISO-8601-duration-up-to-PT10M> "
-                            + "--output-dir <new-dated-build-directory>");
+                            + "--output-dir <new-dated-evidence-directory>");
         }
     }
 }

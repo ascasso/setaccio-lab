@@ -238,15 +238,9 @@ public final class VisionMatrixRunner {
     }
 
     static Path resolveNewOutputDirectory(String value) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path matrixRoot = projectDirectory.resolve("build/vision-matrix").normalize();
-        Path output = projectDirectory.resolve(value).normalize();
-        if (!matrixRoot.equals(output.getParent())) {
-            throw new IllegalArgumentException(
-                    "Output must be one new directory directly under build/vision-matrix/.");
-        }
-        String name = output.getFileName().toString();
-        if (!name.matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
+        Path output = VisionMatrixProtocol.EVIDENCE_ROOT.resolveNewRunDirectory(
+                Path.of(""), value, "Output directory");
+        if (!output.getFileName().toString().matches(".*\\d{4}-\\d{2}-\\d{2}.*")) {
             throw new IllegalArgumentException("Output directory name must contain a YYYY-MM-DD date.");
         }
         if (Files.exists(output)) {
@@ -300,7 +294,7 @@ public final class VisionMatrixRunner {
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
                     "Expected --corpus-dir <local/vision-corpus> --models <tags> "
-                            + "--max-tokens <none|1..32768> --output-dir <dated-build-directory> "
+                            + "--max-tokens <none|1..32768> --output-dir <new-dated-evidence-directory> "
                             + "--prompt-version <supported-version> [--case-ids <case-id,...>]");
         }
     }

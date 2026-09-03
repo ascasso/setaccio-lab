@@ -88,7 +88,7 @@ public abstract class LocalEvaluationTask extends DefaultTask {
         return outputDir;
     }
 
-    @Option(option = "output-dir", description = "Required new dated directory directly under build/evaluation-matrix/.")
+    @Option(option = "output-dir", description = "Required new dated directory directly under local/evidence/evaluation-matrix/.")
     public void setOutputDir(String outputDir) {
         this.outputDir = outputDir;
     }

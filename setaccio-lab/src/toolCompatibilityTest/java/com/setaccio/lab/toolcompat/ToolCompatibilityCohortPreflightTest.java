@@ -212,7 +212,7 @@ class ToolCompatibilityCohortPreflightTest {
                         "https://example.com:11434",
                         List.of(PEER_ONE),
                         REFERENCE,
-                        "build/tool-compatibility/2026-08-23-cohort"),
+                        "local/evidence/tool-compatibility/2026-08-23-cohort"),
                 source))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("loopback");
@@ -234,11 +234,11 @@ class ToolCompatibilityCohortPreflightTest {
                 "http://localhost:11434",
                 peers,
                 reference,
-                "build/tool-compatibility/2026-08-23-cohort");
+                "local/evidence/tool-compatibility/2026-08-23-cohort");
     }
 
     private static Path output(Path project) {
-        return project.resolve("build/tool-compatibility/2026-08-23-cohort");
+        return project.resolve("local/evidence/tool-compatibility/2026-08-23-cohort");
     }
 
     private static ToolCompatibilityCohortInventory inventory(

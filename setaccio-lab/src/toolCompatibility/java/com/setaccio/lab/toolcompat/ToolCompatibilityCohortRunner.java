@@ -157,7 +157,7 @@ public final class ToolCompatibilityCohortRunner {
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
                     "Expected --ollama-base-url <explicit-loopback-url> --max-tokens 512 "
-                            + "--timeout PT2M --output-dir <new-dated-build-directory>; "
+                            + "--timeout PT2M --output-dir <new-dated-evidence-directory>; "
                             + "cohort tags and digests are suite-owned");
         }
     }

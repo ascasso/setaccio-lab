@@ -79,7 +79,7 @@ public abstract class VisionMatrixTask extends DefaultTask {
         return outputDir;
     }
 
-    @Option(option = "output-dir", description = "Required new dated directory under build/vision-matrix/.")
+    @Option(option = "output-dir", description = "Required new dated directory under local/evidence/vision-matrix/.")
     public void setOutputDir(String outputDir) {
         this.outputDir = outputDir;
     }

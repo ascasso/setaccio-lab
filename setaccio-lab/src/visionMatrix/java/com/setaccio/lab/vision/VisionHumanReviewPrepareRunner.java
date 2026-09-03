@@ -2,8 +2,6 @@ package com.setaccio.lab.vision;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.setaccio.core.service.ApacheCommonsBlake3HashingServiceImpl;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -29,18 +27,8 @@ public final class VisionHumanReviewPrepareRunner {
     }
 
     static Path resolveReviewRoot(String value) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path expected = projectDirectory.resolve("build/vision-human-review").normalize();
-        Path actual = projectDirectory.resolve(value).normalize();
-        if (!actual.equals(expected)) {
-            throw new IllegalArgumentException(
-                    "Review output root must be the fixed build/vision-human-review directory.");
-        }
-        if (Files.isSymbolicLink(actual)
-                || (Files.exists(actual) && !Files.isDirectory(actual, LinkOption.NOFOLLOW_LINKS))) {
-            throw new IllegalArgumentException("Review output root is unsafe.");
-        }
-        return actual;
+        return VisionMatrixProtocol.HUMAN_REVIEW_ROOT.resolveFixedDurableRoot(
+                Path.of(""), value, "Review output root");
     }
 
     static String reviewId(Path baseline, Path candidate) {
@@ -80,8 +68,8 @@ public final class VisionHumanReviewPrepareRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --baseline-run-dir <saved-build-directory> "
-                            + "--candidate-run-dir <saved-build-directory> "
+                    "Expected --baseline-run-dir <saved-evidence-directory> "
+                            + "--candidate-run-dir <saved-evidence-directory> "
                             + "--corpus-dir <local-vision-corpus> "
                             + "--output-root <private-review-root>");
         }

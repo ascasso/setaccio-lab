@@ -2,6 +2,7 @@ package com.setaccio.lab.evaluation;
 
 import com.setaccio.core.service.ApacheCommonsBlake3HashingServiceImpl;
 import com.setaccio.core.service.Blake3HashingService;
+import com.setaccio.lab.evidence.EvidenceSuiteRoot;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ final class LocalEvaluationProtocol {
 
     static final int VERSION = 1;
     static final String SUITE = "local-fact-check-evaluation";
+    static final EvidenceSuiteRoot EVIDENCE_ROOT = EvidenceSuiteRoot.of("evaluation-matrix");
     static final String PROVIDER = "ollama";
     static final String ENDPOINT_CATEGORY = "local";
     static final String EXECUTION_ENGINE = "spring-ai-fact-checking-evaluator";

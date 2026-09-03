@@ -48,7 +48,7 @@ public abstract class ToolCompatibilityHumanReviewPrepareTask extends DefaultTas
     @Optional
     public abstract Property<String> getBaselineRun();
 
-    @Option(option = "baseline-run", description = "Required saved untreated directory directly under build/tool-compatibility/.")
+    @Option(option = "baseline-run", description = "Required saved untreated directory directly under local/evidence/tool-compatibility/.")
     public void setBaselineRunOption(String value) {
         getBaselineRun().set(value);
     }
@@ -57,7 +57,7 @@ public abstract class ToolCompatibilityHumanReviewPrepareTask extends DefaultTas
     @Optional
     public abstract Property<String> getCandidateRun();
 
-    @Option(option = "candidate-run", description = "Required saved prompted directory directly under build/tool-compatibility/.")
+    @Option(option = "candidate-run", description = "Required saved prompted directory directly under local/evidence/tool-compatibility/.")
     public void setCandidateRunOption(String value) {
         getCandidateRun().set(value);
     }

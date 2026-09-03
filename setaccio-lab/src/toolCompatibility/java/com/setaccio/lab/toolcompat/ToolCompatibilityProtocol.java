@@ -1,5 +1,6 @@
 package com.setaccio.lab.toolcompat;
 
+import com.setaccio.lab.evidence.EvidenceSuiteRoot;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +12,9 @@ final class ToolCompatibilityProtocol {
 
     static final int VERSION = 1;
     static final String SUITE = "ollama-tool-compatibility";
+    static final EvidenceSuiteRoot EVIDENCE_ROOT = EvidenceSuiteRoot.of("tool-compatibility");
+    static final EvidenceSuiteRoot HUMAN_REVIEW_ROOT =
+            EvidenceSuiteRoot.of("tool-compatibility-human-review");
     static final String PROVIDER = "ollama";
     static final String EXECUTION_ENGINE = "spring-ai-standard-tool-calling-advisor";
     static final String EXECUTION_STRATEGY = "sequential";

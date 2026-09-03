@@ -59,8 +59,8 @@ public final class LocalEvaluationBudgetComparisonRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --budget-64-run-dir <saved-build-directory> "
-                            + "--budget-256-run-dir <saved-build-directory>");
+                    "Expected --budget-64-run-dir <saved-evidence-directory> "
+                            + "--budget-256-run-dir <saved-evidence-directory>");
         }
     }
 }
