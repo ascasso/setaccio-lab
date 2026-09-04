@@ -9,6 +9,23 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Prepared an options memo for three recorded open decisions — explicit
+  reasoning policy in the existing chat matrix, Anthropic portability matrix,
+  Phase 5 answer matrix, and fact-check suites; whether the 2026-09-03 LFM
+  tool-capability diagnostic warrants any change to the closed Phase 1/Phase 2
+  status; and how to treat the second ignored-evidence loss recorded in the
+  Evidence Retention Status section. It verifies the two costs named for the
+  reasoning-policy decision against current source, finding the
+  `ChatGenerationOption`/`ChatProviderOptionSupport` deserialization risk
+  applies only to the chat matrix and Anthropic chat matrix suites (not
+  fact-check or the Phase 5 answer suite, whose raw row types do not carry
+  that class), and confirms by direct directory listing that no chat matrix,
+  Anthropic chat matrix, fact-check, Phase 5 R3/R5/R6, or vision-matrix
+  evidence is currently present on disk to be broken by either named cost.
+  Lays out options for each decision with their exact costs and does not
+  adopt, revise, or reject any of them. Recorded in
+  `docs/logs/2026-09-04-pending-decisions-options-memo.md`.
+
 - Completed the single protocol-v2 reasoning-default and execution-boundary
   diagnostic on 2026-09-04 from clean commit `acc3979` under Ollama `0.33.3`,
   retaining all 42 planned one-attempt rows with no failure, timeout, retry,
