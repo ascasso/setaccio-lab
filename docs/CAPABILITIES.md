@@ -235,6 +235,12 @@ reasoning presence. The full 42-row schedule is sequential at temperature
 `0.0`, seed `42`, `64` output tokens, `PT2M`, one attempt, and pull strategy
 `never`.
 
+Before either protocol allocates an evidence directory, resolved model
+identities must satisfy their assigned role: the subject must advertise
+thinking, the control must not, and the two must resolve to distinct
+installed artifacts. Any violation is rejected before allocation, so an
+invalid subject-versus-control pairing never produces a run.
+
 `thinkingDiagnosticVerify` and `thinkingDiagnosticReanalyze` inspect saved v1
 or v2 diagnostic evidence offline without starting Spring or contacting a
 provider. They dispatch by the raw protocol version: v1 retains its original

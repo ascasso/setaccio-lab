@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = 'com.setaccio'
-    version = '0.1.0-alpha.2'
+    version = '0.1.0'
 }
 
 subprojects {

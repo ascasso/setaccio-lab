@@ -227,6 +227,11 @@ No completed phase places a live model call in default tests or CI.
   measured pre-registered condition, policy pairs derived within a boundary,
   matching-policy boundary pairs derived across boundaries, and every tracked
   fixture scheduled once per arm in catalog order.
+- Cover role-assignment enforcement before any evidence directory is
+  allocated: a resolved subject that does not advertise thinking, a resolved
+  control that does, the same artifact resolved for both roles, and a missing
+  role are each rejected before the run executes; a subject that advertises
+  thinking paired with a distinct non-thinking control is accepted.
 - Cover diagnostic execution provider-free through injected fact-check and chat
   factories:
   all four content/reasoning outcome combinations, retention of failed rows
