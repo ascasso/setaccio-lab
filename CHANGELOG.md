@@ -230,6 +230,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- Enforced the thinking diagnostic's subject/control role assignment before any
+  evidence directory is allocated. `resolveIdentities` recorded each identity's
+  advertised thinking capability but never validated it against the assigned
+  role, so a subject that doesn't advertise thinking, a control that does, or
+  the same artifact resolved for both roles would still allocate an evidence
+  run whose subject-versus-non-thinking-control comparison was invalid.
+  `ThinkingDiagnosticModelInventory.requireDistinctRoleSatisfyingIdentities`
+  now runs first and rejects any of those three cases. No evidence was
+  allocated, read, changed, or published, and no provider was contacted.
+  Recorded in
+  `docs/logs/2026-09-04-thinking-diagnostic-role-capability-fix.md`.
+
 - Kept legacy `build/<suite>/<run-id>` evidence strictly read-only. Every
   offline reanalyzer now rejects it before it can rewrite a deterministic
   `SUMMARY.md`; verifiers, comparisons, and source-evidence consumers retain
