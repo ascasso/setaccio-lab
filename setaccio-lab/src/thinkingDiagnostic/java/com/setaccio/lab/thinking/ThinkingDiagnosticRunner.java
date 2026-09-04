@@ -2,6 +2,7 @@ package com.setaccio.lab.thinking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.setaccio.lab.chat.OllamaChatModelFactory;
 import com.setaccio.lab.evaluation.LocalFactCheckFixtureCatalog;
 import com.setaccio.lab.evaluation.LocalFactCheckJudgeModelFactory;
 import com.setaccio.lab.evaluation.LocalFactCheckPromptDefinition;
@@ -36,6 +37,7 @@ public final class ThinkingDiagnosticRunner {
         LocalFactCheckPromptDefinition promptDefinition = new LocalFactCheckPromptDefinition();
 
         LocalFactCheckJudgeModelFactory modelFactory = new LocalFactCheckJudgeModelFactory();
+        OllamaChatModelFactory chatModelFactory = new OllamaChatModelFactory();
         OllamaApi ollamaApi = modelFactory.createApi(
                 parsed.ollamaBaseUrl(), ThinkingDiagnosticProtocol.REQUEST_TIMEOUT);
 
@@ -51,6 +53,8 @@ public final class ThinkingDiagnosticRunner {
         try {
             ThinkingDiagnosticResult result = new ThinkingDiagnosticExecutor(
                     settings -> modelFactory.create(parsed.ollamaBaseUrl(), settings),
+                    (identity, settings, reasoningPolicy) -> chatModelFactory.createInvocation(
+                            ollamaApi, identity, settings, reasoningPolicy),
                     promptDefinition)
                     .execute(catalog, identities, ollamaVersion);
             requireUnchangedIdentities(identities, resolveIdentities(ollamaApi, parsed));

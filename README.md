@@ -87,6 +87,16 @@ boundary was exercised live, so the chat and answer-matrix empties are
 consistent with this mechanism but untested by it. See
 [`docs/logs/2026-09-03-thinking-diagnostic-run.md`](docs/logs/2026-09-03-thinking-diagnostic-run.md).
 
+A version-aware second diagnostic protocol is implemented to measure those two
+gaps without changing or reinterpreting the first run. Its fixed 64-token
+schedule adds explicit `PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED` subject
+arms at both the fact-check and provider-neutral chat boundaries, plus a
+`PROVIDER_DEFAULT` non-thinking chat control. Both boundaries receive the same
+rendered fact-check prompt. The v1 reader, verifier, analyzer, and report path
+remain available so the 2026-09-03 evidence can continue to verify and
+reanalyze byte-for-byte. No v2 live result is claimed before its separately
+recorded clean-baseline run.
+
 ### The tool-calling artifact rejects tool-bearing requests today
 
 Phase 1's 16 tool-compatibility rows and Phase 2's 32 interleaved attempts

@@ -280,16 +280,26 @@ reasoning explicitly enabled at a `64`-token budget, the artifact those suites
 used spent the whole budget on reasoning and returned empty content in five of
 six rows.
 
-Two follow-ups are therefore registered and unstarted. First, whether those
-suites should send an explicit policy, with the retained-manifest cost above.
-Second, whether a `PROVIDER_DEFAULT` arm and a chat-invocation-boundary arm are
-worth a second diagnostic: the retained runs sent no policy rather than an
-enabled one, and only the fact-check boundary was exercised live, so both links
-currently rest on documented framework behavior rather than measurement.
+The owner started the narrow second follow-up on 2026-09-04 without changing
+the closed suites. Protocol v2 is implemented with a pre-registered
+`PROVIDER_DEFAULT` arm and explicit `ENABLED`/`DISABLED` arms at both the
+fact-check and provider-neutral chat boundaries, all at `64` output tokens,
+plus a provider-default non-thinking chat control. Both boundaries receive the
+same rendered prompt. The execution boundary is recorded per arm and row, and
+policy-within-boundary plus matching-policy boundary pairs are derived from the
+recorded arms. Version-aware readers preserve the original v1 wire format,
+manifest engine and settings, analyzer rules, and report bytes.
 
-Changing any of that needs its own explicit scope start and its own evidence
-decision. Nothing here authorizes a rerun, repair, replacement, or reanalysis
-of any retained evidence, and no closeout is withdrawn.
+Until the separately authorized v2 run completes and verifies, the two links
+remain unmeasured and the 2026-09-03 limitations stand unchanged. The first
+follow-up — whether any closed suite should replace `PROVIDER_DEFAULT` with an
+explicit policy — remains deferred and is not decided by this implementation.
+
+Nothing in this v2 implementation authorizes changing a closed suite, rerunning,
+repairing, replacing, or reinterpreting retained evidence, or withdrawing a
+closeout. The explicit v1 compatibility acceptance is limited to provider-free
+verification and byte-identical summary regeneration against the preserved
+2026-09-03 diagnostic before the new run.
 
 ## Deferred Through the Current Roadmap
 

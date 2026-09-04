@@ -21,8 +21,10 @@ class ThinkingDiagnosticExecutorTest {
     void runsTheWholeLockedScheduleWithoutAnyProviderService() {
         ThinkingDiagnosticTestSupport.PolicyAwareChatModel model =
                 new ThinkingDiagnosticTestSupport.PolicyAwareChatModel();
+        ThinkingDiagnosticTestSupport.PolicyAwareChatFactory chat =
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory();
 
-        ThinkingDiagnosticResult result = execute(settings -> model);
+        ThinkingDiagnosticResult result = execute(settings -> model, chat);
 
         assertThat(result.rows()).hasSize(ThinkingDiagnosticProtocol.ROW_COUNT);
         assertThat(result.rows()).extracting(ThinkingDiagnosticRow::sequence)
@@ -30,35 +32,44 @@ class ThinkingDiagnosticExecutorTest {
                         result.orderedSchedule().stream()
                                 .map(ThinkingDiagnosticScheduleEntry::sequence).toList());
         assertThat(result.rows()).allSatisfy(row -> assertThat(row.attemptCount()).isEqualTo(1));
-        assertThat(model.observedPolicies()).hasSize(ThinkingDiagnosticProtocol.ROW_COUNT);
+        assertThat(model.observedPolicies()).hasSize(3 * LocalFactCheckFixtureCatalog.FIXTURE_COUNT);
+        assertThat(chat.observedPolicies()).hasSize(4 * LocalFactCheckFixtureCatalog.FIXTURE_COUNT);
     }
 
     @Test
     void sendsEachArmsExplicitReasoningPolicyAndRecordsItPerRow() {
         ThinkingDiagnosticTestSupport.PolicyAwareChatModel model =
                 new ThinkingDiagnosticTestSupport.PolicyAwareChatModel();
+        ThinkingDiagnosticTestSupport.PolicyAwareChatFactory chat =
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory();
 
-        ThinkingDiagnosticResult result = execute(settings -> model);
+        ThinkingDiagnosticResult result = execute(settings -> model, chat);
 
-        assertThat(model.observedPolicies()).doesNotContainNull();
         for (ThinkingDiagnosticRow row : result.rows()) {
             ThinkingDiagnosticArm arm = ThinkingDiagnosticProtocol.requireArm(row.armId());
             assertThat(row.requestedReasoningPolicy()).isEqualTo(arm.reasoningPolicy());
-            assertThat(row.reasoningPolicySupport()).isEqualTo(ChatReasoningSupport.APPLIED);
+            assertThat(row.reasoningPolicySupport()).isEqualTo(
+                    arm.reasoningPolicy() == ChatReasoningPolicy.PROVIDER_DEFAULT
+                            ? ChatReasoningSupport.NOT_REQUESTED : ChatReasoningSupport.APPLIED);
             assertThat(row.maxOutputTokens()).isEqualTo(arm.maxOutputTokens());
+            assertThat(row.executionBoundary()).isEqualTo(arm.executionBoundary());
         }
-        assertThat(model.observedPolicies().stream().distinct().toList())
+        assertThat(chat.observedPolicies().stream().distinct().toList())
                 .containsExactlyInAnyOrder(
-                        ThinkOption.ThinkBoolean.ENABLED, ThinkOption.ThinkBoolean.DISABLED);
+                        ChatReasoningPolicy.PROVIDER_DEFAULT,
+                        ChatReasoningPolicy.ENABLED,
+                        ChatReasoningPolicy.DISABLED);
+        assertThat(model.observedPolicies()).containsNull();
     }
 
     @Test
     void separatesEmptyContentWithThinkingFromEmptyContentWithoutIt() {
         ThinkingDiagnosticResult result = execute(
-                settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel());
+                settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel(),
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory());
 
-        List<ThinkingDiagnosticRow> enabled = rowsFor(result, "subject-thinking-enabled-64");
-        List<ThinkingDiagnosticRow> disabled = rowsFor(result, "subject-thinking-disabled-64");
+        List<ThinkingDiagnosticRow> enabled = rowsFor(result, "fact-check-subject-enabled-64");
+        List<ThinkingDiagnosticRow> disabled = rowsFor(result, "fact-check-subject-disabled-64");
 
         assertThat(enabled).allSatisfy(row -> {
             assertThat(row.outcome()).isEqualTo(ThinkingDiagnosticOutcome.EMPTY_CONTENT_WITH_THINKING);
@@ -81,7 +92,8 @@ class ThinkingDiagnosticExecutorTest {
     @Test
     void neverMergesReasoningIntoTheRecordedAssistantContent() {
         ThinkingDiagnosticResult result = execute(
-                settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel());
+                settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel(),
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory());
 
         assertThat(result.rows()).allSatisfy(row -> {
             if (row.thinking() != null) {
@@ -92,10 +104,15 @@ class ThinkingDiagnosticExecutorTest {
 
     @Test
     void classifiesContentAccompaniedByReasoningAsItsOwnOutcome() {
-        ThinkingDiagnosticResult result = execute(settings -> fixedModel(
-                ThinkingDiagnosticTestSupport.response("yes", "trace", "stop", 11, 3)));
+        ThinkingDiagnosticResult result = execute(
+                settings -> fixedModel(ThinkingDiagnosticTestSupport.response(
+                        "yes", "trace", "stop", 11, 3)),
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory());
 
-        assertThat(result.rows()).allSatisfy(row -> {
+        assertThat(result.rows().stream()
+                .filter(row -> row.executionBoundary()
+                        == ThinkingDiagnosticExecutionBoundary.FACT_CHECK_EVALUATOR)
+                .toList()).allSatisfy(row -> {
             assertThat(row.outcome()).isEqualTo(ThinkingDiagnosticOutcome.CONTENT_WITH_THINKING);
             assertThat(row.content()).isEqualTo("yes");
             assertThat(row.thinking()).isEqualTo("trace");
@@ -104,7 +121,11 @@ class ThinkingDiagnosticExecutorTest {
 
     @Test
     void retainsEveryFailedRowWithoutRetryingOrOmittingIt() {
-        ThinkingDiagnosticResult result = execute(settings -> failingModel());
+        ThinkingDiagnosticResult result = execute(
+                settings -> failingModel(),
+                (identity, settings, policy) -> request -> {
+                    throw new IllegalStateException("provider unavailable in this test");
+                });
 
         assertThat(result.rows()).hasSize(ThinkingDiagnosticProtocol.ROW_COUNT);
         assertThat(result.rows()).allSatisfy(row -> {
@@ -121,20 +142,52 @@ class ThinkingDiagnosticExecutorTest {
     @Test
     void recordsTheAdvertisedThinkingCapabilityPerModelRole() {
         ThinkingDiagnosticResult result = execute(
-                settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel());
+                settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel(),
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory());
 
-        assertThat(rowsFor(result, "subject-thinking-enabled-64"))
+        assertThat(rowsFor(result, "fact-check-subject-enabled-64"))
                 .allSatisfy(row -> assertThat(row.modelAdvertisesThinking()).isTrue());
-        assertThat(rowsFor(result, "control-thinking-disabled-64"))
+        assertThat(rowsFor(result, "chat-control-provider-default-64"))
                 .allSatisfy(row -> {
                     assertThat(row.modelAdvertisesThinking()).isFalse();
                     assertThat(row.modelRole()).isEqualTo(ThinkingDiagnosticModelRole.CONTROL);
-                    assertThat(row.requestedReasoningPolicy()).isEqualTo(ChatReasoningPolicy.DISABLED);
+                    assertThat(row.requestedReasoningPolicy())
+                            .isEqualTo(ChatReasoningPolicy.PROVIDER_DEFAULT);
                 });
     }
 
-    private ThinkingDiagnosticResult execute(ThinkingDiagnosticJudgeFactory factory) {
-        return new ThinkingDiagnosticExecutor(factory, ThinkingDiagnosticTestSupport.prompt())
+    @Test
+    void chatBoundaryUsesTheIdenticalRenderedFactCheckPromptAndCarriesNoJudgeVerdict() {
+        ThinkingDiagnosticTestSupport.PolicyAwareChatFactory chat =
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory();
+        ThinkingDiagnosticResult result = execute(
+                settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel(), chat);
+
+        List<ThinkingDiagnosticRow> chatRows = result.rows().stream()
+                .filter(row -> row.executionBoundary()
+                        == ThinkingDiagnosticExecutionBoundary.CHAT_INVOCATION)
+                .toList();
+        assertThat(chatRows).allSatisfy(row -> {
+            assertThat(row.documentBlake3()).hasSize(64);
+            assertThat(row.claimBlake3()).hasSize(64);
+            assertThat(row.expectedVerdict()).isNotNull();
+            assertThat(row.normalizedJudgeVerdict()).isNull();
+            assertThat(row.expectedVerdictMatched()).isNull();
+        });
+        assertThat(chat.observedPrompts()).containsExactlyElementsOf(
+                chatRows.stream().map(row -> {
+                    var fixture = catalog.require(row.fixtureId());
+                    return ThinkingDiagnosticTestSupport.prompt()
+                            .render(fixture.document(), fixture.claim());
+                }).toList());
+    }
+
+    private ThinkingDiagnosticResult execute(
+            ThinkingDiagnosticJudgeFactory factory,
+            ThinkingDiagnosticChatFactory chatFactory
+    ) {
+        return new ThinkingDiagnosticExecutor(
+                factory, chatFactory, ThinkingDiagnosticTestSupport.prompt())
                 .execute(catalog, ThinkingDiagnosticTestSupport.identities(), "0.33.2");
     }
 

@@ -14,6 +14,9 @@ public record ThinkingDiagnosticResult(
         int seed,
         int maxAttempts,
         long requestTimeoutMillis,
+        String promptDelivery,
+        String policyComparison,
+        String boundaryComparison,
         List<ThinkingDiagnosticArm> arms,
         List<ThinkingDiagnosticModelIdentity> modelIdentities,
         String ollamaVersion,
@@ -44,8 +47,15 @@ public record ThinkingDiagnosticResult(
         orderedSchedule = List.copyOf(
                 Objects.requireNonNull(orderedSchedule, "orderedSchedule must not be null"));
         rows = List.copyOf(Objects.requireNonNull(rows, "rows must not be null"));
-        if (protocolVersion != ThinkingDiagnosticProtocol.VERSION) {
-            throw new IllegalArgumentException("protocolVersion must be the locked diagnostic version");
+        if (!ThinkingDiagnosticProtocol.supportsVersion(protocolVersion)) {
+            throw new IllegalArgumentException("protocolVersion must be a supported diagnostic version");
+        }
+        if (protocolVersion == ThinkingDiagnosticProtocol.VERSION) {
+            promptDelivery = requireText(promptDelivery, "promptDelivery");
+            policyComparison = requireText(policyComparison, "policyComparison");
+            boundaryComparison = requireText(boundaryComparison, "boundaryComparison");
+        } else if (promptDelivery != null || policyComparison != null || boundaryComparison != null) {
+            throw new IllegalArgumentException("protocol v1 must not record v2 comparison settings");
         }
         if (maxAttempts != ThinkingDiagnosticProtocol.MAX_ATTEMPTS) {
             throw new IllegalArgumentException("maxAttempts must be exactly 1");

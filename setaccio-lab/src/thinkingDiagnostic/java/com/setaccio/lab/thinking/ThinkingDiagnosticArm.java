@@ -3,12 +3,14 @@ package com.setaccio.lab.thinking;
 import com.setaccio.lab.chat.ChatReasoningPolicy;
 import java.util.Objects;
 
-/** One pre-registered arm: a model, an explicit reasoning policy, and one output budget. */
+/** One pre-registered arm: a model, a named reasoning policy, a boundary, and one output budget. */
 public record ThinkingDiagnosticArm(
         String armId,
         ThinkingDiagnosticModelRole modelRole,
         ChatReasoningPolicy reasoningPolicy,
-        int maxOutputTokens
+        ThinkingDiagnosticExecutionBoundary executionBoundary,
+        int maxOutputTokens,
+        boolean measuredProviderDefault
 ) {
     public ThinkingDiagnosticArm {
         if (armId == null || !armId.matches("[a-z0-9]+(?:-[a-z0-9]+)*")) {
@@ -16,9 +18,11 @@ public record ThinkingDiagnosticArm(
         }
         modelRole = Objects.requireNonNull(modelRole, "modelRole must not be null");
         reasoningPolicy = Objects.requireNonNull(reasoningPolicy, "reasoningPolicy must not be null");
-        if (reasoningPolicy == ChatReasoningPolicy.PROVIDER_DEFAULT) {
+        executionBoundary = Objects.requireNonNull(
+                executionBoundary, "executionBoundary must not be null");
+        if ((reasoningPolicy == ChatReasoningPolicy.PROVIDER_DEFAULT) != measuredProviderDefault) {
             throw new IllegalArgumentException(
-                    "every diagnostic arm must state an explicit reasoning policy");
+                    "PROVIDER_DEFAULT is allowed only as an explicitly measured pre-registered condition");
         }
         if (maxOutputTokens < 1) {
             throw new IllegalArgumentException("maxOutputTokens must be positive");

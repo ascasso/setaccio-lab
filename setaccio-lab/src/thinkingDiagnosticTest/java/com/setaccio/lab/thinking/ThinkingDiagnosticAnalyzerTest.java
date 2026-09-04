@@ -19,7 +19,7 @@ class ThinkingDiagnosticAnalyzerTest {
         assertThat(analysis.valid()).isTrue();
         assertThat(analysis.armSummaries()).hasSize(ThinkingDiagnosticProtocol.ARMS.size());
         ThinkingDiagnosticAnalyzer.ArmSummary enabled = analysis.armSummaries().stream()
-                .filter(arm -> arm.armId().equals("subject-thinking-enabled-64"))
+                .filter(arm -> arm.armId().equals("fact-check-subject-enabled-64"))
                 .findFirst().orElseThrow();
         assertThat(enabled.rowCount()).isEqualTo(LocalFactCheckFixtureCatalog.FIXTURE_COUNT);
         assertThat(enabled.rowsWithThinking()).isEqualTo(LocalFactCheckFixtureCatalog.FIXTURE_COUNT);
@@ -66,7 +66,9 @@ class ThinkingDiagnosticAnalyzerTest {
         ThinkingDiagnosticResult drifted = new ThinkingDiagnosticResult(
                 complete.protocolVersion(), "other-provider", complete.endpointCategory(),
                 complete.executionStrategy(), complete.pullModelStrategy(), complete.temperature(),
-                complete.seed(), complete.maxAttempts(), complete.requestTimeoutMillis(), complete.arms(),
+                complete.seed(), complete.maxAttempts(), complete.requestTimeoutMillis(),
+                complete.promptDelivery(), complete.policyComparison(), complete.boundaryComparison(),
+                complete.arms(),
                 complete.modelIdentities(), complete.ollamaVersion(), "other-prompt",
                 complete.promptVersion(), complete.promptSha256(), complete.fixtureCatalogId(),
                 complete.fixtureCatalogVersion(), complete.fixtureCatalogSha256(),
@@ -124,6 +126,7 @@ class ThinkingDiagnosticAnalyzerTest {
     private ThinkingDiagnosticResult result() {
         return new ThinkingDiagnosticExecutor(
                 settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel(),
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory(),
                 ThinkingDiagnosticTestSupport.prompt())
                 .execute(catalog, ThinkingDiagnosticTestSupport.identities(), "0.33.2");
     }
@@ -135,7 +138,9 @@ class ThinkingDiagnosticAnalyzerTest {
         return new ThinkingDiagnosticResult(
                 source.protocolVersion(), source.provider(), source.endpointCategory(),
                 source.executionStrategy(), source.pullModelStrategy(), source.temperature(),
-                source.seed(), source.maxAttempts(), source.requestTimeoutMillis(), source.arms(),
+                source.seed(), source.maxAttempts(), source.requestTimeoutMillis(),
+                source.promptDelivery(), source.policyComparison(), source.boundaryComparison(),
+                source.arms(),
                 source.modelIdentities(), source.ollamaVersion(), source.promptId(),
                 source.promptVersion(), source.promptSha256(), source.fixtureCatalogId(),
                 source.fixtureCatalogVersion(), source.fixtureCatalogSha256(),
@@ -150,7 +155,8 @@ class ThinkingDiagnosticAnalyzerTest {
             int attemptCount
     ) {
         return new ThinkingDiagnosticRow(
-                source.sequence(), source.armId(), source.modelRole(), source.requestedModel(),
+                source.sequence(), source.armId(), source.executionBoundary(), source.modelRole(),
+                source.requestedModel(),
                 source.requestedReasoningPolicy(), source.reasoningPolicySupport(),
                 source.modelAdvertisesThinking(), source.maxOutputTokens(), source.seed(),
                 source.fixtureId(), source.pairId(), source.expectedVerdict(), documentBlake3,
@@ -163,7 +169,8 @@ class ThinkingDiagnosticAnalyzerTest {
 
     private static ThinkingDiagnosticRow failedRowWithoutError(ThinkingDiagnosticRow source) {
         return new ThinkingDiagnosticRow(
-                source.sequence(), source.armId(), source.modelRole(), source.requestedModel(),
+                source.sequence(), source.armId(), source.executionBoundary(), source.modelRole(),
+                source.requestedModel(),
                 source.requestedReasoningPolicy(), source.reasoningPolicySupport(),
                 source.modelAdvertisesThinking(), source.maxOutputTokens(), source.seed(),
                 source.fixtureId(), source.pairId(), source.expectedVerdict(), source.documentBlake3(),

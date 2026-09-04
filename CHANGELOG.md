@@ -9,6 +9,25 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Implemented protocol v2 for the explicitly started reasoning-default and
+  execution-boundary diagnostic without changing any closed suite. The fixed
+  42-row schedule runs the tracked six fixtures once through seven `64`-token
+  arms: subject `PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED` at both the
+  fact-check and provider-neutral chat boundaries, plus a provider-default
+  non-thinking chat control, at temperature `0.0`, seed `42`, `PT2M`, one
+  attempt, and no pull. Both boundaries receive the identical rendered
+  fact-check prompt. Execution boundary is recorded on every arm and row; chat
+  rows keep fixture hashes and expected verdict provenance but no normalized
+  judge verdict or expectation match. Provider default is accepted only as an
+  explicitly marked pre-registered measured condition. Version-aware raw
+  readers, manifest reconstruction, analyzers, and report rendering retain
+  protocol v1 compatibility, including its old arm/row wire shapes and
+  byte-identical summary regeneration. The Gradle task names and CLI options
+  are unchanged, default tests remain provider-free, and this implementation
+  makes no live observation, changes no retained closeout, and authorizes no
+  policy change in an existing suite. Recorded in
+  `docs/logs/2026-09-04-reasoning-default-boundary-implementation.md`.
+
 - Completed a small standalone LFM tool-capability diagnostic on 2026-09-03
   against the currently installed Phase 1/Phase 2 artifact
   `hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0` (full digest

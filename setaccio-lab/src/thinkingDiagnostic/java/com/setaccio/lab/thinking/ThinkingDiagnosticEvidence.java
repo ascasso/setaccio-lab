@@ -1,6 +1,5 @@
 package com.setaccio.lab.thinking;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.setaccio.lab.evaluation.LocalFactCheckFixtureCatalog;
@@ -30,6 +29,7 @@ public final class ThinkingDiagnosticEvidence {
     private final ObjectMapper objectMapper;
     private final EvidenceManifestStore manifestStore;
     private final EvidenceVerifier verifier;
+    private final ThinkingDiagnosticResultCodec resultCodec;
     private final ThinkingDiagnosticAnalyzer analyzer;
     private final ThinkingDiagnosticReport report;
 
@@ -40,6 +40,7 @@ public final class ThinkingDiagnosticEvidence {
         this.objectMapper = objectMapper;
         this.manifestStore = new EvidenceManifestStore(objectMapper);
         this.verifier = new EvidenceVerifier();
+        this.resultCodec = new ThinkingDiagnosticResultCodec(objectMapper);
         this.analyzer = new ThinkingDiagnosticAnalyzer(catalog);
         this.report = new ThinkingDiagnosticReport();
     }
@@ -60,7 +61,7 @@ public final class ThinkingDiagnosticEvidence {
         Path rawPath = root.resolve(ThinkingDiagnosticProtocol.RAW_FILENAME);
         byte[] rawJson;
         try {
-            rawJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsBytes(result);
+            rawJson = resultCodec.write(result);
         } catch (Exception exception) {
             throw new IllegalStateException("Failed to write raw thinking diagnostic result", exception);
         }
@@ -80,7 +81,7 @@ public final class ThinkingDiagnosticEvidence {
                 Instant.now(),
                 codeBaseline,
                 EvidenceProvenance.detectFrameworkVersions(),
-                ThinkingDiagnosticProtocol.EXECUTION_ENGINE,
+                ThinkingDiagnosticProtocol.manifestExecutionEngine(result.protocolVersion()),
                 ThinkingDiagnosticProtocol.manifestSettings(result),
                 List.of(rawArtifact, summaryArtifact));
         Path manifestPath = manifestStore.write(root, manifest);
@@ -146,9 +147,6 @@ public final class ThinkingDiagnosticEvidence {
                 failures.add("Thinking diagnostic manifest suite is not "
                         + ThinkingDiagnosticProtocol.SUITE + ".");
             }
-            if (!ThinkingDiagnosticProtocol.EXECUTION_ENGINE.equals(manifest.executionEngine())) {
-                failures.add("Thinking diagnostic manifest execution engine is unexpected.");
-            }
             rawArtifact = EvidenceFiles.singleArtifact(manifest.artifacts(), RAW_ROLE, failures,
                     "Thinking diagnostic manifest must declare exactly one raw-result artifact.");
             summaryArtifact = EvidenceFiles.singleArtifact(manifest.artifacts(), SUMMARY_ROLE, failures,
@@ -177,6 +175,11 @@ public final class ThinkingDiagnosticEvidence {
         ThinkingDiagnosticResult result = rawValid ? readRawResult(rawPath, failures) : null;
         String expectedSummary = null;
         if (result != null) {
+            if (manifest != null && !ThinkingDiagnosticProtocol.manifestExecutionEngine(
+                    result.protocolVersion()).equals(manifest.executionEngine())) {
+                failures.add("Thinking diagnostic manifest execution engine is unexpected for protocol v"
+                        + result.protocolVersion() + ".");
+            }
             validateSettings(manifest, result, failures);
             try {
                 ThinkingDiagnosticAnalyzer.Analysis analysis = analyzer.analyze(result);
@@ -230,9 +233,7 @@ public final class ThinkingDiagnosticEvidence {
 
     private ThinkingDiagnosticResult readRawResult(Path rawPath, List<String> failures) {
         try {
-            return objectMapper.readerFor(ThinkingDiagnosticResult.class)
-                    .with(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                    .readValue(rawPath.toFile());
+            return resultCodec.read(rawPath);
         } catch (Exception exception) {
             failures.add("Raw thinking diagnostic JSON could not be read: "
                     + EvidenceFiles.safeMessage(exception) + ".");

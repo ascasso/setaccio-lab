@@ -29,12 +29,42 @@ class ThinkingDiagnosticEvidenceTest {
         evidence.write(run, result(), BASELINE);
 
         assertThat(evidence.verify(run).failures()).isEmpty();
+        var raw = objectMapper.readTree(run.resolve(ThinkingDiagnosticProtocol.RAW_FILENAME).toFile());
+        assertThat(raw.path("protocolVersion").asInt()).isEqualTo(2);
+        assertThat(raw.path("rows")).allSatisfy(row ->
+                assertThat(row.path("executionBoundary").asText()).isNotBlank());
+        var manifest = objectMapper.readTree(run.resolve("manifest.json").toFile());
+        assertThat(manifest.path("executionEngine").asText())
+                .isEqualTo(ThinkingDiagnosticProtocol.MANIFEST_EXECUTION_ENGINE);
+        assertThat(manifest.path("settings").path("reasoningPolicySource").asText())
+                .isEqualTo("pre-registered-per-arm-including-provider-default");
+        assertThat(manifest.path("settings").path("arms")).allSatisfy(arm ->
+                assertThat(arm.path("executionBoundary").asText()).isNotBlank());
         String summaryBefore = Files.readString(run.resolve(ThinkingDiagnosticEvidence.SUMMARY_FILENAME));
         assertThat(evidence.reanalyze(run).failures()).isEmpty();
         assertThat(Files.readString(run.resolve(ThinkingDiagnosticEvidence.SUMMARY_FILENAME)))
                 .isEqualTo(summaryBefore);
         assertThat(Files.list(run).map(path -> path.getFileName().toString()).sorted().toList())
                 .containsExactly("SUMMARY.md", "manifest.json", "thinking-diagnostic-results.json");
+    }
+
+    @Test
+    void readsVerifiesAndReanalyzesLegacyV1EvidenceWithoutChangingItsWireShape(
+            @TempDir Path root
+    ) throws IOException {
+        Path run = Files.createDirectory(root.resolve("2026-09-03-v1-thinking"));
+        ThinkingDiagnosticEvidence evidence = evidence();
+
+        evidence.write(run, ThinkingDiagnosticTestSupport.legacyResult(), BASELINE);
+
+        String raw = Files.readString(run.resolve(ThinkingDiagnosticProtocol.RAW_FILENAME));
+        String summary = Files.readString(run.resolve(ThinkingDiagnosticEvidence.SUMMARY_FILENAME));
+        assertThat(raw).doesNotContain("executionBoundary", "measuredProviderDefault",
+                "promptDelivery", "policyComparison", "boundaryComparison");
+        assertThat(evidence.verify(run).failures()).isEmpty();
+        assertThat(evidence.reanalyze(run).failures()).isEmpty();
+        assertThat(Files.readString(run.resolve(ThinkingDiagnosticEvidence.SUMMARY_FILENAME)))
+                .isEqualTo(summary);
     }
 
     @Test
@@ -93,6 +123,7 @@ class ThinkingDiagnosticEvidenceTest {
     private ThinkingDiagnosticResult result() {
         return new ThinkingDiagnosticExecutor(
                 settings -> new ThinkingDiagnosticTestSupport.PolicyAwareChatModel(),
+                new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory(),
                 ThinkingDiagnosticTestSupport.prompt())
                 .execute(catalog, ThinkingDiagnosticTestSupport.identities(), "0.33.2");
     }

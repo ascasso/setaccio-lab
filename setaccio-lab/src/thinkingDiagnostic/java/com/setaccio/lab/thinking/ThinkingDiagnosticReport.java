@@ -46,7 +46,14 @@ public final class ThinkingDiagnosticReport {
         out.append("- Fixture catalog: `").append(result.fixtureCatalogId()).append("` version `")
                 .append(result.fixtureCatalogVersion()).append("` (`")
                 .append(result.fixtureCatalogSha256()).append("`)\n");
-        out.append("- Reasoning policy source: `explicit-per-arm`\n");
+        out.append("- Reasoning policy source: `")
+                .append(ThinkingDiagnosticProtocol.reasoningPolicySource(result.arms()))
+                .append("`\n");
+        if (result.protocolVersion() == ThinkingDiagnosticProtocol.VERSION) {
+            out.append("- Prompt delivery: `").append(result.promptDelivery()).append("`\n");
+            out.append("- Policy comparison: `").append(result.policyComparison()).append("`\n");
+            out.append("- Boundary comparison: `").append(result.boundaryComparison()).append("`\n");
+        }
         out.append("- Temperature: `").append(result.temperature()).append("`; seed: `")
                 .append(result.seed()).append("`\n");
         out.append("- Attempt policy: exactly ").append(result.maxAttempts())
@@ -55,11 +62,19 @@ public final class ThinkingDiagnosticReport {
         out.append("- Retained rows: ").append(result.rows().size()).append("\n");
 
         out.append("\n## Arms\n\n");
-        out.append("| Arm | Model role | Reasoning policy | Budget | Rows | Content | Thinking | At budget | Evaluated tokens |\n");
-        out.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        if (result.protocolVersion() == ThinkingDiagnosticProtocol.LEGACY_VERSION) {
+            out.append("| Arm | Model role | Reasoning policy | Budget | Rows | Content | Thinking | At budget | Evaluated tokens |\n");
+            out.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        } else {
+            out.append("| Arm | Execution boundary | Model role | Reasoning policy | Budget | Rows | Content | Thinking | At budget | Evaluated tokens |\n");
+            out.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |\n");
+        }
         for (ThinkingDiagnosticAnalyzer.ArmSummary arm : analysis.armSummaries()) {
-            out.append("| `").append(arm.armId()).append("` | `")
-                    .append(arm.modelRole().name()).append("` | `")
+            out.append("| `").append(arm.armId()).append("` | ");
+            if (result.protocolVersion() == ThinkingDiagnosticProtocol.VERSION) {
+                out.append('`').append(arm.executionBoundary().id()).append("` | ");
+            }
+            out.append('`').append(arm.modelRole().name()).append("` | `")
                     .append(arm.reasoningPolicy()).append("` | ")
                     .append(arm.maxOutputTokens()).append(" | ")
                     .append(arm.rowCount()).append(" | ")
@@ -83,12 +98,23 @@ public final class ThinkingDiagnosticReport {
         }
 
         out.append("\n## Retained evidence\n\n");
-        out.append("The ignored raw artifact retains, for every row, the assistant content and any"
-                + " reasoning field as two separate values, the finish reason, the evaluated"
-                + " output-token count, the requested reasoning policy, whether the artifact"
-                + " advertises the thinking capability, and the classified outcome. Recorded"
-                + " content, reasoning text, and evaluator output are never copied into tracked"
-                + " files.\n");
+        if (result.protocolVersion() == ThinkingDiagnosticProtocol.LEGACY_VERSION) {
+            out.append("The ignored raw artifact retains, for every row, the assistant content and any"
+                    + " reasoning field as two separate values, the finish reason, the evaluated"
+                    + " output-token count, the requested reasoning policy, whether the artifact"
+                    + " advertises the thinking capability, and the classified outcome. Recorded"
+                    + " content, reasoning text, and evaluator output are never copied into tracked"
+                    + " files.\n");
+        } else {
+            out.append("The ignored raw artifact retains, for every row, the assistant content and any"
+                    + " reasoning field as two separate values, the finish reason, the evaluated"
+                    + " output-token count, the requested reasoning policy, the pre-registered"
+                    + " execution boundary, whether the artifact advertises the thinking capability,"
+                    + " and the classified outcome. Chat-boundary rows retain the fixture identities"
+                    + " and expected verdict as input provenance, but record no normalized judge"
+                    + " verdict or expectation match. Recorded content, reasoning text, and evaluator"
+                    + " output are never copied into tracked files.\n");
+        }
 
         out.append("\n## Interpretation boundary\n\n");
         out.append("This records the shape of provider responses under one fixed prompt, fixture"

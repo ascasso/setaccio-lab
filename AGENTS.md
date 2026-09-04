@@ -460,6 +460,16 @@ This repo was bootstrapped from the Setaccio monorepo but has been intentionally
   boundary was exercised live. No quality, factuality, reliability, ranking, or
   model-selection claim follows, no closeout is withdrawn, and no rerun of
   retained evidence is authorized.
+- A version-aware protocol v2 is implemented for the separately started
+  reasoning-default and execution-boundary diagnostic. It preserves v1 reading,
+  exact manifest reconstruction, deterministic analysis, and report bytes, and
+  locks seven `64`-token arms over the same six fixtures: subject
+  `PROVIDER_DEFAULT`/`ENABLED`/`DISABLED` at both the fact-check and
+  provider-neutral chat boundaries, plus a provider-default non-thinking chat
+  control. The identical rendered fact-check prompt is sent through both
+  boundaries; chat rows keep fixture hashes and expected-verdict provenance but
+  no judge verdict. The implementation alone makes no live observation and does
+  not change any closed suite's `PROVIDER_DEFAULT` policy.
 - A small standalone diagnostic on 2026-09-03 tested the currently installed
   Phase 1/Phase 2 artifact
   (`hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0`, digest

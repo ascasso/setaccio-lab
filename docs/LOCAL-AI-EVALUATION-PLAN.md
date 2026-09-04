@@ -220,6 +220,21 @@ work, so the future budget experiment does not need another local-call or
 local-run approval once its implementation scope is explicitly started. Its
 paired-evidence and clean-baseline safeguards remain unchanged.
 
+### Separately started reasoning-default and boundary diagnostic
+
+The 2026-09-04 successor diagnostic is separate from A5, A6, and the completed
+output-budget work. Its version-aware protocol preserves the first reasoning
+diagnostic and pre-registers one new 42-row schedule at `64` tokens: the subject
+under `PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED` at both the fact-check and
+provider-neutral chat boundaries, plus a provider-default non-thinking chat
+control. Both boundaries receive the identical rendered prompt. Within-boundary
+policy contrast is controlled; matching-policy boundary contrast is controlled
+for the prompt and recorded settings, while remaining descriptive for observed
+runtime behavior. Chat rows keep fixture identity and expected-verdict
+provenance but intentionally carry no evaluator verdict. This does not rerun,
+repair, replace, reanalyze, or reinterpret A5 or any Phase 4 evidence and does
+not decide whether a closed suite should change its reasoning policy.
+
 Testcontainers disposition for this cycle: **defer**. Host-Ollama execution,
 provenance, and offline verification worked; containerization would test model
 provisioning and service-connection wiring, not the observed verdict-yield
