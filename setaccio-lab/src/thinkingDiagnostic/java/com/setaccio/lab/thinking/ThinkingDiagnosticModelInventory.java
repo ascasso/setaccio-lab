@@ -62,4 +62,50 @@ public final class ThinkingDiagnosticModelInventory {
                 .map(value -> value.toLowerCase(Locale.ROOT))
                 .anyMatch("thinking"::equals);
     }
+
+    /**
+     * Confirms the resolved subject and control satisfy their assigned roles and are two
+     * distinct installed artifacts, before any evidence directory is allocated or the run
+     * executes. The subject-versus-non-thinking-control comparison this diagnostic exists to
+     * make is only valid when the subject advertises thinking, the control does not, and the
+     * two are not the same artifact under different tags.
+     */
+    public static void requireDistinctRoleSatisfyingIdentities(
+            Map<ThinkingDiagnosticModelRole, ThinkingDiagnosticModelIdentity> identities
+    ) {
+        ThinkingDiagnosticModelIdentity subject = requirePresent(
+                identities, ThinkingDiagnosticModelRole.SUBJECT);
+        ThinkingDiagnosticModelIdentity control = requirePresent(
+                identities, ThinkingDiagnosticModelRole.CONTROL);
+        requireSatisfiesRole(subject, true);
+        requireSatisfiesRole(control, false);
+        if (subject.digest().equals(control.digest())) {
+            throw new ThinkingDiagnosticModelUnavailableException(
+                    "Subject and control must resolve to different installed artifacts; both resolved "
+                            + "to digest " + subject.digest());
+        }
+    }
+
+    private static ThinkingDiagnosticModelIdentity requirePresent(
+            Map<ThinkingDiagnosticModelRole, ThinkingDiagnosticModelIdentity> identities,
+            ThinkingDiagnosticModelRole role
+    ) {
+        ThinkingDiagnosticModelIdentity identity = identities.get(role);
+        if (identity == null) {
+            throw new IllegalArgumentException("Missing resolved model identity for role " + role);
+        }
+        return identity;
+    }
+
+    private static void requireSatisfiesRole(
+            ThinkingDiagnosticModelIdentity identity, boolean expectedAdvertisesThinking
+    ) {
+        if (identity.advertisesThinking() != expectedAdvertisesThinking) {
+            throw new ThinkingDiagnosticModelUnavailableException(
+                    identity.role() + " model " + identity.normalizedInstalledName() + " must "
+                            + (expectedAdvertisesThinking ? "" : "not ")
+                            + "advertise the thinking capability for this role, but advertisesThinking="
+                            + identity.advertisesThinking());
+        }
+    }
 }

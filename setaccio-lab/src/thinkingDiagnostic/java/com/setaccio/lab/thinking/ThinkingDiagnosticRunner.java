@@ -81,6 +81,7 @@ public final class ThinkingDiagnosticRunner {
                 ollamaApi, ThinkingDiagnosticModelRole.SUBJECT, parsed.subjectModel()));
         identities.put(ThinkingDiagnosticModelRole.CONTROL, resolve(
                 ollamaApi, ThinkingDiagnosticModelRole.CONTROL, parsed.controlModel()));
+        ThinkingDiagnosticModelInventory.requireDistinctRoleSatisfyingIdentities(identities);
         return identities;
     }
 
