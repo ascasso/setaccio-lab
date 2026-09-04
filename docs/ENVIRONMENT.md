@@ -1062,7 +1062,10 @@ rendered fact-check prompt. Temperature is `0.0`, seed `42`, timeout `PT2M`,
 the attempt limit is one, and pull strategy is `never`. The runner
 requires a clean worktree at a full Git commit, resolves both full immutable
 digests and their advertised capabilities before allocation, and re-checks both
-identities and the Git baseline before writing evidence.
+identities and the Git baseline before writing evidence. Before any evidence
+directory is allocated, it also requires that the resolved subject advertises
+thinking, the resolved control does not, and the two resolve to distinct
+digests, rejecting the run otherwise.
 
 Offline inspection is provider-free and never starts Spring:
 

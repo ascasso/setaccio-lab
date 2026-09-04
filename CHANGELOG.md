@@ -7,6 +7,13 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-04
+
+First tagged release. Everything below was previously recorded under
+`[Unreleased]`; nothing in this cut reruns, repairs, replaces, reanalyzes, or
+publishes any retained evidence, and no closeout is withdrawn. Recorded in
+`docs/logs/2026-09-04-release-0.1.0.md`.
+
 ### Added
 
 - Recorded the project owner's decisions on the three items raised in the
@@ -229,6 +236,18 @@ and this project follows [Semantic Versioning](https://semver.org/).
   and establishes no embedding quality, semantic relevance, or model ranking.
 
 ### Fixed
+
+- Enforced the thinking diagnostic's subject/control role assignment before any
+  evidence directory is allocated. `resolveIdentities` recorded each identity's
+  advertised thinking capability but never validated it against the assigned
+  role, so a subject that doesn't advertise thinking, a control that does, or
+  the same artifact resolved for both roles would still allocate an evidence
+  run whose subject-versus-non-thinking-control comparison was invalid.
+  `ThinkingDiagnosticModelInventory.requireDistinctRoleSatisfyingIdentities`
+  now runs first and rejects any of those three cases. No evidence was
+  allocated, read, changed, or published, and no provider was contacted.
+  Recorded in
+  `docs/logs/2026-09-04-thinking-diagnostic-role-capability-fix.md`.
 
 - Kept legacy `build/<suite>/<run-id>` evidence strictly read-only. Every
   offline reanalyzer now rejects it before it can rewrite a deterministic
