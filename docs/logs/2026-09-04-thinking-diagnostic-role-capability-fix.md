@@ -27,14 +27,21 @@ subject and control resolve to the same digest, and throws
 ## Verification
 
 `ThinkingDiagnosticModelInventoryTest` (new, provider-free) covers all four
-rejection cases and the accepting case. Ran
-`./gradlew :setaccio-core:test :setaccio-lab:test :setaccio-core:build :setaccio-lab:build :setaccio-testcontainers:build --rerun-tasks`;
+rejection cases and the accepting case; it is not reached by `test` or `check`
+because `thinkingDiagnosticTest` is a standalone task
+(`shouldRunAfter tasks.named('test')` only, no `check.dependsOn` link), so it
+must be named explicitly. Ran
+`./gradlew :setaccio-core:test :setaccio-lab:test :setaccio-lab:thinkingDiagnosticTest :setaccio-core:build :setaccio-lab:build :setaccio-testcontainers:build --rerun-tasks`;
 all tasks completed successfully, offline, with no Ollama, Anthropic, or other
 provider contacted. Ran `git diff --check`.
 
 ## What this does not do
 
 No evidence directory was allocated, read, changed, reanalyzed, or published.
-No model was pulled or invoked. No closed suite, closeout, or retained
-evidence was touched — the thinking diagnostic itself has no formal evidence
-on disk to affect. No release, tag, or push occurred.
+No model was pulled or invoked, and no closed suite, closeout, or retained
+evidence was touched by this fix or this record. This suite does hold retained
+evidence on disk today —
+`local/evidence/thinking-diagnostic/2026-09-03-thinking-empty-content/` and
+`local/evidence/thinking-diagnostic/2026-09-04-reasoning-default-boundaries/`
+— and this record neither reads, verifies, reanalyzes, nor otherwise touches
+either run. No release, tag, or push occurred.
