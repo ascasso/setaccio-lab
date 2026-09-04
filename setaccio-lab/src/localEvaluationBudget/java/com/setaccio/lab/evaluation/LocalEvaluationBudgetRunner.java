@@ -182,8 +182,8 @@ public final class LocalEvaluationBudgetRunner {
             return new IllegalArgumentException(
                     "Expected --ollama-base-url <explicit-loopback-url> "
                             + "--judge-model <installed-tag> "
-                            + "--output-dir-64 <new-dated-build-directory> "
-                            + "--output-dir-256 <new-dated-build-directory>; "
+                            + "--output-dir-64 <new-dated-evidence-directory> "
+                            + "--output-dir-256 <new-dated-evidence-directory>; "
                             + "F1 fixes max tokens to 64 and 256 and timeout to PT2M");
         }
     }

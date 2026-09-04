@@ -88,7 +88,7 @@ class LocalEvaluationExecutorTest {
             }
         };
         return new LocalEvaluationPreflight.Prepared(
-                Path.of("build/evaluation-matrix/2026-08-03-executor-test"),
+                Path.of("local/evidence/evaluation-matrix/2026-08-03-executor-test"),
                 LocalEvaluationProtocol.settings("judge-model", 64, Duration.ofSeconds(30)),
                 LocalEvaluationTestFixtures.MODEL_IDENTITY,
                 contract,

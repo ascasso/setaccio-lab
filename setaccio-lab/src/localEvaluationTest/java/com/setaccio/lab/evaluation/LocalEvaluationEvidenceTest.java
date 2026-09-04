@@ -200,13 +200,13 @@ class LocalEvaluationEvidenceTest {
         assertThatThrownBy(() -> LocalEvaluationOfflineRunner.resolveRunDirectory(
                 temporaryDirectory.toString()))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Run directory must be directly under build/evaluation-matrix/.");
+                .hasMessage("Run directory must be directly under local/evidence/evaluation-matrix/ (or legacy build/evaluation-matrix/ for already-saved evidence).");
     }
 
     @Test
     void offlineRunnerVerifiesAndReanalyzesSavedEvidenceWithoutStartingSpring() throws Exception {
         Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/evaluation-matrix");
+        Path evidenceRoot = projectDirectory.resolve("local/evidence/evaluation-matrix");
         Files.createDirectories(evidenceRoot);
         Path runDirectory = Files.createDirectory(evidenceRoot.resolve(
                 "offline-test-" + UUID.randomUUID()));

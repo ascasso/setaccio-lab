@@ -10,9 +10,9 @@ class ToolCompatibilityCohortFrontierRunnerArgumentsTest {
     @Test
     void requiresExactlyOneTrimmedSavedCohortDirectory() {
         assertThat(ToolCompatibilityCohortFrontierRunner.Arguments.parse(new String[] {
-                "--run-dir", "build/tool-compatibility/2026-08-24-approved-cohort"
+                "--run-dir", "local/evidence/tool-compatibility/2026-08-24-approved-cohort"
         }).runDirectory())
-                .isEqualTo("build/tool-compatibility/2026-08-24-approved-cohort");
+                .isEqualTo("local/evidence/tool-compatibility/2026-08-24-approved-cohort");
 
         assertThatThrownBy(() -> ToolCompatibilityCohortFrontierRunner.Arguments.parse(null))
                 .isInstanceOf(IllegalArgumentException.class)

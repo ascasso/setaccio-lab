@@ -10,20 +10,20 @@ class ToolCompatibilityPromptMatrixComparisonRunnerArgumentsTest {
     @Test
     void requiresBothSavedRunsExactlyOnce() {
         assertThat(ToolCompatibilityPromptMatrixComparisonRunner.Arguments.parse(new String[] {
-                "--candidate-run", "build/tool-compatibility/2026-08-21-prompted",
-                "--baseline-run", "build/tool-compatibility/2026-08-21-baseline"
+                "--candidate-run", "local/evidence/tool-compatibility/2026-08-21-prompted",
+                "--baseline-run", "local/evidence/tool-compatibility/2026-08-21-baseline"
         })).isEqualTo(new ToolCompatibilityPromptMatrixComparisonRunner.Arguments(
-                "build/tool-compatibility/2026-08-21-baseline",
-                "build/tool-compatibility/2026-08-21-prompted"));
+                "local/evidence/tool-compatibility/2026-08-21-baseline",
+                "local/evidence/tool-compatibility/2026-08-21-prompted"));
 
         assertThatThrownBy(() -> ToolCompatibilityPromptMatrixComparisonRunner.Arguments.parse(new String[] {
-                "--baseline-run", "build/tool-compatibility/2026-08-21-baseline",
-                "--candidate-run", "build/tool-compatibility/2026-08-21-prompted",
-                "--candidate-run", "build/tool-compatibility/2026-08-21-other"
+                "--baseline-run", "local/evidence/tool-compatibility/2026-08-21-baseline",
+                "--candidate-run", "local/evidence/tool-compatibility/2026-08-21-prompted",
+                "--candidate-run", "local/evidence/tool-compatibility/2026-08-21-other"
         })).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> ToolCompatibilityPromptMatrixComparisonRunner.Arguments.parse(new String[] {
-                "--baseline-run", " build/tool-compatibility/2026-08-21-baseline ",
-                "--candidate-run", "build/tool-compatibility/2026-08-21-prompted"
+                "--baseline-run", " local/evidence/tool-compatibility/2026-08-21-baseline ",
+                "--candidate-run", "local/evidence/tool-compatibility/2026-08-21-prompted"
         })).isInstanceOf(IllegalArgumentException.class);
     }
 }

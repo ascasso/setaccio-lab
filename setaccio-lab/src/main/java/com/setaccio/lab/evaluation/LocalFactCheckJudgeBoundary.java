@@ -1,5 +1,9 @@
 package com.setaccio.lab.evaluation;
 
+import com.setaccio.lab.chat.ChatReasoningPolicy;
+import com.setaccio.lab.chat.ChatReasoningSupport;
+import com.setaccio.lab.chat.ChatResponseCapture;
+import com.setaccio.lab.chat.OllamaReasoningOptions;
 import java.net.SocketTimeoutException;
 import java.net.http.HttpTimeoutException;
 import java.util.Collections;
@@ -29,20 +33,36 @@ public final class LocalFactCheckJudgeBoundary {
     private final ChatModel judgeModel;
     private final LocalFactCheckJudgeSettings settings;
     private final LocalFactCheckPromptDefinition promptDefinition;
+    private final ChatReasoningPolicy reasoningPolicy;
 
     public LocalFactCheckJudgeBoundary(
             ChatModel judgeModel,
             LocalFactCheckJudgeSettings settings,
             LocalFactCheckPromptDefinition promptDefinition
     ) {
+        this(judgeModel, settings, promptDefinition, ChatReasoningPolicy.PROVIDER_DEFAULT);
+    }
+
+    /**
+     * The reasoning policy is explicit rather than inherited. {@code PROVIDER_DEFAULT} preserves
+     * the behavior every existing fact-check run used: no policy is sent and the model's own
+     * default applies.
+     */
+    public LocalFactCheckJudgeBoundary(
+            ChatModel judgeModel,
+            LocalFactCheckJudgeSettings settings,
+            LocalFactCheckPromptDefinition promptDefinition,
+            ChatReasoningPolicy reasoningPolicy
+    ) {
         this.judgeModel = Objects.requireNonNull(judgeModel, "judgeModel must not be null");
         this.settings = Objects.requireNonNull(settings, "settings must not be null");
         this.promptDefinition = Objects.requireNonNull(promptDefinition, "promptDefinition must not be null");
+        this.reasoningPolicy = Objects.requireNonNull(reasoningPolicy, "reasoningPolicy must not be null");
     }
 
     public LocalFactCheckJudgeResult evaluate(LocalFactCheckFixture fixture) {
         Objects.requireNonNull(fixture, "fixture must not be null");
-        RecordingChatModel recordingModel = new RecordingChatModel(judgeModel, settings);
+        RecordingChatModel recordingModel = new RecordingChatModel(judgeModel, settings, reasoningPolicy);
         ChatClient.Builder chatClientBuilder = ChatClient.builder(recordingModel)
                 .defaultOptions(settings.ollamaOptions().mutate());
         FactCheckingEvaluator evaluator = FactCheckingEvaluator.builder(chatClientBuilder)
@@ -93,7 +113,8 @@ public final class LocalFactCheckJudgeBoundary {
                 invocation.totalTokens(),
                 invocation.latencyMillis(),
                 invocation.attemptCount(),
-                null);
+                null,
+                invocation.capture());
     }
 
     private LocalFactCheckJudgeResult failed(
@@ -118,7 +139,8 @@ public final class LocalFactCheckJudgeBoundary {
                 invocation.totalTokens(),
                 invocation.latencyMillis(),
                 invocation.attemptCount(),
-                error);
+                error,
+                invocation.capture());
     }
 
     private static boolean expectedVerdictMatched(
@@ -176,15 +198,21 @@ public final class LocalFactCheckJudgeBoundary {
 
         private final ChatModel delegate;
         private final LocalFactCheckJudgeSettings settings;
+        private final ChatReasoningPolicy reasoningPolicy;
         private final OllamaChatOptions options;
         private final AtomicInteger attemptCount = new AtomicInteger();
         private final AtomicReference<RecordedInvocation> observation = new AtomicReference<>(
                 RecordedInvocation.notStarted());
 
-        private RecordingChatModel(ChatModel delegate, LocalFactCheckJudgeSettings settings) {
+        private RecordingChatModel(
+                ChatModel delegate,
+                LocalFactCheckJudgeSettings settings,
+                ChatReasoningPolicy reasoningPolicy
+        ) {
             this.delegate = delegate;
             this.settings = settings;
-            this.options = settings.ollamaOptions();
+            this.reasoningPolicy = reasoningPolicy;
+            this.options = OllamaReasoningOptions.withPolicy(settings.ollamaOptions(), reasoningPolicy);
         }
 
         @Override
@@ -194,7 +222,8 @@ public final class LocalFactCheckJudgeBoundary {
             if (currentAttempt > settings.maxAttempts()) {
                 IllegalStateException exception = new IllegalStateException(
                         "Fact-check judge exceeded the explicit one-attempt policy");
-                observation.set(RecordedInvocation.failed(elapsedMillis(startedNanos), currentAttempt));
+                observation.set(RecordedInvocation.failed(
+                        elapsedMillis(startedNanos), currentAttempt, reasoningPolicy));
                 throw exception;
             }
 
@@ -204,12 +233,14 @@ public final class LocalFactCheckJudgeBoundary {
                 observation.set(RecordedInvocation.completed(
                         response,
                         elapsedMillis(startedNanos),
-                        currentAttempt));
+                        currentAttempt,
+                        reasoningPolicy));
                 return response;
             } catch (RuntimeException exception) {
                 observation.set(RecordedInvocation.failed(
                         elapsedMillis(startedNanos),
-                        currentAttempt));
+                        currentAttempt,
+                        reasoningPolicy));
                 throw exception;
             }
         }
@@ -232,22 +263,33 @@ public final class LocalFactCheckJudgeBoundary {
             Integer completionTokens,
             Integer totalTokens,
             long latencyMillis,
-            int attemptCount
+            int attemptCount,
+            ChatResponseCapture capture
     ) {
         private static RecordedInvocation notStarted() {
-            return new RecordedInvocation(false, null, null, null, null, null, 0, 0);
+            return new RecordedInvocation(false, null, null, null, null, null, 0, 0, null);
         }
 
-        private static RecordedInvocation failed(long latencyMillis, int attemptCount) {
-            return new RecordedInvocation(false, null, null, null, null, null, latencyMillis, attemptCount);
+        private static RecordedInvocation failed(
+                long latencyMillis,
+                int attemptCount,
+                ChatReasoningPolicy reasoningPolicy
+        ) {
+            return new RecordedInvocation(
+                    false, null, null, null, null, null, latencyMillis, attemptCount,
+                    ChatResponseCapture.unavailable(
+                            reasoningPolicy, OllamaReasoningOptions.support(reasoningPolicy)));
         }
 
-        private static RecordedInvocation completed(ChatResponse response, long latencyMillis, int attemptCount) {
-            String rawResponse = response == null
-                    || response.getResult() == null
-                    || response.getResult().getOutput() == null
-                    ? null
-                    : response.getResult().getOutput().getText();
+        private static RecordedInvocation completed(
+                ChatResponse response,
+                long latencyMillis,
+                int attemptCount,
+                ChatReasoningPolicy reasoningPolicy
+        ) {
+            ChatReasoningSupport support = OllamaReasoningOptions.support(reasoningPolicy);
+            ChatResponseCapture capture = ChatResponseCapture.from(response, reasoningPolicy, support);
+            String rawResponse = capture.content();
             ChatResponseMetadata metadata = response == null ? null : response.getMetadata();
             Usage usage = metadata == null ? null : metadata.getUsage();
             boolean usageAvailable = usage != null && !(usage instanceof EmptyUsage);
@@ -266,7 +308,8 @@ public final class LocalFactCheckJudgeBoundary {
                     usageAvailable ? usage.getCompletionTokens() : null,
                     usageAvailable ? usage.getTotalTokens() : null,
                     latencyMillis,
-                    attemptCount);
+                    attemptCount,
+                    capture);
         }
 
         private static Map<String, Object> captureAttributes(ChatResponseMetadata metadata) {

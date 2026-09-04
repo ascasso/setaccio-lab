@@ -35,7 +35,7 @@ actual human review.
 - Keep source images, raw responses, reference observations, expected concepts,
   unsupported-detail notes, filenames, and local paths private.
 - Edit only the ignored worksheet under
-  `setaccio-lab/build/vision-human-review/`.
+  `setaccio-lab/local/evidence/vision-human-review/`.
 - Do not move the worksheet into tracked documentation.
 
 **Workload for the documented locked pair (Prompt v1 vs v2):**
@@ -66,8 +66,8 @@ which private evidence to compare.
 
 ```bash
 ls -d \
-  setaccio-lab/build/vision-matrix/2026-07-25-controlled-four-case \
-  setaccio-lab/build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
+  setaccio-lab/local/evidence/vision-matrix/2026-07-25-controlled-four-case \
+  setaccio-lab/local/evidence/vision-matrix/2026-07-26-prompt-v2-controlled-four-case
 ```
 
 Both directories must print. If either reports `No such file or directory`,
@@ -77,8 +77,8 @@ stop and restore those exact saved runs before continuing.
 
 ```bash
 ./gradlew :setaccio-lab:visionHumanReviewPrepare \
-  --baseline-run-dir=build/vision-matrix/2026-07-25-controlled-four-case \
-  --candidate-run-dir=build/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
+  --baseline-run-dir=local/evidence/vision-matrix/2026-07-25-controlled-four-case \
+  --candidate-run-dir=local/evidence/vision-matrix/2026-07-26-prompt-v2-controlled-four-case \
   --corpus-dir=local/vision-corpus
 ```
 
@@ -88,7 +88,7 @@ On macOS:
 
 ```bash
 open \
-  setaccio-lab/build/vision-human-review/2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/HUMAN-REVIEW.md
+  setaccio-lab/local/evidence/vision-human-review/2026-07-25-controlled-four-case--vs--2026-07-26-prompt-v2-controlled-four-case/HUMAN-REVIEW.md
 ```
 
 On other systems, open the path printed by the successful task, or the same
@@ -262,9 +262,9 @@ judgments.
 The commands above are canonical for the current Prompt v1 vs v2 controlled
 four-case review. For a later pair:
 
-1. Keep shell paths rooted at `setaccio-lab/build/...`.
-2. Keep Gradle option values rooted at `build/...` (the task runs from the
-   `setaccio-lab` module directory).
+1. Keep shell paths rooted at `setaccio-lab/local/evidence/...`.
+2. Keep Gradle option values rooted at `local/evidence/...` (the task runs from
+   the `setaccio-lab` module directory).
 3. Replace only the baseline directory name, candidate directory name, and the
    matching worksheet folder name under `vision-human-review/`.
 

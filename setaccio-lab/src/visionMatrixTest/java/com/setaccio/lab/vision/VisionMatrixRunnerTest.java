@@ -29,7 +29,7 @@ class VisionMatrixRunnerTest {
                 "--corpus-dir", "local/vision-corpus",
                 "--models", "model-a",
                 "--max-tokens", "none",
-                "--output-dir", "build/vision-matrix/2026-07-26-fixture"
+                "--output-dir", "local/evidence/vision-matrix/2026-07-26-fixture"
         }))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("--prompt-version");
@@ -113,10 +113,10 @@ class VisionMatrixRunnerTest {
     void restrictsInputsAndOutputsToTheFixedIgnoredLayout() {
         Path corpus = VisionMatrixRunner.resolveCorpusDirectory("local/vision-corpus");
         Path output = VisionMatrixRunner.resolveNewOutputDirectory(
-                "build/vision-matrix/2026-07-25-offline-fixture");
+                "local/evidence/vision-matrix/2026-07-25-offline-fixture");
 
         assertThat(corpus.toString()).endsWith("local/vision-corpus");
-        assertThat(output.toString()).endsWith("build/vision-matrix/2026-07-25-offline-fixture");
+        assertThat(output.toString()).endsWith("local/evidence/vision-matrix/2026-07-25-offline-fixture");
         assertThatThrownBy(() -> VisionMatrixRunner.resolveCorpusDirectory("../Pictures"))
                 .isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> VisionMatrixRunner.resolveNewOutputDirectory(

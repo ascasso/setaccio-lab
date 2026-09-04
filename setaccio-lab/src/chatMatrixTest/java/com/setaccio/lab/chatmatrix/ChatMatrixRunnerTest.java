@@ -14,7 +14,7 @@ class ChatMatrixRunnerTest {
                 "--model", "model-a",
                 "--max-tokens", "128",
                 "--timeout", "PT30S",
-                "--output-dir", "build/chat-matrix/2026-08-04-test"
+                "--output-dir", "local/evidence/chat-matrix/2026-08-04-test"
         });
 
         assertThat(arguments.model()).isEqualTo("model-a");

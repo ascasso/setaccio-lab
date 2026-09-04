@@ -129,7 +129,10 @@ public final class AnthropicChatMatrixRunner {
     }
 
     static Path resolveNewOutputDirectory(Path projectDirectory, String value) {
-        Path output = resolveDirectChild(projectDirectory, value, "build/anthropic-chat-matrix", "Output");
+        Path output = requireDatedName(
+                AnthropicChatMatrixProtocol.EVIDENCE_ROOT.resolveNewRunDirectory(
+                        projectDirectory, require(value, "--output-dir"), "Output directory"),
+                "Output");
         if (Files.exists(output)) {
             throw new IllegalArgumentException("Output directory already exists: " + output);
         }
@@ -137,28 +140,14 @@ public final class AnthropicChatMatrixRunner {
     }
 
     static Path resolveOllamaRunDirectory(Path projectDirectory, String value) {
-        Path run = resolveDirectChild(projectDirectory, value, "build/chat-matrix", "Ollama run");
-        if (!Files.isDirectory(run) || Files.isSymbolicLink(run)) {
-            throw new IllegalArgumentException("Ollama run directory does not exist or is unsafe");
-        }
-        return run;
+        return requireDatedName(
+                ChatMatrixProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                        projectDirectory, require(value, "--ollama-run-dir"), "Ollama run directory"),
+                "Ollama run");
     }
 
-    private static Path resolveDirectChild(Path projectDirectory, String value, String relativeRoot, String label) {
-        if (projectDirectory == null) {
-            throw new IllegalArgumentException("projectDirectory must not be null");
-        }
-        Path project = projectDirectory.toAbsolutePath().normalize();
-        Path root = project.resolve(relativeRoot).normalize();
-        Path target = project.resolve(require(value, "--" + (label.equals("Output") ? "output-dir" : "ollama-run-dir"))).normalize();
-        if (!root.equals(target.getParent())) {
-            throw new IllegalArgumentException(label + " directory must be directly under " + relativeRoot + "/");
-        }
-        String name = target.getFileName().toString();
-        if (!name.matches("[A-Za-z0-9][A-Za-z0-9._-]*")) {
-            throw new IllegalArgumentException(label + " directory name must be one safe path segment");
-        }
-        Matcher matcher = DATE.matcher(name);
+    private static Path requireDatedName(Path target, String label) {
+        Matcher matcher = DATE.matcher(target.getFileName().toString());
         if (!matcher.matches()) {
             throw new IllegalArgumentException(label + " directory name must contain a YYYY-MM-DD date");
         }
@@ -282,7 +271,7 @@ public final class AnthropicChatMatrixRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException("Expected --max-tokens 128 --timeout PT2M --max-cost-usd <0..3.00> "
-                    + "--output-dir <new-dated-anthropic-build-directory> --ollama-run-dir <verified-saved-ollama-run>");
+                    + "--output-dir <new-dated-anthropic-evidence-directory> --ollama-run-dir <verified-saved-ollama-run>");
         }
     }
 }

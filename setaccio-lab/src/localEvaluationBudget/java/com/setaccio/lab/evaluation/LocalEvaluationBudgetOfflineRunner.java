@@ -2,8 +2,6 @@ package com.setaccio.lab.evaluation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +13,8 @@ public final class LocalEvaluationBudgetOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path budget64 = resolveRunDirectory(parsed.budget64RunDirectory());
-        Path budget256 = resolveRunDirectory(parsed.budget256RunDirectory());
+        Path budget64 = resolveRunDirectory(parsed.budget64RunDirectory(), parsed.mode());
+        Path budget256 = resolveRunDirectory(parsed.budget256RunDirectory(), parsed.mode());
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         LocalFactCheckPromptDefinition prompt = new LocalFactCheckPromptDefinition();
         LocalFactCheckFixtureCatalog catalog = new LocalFactCheckFixtureCatalog(objectMapper);
@@ -41,18 +39,16 @@ public final class LocalEvaluationBudgetOfflineRunner {
     }
 
     static Path resolveRunDirectory(String value) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/evaluation-matrix").normalize();
-        Path runDirectory = projectDirectory.resolve(value).normalize();
-        if (!evidenceRoot.equals(runDirectory.getParent())) {
-            throw new IllegalArgumentException(
-                    "F1 budget run directory must be directly under build/evaluation-matrix/.");
+        return resolveRunDirectory(value, Mode.VERIFY);
+    }
+
+    private static Path resolveRunDirectory(String value, Mode mode) {
+        if (mode == Mode.REANALYZE) {
+            return LocalEvaluationProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                    Path.of(""), value, "F1 budget run directory");
         }
-        if (Files.isSymbolicLink(runDirectory)
-                || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("F1 budget run directory does not exist or is unsafe.");
-        }
-        return runDirectory;
+        return LocalEvaluationProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                Path.of(""), value, "F1 budget run directory");
     }
 
     private enum Mode {
@@ -108,8 +104,8 @@ public final class LocalEvaluationBudgetOfflineRunner {
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
                     "Expected --mode <verify|reanalyze> "
-                            + "--budget-64-run-dir <saved-build-directory> "
-                            + "--budget-256-run-dir <saved-build-directory>");
+                            + "--budget-64-run-dir <saved-evidence-directory> "
+                            + "--budget-256-run-dir <saved-evidence-directory>");
         }
     }
 }

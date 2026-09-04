@@ -79,7 +79,7 @@ class ChatMatrixPreflightTest {
                 () -> ChatMatrixTestFixtures.CATALOG,
                 factory))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("directly under build/chat-matrix");
+                .hasMessageContaining("directly under local/evidence/chat-matrix");
 
         assertThat(sessions).hasValue(0);
         assertThat(Files.exists(projectDirectory.resolve("build"))).isFalse();
@@ -144,7 +144,7 @@ class ChatMatrixPreflightTest {
     }
 
     private String outputArgument() {
-        return "build/chat-matrix/2026-08-04-test";
+        return "local/evidence/chat-matrix/2026-08-04-test";
     }
 
     private Path outputDirectory() {

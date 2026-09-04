@@ -1,7 +1,6 @@
 package com.setaccio.lab.chatmatrix;
 
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -11,7 +10,10 @@ public final class AnthropicChatMatrixOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path run = resolveRunDirectory(parsed.runDirectory());
+        Path run = parsed.reanalyze()
+                ? AnthropicChatMatrixProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        Path.of(""), parsed.runDirectory(), "Run directory")
+                : resolveRunDirectory(parsed.runDirectory());
         AnthropicChatMatrixEvidence evidence = new AnthropicChatMatrixEvidence(JsonMapper.builder().findAndAddModules().build());
         AnthropicChatMatrixEvidence.OfflineResult result = parsed.reanalyze()
                 ? evidence.reanalyze(run) : evidence.verify(run);
@@ -24,13 +26,8 @@ public final class AnthropicChatMatrixOfflineRunner {
     }
 
     private static Path resolveRunDirectory(String value) {
-        Path project = Path.of("").toAbsolutePath().normalize();
-        Path root = project.resolve("build/anthropic-chat-matrix").normalize();
-        Path run = project.resolve(value).normalize();
-        if (!root.equals(run.getParent()) || !Files.isDirectory(run) || Files.isSymbolicLink(run)) {
-            throw new IllegalArgumentException("Run directory must be an existing safe direct child of build/anthropic-chat-matrix/");
-        }
-        return run;
+        return AnthropicChatMatrixProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                Path.of(""), value, "Run directory");
     }
 
     private record Arguments(boolean reanalyze, String runDirectory) {
@@ -52,7 +49,7 @@ public final class AnthropicChatMatrixOfflineRunner {
         }
 
         private static IllegalArgumentException usage() {
-            return new IllegalArgumentException("Expected --mode <verify|reanalyze> --run-dir <saved-build-directory>");
+            return new IllegalArgumentException("Expected --mode <verify|reanalyze> --run-dir <saved-evidence-directory>");
         }
     }
 }

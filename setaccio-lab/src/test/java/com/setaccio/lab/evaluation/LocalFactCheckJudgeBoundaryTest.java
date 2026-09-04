@@ -1,12 +1,18 @@
 package com.setaccio.lab.evaluation;
 
+import com.setaccio.lab.chat.ChatReasoningPolicy;
+import com.setaccio.lab.chat.ChatReasoningSupport;
+import com.setaccio.lab.chat.ChatResponseCapture;
+import com.setaccio.lab.chat.ChatThinkingPresence;
 import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.metadata.ChatResponseMetadata;
 import org.springframework.ai.chat.metadata.DefaultUsage;
 import org.springframework.ai.chat.model.ChatModel;
@@ -14,6 +20,7 @@ import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.ollama.api.OllamaChatOptions;
+import org.springframework.ai.ollama.api.ThinkOption;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -197,6 +204,137 @@ class LocalFactCheckJudgeBoundaryTest {
         assertThat(result.diagnosticCategory()).isEqualTo(expectedCategory);
         assertThat(result.attemptCount()).isEqualTo(1);
         assertThat(result.error()).isEqualTo(expectedError);
+    }
+
+    @Test
+    void capturesThinkingFinishReasonAndEvaluatedTokensThroughTheRecordingBoundary() {
+        ChatModel judgeModel = mock(ChatModel.class);
+        when(judgeModel.call(any(Prompt.class)))
+                .thenReturn(thinkingResponse("", "a private reasoning trace", "length", 11, 64));
+
+        LocalFactCheckJudgeResult result = new LocalFactCheckJudgeBoundary(
+                judgeModel, settings("judge:model", 42, 1), promptDefinition,
+                ChatReasoningPolicy.ENABLED)
+                .evaluate(fixture("supported-fixture", LocalFactCheckExpectedVerdict.SUPPORTED));
+
+        ChatResponseCapture capture = result.capture();
+        assertThat(capture).isNotNull();
+        assertThat(capture.content()).isEmpty();
+        assertThat(capture.thinking()).isEqualTo("a private reasoning trace");
+        assertThat(capture.thinkingPresence()).isEqualTo(ChatThinkingPresence.PRESENT);
+        assertThat(capture.thinkingWithoutContent()).isTrue();
+        assertThat(capture.finishReason()).isEqualTo("length");
+        assertThat(capture.evaluatedOutputTokens()).isEqualTo(64);
+        assertThat(capture.requestedReasoningPolicy()).isEqualTo(ChatReasoningPolicy.ENABLED);
+        assertThat(capture.reasoningPolicySupport()).isEqualTo(ChatReasoningSupport.APPLIED);
+
+        assertThat(result.rawResponse()).isEmpty();
+        assertThat(result.rawResponse()).doesNotContain("reasoning");
+        assertThat(result.diagnosticCategory()).isEqualTo(LocalFactCheckDiagnosticCategory.EMPTY_RESPONSE);
+    }
+
+    @Test
+    void sendsTheExplicitReasoningPolicyOnEveryJudgeRequest() {
+        ChatModel judgeModel = mock(ChatModel.class);
+        List<Prompt> prompts = new ArrayList<>();
+        when(judgeModel.call(any(Prompt.class))).thenAnswer(invocation -> {
+            prompts.add(invocation.getArgument(0));
+            return response("no", 11, 1);
+        });
+
+        new LocalFactCheckJudgeBoundary(
+                judgeModel, settings("judge:model", 42, 1), promptDefinition, ChatReasoningPolicy.DISABLED)
+                .evaluate(fixture("unsupported-fixture", LocalFactCheckExpectedVerdict.UNSUPPORTED));
+
+        assertThat(prompts).hasSize(1);
+        OllamaChatOptions options = (OllamaChatOptions) prompts.getFirst().getOptions();
+        assertThat(options.getThinkOption()).isEqualTo(ThinkOption.ThinkBoolean.DISABLED);
+        assertThat(options.getNumPredict()).isEqualTo(64);
+        assertThat(options.getSeed()).isEqualTo(42);
+    }
+
+    @Test
+    void leavesTheReasoningPolicyUnsentUnlessACallerRequestsOne() {
+        ChatModel judgeModel = mock(ChatModel.class);
+        List<Prompt> prompts = new ArrayList<>();
+        when(judgeModel.call(any(Prompt.class))).thenAnswer(invocation -> {
+            prompts.add(invocation.getArgument(0));
+            return response("no", 11, 1);
+        });
+
+        LocalFactCheckJudgeResult result = boundary(judgeModel, 42)
+                .evaluate(fixture("unsupported-fixture", LocalFactCheckExpectedVerdict.UNSUPPORTED));
+
+        OllamaChatOptions options = (OllamaChatOptions) prompts.getFirst().getOptions();
+        assertThat(options.getThinkOption()).isNull();
+        assertThat(result.capture().requestedReasoningPolicy())
+                .isEqualTo(ChatReasoningPolicy.PROVIDER_DEFAULT);
+        assertThat(result.capture().reasoningPolicySupport())
+                .isEqualTo(ChatReasoningSupport.NOT_REQUESTED);
+    }
+
+    @Test
+    void recordsAnUnavailableCaptureWhenTheProviderFails() {
+        LocalFactCheckJudgeResult result = new LocalFactCheckJudgeBoundary(
+                failingModel(new IllegalStateException("provider exploded")),
+                settings("judge:model", 42, 1),
+                promptDefinition,
+                ChatReasoningPolicy.ENABLED)
+                .evaluate(fixture("supported-fixture", LocalFactCheckExpectedVerdict.SUPPORTED));
+
+        assertThat(result.invocationSucceeded()).isFalse();
+        assertThat(result.capture().thinkingPresence()).isEqualTo(ChatThinkingPresence.UNAVAILABLE);
+        assertThat(result.capture().content()).isNull();
+        assertThat(result.capture().thinking()).isNull();
+    }
+
+    @Test
+    void keepsThePhase4ResultShapeConstructibleWithoutACapture() {
+        LocalFactCheckJudgeResult legacy = new LocalFactCheckJudgeResult(
+                "supported-fixture",
+                LocalFactCheckExpectedVerdict.SUPPORTED,
+                settings("judge:model", 42, 1),
+                true,
+                true,
+                LocalFactCheckJudgeVerdict.SUPPORTED,
+                true,
+                LocalFactCheckDiagnosticCategory.NONE,
+                "yes",
+                null,
+                11,
+                1,
+                12,
+                5L,
+                1,
+                null);
+
+        assertThat(legacy.capture()).isNull();
+        assertThat(legacy.rawResponse()).isEqualTo("yes");
+    }
+
+    private static ChatResponse thinkingResponse(
+            String content,
+            String thinking,
+            String finishReason,
+            Integer promptTokens,
+            Integer completionTokens
+    ) {
+        AssistantMessage assistant = AssistantMessage.builder()
+                .content(content)
+                .properties(thinking == null
+                        ? Map.of()
+                        : Map.of(ChatResponseCapture.THINKING_KEY, thinking))
+                .build();
+        return new ChatResponse(
+                List.of(new Generation(
+                        assistant,
+                        ChatGenerationMetadata.builder().finishReason(finishReason).build())),
+                ChatResponseMetadata.builder()
+                        .id("response-1")
+                        .model("judge:model")
+                        .keyValue("done", true)
+                        .usage(new DefaultUsage(promptTokens, completionTokens))
+                        .build());
     }
 
     private LocalFactCheckJudgeBoundary boundary(ChatModel judgeModel, int seed) {

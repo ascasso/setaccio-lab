@@ -60,7 +60,7 @@ public abstract class AnthropicChatMatrixTask extends DefaultTask {
     @Input @Optional
     public String getOutputDir() { return outputDir; }
 
-    @Option(option = "output-dir", description = "Required new dated directory directly under build/anthropic-chat-matrix/.")
+    @Option(option = "output-dir", description = "Required new dated directory directly under local/evidence/anthropic-chat-matrix/.")
     public void setOutputDir(String outputDir) { this.outputDir = outputDir; }
 
     @Input @Optional

@@ -1,6 +1,7 @@
 package com.setaccio.lab.chatmatrix;
 
 import com.setaccio.lab.chat.OllamaChatModelIdentity;
+import com.setaccio.lab.evidence.EvidenceSuiteRoot;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ final class ChatMatrixProtocol {
 
     static final int VERSION = 1;
     static final String SUITE = "ollama-chat-matrix";
+    static final EvidenceSuiteRoot EVIDENCE_ROOT = EvidenceSuiteRoot.of("chat-matrix");
     static final String PROVIDER = "ollama";
     static final String ENDPOINT_CATEGORY = "local";
     static final String EXECUTION_ENGINE = "spring-ai-chat-invocation";

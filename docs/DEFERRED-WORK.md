@@ -2,7 +2,10 @@
 
 Status: current after the authorized Phase 3 cohort, Phase 4 fact-check
 output-budget, and bounded Phase 5 retrieval protocol closeouts on 2026-08-30,
-and the explicitly requested Phase 5 R4 embedding run on 2026-09-02.
+the explicitly requested Phase 5 R4 embedding run on 2026-09-02, the durable
+evidence retention migration on 2026-09-03, and the owner's 2026-09-04
+decisions on reasoning-policy status quo, the LFM diagnostic (no change), and
+the second-evidence-loss waiver.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -25,28 +28,76 @@ quality, semantic relevance, or model ranking or selection conclusion; see
 Read every "verifies offline" statement in this index as a record of what was
 true at that closeout, not as a claim about what is present today.
 
-Formal evidence is written under ignored `build/` directories, which ordinary
-Gradle cleaning removes. Integrity and retention are different properties: the
-manifest, artifact hashes, and non-overwriting run directories protect a saved
-run from being altered or silently replaced, and none of them protects it from
-being deleted.
+Integrity and retention are different properties: the manifest, artifact
+hashes, and non-overwriting run directories protect a saved run from being
+altered or silently replaced, and none of them protects it from being deleted.
+Formal evidence was previously written under ignored `build/` directories,
+which ordinary Gradle cleaning removes.
 
 As of 2026-09-02, the only formal run evidence present on the maintainer's host
-is the Phase 5 R4 embedding run. Evidence for Phase 1, Phase 2, Phase 3, the
+was the Phase 5 R4 embedding run. Evidence for Phase 1, Phase 2, Phase 3, the
 Phase 4 five-arm breakpoint study, Phase 5 R3/R5/R6, the fact-check A5 run, the
-chat matrix, the vision matrices, and the Anthropic O3 portability run is not
-present there. This is the second ignored-evidence loss in the project; the
+chat matrix, the vision matrices, and the Anthropic O3 portability run was not
+present there. That was the second ignored-evidence loss in the project; the
 first was the vision Prompt v1/v2 pair, closed on 2026-08-02 through a
 documented evidence-loss waiver.
 
-No waiver is claimed here and no closeout is withdrawn. Each recorded result
-was bounded to what its evidence supported and was verified when written, and
-the public-safe interpretations remain accurate. What is not currently
-reproducible is third-party or maintainer re-verification of those specific
-saved runs.
+As initially recorded here, no waiver was claimed and no closeout was
+withdrawn. Each recorded result was bounded to what its evidence supported and
+was verified when written, and the public-safe interpretations remain
+accurate. What is not currently reproducible is third-party or maintainer
+re-verification of those specific saved runs.
 
-Durable retention outside `build/` remains available as separately authorized
-future work. See
+On 2026-09-04 the project owner closed this second evidence-loss gap through a
+documented waiver, in the same shape as the 2026-08-02 vision Prompt v1/v2
+waiver (`docs/logs/2026-08-02.md`). A read-only recovery search covered the
+repository workspace — including the stray pre-durable-root
+`setaccio-lab/build/evaluation-matrix/` and
+`setaccio-lab/build/tool-compatibility/` directories, both empty — `~/.Trash`,
+`/tmp`, `$TMPDIR`, and Spotlight (`mdfind`), and found no copy of the missing
+evidence for Phase 1, Phase 2, Phase 3, the Phase 4 five-arm breakpoint study,
+Phase 5 R3/R5/R6, the fact-check A5 run, the chat matrix, the vision matrices,
+or the Anthropic O3 portability run. No Time Machine backup destination is
+configured for this host, and the local snapshot listing could not be checked
+because of an OS permission restriction, so a snapshot-level copy is not
+definitively ruled out; the owner elected to close through waiver regardless.
+
+This waiver closes the retention gap only. No closeout above is withdrawn, and
+no actual-human `adopt`/`revise`/`reject` judgment is claimed for any of the
+listed runs beyond what each already recorded — the Phase 2 `inconclusive`
+T2.5 decision, the Slice A6 fact-check interpretation, and the T3.4/T3.5/T3.6
+cohort interpretations all stand exactly as written. None of the named runs
+may be recreated under their original run names or represented as the
+original immutable evidence. Per
+[logs/2026-09-04-pending-decisions-options-memo.md](logs/2026-09-04-pending-decisions-options-memo.md)
+option 1, any future re-run of one of these suites needs its own new
+scope-start request, fresh clean-baseline commit, and new dated run directory,
+exactly like every other deferred re-run gate in this index.
+
+On 2026-09-03 the durable evidence root was adopted to stop the recurrence.
+Formal run evidence is now allocated only under the private, ignored
+
+```
+setaccio-lab/local/evidence/<suite>/<run-id>/
+```
+
+which is not a Gradle output directory, so `clean` does not remove it. Gradle
+commands run from the repository root pass paths such as
+`local/evidence/retrieval-embedding/<run-id>`, because the opt-in tasks execute
+with the `setaccio-lab` module directory as their working directory. Readers
+still accept a legacy `build/<suite>/<run-id>` path so already-saved evidence
+can be verified, compared, and consumed. Reanalysis is rejected for legacy
+paths because it rewrites `SUMMARY.md`; no writer allocates there, and legacy
+acceptance never permits rewriting, repairing, or moving old evidence.
+
+Before that change the surviving Phase 5 R4 run was copied byte-for-byte from
+`setaccio-lab/build/retrieval-embedding/2026-09-02-r4-qwen3-embedding-0-6b/` to
+the matching durable directory. Both manifest-listed artifacts verified against
+the copied manifest, all three files compared identical, and the recomputed
+source hashes were unchanged. Nothing else was moved, rewritten, rerun, or
+reanalyzed. See
+[logs/2026-09-03-durable-evidence-retention.md](logs/2026-09-03-durable-evidence-retention.md)
+and
 [logs/2026-09-02-public-evidence-and-readme.md](logs/2026-09-02-public-evidence-and-readme.md).
 
 ## Completed Boundary
@@ -137,6 +188,29 @@ installed-model inspection. Exact identity lock, model invocation, and live
 execution remain deferred until owner identity approval and the remaining live
 runner gate are complete.
 
+The retained Phase 1 and Phase 2 evidence and closeouts above are unchanged and
+still do not identify the underlying provider failure cause. Separately, on
+2026-09-03 a small standalone diagnostic tested the currently installed and
+still tagged/digest-matching LFM2.5 artifact directly against the Ollama
+provider boundary (not through Spring AI), under the current Ollama runtime.
+Two otherwise-identical direct `/api/chat` calls differing only in the presence
+of a minimal tool definition showed the tool-bearing call rejected
+synchronously (HTTP `400`, explicit provider error) while the tool-free call
+succeeded. This is consistent with the historical `PROVIDER_FAILURE`
+observations above but does not establish their historical cause, since this
+diagnostic ran under a later runtime, and it is not evidence about the
+underlying model architecture's latent tool-calling ability. See
+[logs/2026-09-03-lfm-tool-capability-check.md](logs/2026-09-03-lfm-tool-capability-check.md).
+No Phase 1 or Phase 2 evidence or closeout was rerun, repaired, replaced,
+reinterpreted, or rewritten by that diagnostic.
+
+On 2026-09-04, after reviewing
+[logs/2026-09-04-pending-decisions-options-memo.md](logs/2026-09-04-pending-decisions-options-memo.md),
+the project owner decided this diagnostic warrants no change: Phase 1 and
+Phase 2 keep their exact recorded status above, cause unidentified, and the
+existing cross-reference paragraph stands as the only link between the two.
+No further diagnostic work is authorized by this decision.
+
 ## Deferred From the August Cycle
 
 | Item | Status and reason | Required gate before work begins |
@@ -201,6 +275,12 @@ Permitted, for a run whose closeout is already public-safe:
   publication copy is partial and therefore does not pass the suite's offline
   verification task.
 
+`docs/evidence/` is a tracked, partial publication copy of permitted summaries
+and manifests only. It is not a runnable evidence store, is never a task input,
+and is not the source for offline verification. The only runnable evidence
+store is the private, ignored `setaccio-lab/local/evidence/<suite>/` root
+described under Evidence Retention Status.
+
 Still ignored and unpublished, unchanged by this decision:
 
 - raw result artifacts, model responses, embedding vectors, evaluator output,
@@ -212,6 +292,67 @@ Copying is read-only with respect to the source. It is not a rerun, repair,
 replacement, reanalysis, or mutation, and it does not weaken any closeout gate,
 retention rule, or interpretation boundary. It authorizes no model pull, remote
 provider, credential, Docker use, spending, release, tag, or push.
+
+## Reasoning Policy in the Existing Suites
+
+The chat matrix, Anthropic portability matrix, Phase 5 answer matrix, and the
+fact-check suites all send no explicit reasoning policy, so each inherits
+whatever its model does by default. For a thinking-capable Ollama artifact that
+default is to think, which means a small output budget can be spent on
+reasoning before any visible content appears.
+
+This is now a recorded limitation rather than an unnoticed one, and it is
+deliberately not fixed in place. Making reasoning explicit in those suites
+would change their protocol identity and, because their verifiers compare
+manifest settings as an exact JSON string and regenerate `SUMMARY.md`
+byte-for-byte, it would also stop every retained manifest in those suites from
+verifying. Adding a constant to `ChatGenerationOption` would go further and make
+retained chat and answer raw JSON undeserializable, because
+`ChatProviderOptionSupport` requires every constant to be classified.
+
+The 2026-09-03 diagnostic makes this concrete rather than theoretical: with
+reasoning explicitly enabled at a `64`-token budget, the artifact those suites
+used spent the whole budget on reasoning and returned empty content in five of
+six rows.
+
+The owner started the narrow second follow-up on 2026-09-04 without changing
+the closed suites. Protocol v2 is implemented with a pre-registered
+`PROVIDER_DEFAULT` arm and explicit `ENABLED`/`DISABLED` arms at both the
+fact-check and provider-neutral chat boundaries, all at `64` output tokens,
+plus a provider-default non-thinking chat control. Both boundaries receive the
+same rendered prompt. The execution boundary is recorded per arm and row, and
+policy-within-boundary plus matching-policy boundary pairs are derived from the
+recorded arms. Version-aware readers preserve the original v1 wire format,
+manifest engine and settings, analyzer rules, and report bytes.
+
+The separately authorized v2 run completed once from clean commit `acc3979`
+under Ollama `0.33.3`, retained all 42 rows, and verified and reanalyzed offline.
+At both boundaries, subject `PROVIDER_DEFAULT` reproduced the `ENABLED`
+aggregate: one of six rows with content, five with reasoning, and the same five
+at the full budget with finish reason `length`. Subject `DISABLED` produced
+content in all six rows at both boundaries with no reasoning; the non-thinking
+provider-default chat control also produced content in all six. Thus the
+provider-default behavior and the chat-boundary mechanism are measured for this
+exact artifact, prompt, fixture catalog, seed, budget, and runtime rather than
+inferred only from framework behavior. This does not establish the historical
+cause of any retained response.
+
+The first follow-up — whether any closed suite should replace
+`PROVIDER_DEFAULT` with an explicit policy — was decided by the project owner
+on 2026-09-04 after reviewing
+[logs/2026-09-04-pending-decisions-options-memo.md](logs/2026-09-04-pending-decisions-options-memo.md):
+status quo. The chat matrix, Anthropic portability matrix, Phase 5 answer
+matrix, and fact-check suites keep sending `PROVIDER_DEFAULT`. No
+`ChatGenerationOption` constant, `manifestSettings()` shape, or suite schema
+changes as a result. The recorded limitation and the two diagnostic runs above
+stand as the only measurement of the default-policy/chat-boundary link for
+this artifact; nothing further is authorized or required by this decision.
+
+Nothing in this v2 implementation or run authorizes changing a closed suite,
+rerunning, repairing, replacing, or reinterpreting retained evidence, or
+withdrawing a closeout. The explicit v1 compatibility acceptance was limited to provider-free
+verification and byte-identical summary regeneration against the preserved
+2026-09-03 diagnostic before the new run.
 
 ## Deferred Through the Current Roadmap
 

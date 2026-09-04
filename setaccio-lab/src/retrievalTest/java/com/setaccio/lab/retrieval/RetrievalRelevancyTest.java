@@ -231,16 +231,24 @@ class RetrievalRelevancyTest {
     @Test
     void restrictsNewAndSavedEvidenceToDedicatedRoots() {
         assertThat(RetrievalRelevancyRunner.resolveNewOutputDirectory(
-                "build/retrieval-relevancy/2026-08-28-r6").getFileName().toString()).isEqualTo("2026-08-28-r6");
-        assertThatThrownBy(() -> RetrievalRelevancyRunner.resolveNewOutputDirectory("build/elsewhere/2026-08-28-r6"))
+                "local/evidence/retrieval-relevancy/2026-08-28-r6").getFileName().toString())
+                .isEqualTo("2026-08-28-r6");
+        assertThatThrownBy(() -> RetrievalRelevancyRunner.resolveNewOutputDirectory(
+                "local/evidence/elsewhere/2026-08-28-r6"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("build/retrieval-relevancy");
-        assertThatThrownBy(() -> RetrievalRelevancyRunner.resolveNewOutputDirectory("build/retrieval-relevancy/not-dated"))
+                .hasMessageContaining("local/evidence/retrieval-relevancy");
+        assertThatThrownBy(() -> RetrievalRelevancyRunner.resolveNewOutputDirectory(
+                "build/retrieval-relevancy/2026-08-28-r6"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("local/evidence/retrieval-relevancy");
+        assertThatThrownBy(() -> RetrievalRelevancyRunner.resolveNewOutputDirectory(
+                "local/evidence/retrieval-relevancy/not-dated"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("YYYY-MM-DD");
-        assertThatThrownBy(() -> RetrievalRelevancyOfflineRunner.resolveRunDirectory("build/retrieval-answer/2026-08-28-r5"))
+        assertThatThrownBy(() -> RetrievalRelevancyOfflineRunner.resolveRunDirectory(
+                "local/evidence/retrieval-answer/2026-08-28-r5"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("build/retrieval-relevancy");
+                .hasMessageContaining("local/evidence/retrieval-relevancy");
     }
 
     private static RetrievalRelevancyResult execute(

@@ -201,12 +201,18 @@ class RetrievalEmbeddingTest {
     @Test
     void restrictsNewAndSavedEvidenceToTheDedicatedR4Root() {
         assertThat(RetrievalEmbeddingRunner.resolveNewOutputDirectory(
-                "build/retrieval-embedding/2026-08-28-r4").getFileName().toString())
+                "local/evidence/retrieval-embedding/2026-08-28-r4").getFileName().toString())
                 .isEqualTo("2026-08-28-r4");
-        assertThatThrownBy(() -> RetrievalEmbeddingRunner.resolveNewOutputDirectory("build/elsewhere/2026-08-28-r4"))
+        assertThatThrownBy(() -> RetrievalEmbeddingRunner.resolveNewOutputDirectory(
+                "local/evidence/elsewhere/2026-08-28-r4"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("build/retrieval-embedding");
-        assertThatThrownBy(() -> RetrievalEmbeddingRunner.resolveNewOutputDirectory("build/retrieval-embedding/not-dated"))
+                .hasMessageContaining("local/evidence/retrieval-embedding");
+        assertThatThrownBy(() -> RetrievalEmbeddingRunner.resolveNewOutputDirectory(
+                "build/retrieval-embedding/2026-08-28-r4"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("local/evidence/retrieval-embedding");
+        assertThatThrownBy(() -> RetrievalEmbeddingRunner.resolveNewOutputDirectory(
+                "local/evidence/retrieval-embedding/not-dated"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("YYYY-MM-DD");
     }

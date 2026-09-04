@@ -42,7 +42,7 @@ public abstract class RetrievalEvaluationComparisonTask extends DefaultTask {
         return baselineRunDir;
     }
 
-    @Option(option = "baseline-run-dir", description = "Required saved baseline directory under build/retrieval-evaluation/.")
+    @Option(option = "baseline-run-dir", description = "Required saved baseline directory under local/evidence/retrieval-evaluation/.")
     public void setBaselineRunDir(String baselineRunDir) {
         this.baselineRunDir = baselineRunDir;
     }
@@ -53,7 +53,7 @@ public abstract class RetrievalEvaluationComparisonTask extends DefaultTask {
         return candidateRunDir;
     }
 
-    @Option(option = "candidate-run-dir", description = "Required saved candidate directory under build/retrieval-evaluation/.")
+    @Option(option = "candidate-run-dir", description = "Required saved candidate directory under local/evidence/retrieval-evaluation/.")
     public void setCandidateRunDir(String candidateRunDir) {
         this.candidateRunDir = candidateRunDir;
     }
@@ -75,7 +75,7 @@ public abstract class RetrievalEvaluationComparisonTask extends DefaultTask {
 
     private static void requireOption(String value, String option) {
         if (value == null || value.isBlank()) {
-            throw new GradleException("retrievalEvaluationCompare requires " + option + "=<saved-build-directory>");
+            throw new GradleException("retrievalEvaluationCompare requires " + option + "=<saved-evidence-directory>");
         }
     }
 }

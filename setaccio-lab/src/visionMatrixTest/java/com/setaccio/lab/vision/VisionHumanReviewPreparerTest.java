@@ -114,19 +114,19 @@ class VisionHumanReviewPreparerTest {
 
     @Test
     void restrictsTheRunnerToTheIgnoredReviewRootAndSafeRunNames() {
-        assertThat(VisionHumanReviewPrepareRunner.resolveReviewRoot("build/vision-human-review"))
+        assertThat(VisionHumanReviewPrepareRunner.resolveReviewRoot("local/evidence/vision-human-review"))
                 .hasToString(Path.of("").toAbsolutePath().normalize()
-                        .resolve("build/vision-human-review").toString());
+                        .resolve("local/evidence/vision-human-review").toString());
         assertThat(VisionHumanReviewPrepareRunner.reviewId(
-                        Path.of("build/vision-matrix/2026-07-27-v1"),
-                        Path.of("build/vision-matrix/2026-07-27-v2")))
+                        Path.of("local/evidence/vision-matrix/2026-07-27-v1"),
+                        Path.of("local/evidence/vision-matrix/2026-07-27-v2")))
                 .isEqualTo("2026-07-27-v1--vs--2026-07-27-v2");
         assertThatThrownBy(() -> VisionHumanReviewPrepareRunner.resolveReviewRoot("build/other"))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("fixed build/vision-human-review");
+                .hasMessageContaining("fixed local/evidence/vision-human-review");
         assertThatThrownBy(() -> VisionHumanReviewPrepareRunner.reviewId(
-                        Path.of("build/vision-matrix/unsafe name"),
-                        Path.of("build/vision-matrix/safe-name")))
+                        Path.of("local/evidence/vision-matrix/unsafe name"),
+                        Path.of("local/evidence/vision-matrix/safe-name")))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("safe path segments");
     }

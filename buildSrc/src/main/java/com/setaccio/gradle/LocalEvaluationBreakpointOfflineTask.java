@@ -34,19 +34,19 @@ public abstract class LocalEvaluationBreakpointOfflineTask extends DefaultTask {
     @Input public abstract Property<String> getJavaExecutable();
     @Input @Optional public abstract Property<String> getMode();
     @Input @Optional public String getRunDir64() { return runDir64; }
-    @Option(option = "run-dir-64", description = "Required saved 64-token arm under build/evaluation-matrix/.")
+    @Option(option = "run-dir-64", description = "Required saved 64-token arm under local/evidence/evaluation-matrix/.")
     public void setRunDir64(String value) { runDir64 = value; }
     @Input @Optional public String getRunDir96() { return runDir96; }
-    @Option(option = "run-dir-96", description = "Required saved 96-token arm under build/evaluation-matrix/.")
+    @Option(option = "run-dir-96", description = "Required saved 96-token arm under local/evidence/evaluation-matrix/.")
     public void setRunDir96(String value) { runDir96 = value; }
     @Input @Optional public String getRunDir128() { return runDir128; }
-    @Option(option = "run-dir-128", description = "Required saved 128-token arm under build/evaluation-matrix/.")
+    @Option(option = "run-dir-128", description = "Required saved 128-token arm under local/evidence/evaluation-matrix/.")
     public void setRunDir128(String value) { runDir128 = value; }
     @Input @Optional public String getRunDir192() { return runDir192; }
-    @Option(option = "run-dir-192", description = "Required saved 192-token arm under build/evaluation-matrix/.")
+    @Option(option = "run-dir-192", description = "Required saved 192-token arm under local/evidence/evaluation-matrix/.")
     public void setRunDir192(String value) { runDir192 = value; }
     @Input @Optional public String getRunDir256() { return runDir256; }
-    @Option(option = "run-dir-256", description = "Required saved 256-token arm under build/evaluation-matrix/.")
+    @Option(option = "run-dir-256", description = "Required saved 256-token arm under local/evidence/evaluation-matrix/.")
     public void setRunDir256(String value) { runDir256 = value; }
 
     @TaskAction
@@ -70,7 +70,7 @@ public abstract class LocalEvaluationBreakpointOfflineTask extends DefaultTask {
 
     private void require(String value, String option) {
         if (value == null || value.isBlank()) {
-            throw new GradleException(getName() + " requires " + option + "=<saved-build-directory>");
+            throw new GradleException(getName() + " requires " + option + "=<saved-evidence-directory>");
         }
     }
 }

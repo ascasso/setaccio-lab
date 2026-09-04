@@ -38,6 +38,8 @@ import com.setaccio.gradle.RetrievalAnswerTask
 import com.setaccio.gradle.RetrievalAnswerOfflineTask
 import com.setaccio.gradle.RetrievalRelevancyTask
 import com.setaccio.gradle.RetrievalRelevancyOfflineTask
+import com.setaccio.gradle.ThinkingDiagnosticTask
+import com.setaccio.gradle.ThinkingDiagnosticOfflineTask
 
 description = 'Setaccio Lab'
 
@@ -138,6 +140,16 @@ sourceSets {
         compileClasspath += sourceSets.main.output + sourceSets.toolCompatibility.output
         runtimeClasspath += output + compileClasspath
     }
+    thinkingDiagnostic {
+        java.srcDir 'src/thinkingDiagnostic/java'
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += output + compileClasspath
+    }
+    thinkingDiagnosticTest {
+        java.srcDir 'src/thinkingDiagnosticTest/java'
+        compileClasspath += sourceSets.main.output + sourceSets.thinkingDiagnostic.output
+        runtimeClasspath += output + compileClasspath
+    }
     retrieval {
         java.srcDir 'src/retrieval/java'
         compileClasspath += sourceSets.main.output
@@ -175,6 +187,10 @@ configurations {
     toolCompatibilityRuntimeOnly.extendsFrom runtimeOnly
     toolCompatibilityTestImplementation.extendsFrom testImplementation, toolCompatibilityImplementation
     toolCompatibilityTestRuntimeOnly.extendsFrom testRuntimeOnly, toolCompatibilityRuntimeOnly
+    thinkingDiagnosticImplementation.extendsFrom implementation
+    thinkingDiagnosticRuntimeOnly.extendsFrom runtimeOnly
+    thinkingDiagnosticTestImplementation.extendsFrom testImplementation, thinkingDiagnosticImplementation
+    thinkingDiagnosticTestRuntimeOnly.extendsFrom testRuntimeOnly, thinkingDiagnosticRuntimeOnly
     retrievalImplementation.extendsFrom implementation
     retrievalRuntimeOnly.extendsFrom runtimeOnly
     retrievalTestImplementation.extendsFrom testImplementation, retrievalImplementation
@@ -471,7 +487,7 @@ tasks.register('toolCompatibilityHumanReviewPrepare', ToolCompatibilityHumanRevi
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })
     workingDirectory.set(layout.projectDirectory)
-    reviewRoot.set(layout.projectDirectory.dir('build/tool-compatibility-human-review'))
+    reviewRoot.set(layout.projectDirectory.dir('local/evidence/tool-compatibility-human-review'))
 }
 
 tasks.register('toolCompatibilityVerify', ToolCompatibilityOfflineTask) {
@@ -758,7 +774,7 @@ tasks.register('visionHumanReviewPrepare', VisionHumanReviewPrepareTask) {
     classpath.from(sourceSets.visionMatrix.runtimeClasspath)
     mainClass.set('com.setaccio.lab.vision.VisionHumanReviewPrepareRunner')
     workingDirectory.set(layout.projectDirectory)
-    reviewRoot.set(layout.buildDirectory.dir('vision-human-review'))
+    reviewRoot.set(layout.projectDirectory.dir('local/evidence/vision-human-review'))
     javaExecutable.set(javaToolchains.launcherFor {
         languageVersion = JavaLanguageVersion.of(25)
     }.map { it.executablePath.asFile.absolutePath })
@@ -769,6 +785,46 @@ tasks.register('visionMatrixTest', Test) {
     group = 'verification'
     testClassesDirs = sourceSets.visionMatrixTest.output.classesDirs
     classpath = sourceSets.visionMatrixTest.runtimeClasspath
+    useJUnitPlatform()
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.register('thinkingDiagnostic', ThinkingDiagnosticTask) {
+    dependsOn tasks.named('thinkingDiagnosticClasses')
+    classpath.from(sourceSets.thinkingDiagnostic.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.thinking.ThinkingDiagnosticRunner')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('thinkingDiagnosticVerify', ThinkingDiagnosticOfflineTask) {
+    description = 'Verifies a saved reasoning diagnostic run without calling a model provider.'
+    dependsOn tasks.named('thinkingDiagnosticClasses')
+    classpath.from(sourceSets.thinkingDiagnostic.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.thinking.ThinkingDiagnosticOfflineRunner')
+    mode.set('verify')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('thinkingDiagnosticReanalyze', ThinkingDiagnosticOfflineTask) {
+    description = 'Regenerates and verifies a saved reasoning diagnostic summary provider-free.'
+    dependsOn tasks.named('thinkingDiagnosticClasses')
+    classpath.from(sourceSets.thinkingDiagnostic.runtimeClasspath)
+    mainClass.set('com.setaccio.lab.thinking.ThinkingDiagnosticOfflineRunner')
+    mode.set('reanalyze')
+    javaExecutable.set(javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(25)
+    }.map { it.executablePath.asFile.absolutePath })
+}
+
+tasks.register('thinkingDiagnosticTest', Test) {
+    description = 'Runs provider-free tests for the opt-in reasoning diagnostic.'
+    group = 'verification'
+    testClassesDirs = sourceSets.thinkingDiagnosticTest.output.classesDirs
+    classpath = sourceSets.thinkingDiagnosticTest.runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter tasks.named('test')
 }

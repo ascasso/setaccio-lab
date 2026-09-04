@@ -97,16 +97,10 @@ final class ToolCompatibilityPreflight {
         }
         String requested = requireOption(value, "--output-dir");
         Path project = projectDirectory.toAbsolutePath().normalize();
-        Path root = project.resolve("build/tool-compatibility").normalize();
-        Path output = project.resolve(requested).normalize();
-        if (!root.equals(output.getParent())) {
-            throw new IllegalArgumentException(
-                    "Output must be one new directory directly under build/tool-compatibility/");
-        }
+        Path root = ToolCompatibilityProtocol.EVIDENCE_ROOT.durableRoot(project);
+        Path output = ToolCompatibilityProtocol.EVIDENCE_ROOT.resolveNewRunDirectory(
+                project, requested, "Output");
         String runId = output.getFileName().toString();
-        if (!runId.matches("[A-Za-z0-9][A-Za-z0-9._-]*")) {
-            throw new IllegalArgumentException("Output directory name must be one safe path segment");
-        }
         Matcher matcher = DATE.matcher(runId);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Output directory name must contain a YYYY-MM-DD date");
@@ -133,7 +127,9 @@ final class ToolCompatibilityPreflight {
             throw new IllegalArgumentException("outputDirectory must identify a named run directory");
         }
         Path output = outputDirectory.toAbsolutePath().normalize();
-        requireNoSymbolicLinks(output.getParent().getParent().getParent(), output);
+        requireNoSymbolicLinks(
+                ToolCompatibilityProtocol.EVIDENCE_ROOT.projectDirectoryOfDurableRun(output),
+                output);
         requireNewOutputDirectory(output);
         return EvidenceRunDirectory.createNamed(output.getParent(), output.getFileName().toString());
     }

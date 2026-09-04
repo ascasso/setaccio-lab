@@ -2,8 +2,6 @@ package com.setaccio.lab.chatmatrix;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -13,7 +11,10 @@ public final class ChatMatrixOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path runDirectory = resolveRunDirectory(parsed.runDirectory());
+        Path runDirectory = parsed.mode() == Mode.REANALYZE
+                ? ChatMatrixProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        Path.of(""), parsed.runDirectory(), "Run directory")
+                : resolveRunDirectory(parsed.runDirectory());
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         ChatMatrixEvidence evidence = new ChatMatrixEvidence(
                 objectMapper,
@@ -32,17 +33,8 @@ public final class ChatMatrixOfflineRunner {
     }
 
     static Path resolveRunDirectory(String value) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/chat-matrix").normalize();
-        Path runDirectory = projectDirectory.resolve(value).normalize();
-        if (!evidenceRoot.equals(runDirectory.getParent())) {
-            throw new IllegalArgumentException("Run directory must be directly under build/chat-matrix/.");
-        }
-        if (Files.isSymbolicLink(runDirectory)
-                || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("Run directory does not exist or is unsafe.");
-        }
-        return runDirectory;
+        return ChatMatrixProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                Path.of(""), value, "Run directory");
     }
 
     private enum Mode {
@@ -86,7 +78,7 @@ public final class ChatMatrixOfflineRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --mode <verify|reanalyze> --run-dir <saved-build-directory>");
+                    "Expected --mode <verify|reanalyze> --run-dir <saved-evidence-directory>");
         }
     }
 }

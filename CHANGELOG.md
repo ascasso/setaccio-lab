@@ -9,6 +9,192 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Recorded the project owner's decisions on the three items raised in the
+  2026-09-04 options memo. Reasoning policy in the existing chat matrix,
+  Anthropic portability matrix, Phase 5 answer matrix, and fact-check suites:
+  status quo, `PROVIDER_DEFAULT` unchanged, no schema change. The 2026-09-03
+  LFM tool-capability diagnostic against closed Phase 1/Phase 2: as is, no
+  change to their recorded status. The second ignored-evidence loss: waived,
+  in the same shape as the 2026-08-02 vision waiver, after a read-only
+  recovery search across the repository workspace (including stray
+  pre-durable-root `build/evaluation-matrix` and `build/tool-compatibility`
+  directories, both empty), `~/.Trash`, `/tmp`/`$TMPDIR`, and Spotlight found
+  no copy of the missing evidence; no closeout is withdrawn and no named run
+  may be recreated under its original name. Recorded in
+  `docs/logs/2026-09-04-three-pending-decisions.md`.
+
+- Prepared an options memo for three recorded open decisions — explicit
+  reasoning policy in the existing chat matrix, Anthropic portability matrix,
+  Phase 5 answer matrix, and fact-check suites; whether the 2026-09-03 LFM
+  tool-capability diagnostic warrants any change to the closed Phase 1/Phase 2
+  status; and how to treat the second ignored-evidence loss recorded in the
+  Evidence Retention Status section. It verifies the two costs named for the
+  reasoning-policy decision against current source, finding the
+  `ChatGenerationOption`/`ChatProviderOptionSupport` deserialization risk
+  applies only to the chat matrix and Anthropic chat matrix suites (not
+  fact-check or the Phase 5 answer suite, whose raw row types do not carry
+  that class), and confirms by direct directory listing that no chat matrix,
+  Anthropic chat matrix, fact-check, Phase 5 R3/R5/R6, or vision-matrix
+  evidence is currently present on disk to be broken by either named cost.
+  Lays out options for each decision with their exact costs and does not
+  adopt, revise, or reject any of them. Recorded in
+  `docs/logs/2026-09-04-pending-decisions-options-memo.md`.
+
+- Completed the single protocol-v2 reasoning-default and execution-boundary
+  diagnostic on 2026-09-04 from clean commit `acc3979` under Ollama `0.33.3`,
+  retaining all 42 planned one-attempt rows with no failure, timeout, retry,
+  repair, replacement, or omission. The required `gemma4:e2b` and
+  `granite4.1:3b` full digests matched before allocation and after execution; no
+  model was pulled or substituted. At both the fact-check and provider-neutral
+  chat boundaries, subject `PROVIDER_DEFAULT` and `ENABLED` each produced
+  content in one of six rows, reasoning in five, and five full-budget rows with
+  finish reason `length`; subject `DISABLED` produced content in all six with no
+  reasoning and no budget saturation. The provider-default non-thinking chat
+  control produced content in all six with no reasoning. Matching-policy
+  aggregates were identical across boundaries. The new v2 evidence verified
+  and reanalyzed offline without hash drift, and the retained 2026-09-03 v1 run
+  also verified and regenerated its byte-identical summary before the new run.
+  This measures the default-policy and chat-boundary links for only the exact
+  artifacts, prompt, catalog, seed, budget, and runtime; it does not establish
+  historical causation, change an existing suite's reasoning policy, revisit a
+  closed phase, or make a quality, factuality, reliability, ranking, or model
+  selection claim. Raw content, reasoning, evaluator output, and per-row
+  payloads remain ignored. Recorded in
+  `docs/logs/2026-09-04-reasoning-default-boundary-run.md`.
+
+- Implemented protocol v2 for the explicitly started reasoning-default and
+  execution-boundary diagnostic without changing any closed suite. The fixed
+  42-row schedule runs the tracked six fixtures once through seven `64`-token
+  arms: subject `PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED` at both the
+  fact-check and provider-neutral chat boundaries, plus a provider-default
+  non-thinking chat control, at temperature `0.0`, seed `42`, `PT2M`, one
+  attempt, and no pull. Both boundaries receive the identical rendered
+  fact-check prompt. Execution boundary is recorded on every arm and row; chat
+  rows keep fixture hashes and expected verdict provenance but no normalized
+  judge verdict or expectation match. Provider default is accepted only as an
+  explicitly marked pre-registered measured condition. Version-aware raw
+  readers, manifest reconstruction, analyzers, and report rendering retain
+  protocol v1 compatibility, including its old arm/row wire shapes and
+  byte-identical summary regeneration. The Gradle task names and CLI options
+  are unchanged, default tests remain provider-free, and this implementation
+  makes no live observation, changes no retained closeout, and authorizes no
+  policy change in an existing suite. Recorded in
+  `docs/logs/2026-09-04-reasoning-default-boundary-implementation.md`.
+
+- Completed a small standalone LFM tool-capability diagnostic on 2026-09-03
+  against the currently installed Phase 1/Phase 2 artifact
+  `hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0` (full digest
+  `2c88e114a368b8500aabb7cf32e8a16c274d2265b640c601198a784a559bc5ed`), no pull,
+  rename, or modification. Confirmed live under Ollama `0.33.3` that the
+  artifact still advertises `completion` only. Made exactly two direct,
+  non-streaming, non-retried `POST /api/chat` calls at the provider boundary
+  (temperature `0.0`, seed `42`, `512` output tokens, otherwise identical
+  message and settings), differing only in whether a single minimal
+  zero-argument tool definition was attached. The tool-bearing call was
+  rejected synchronously with HTTP `400` and an explicit provider error
+  stating the model does not support tools; the tool-free call succeeded with
+  HTTP `200` and a complete response. The currently deployed artifact/runtime
+  rejects tool-bearing requests at the provider boundary. This is consistent
+  with the historical Phase 1 (16 rows) and Phase 2 (32 interleaved attempts)
+  `PROVIDER_FAILURE` observations but does not establish their historical
+  cause — this diagnostic ran under a later Ollama runtime than either closed
+  phase — and it is not evidence about the underlying model architecture's
+  latent tool-calling ability. Verbatim request/response bodies, HTTP status
+  codes, and SHA-256 checksums are retained in the ignored bundle under
+  `local/evidence/lfm-tool-capability/2026-09-03-lfm-tool-capability/`; no raw
+  payload is published in tracked files. No Phase 1 or Phase 2 evidence or
+  closeout was rerun, repaired, replaced, reinterpreted, or rewritten, and no
+  model was pulled or substituted. Recorded in
+  `docs/logs/2026-09-03-lfm-tool-capability-check.md`.
+
+- Completed the one authorized reasoning diagnostic on 2026-09-03 from clean
+  commit `4e766b7` under Ollama `0.33.3`, retaining all 30 rows with no failure,
+  timeout, retry, replacement, or omission. With reasoning explicitly enabled at
+  `64` output tokens, `gemma4:e2b` at digest `7fbdbf8f5e45` returned empty
+  assistant content alongside a populated reasoning field, the full `64`
+  evaluated output tokens, and finish reason `length` in five of six rows. The
+  paired arm held prompt, fixture order, seed, temperature, timeout, and budget
+  constant and changed only the reasoning policy: with reasoning explicitly
+  disabled, all six rows returned visible content in two evaluated tokens with
+  finish reason `stop`. At `256` tokens with reasoning enabled, reasoning fit
+  within budget and every row produced visible content. The non-thinking control
+  `granite4.1:3b` produced content in all six rows. The evidence verified and
+  reanalyzed offline byte-for-byte and stays ignored under
+  `local/evidence/thinking-diagnostic/`. This is a mechanism consistent with and
+  explanatory of the Phase 4 output-budget association; that curve stands exactly
+  as recorded and is neither replaced nor corrected. Two limits are part of the
+  result and are recorded with it: the retained runs sent no reasoning policy
+  rather than an enabled one and this diagnostic has no unset-policy arm, and
+  only the fact-check boundary was exercised live, so the chat and answer-matrix
+  empty responses are consistent with but untested by it. No quality,
+  factuality, reliability, ranking, or model-selection claim follows, no closeout
+  is withdrawn, no adopt/revise/reject decision is made for the closed Phase 4
+  cycle, and no retained evidence was rerun, repaired, replaced, reanalyzed, or
+  mutated. Recorded in `docs/logs/2026-09-03-thinking-diagnostic-run.md`.
+
+- Recorded the Spring AI reasoning-field inspection and implemented the
+  provider-free half of the empty-response diagnostic. Spring AI's
+  `OllamaChatModel` routes Ollama's `message.thinking` into assistant-message
+  properties under the key `thinking` while `getOutput().getText()` returns
+  `message.content` only, and Spring AI documents that a thinking-capable model
+  auto-enables thinking when no policy is sent. Verified identical in `2.0.0`
+  sources and `2.0.1` bytecode and recorded in
+  `docs/logs/2026-09-03-thinking-field-inspection.md`; the inspection stands
+  independently of any run. Both local chat boundaries — the shared
+  `OllamaChatInvocation` and the fact-check `RecordingChatModel`, which does not
+  go through it — now record content, reasoning, reasoning presence, finish
+  reason, evaluated output tokens, the requested reasoning policy, and the
+  adapter's handling of that policy through one shared `ChatResponseCapture`,
+  never merging content and reasoning. A provider-neutral `ChatReasoningPolicy`
+  makes reasoning explicit, with `OllamaReasoningOptions` keeping Spring AI's
+  `ThinkOption` inside the Ollama adapter; `PROVIDER_DEFAULT` sends nothing and
+  is deliberately distinct from `DISABLED`. The new opt-in `thinkingDiagnostic`,
+  `thinkingDiagnosticVerify`, and `thinkingDiagnosticReanalyze` tasks lock five
+  arms in a fixed order — a subject model with reasoning explicitly enabled and
+  explicitly disabled at `64` output tokens, the same pair at `256`, and a
+  non-thinking control at `64` — over the tracked public-safe fact-check fixture
+  catalog in its confirmed order at temperature `0.0`, seed `42`, `PT2M`, one
+  attempt per row, no pull, and 30 retained rows, writing evidence under
+  `local/evidence/thinking-diagnostic/`. Recorded content and reasoning stay in
+  the ignored raw artifact; the deterministic summary carries per-arm aggregates
+  only. Per the owner's schema and protocol decisions, the new fields and the
+  reasoning protocol setting exist only in the new suite: the chat, Anthropic,
+  answer, and fact-check suites keep their protocol versions and row schemas,
+  still send no reasoning policy, and their retained evidence still verifies and
+  reanalyzes. No model was called, and no evidence was run, rerun, repaired,
+  replaced, reanalyzed, or mutated.
+
+- Migrated the formal evidence lifecycle to a durable private root. Every
+  suite now allocates new run evidence only under
+  `setaccio-lab/local/evidence/<suite>/<run-id>/`, which is ignored but is not
+  a Gradle output directory, so `./gradlew clean` cannot remove it. A new
+  shared `EvidenceSuiteRoot` contract owns the root, direct-child, path
+  traversal, and symbolic-link policy for all twelve suite roots
+  (`chat-matrix`, `anthropic-chat-matrix`, `evaluation-matrix`,
+  `retrieval-evaluation`, `retrieval-embedding`, `retrieval-answer`,
+  `retrieval-relevancy`, `tool-compatibility`,
+  `tool-compatibility-human-review`, `tool-search-matrix`, `vision-matrix`,
+  `vision-human-review`), replacing twenty-plus independent reimplementations;
+  each suite keeps only its own date and run-id rule. Every writer, verifier,
+  reanalyzer, comparison, cohort frontier, human-review preparer, paired-arm,
+  multi-arm, and downstream source-evidence consumer now resolves through it.
+  CLI option names and explicit-path behavior are unchanged. Readers still
+  accept a legacy `build/<suite>/<run-id>` path so evidence saved before this
+  change can be verified, compared, and consumed; that acceptance is read-only
+  and authorizes no rewrite, repair, reanalysis into, or move of
+  old evidence. Direct-child, date/run-id, traversal, symlink, non-overwrite,
+  and fresh-allocation safeguards are preserved, and the Tool Search reader,
+  previously the loosest, is now held to the same direct-child rule. Ordinary
+  interactive endpoint output under `build/lab-results/`, compilation output,
+  and unrelated generated files are untouched. Before the path change the
+  surviving Phase 5 R4 run was copied byte-for-byte from
+  `setaccio-lab/build/retrieval-embedding/2026-09-02-r4-qwen3-embedding-0-6b/`
+  into the durable root; both manifest-listed artifacts verified against the
+  copied manifest, all three files compared identical, and the recomputed
+  source hashes were unchanged. No run, rerun, reanalysis, verifier
+  invocation, model call, or evidence mutation occurred. Recorded in
+  `docs/logs/2026-09-03-durable-evidence-retention.md`.
+
 - Recorded read-only `ollama show` capability observations for the four
   already-installed artifacts that appear in retained closeouts, in
   `docs/logs/2026-09-02-model-capability-observations.md`. Every empty-response
@@ -43,6 +229,28 @@ and this project follows [Semantic Versioning](https://semver.org/).
   and establishes no embedding quality, semantic relevance, or model ranking.
 
 ### Fixed
+
+- Kept legacy `build/<suite>/<run-id>` evidence strictly read-only. Every
+  offline reanalyzer now rejects it before it can rewrite a deterministic
+  `SUMMARY.md`; verifiers, comparisons, and source-evidence consumers retain
+  read-only legacy support. Hardened thinking-diagnostic offline analysis to
+  lock retained protocol and prompt identity, recompute each fixture document
+  and claim BLAKE3 identity, and reject incoherent outcome or attempt fields
+  before a summary can be rewritten. No evidence was read, changed, or
+  allocated, and no provider was contacted. Recorded in
+  `docs/logs/2026-09-03-pr77-evidence-review-followup.md`.
+
+- Corrected both human-review Gradle task defaults to pass their fixed durable
+  roots: `local/evidence/tool-compatibility-human-review` for
+  `toolCompatibilityHumanReviewPrepare` and
+  `local/evidence/vision-human-review` for `visionHumanReviewPrepare`. The
+  shared `EvidenceSuiteRoot` contract now rejects an existing symbolic link in
+  every root-to-run component before a writer can allocate through it or a
+  reader can use saved evidence, including durable `local`, `local/evidence`,
+  and suite components as well as legacy `build` components. Fixed worksheet
+  roots receive the same guard. No formal evidence was allocated, read,
+  changed, or published, and no provider was contacted. Recorded in
+  `docs/logs/2026-09-03-durable-evidence-root-followup.md`.
 
 - Treated Spring AI's `EmptyUsage` marker as unavailable in the vision
   invocation boundary instead of recording synthetic zero-token usage.

@@ -60,8 +60,8 @@ public final class ToolCompatibilityPromptMatrixComparisonRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --baseline-run <saved-build-directory> "
-                            + "--candidate-run <saved-build-directory>");
+                    "Expected --baseline-run <saved-evidence-directory> "
+                            + "--candidate-run <saved-evidence-directory>");
         }
     }
 }

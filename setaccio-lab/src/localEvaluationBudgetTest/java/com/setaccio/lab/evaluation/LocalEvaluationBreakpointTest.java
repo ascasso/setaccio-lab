@@ -37,17 +37,17 @@ class LocalEvaluationBreakpointTest {
     @Test
     void acceptsOnlyAllFiveRunnerOutputDirectories() {
         LocalEvaluationBreakpointRunner.Arguments parsed = LocalEvaluationBreakpointRunner.Arguments.parse(new String[] {
-                "--judge-model", "judge-model", "--output-dir-256", "build/evaluation-matrix/256",
-                "--output-dir-128", "build/evaluation-matrix/128", "--ollama-base-url", "http://localhost:11434",
-                "--output-dir-64", "build/evaluation-matrix/64", "--output-dir-192", "build/evaluation-matrix/192",
-                "--output-dir-96", "build/evaluation-matrix/96"
+                "--judge-model", "judge-model", "--output-dir-256", "local/evidence/evaluation-matrix/256",
+                "--output-dir-128", "local/evidence/evaluation-matrix/128", "--ollama-base-url", "http://localhost:11434",
+                "--output-dir-64", "local/evidence/evaluation-matrix/64", "--output-dir-192", "local/evidence/evaluation-matrix/192",
+                "--output-dir-96", "local/evidence/evaluation-matrix/96"
         });
 
-        assertThat(parsed.outputDirectories()).containsEntry(128, "build/evaluation-matrix/128");
+        assertThat(parsed.outputDirectories()).containsEntry(128, "local/evidence/evaluation-matrix/128");
         assertThat(parsed.outputDirectories()).hasSize(5);
         assertThatThrownBy(() -> LocalEvaluationBreakpointRunner.Arguments.parse(new String[] {
                 "--ollama-base-url", "http://localhost:11434", "--judge-model", "judge-model",
-                "--output-dir-64", "build/evaluation-matrix/64", "--output-dir-96", "build/evaluation-matrix/96"
+                "--output-dir-64", "local/evidence/evaluation-matrix/64", "--output-dir-96", "local/evidence/evaluation-matrix/96"
         })).isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -55,7 +55,7 @@ class LocalEvaluationBreakpointTest {
     void preflightsAllFiveArmsBeforeAllocatingAnyOutput() {
         Map<Integer, String> outputs = new LinkedHashMap<>();
         for (int tokens : LocalEvaluationBreakpointProtocol.MAX_TOKENS) {
-            outputs.put(tokens, "build/evaluation-matrix/2026-08-26-breakpoint-" + tokens);
+            outputs.put(tokens, "local/evidence/evaluation-matrix/2026-08-26-breakpoint-" + tokens);
         }
         LocalEvaluationBreakpointPreflight.Prepared prepared = new LocalEvaluationBreakpointPreflight().prepare(
                 new LocalEvaluationBreakpointPreflight.Input(

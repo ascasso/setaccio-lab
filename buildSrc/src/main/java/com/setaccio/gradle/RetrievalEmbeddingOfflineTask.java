@@ -43,7 +43,7 @@ public abstract class RetrievalEmbeddingOfflineTask extends DefaultTask {
         return runDir;
     }
 
-    @Option(option = "run-dir", description = "Required saved directory directly under build/retrieval-embedding/.")
+    @Option(option = "run-dir", description = "Required saved directory directly under local/evidence/retrieval-embedding/.")
     public void setRunDir(String runDir) {
         this.runDir = runDir;
     }
@@ -51,7 +51,7 @@ public abstract class RetrievalEmbeddingOfflineTask extends DefaultTask {
     @TaskAction
     public void inspectEvidence() {
         if (runDir == null || runDir.isBlank()) {
-            throw new GradleException(getName() + " requires --run-dir=<saved-build-directory>");
+            throw new GradleException(getName() + " requires --run-dir=<saved-evidence-directory>");
         }
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());

@@ -2,8 +2,6 @@ package com.setaccio.lab.retrieval;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -14,7 +12,10 @@ public final class RetrievalEvaluationOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Path runDirectory = resolveRunDirectory(parsed.runDirectory());
+        Path runDirectory = parsed.mode() == Mode.REANALYZE
+                ? RetrievalEvaluationProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                        Path.of(""), parsed.runDirectory(), "Run directory")
+                : resolveRunDirectory(parsed.runDirectory());
         RetrievalEvaluationRunner.Inputs inputs = RetrievalEvaluationRunner.loadInputs();
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         RetrievalEvaluationEvidence evidence = new RetrievalEvaluationEvidence(
@@ -34,18 +35,7 @@ public final class RetrievalEvaluationOfflineRunner {
     }
 
     static Path resolveRunDirectory(String value) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/retrieval-evaluation").normalize();
-        Path runDirectory = projectDirectory.resolve(value).normalize();
-        if (!evidenceRoot.equals(runDirectory.getParent())) {
-            throw new IllegalArgumentException(
-                    "Run directory must be directly under build/retrieval-evaluation/.");
-        }
-        if (Files.isSymbolicLink(runDirectory)
-                || !Files.isDirectory(runDirectory, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IllegalArgumentException("Run directory does not exist or is unsafe.");
-        }
-        return runDirectory;
+        return RetrievalEvaluationProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(Path.of(""), value, "Run directory");
     }
 
     private enum Mode {
@@ -88,7 +78,8 @@ public final class RetrievalEvaluationOfflineRunner {
 
         private static IllegalArgumentException usage() {
             return new IllegalArgumentException(
-                    "Expected --mode <verify|reanalyze> --run-dir <saved-build-directory>");
+                    "Expected --mode <verify|reanalyze> --run-dir <saved-evidence-directory-under-"
+                            + RetrievalEvaluationProtocol.EVIDENCE_ROOT.durableRelativePath() + ">");
         }
     }
 }

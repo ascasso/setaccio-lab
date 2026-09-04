@@ -81,7 +81,7 @@ public abstract class ToolCompatibilityPromptMatrixTask extends DefaultTask {
     @Optional
     public abstract Property<String> getBaselineOutputDir();
 
-    @Option(option = "baseline-output-dir", description = "Required new dated untreated directory directly under build/tool-compatibility/.")
+    @Option(option = "baseline-output-dir", description = "Required new dated untreated directory directly under local/evidence/tool-compatibility/.")
     public void setBaselineOutputDirOption(String value) {
         getBaselineOutputDir().set(value);
     }
@@ -90,7 +90,7 @@ public abstract class ToolCompatibilityPromptMatrixTask extends DefaultTask {
     @Optional
     public abstract Property<String> getCandidateOutputDir();
 
-    @Option(option = "candidate-output-dir", description = "Required new dated prompted directory directly under build/tool-compatibility/.")
+    @Option(option = "candidate-output-dir", description = "Required new dated prompted directory directly under local/evidence/tool-compatibility/.")
     public void setCandidateOutputDirOption(String value) {
         getCandidateOutputDir().set(value);
     }

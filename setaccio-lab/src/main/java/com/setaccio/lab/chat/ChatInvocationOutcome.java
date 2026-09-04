@@ -15,7 +15,8 @@ public record ChatInvocationOutcome(
         long latencyMillis,
         int attemptCount,
         ChatInvocationFailureCategory failureCategory,
-        String error
+        String error,
+        ChatResponseCapture capture
 ) {
     public ChatInvocationOutcome {
         modelIdentity = Objects.requireNonNull(modelIdentity, "modelIdentity must not be null");
@@ -62,7 +63,37 @@ public record ChatInvocationOutcome(
             if (rawResponse != null) {
                 throw new IllegalArgumentException("failed invocation must not record a response");
             }
+            if (capture != null && capture.thinkingPresence() != ChatThinkingPresence.UNAVAILABLE) {
+                throw new IllegalArgumentException("failed invocation must not record a response capture");
+            }
         }
+        if (capture != null && capture.content() != null && !capture.content().equals(rawResponse)) {
+            throw new IllegalArgumentException("captured content must match the recorded response text");
+        }
+    }
+
+    /**
+     * Retains the pre-capture argument order so existing suites construct outcomes unchanged.
+     * Their serialized evidence does not carry the capture.
+     */
+    public ChatInvocationOutcome(
+            ChatProviderModelIdentity modelIdentity,
+            ChatProviderOptionSupport optionSupport,
+            String promptId,
+            boolean invocationSucceeded,
+            String rawResponse,
+            String providerResponseId,
+            Integer promptTokens,
+            Integer completionTokens,
+            Integer totalTokens,
+            long latencyMillis,
+            int attemptCount,
+            ChatInvocationFailureCategory failureCategory,
+            String error
+    ) {
+        this(modelIdentity, optionSupport, promptId, invocationSucceeded, rawResponse, providerResponseId,
+                promptTokens, completionTokens, totalTokens, latencyMillis, attemptCount, failureCategory,
+                error, null);
     }
 
     public ChatInvocationOutcome(
@@ -80,7 +111,8 @@ public record ChatInvocationOutcome(
             String error
     ) {
         this(modelIdentity, optionSupport, promptId, invocationSucceeded, rawResponse, null,
-                promptTokens, completionTokens, totalTokens, latencyMillis, attemptCount, failureCategory, error);
+                promptTokens, completionTokens, totalTokens, latencyMillis, attemptCount, failureCategory,
+                error, null);
     }
 
     public boolean successful() {

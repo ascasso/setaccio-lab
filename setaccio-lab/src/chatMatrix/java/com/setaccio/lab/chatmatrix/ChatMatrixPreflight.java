@@ -91,16 +91,9 @@ final class ChatMatrixPreflight {
             throw new IllegalArgumentException("projectDirectory must not be null");
         }
         String requested = requireOption(value, "--output-dir");
-        Path project = projectDirectory.toAbsolutePath().normalize();
-        Path root = project.resolve("build/chat-matrix").normalize();
-        Path output = project.resolve(requested).normalize();
-        if (!root.equals(output.getParent())) {
-            throw new IllegalArgumentException("Output must be one new directory directly under build/chat-matrix/");
-        }
+        Path output = ChatMatrixProtocol.EVIDENCE_ROOT.resolveNewRunDirectory(
+                projectDirectory, requested, "Output");
         String runId = output.getFileName().toString();
-        if (!runId.matches("[A-Za-z0-9][A-Za-z0-9._-]*")) {
-            throw new IllegalArgumentException("Output directory name must be one safe path segment");
-        }
         Matcher matcher = DATE.matcher(runId);
         if (!matcher.matches()) {
             throw new IllegalArgumentException("Output directory name must contain a YYYY-MM-DD date");

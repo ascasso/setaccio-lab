@@ -111,7 +111,7 @@ a model, attach live execution to a default lifecycle, or add a dependency.
 
 - `:setaccio-lab:localEvaluation` requires an explicit loopback URL, installed
   judge tag, positive token limit, ISO-8601 timeout up to ten minutes, and a
-  new dated child of ignored `build/evaluation-matrix/`.
+  new dated child of ignored `local/evidence/evaluation-matrix/`.
 - Preflight locks the A1 prompt/catalog/review digests and confirmed fixture
   order, validates every option and output path, and resolves the requested
   installed tag to its normalized name and full immutable Ollama digest before
@@ -220,6 +220,31 @@ work, so the future budget experiment does not need another local-call or
 local-run approval once its implementation scope is explicitly started. Its
 paired-evidence and clean-baseline safeguards remain unchanged.
 
+### Separately started reasoning-default and boundary diagnostic
+
+The 2026-09-04 successor diagnostic is separate from A5, A6, and the completed
+output-budget work. Its version-aware protocol preserves the first reasoning
+diagnostic and pre-registers one new 42-row schedule at `64` tokens: the subject
+under `PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED` at both the fact-check and
+provider-neutral chat boundaries, plus a provider-default non-thinking chat
+control. Both boundaries receive the identical rendered prompt. Within-boundary
+policy contrast is controlled; matching-policy boundary contrast is controlled
+for the prompt and recorded settings, while remaining descriptive for observed
+runtime behavior. Chat rows keep fixture identity and expected-verdict
+provenance but intentionally carry no evaluator verdict. This does not rerun,
+repair, replace, reanalyze, or reinterpret A5 or any Phase 4 evidence and does
+not decide whether a closed suite should change its reasoning policy.
+
+The single v2 run completed from clean commit `acc3979` under Ollama `0.33.3`
+and retained all 42 planned one-attempt rows. At each boundary, subject
+`PROVIDER_DEFAULT` matched `ENABLED`: one of six rows had content and five had
+reasoning, reached all 64 evaluated output tokens, and finished with `length`.
+Subject `DISABLED` produced content in all six rows at each boundary with no
+reasoning; the provider-default non-thinking chat control did the same. The run
+therefore measures the default-policy and chat-boundary links for the exact
+protocol, without establishing historical causation or changing A5, A6, any
+closed phase, or any existing suite policy.
+
 Testcontainers disposition for this cycle: **defer**. Host-Ollama execution,
 provenance, and offline verification worked; containerization would test model
 provisioning and service-connection wiring, not the observed verdict-yield
@@ -263,7 +288,7 @@ for explicitly requested work using already-installed loopback models.
 - Preserve raw `yes` / `no` output separately from expectation agreement and
   repetition consistency. Do not coerce any other text into a verdict.
 - Write immutable raw JSON, a shared v1 evidence manifest, and deterministic
-  Markdown summary under ignored `build/evaluation-matrix/` output. Add
+  Markdown summary under ignored `local/evidence/evaluation-matrix/` output. Add
   standalone offline verification and reanalysis before the first controlled
   live run.
 - Treat a dirty worktree as diagnostic/non-final provenance, not as missing

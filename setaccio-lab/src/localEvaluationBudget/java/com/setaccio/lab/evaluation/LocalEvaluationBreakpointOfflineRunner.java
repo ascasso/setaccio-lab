@@ -2,8 +2,6 @@ package com.setaccio.lab.evaluation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -17,7 +15,7 @@ public final class LocalEvaluationBreakpointOfflineRunner {
 
     public static void main(String[] args) {
         Arguments parsed = Arguments.parse(args);
-        Map<Integer, Path> directories = resolveRunDirectories(parsed.runDirectories());
+        Map<Integer, Path> directories = resolveRunDirectories(parsed.runDirectories(), parsed.mode());
         ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
         LocalFactCheckFixtureCatalog catalog = new LocalFactCheckFixtureCatalog(objectMapper);
         LocalEvaluationBreakpointEvidence evidence = new LocalEvaluationBreakpointEvidence(
@@ -37,17 +35,18 @@ public final class LocalEvaluationBreakpointOfflineRunner {
     }
 
     static Map<Integer, Path> resolveRunDirectories(Map<Integer, String> values) {
-        Path projectDirectory = Path.of("").toAbsolutePath().normalize();
-        Path evidenceRoot = projectDirectory.resolve("build/evaluation-matrix").normalize();
+        return resolveRunDirectories(values, Mode.VERIFY);
+    }
+
+    private static Map<Integer, Path> resolveRunDirectories(Map<Integer, String> values, Mode mode) {
         Map<Integer, Path> resolved = new LinkedHashMap<>();
         for (int tokens : LocalEvaluationBreakpointProtocol.MAX_TOKENS) {
-            Path directory = projectDirectory.resolve(values.get(tokens)).normalize();
-            if (!evidenceRoot.equals(directory.getParent()) || Files.isSymbolicLink(directory)
-                    || !Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
-                throw new IllegalArgumentException(
-                        "Breakpoint run directory must exist safely directly under build/evaluation-matrix/.");
-            }
-            resolved.put(tokens, directory);
+            Path runDirectory = mode == Mode.REANALYZE
+                    ? LocalEvaluationProtocol.EVIDENCE_ROOT.requireReanalyzableRunDirectory(
+                            Path.of(""), values.get(tokens), "Breakpoint run directory")
+                    : LocalEvaluationProtocol.EVIDENCE_ROOT.requireSavedRunDirectory(
+                            Path.of(""), values.get(tokens), "Breakpoint run directory");
+            resolved.put(tokens, runDirectory);
         }
         return Map.copyOf(resolved);
     }

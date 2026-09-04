@@ -11,10 +11,10 @@ class ToolCompatibilityPromptMatrixRunnerArgumentsTest {
     void requiresEveryPairedLiveOptionExactlyOnceWithoutPromptSelection() {
         ToolCompatibilityPromptMatrixRunner.Arguments arguments =
                 ToolCompatibilityPromptMatrixRunner.Arguments.parse(new String[] {
-                        "--candidate-output-dir", "build/tool-compatibility/2026-08-21-prompted",
+                        "--candidate-output-dir", "local/evidence/tool-compatibility/2026-08-21-prompted",
                         "--timeout", "PT2M",
                         "--model", ToolCompatibilityProtocol.INITIAL_MODEL,
-                        "--baseline-output-dir", "build/tool-compatibility/2026-08-21-baseline",
+                        "--baseline-output-dir", "local/evidence/tool-compatibility/2026-08-21-baseline",
                         "--ollama-base-url", "http://localhost:11434",
                         "--max-tokens", "512"
                 });
@@ -24,14 +24,14 @@ class ToolCompatibilityPromptMatrixRunnerArgumentsTest {
                 ToolCompatibilityProtocol.INITIAL_MODEL,
                 "512",
                 "PT2M",
-                "build/tool-compatibility/2026-08-21-baseline",
-                "build/tool-compatibility/2026-08-21-prompted"));
+                "local/evidence/tool-compatibility/2026-08-21-baseline",
+                "local/evidence/tool-compatibility/2026-08-21-prompted"));
         assertThatThrownBy(() -> ToolCompatibilityPromptMatrixRunner.Arguments.parse(new String[] {
                 "--ollama-base-url", "http://localhost:11434",
                 "--model", ToolCompatibilityProtocol.INITIAL_MODEL,
                 "--max-tokens", "512",
                 "--timeout", "PT2M",
-                "--baseline-output-dir", "build/tool-compatibility/2026-08-21-baseline",
+                "--baseline-output-dir", "local/evidence/tool-compatibility/2026-08-21-baseline",
                 "--prompt", "tool-system-discipline"
         })).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> ToolCompatibilityPromptMatrixRunner.Arguments.parse(new String[] {
@@ -39,9 +39,9 @@ class ToolCompatibilityPromptMatrixRunnerArgumentsTest {
                 "--model", ToolCompatibilityProtocol.INITIAL_MODEL,
                 "--max-tokens", "512",
                 "--timeout", "PT2M",
-                "--baseline-output-dir", "build/tool-compatibility/2026-08-21-baseline",
-                "--candidate-output-dir", "build/tool-compatibility/2026-08-21-prompted",
-                "--candidate-output-dir", "build/tool-compatibility/2026-08-21-other"
+                "--baseline-output-dir", "local/evidence/tool-compatibility/2026-08-21-baseline",
+                "--candidate-output-dir", "local/evidence/tool-compatibility/2026-08-21-prompted",
+                "--candidate-output-dir", "local/evidence/tool-compatibility/2026-08-21-other"
         })).isInstanceOf(IllegalArgumentException.class);
     }
 }

@@ -42,7 +42,7 @@ public abstract class LocalEvaluationOfflineTask extends DefaultTask {
         return runDir;
     }
 
-    @Option(option = "run-dir", description = "Required saved directory under build/evaluation-matrix/.")
+    @Option(option = "run-dir", description = "Required saved directory under local/evidence/evaluation-matrix/.")
     public void setRunDir(String runDir) {
         this.runDir = runDir;
     }
@@ -50,7 +50,7 @@ public abstract class LocalEvaluationOfflineTask extends DefaultTask {
     @TaskAction
     public void inspectEvidence() {
         if (runDir == null || runDir.isBlank()) {
-            throw new GradleException(getName() + " requires --run-dir=<saved-build-directory>");
+            throw new GradleException(getName() + " requires --run-dir=<saved-evidence-directory>");
         }
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());

@@ -46,7 +46,7 @@ public abstract class ToolCompatibilityOfflineTask extends DefaultTask {
     @Optional
     public abstract Property<String> getRunDir();
 
-    @Option(option = "run-dir", description = "Required saved directory directly under build/tool-compatibility/.")
+    @Option(option = "run-dir", description = "Required saved directory directly under local/evidence/tool-compatibility/.")
     public void setRunDirOption(String value) {
         getRunDir().set(value);
     }
@@ -56,7 +56,7 @@ public abstract class ToolCompatibilityOfflineTask extends DefaultTask {
         String runDirectory = getRunDir().getOrNull();
         if (runDirectory == null || runDirectory.isBlank()) {
             throw new GradleException(
-                    getName() + " requires --run-dir=<saved-build-directory>");
+                    getName() + " requires --run-dir=<saved-evidence-directory>");
         }
         execOperations.javaexec(spec -> {
             spec.setClasspath(getClasspath());

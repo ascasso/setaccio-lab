@@ -62,7 +62,7 @@ final class ToolCompatibilityCohortTestFixtures {
                 "MLX");
         ToolCompatibilityCohortPreflight.Prepared preflight =
                 new ToolCompatibilityCohortPreflight.Prepared(
-                        Path.of("build/tool-compatibility/2026-08-25-comparison-fixture"),
+                        Path.of("local/evidence/tool-compatibility/2026-08-25-comparison-fixture"),
                         RUNTIME_VERSION,
                         List.of(firstPeer, secondPeer),
                         reference);
@@ -104,7 +104,7 @@ final class ToolCompatibilityCohortTestFixtures {
         }
         ToolCompatibilityCohortPreflight.Prepared preflight =
                 new ToolCompatibilityCohortPreflight.Prepared(
-                        Path.of("build/tool-compatibility/2026-08-25-frontier-fixture"),
+                        Path.of("local/evidence/tool-compatibility/2026-08-25-frontier-fixture"),
                         RUNTIME_VERSION,
                         identities.subList(0, identities.size() - 1),
                         identities.getLast());
@@ -163,7 +163,7 @@ final class ToolCompatibilityCohortTestFixtures {
                 ToolCompatibilityCohortSeedSemantics.UNSUPPORTED,
                 "MLX");
         return new ToolCompatibilityCohortPreflight.Prepared(
-                Path.of("build/tool-compatibility/2026-08-23-fixture"),
+                Path.of("local/evidence/tool-compatibility/2026-08-23-fixture"),
                 RUNTIME_VERSION,
                 List.of(peer),
                 reference);
