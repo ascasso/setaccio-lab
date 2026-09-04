@@ -222,17 +222,26 @@ No completed phase places a live model call in default tests or CI.
   and evaluated tokens before `FactCheckingEvaluator` consumes the response;
   the explicit policy reaching every judge request; and the unchanged
   no-policy default.
-- Cover the diagnostic protocol lock: five arms in a fixed order, every arm
-  carrying an explicit policy, each paired arm differing only in that policy,
-  and every tracked fixture scheduled once per arm in catalog order.
-- Cover diagnostic execution provider-free through an injected model factory:
+- Cover the current diagnostic protocol lock: seven 64-token arms in a fixed
+  order, every arm naming its policy, `PROVIDER_DEFAULT` accepted only as a
+  measured pre-registered condition, policy pairs derived within a boundary,
+  matching-policy boundary pairs derived across boundaries, and every tracked
+  fixture scheduled once per arm in catalog order.
+- Cover diagnostic execution provider-free through injected fact-check and chat
+  factories:
   all four content/reasoning outcome combinations, retention of failed rows
   without retry or omission, one attempt per row, and per-row recording of the
-  advertised thinking capability.
+  advertised thinking capability and execution boundary. Assert that both
+  boundaries receive the identical rendered prompt, and that chat rows retain
+  fixture hashes and expected verdict provenance while carrying no judge verdict
+  or expectation match.
 - Cover the diagnostic evidence round trip: write, verify, deterministic
   reanalysis producing a byte-identical summary, rejection of a tampered raw
   artifact, a drifted summary, an unexpected extra artifact, an incomplete run,
-  and a row that drifted from its locked schedule position.
+  and a row that drifted from its locked schedule position. Exercise both v2
+  round-trip integrity and a v1 fixture whose old raw wire shape, manifest
+  settings, analyzer rules, and deterministic report remain readable,
+  verifiable, and reanalyzable.
 - Cover evidence compatibility for the suites that were deliberately left
   alone: the chat and fact-check row schemas carry no reasoning field, project
   identically whether or not an outcome carries a capture, and still

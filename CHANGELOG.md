@@ -9,6 +9,78 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Recorded the project owner's decisions on the three items raised in the
+  2026-09-04 options memo. Reasoning policy in the existing chat matrix,
+  Anthropic portability matrix, Phase 5 answer matrix, and fact-check suites:
+  status quo, `PROVIDER_DEFAULT` unchanged, no schema change. The 2026-09-03
+  LFM tool-capability diagnostic against closed Phase 1/Phase 2: as is, no
+  change to their recorded status. The second ignored-evidence loss: waived,
+  in the same shape as the 2026-08-02 vision waiver, after a read-only
+  recovery search across the repository workspace (including stray
+  pre-durable-root `build/evaluation-matrix` and `build/tool-compatibility`
+  directories, both empty), `~/.Trash`, `/tmp`/`$TMPDIR`, and Spotlight found
+  no copy of the missing evidence; no closeout is withdrawn and no named run
+  may be recreated under its original name. Recorded in
+  `docs/logs/2026-09-04-three-pending-decisions.md`.
+
+- Prepared an options memo for three recorded open decisions — explicit
+  reasoning policy in the existing chat matrix, Anthropic portability matrix,
+  Phase 5 answer matrix, and fact-check suites; whether the 2026-09-03 LFM
+  tool-capability diagnostic warrants any change to the closed Phase 1/Phase 2
+  status; and how to treat the second ignored-evidence loss recorded in the
+  Evidence Retention Status section. It verifies the two costs named for the
+  reasoning-policy decision against current source, finding the
+  `ChatGenerationOption`/`ChatProviderOptionSupport` deserialization risk
+  applies only to the chat matrix and Anthropic chat matrix suites (not
+  fact-check or the Phase 5 answer suite, whose raw row types do not carry
+  that class), and confirms by direct directory listing that no chat matrix,
+  Anthropic chat matrix, fact-check, Phase 5 R3/R5/R6, or vision-matrix
+  evidence is currently present on disk to be broken by either named cost.
+  Lays out options for each decision with their exact costs and does not
+  adopt, revise, or reject any of them. Recorded in
+  `docs/logs/2026-09-04-pending-decisions-options-memo.md`.
+
+- Completed the single protocol-v2 reasoning-default and execution-boundary
+  diagnostic on 2026-09-04 from clean commit `acc3979` under Ollama `0.33.3`,
+  retaining all 42 planned one-attempt rows with no failure, timeout, retry,
+  repair, replacement, or omission. The required `gemma4:e2b` and
+  `granite4.1:3b` full digests matched before allocation and after execution; no
+  model was pulled or substituted. At both the fact-check and provider-neutral
+  chat boundaries, subject `PROVIDER_DEFAULT` and `ENABLED` each produced
+  content in one of six rows, reasoning in five, and five full-budget rows with
+  finish reason `length`; subject `DISABLED` produced content in all six with no
+  reasoning and no budget saturation. The provider-default non-thinking chat
+  control produced content in all six with no reasoning. Matching-policy
+  aggregates were identical across boundaries. The new v2 evidence verified
+  and reanalyzed offline without hash drift, and the retained 2026-09-03 v1 run
+  also verified and regenerated its byte-identical summary before the new run.
+  This measures the default-policy and chat-boundary links for only the exact
+  artifacts, prompt, catalog, seed, budget, and runtime; it does not establish
+  historical causation, change an existing suite's reasoning policy, revisit a
+  closed phase, or make a quality, factuality, reliability, ranking, or model
+  selection claim. Raw content, reasoning, evaluator output, and per-row
+  payloads remain ignored. Recorded in
+  `docs/logs/2026-09-04-reasoning-default-boundary-run.md`.
+
+- Implemented protocol v2 for the explicitly started reasoning-default and
+  execution-boundary diagnostic without changing any closed suite. The fixed
+  42-row schedule runs the tracked six fixtures once through seven `64`-token
+  arms: subject `PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED` at both the
+  fact-check and provider-neutral chat boundaries, plus a provider-default
+  non-thinking chat control, at temperature `0.0`, seed `42`, `PT2M`, one
+  attempt, and no pull. Both boundaries receive the identical rendered
+  fact-check prompt. Execution boundary is recorded on every arm and row; chat
+  rows keep fixture hashes and expected verdict provenance but no normalized
+  judge verdict or expectation match. Provider default is accepted only as an
+  explicitly marked pre-registered measured condition. Version-aware raw
+  readers, manifest reconstruction, analyzers, and report rendering retain
+  protocol v1 compatibility, including its old arm/row wire shapes and
+  byte-identical summary regeneration. The Gradle task names and CLI options
+  are unchanged, default tests remain provider-free, and this implementation
+  makes no live observation, changes no retained closeout, and authorizes no
+  policy change in an existing suite. Recorded in
+  `docs/logs/2026-09-04-reasoning-default-boundary-implementation.md`.
+
 - Completed a small standalone LFM tool-capability diagnostic on 2026-09-03
   against the currently installed Phase 1/Phase 2 artifact
   `hf.co/ermiaazarkhalili/LFM2.5-2.6B-SFT-Fable5-Glint-GGUF:Q8_0` (full digest

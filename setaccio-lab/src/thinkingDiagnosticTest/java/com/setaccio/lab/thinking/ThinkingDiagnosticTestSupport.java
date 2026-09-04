@@ -2,10 +2,19 @@ package com.setaccio.lab.thinking;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.setaccio.core.service.ApacheCommonsBlake3HashingServiceImpl;
+import com.setaccio.lab.chat.ChatInvocationFailureCategory;
+import com.setaccio.lab.chat.ChatInvocationOutcome;
+import com.setaccio.lab.chat.ChatReasoningPolicy;
+import com.setaccio.lab.chat.ChatReasoningSupport;
 import com.setaccio.lab.chat.ChatResponseCapture;
+import com.setaccio.lab.chat.OllamaChatModelIdentity;
 import com.setaccio.lab.evaluation.LocalFactCheckFixtureCatalog;
+import com.setaccio.lab.evaluation.LocalFactCheckExpectedVerdict;
+import com.setaccio.lab.evaluation.LocalFactCheckJudgeVerdict;
 import com.setaccio.lab.evaluation.LocalFactCheckPromptDefinition;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -58,6 +67,49 @@ final class ThinkingDiagnosticTestSupport {
                 ThinkingDiagnosticModelRole.CONTROL, control());
     }
 
+    static ThinkingDiagnosticResult legacyResult() {
+        LocalFactCheckFixtureCatalog catalog = catalog();
+        LocalFactCheckPromptDefinition prompt = prompt();
+        var blake3 = new ApacheCommonsBlake3HashingServiceImpl();
+        List<ThinkingDiagnosticScheduleEntry> schedule = ThinkingDiagnosticProtocol.schedule(
+                catalog, ThinkingDiagnosticProtocol.LEGACY_VERSION);
+        List<ThinkingDiagnosticRow> rows = schedule.stream().map(entry -> {
+            ThinkingDiagnosticArm arm = ThinkingDiagnosticProtocol.requireArm(
+                    ThinkingDiagnosticProtocol.LEGACY_VERSION, entry.armId());
+            var fixture = catalog.require(entry.fixtureId());
+            LocalFactCheckJudgeVerdict verdict = fixture.expectedVerdict()
+                    == LocalFactCheckExpectedVerdict.SUPPORTED
+                    ? LocalFactCheckJudgeVerdict.SUPPORTED
+                    : LocalFactCheckJudgeVerdict.UNSUPPORTED;
+            return new ThinkingDiagnosticRow(
+                    entry.sequence(), arm.armId(), arm.executionBoundary(), arm.modelRole(),
+                    arm.modelRole() == ThinkingDiagnosticModelRole.SUBJECT
+                            ? "subject:model" : "control:model",
+                    arm.reasoningPolicy(), ChatReasoningSupport.APPLIED,
+                    arm.modelRole() == ThinkingDiagnosticModelRole.SUBJECT,
+                    arm.maxOutputTokens(), entry.seed(), fixture.id(), fixture.pairId(),
+                    fixture.expectedVerdict(), blake3.hashString(fixture.document()),
+                    blake3.hashString(fixture.claim()), true, verdict == LocalFactCheckJudgeVerdict.SUPPORTED
+                            ? "yes" : "no", null, com.setaccio.lab.chat.ChatThinkingPresence.ABSENT,
+                    "stop", 2, 11, 13, verdict, true,
+                    ThinkingDiagnosticOutcome.CONTENT_WITHOUT_THINKING, 1L, 1, null);
+        }).toList();
+        return new ThinkingDiagnosticResult(
+                ThinkingDiagnosticProtocol.LEGACY_VERSION,
+                ThinkingDiagnosticProtocol.PROVIDER,
+                ThinkingDiagnosticProtocol.ENDPOINT_CATEGORY,
+                ThinkingDiagnosticProtocol.EXECUTION_STRATEGY,
+                ThinkingDiagnosticProtocol.PULL_MODEL_STRATEGY,
+                ThinkingDiagnosticProtocol.TEMPERATURE,
+                ThinkingDiagnosticProtocol.SEED,
+                ThinkingDiagnosticProtocol.MAX_ATTEMPTS,
+                ThinkingDiagnosticProtocol.REQUEST_TIMEOUT.toMillis(),
+                null, null, null,
+                ThinkingDiagnosticProtocol.arms(ThinkingDiagnosticProtocol.LEGACY_VERSION),
+                List.of(subject(true), control()), "0.33.2", prompt.id(), prompt.version(),
+                prompt.sha256(), catalog.id(), catalog.version(), catalog.sha256(), schedule, rows);
+    }
+
     /**
      * A chat model that answers according to the reasoning policy actually present on the
      * request options, so tests assert propagation and capture in one place.
@@ -71,7 +123,7 @@ final class ThinkingDiagnosticTestSupport {
             OllamaChatOptions options = (OllamaChatOptions) prompt.getOptions();
             ThinkOption think = options.getThinkOption();
             observedPolicies.add(think);
-            if (ThinkOption.ThinkBoolean.ENABLED.equals(think)) {
+            if (think == null || ThinkOption.ThinkBoolean.ENABLED.equals(think)) {
                 return response("", "reasoning trace", "length", 11, options.getNumPredict());
             }
             return response("no", null, "stop", 11, 2);
@@ -83,7 +135,57 @@ final class ThinkingDiagnosticTestSupport {
         }
 
         List<ThinkOption> observedPolicies() {
+            return Collections.unmodifiableList(new ArrayList<>(observedPolicies));
+        }
+    }
+
+    static final class PolicyAwareChatFactory implements ThinkingDiagnosticChatFactory {
+
+        private final List<ChatReasoningPolicy> observedPolicies = new ArrayList<>();
+        private final List<String> observedPrompts = new ArrayList<>();
+
+        @Override
+        public com.setaccio.lab.chat.ChatInvocation create(
+                OllamaChatModelIdentity identity,
+                com.setaccio.lab.chat.ChatGenerationSettings settings,
+                ChatReasoningPolicy reasoningPolicy
+        ) {
+            return request -> {
+                observedPolicies.add(reasoningPolicy);
+                observedPrompts.add(request.prompt().text());
+                boolean reasons = reasoningPolicy != ChatReasoningPolicy.DISABLED;
+                ChatResponse response = reasons
+                        ? response("", "reasoning trace", "length", 11, settings.maxOutputTokens())
+                        : response("no", null, "stop", 11, 2);
+                ChatReasoningSupport support = reasoningPolicy == ChatReasoningPolicy.PROVIDER_DEFAULT
+                        ? ChatReasoningSupport.NOT_REQUESTED : ChatReasoningSupport.APPLIED;
+                ChatResponseCapture capture = ChatResponseCapture.from(response, reasoningPolicy, support);
+                return new ChatInvocationOutcome(
+                        identity,
+                        com.setaccio.lab.chat.ChatProviderOptionSupport.supportsAll(),
+                        request.prompt().id(),
+                        true,
+                        capture.content(),
+                        null,
+                        11,
+                        reasons ? settings.maxOutputTokens() : 2,
+                        reasons ? 11 + settings.maxOutputTokens() : 13,
+                        1L,
+                        1,
+                        capture.content() == null || capture.content().isBlank()
+                                ? ChatInvocationFailureCategory.EMPTY_RESPONSE
+                                : ChatInvocationFailureCategory.NONE,
+                        null,
+                        capture);
+            };
+        }
+
+        List<ChatReasoningPolicy> observedPolicies() {
             return List.copyOf(observedPolicies);
+        }
+
+        List<String> observedPrompts() {
+            return List.copyOf(observedPrompts);
         }
     }
 

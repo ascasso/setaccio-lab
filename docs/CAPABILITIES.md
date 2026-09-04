@@ -211,22 +211,35 @@ provider-neutral `ChatReasoningPolicy` has `ENABLED`, `DISABLED`, and
 `ThinkOption`, which stays inside the Ollama adapter. `PROVIDER_DEFAULT` sends
 nothing and is not the same as `DISABLED`.
 
-The opt-in `thinkingDiagnostic` task is a new diagnostic protocol with its own
-suite, schema, and manifest settings. It reuses the tracked public-safe
+The opt-in `thinkingDiagnostic` task has a versioned diagnostic protocol with
+its own suite, schema, and manifest settings. It reuses the tracked public-safe
 fact-check fixture catalog, its confirmed ordering, and the tracked
 `local-fact-check` prompt, but it is not a rerun, repair, replacement, or
 reanalysis of the Phase 4 fact-check evidence and it never writes into that
-suite. It locks five arms in a fixed order: a subject model with reasoning
-explicitly enabled and explicitly disabled at 64 output tokens, the same pair
-at 256, and a non-thinking control model with reasoning explicitly disabled at
-64. Each paired subject arm holds prompt, fixture order, seed, temperature,
-timeout, and every non-reasoning setting constant, so the only difference
-inside a pair is the reasoning policy. Every one of its 30 rows is one logical
-attempt at temperature `0.0`, seed `42`, `PT2M`, and pull strategy `never`,
-and every row is retained.
+suite. Protocol v1 is the completed five-arm, 30-row 2026-09-03 diagnostic.
+Protocol v2 locks seven 64-token arms: `PROVIDER_DEFAULT`, `ENABLED`, and
+`DISABLED` for the subject at the fact-check boundary; the same three policies
+for the subject at the provider-neutral chat invocation boundary; and a
+`PROVIDER_DEFAULT` non-thinking chat control. Every arm names its policy, and a
+provider default is accepted only when that arm explicitly marks it as a
+measured pre-registered condition.
 
-`thinkingDiagnosticVerify` and `thinkingDiagnosticReanalyze` inspect saved
-diagnostic evidence offline without starting Spring or contacting a provider.
+The execution boundary is a per-arm and per-row dimension in v2. Both
+boundaries receive the identical fact-check template rendered with the same
+fixture document and claim, so policy comparisons within a boundary and the
+matching-policy boundary comparisons are pre-registered as controlled. Chat
+rows retain the document and claim hashes and the fixture's expected verdict as
+input provenance, but record no normalized judge verdict or expectation match;
+their response outcome depends only on invocation success, content, and
+reasoning presence. The full 42-row schedule is sequential at temperature
+`0.0`, seed `42`, `64` output tokens, `PT2M`, one attempt, and pull strategy
+`never`.
+
+`thinkingDiagnosticVerify` and `thinkingDiagnosticReanalyze` inspect saved v1
+or v2 diagnostic evidence offline without starting Spring or contacting a
+provider. They dispatch by the raw protocol version: v1 retains its original
+arm and row wire shapes, manifest settings and engine, analyzer rules, and
+report bytes; v2 requires the new boundary and registered-default dimensions.
 Recorded content and reasoning stay in the ignored raw artifact; the
 deterministic summary reports per-arm aggregates only.
 
@@ -242,11 +255,28 @@ does not test the unset-policy behavior the retained runs actually used. The
 bounded closeout is in
 [`docs/logs/2026-09-03-thinking-diagnostic-run.md`](logs/2026-09-03-thinking-diagnostic-run.md).
 
+The v2 implementation and its pre-registered schedule are recorded in
+[`docs/logs/2026-09-04-reasoning-default-boundary-implementation.md`](logs/2026-09-04-reasoning-default-boundary-implementation.md);
+that implementation record does not itself claim a live result. One v2 run then
+completed from clean commit `acc3979` under Ollama `0.33.3`, retaining all 42
+one-attempt rows. At both boundaries, subject `PROVIDER_DEFAULT` and `ENABLED`
+each produced content in one of six rows, reasoning in five, and five rows at
+the full 64-token budget with finish reason `length`; `DISABLED` produced
+content in all six, no reasoning, and no row at budget. The non-thinking chat
+control under provider default produced content in all six with no reasoning.
+Both matching-policy boundary aggregates were identical. The evidence verified
+and reanalyzed offline without hash drift. This measures provider-default
+behavior and both boundaries for the exact protocol; it does not establish the
+historical cause of a retained response, generalize across artifacts or
+runtimes, or decide a policy change for a closed suite. See
+[`docs/logs/2026-09-04-reasoning-default-boundary-run.md`](logs/2026-09-04-reasoning-default-boundary-run.md).
+
 The Phase 2 chat matrix, Phase 5 answer matrix, and Phase 4 fact-check suite
 keep their existing protocol versions and row schemas. They continue to send no
 reasoning policy, so their retained evidence still verifies and reanalyzes
 unchanged, and their inherited-default behavior is recorded as a named
-limitation rather than silently changed.
+limitation rather than silently changed. The new result surfaces an implication
+for the owner but does not alter those protocols or make the policy decision.
 
 ## Local Fixture Evaluation Benchmark
 
@@ -361,4 +391,3 @@ All benchmarks are local-first and offline-safe by default:
   remove.
 
 Result filenames include nanosecond timestamps and short run identifiers so repeated runs cannot overwrite one another when they start at the same instant.
-

@@ -11,30 +11,34 @@ import org.junit.jupiter.api.Test;
 class ThinkingDiagnosticProtocolTest {
 
     @Test
-    void locksTheFivePreRegisteredArmsInAFixedOrder() {
+    void locksTheSevenPreRegisteredArmsInAFixedOrder() {
         assertThat(ThinkingDiagnosticProtocol.ARMS).extracting(ThinkingDiagnosticArm::armId)
                 .containsExactly(
-                        "subject-thinking-enabled-64",
-                        "subject-thinking-disabled-64",
-                        "subject-thinking-enabled-256",
-                        "subject-thinking-disabled-256",
-                        "control-thinking-disabled-64");
+                        "fact-check-subject-provider-default-64",
+                        "fact-check-subject-enabled-64",
+                        "fact-check-subject-disabled-64",
+                        "chat-subject-provider-default-64",
+                        "chat-subject-enabled-64",
+                        "chat-subject-disabled-64",
+                        "chat-control-provider-default-64");
         assertThat(ThinkingDiagnosticProtocol.ARMS)
-                .allSatisfy(arm -> assertThat(arm.reasoningPolicy())
-                        .isNotEqualTo(ChatReasoningPolicy.PROVIDER_DEFAULT));
+                .filteredOn(arm -> arm.reasoningPolicy() == ChatReasoningPolicy.PROVIDER_DEFAULT)
+                .allSatisfy(arm -> assertThat(arm.measuredProviderDefault()).isTrue());
     }
 
     @Test
     void holdsEveryNonReasoningSettingConstantInsideEachPairedIntervention() {
+        assertThat(ThinkingDiagnosticProtocol.PAIRED_ARMS).hasSize(6);
         for (List<String> pair : ThinkingDiagnosticProtocol.PAIRED_ARMS) {
-            ThinkingDiagnosticArm enabled = ThinkingDiagnosticProtocol.requireArm(pair.get(0));
-            ThinkingDiagnosticArm disabled = ThinkingDiagnosticProtocol.requireArm(pair.get(1));
+            ThinkingDiagnosticArm first = ThinkingDiagnosticProtocol.requireArm(pair.get(0));
+            ThinkingDiagnosticArm second = ThinkingDiagnosticProtocol.requireArm(pair.get(1));
 
-            assertThat(enabled.modelRole()).isEqualTo(disabled.modelRole());
-            assertThat(enabled.maxOutputTokens()).isEqualTo(disabled.maxOutputTokens());
-            assertThat(enabled.reasoningPolicy()).isEqualTo(ChatReasoningPolicy.ENABLED);
-            assertThat(disabled.reasoningPolicy()).isEqualTo(ChatReasoningPolicy.DISABLED);
+            assertThat(first.modelRole()).isEqualTo(second.modelRole());
+            assertThat(first.maxOutputTokens()).isEqualTo(second.maxOutputTokens());
+            assertThat(first.executionBoundary()).isEqualTo(second.executionBoundary());
+            assertThat(first.reasoningPolicy()).isNotEqualTo(second.reasoningPolicy());
         }
+        assertThat(ThinkingDiagnosticProtocol.BOUNDARY_PAIRS).hasSize(3);
     }
 
     @Test
@@ -44,7 +48,7 @@ class ThinkingDiagnosticProtocolTest {
 
         assertThat(schedule).hasSize(ThinkingDiagnosticProtocol.ROW_COUNT);
         assertThat(ThinkingDiagnosticProtocol.ROW_COUNT)
-                .isEqualTo(5 * LocalFactCheckFixtureCatalog.FIXTURE_COUNT);
+                .isEqualTo(7 * LocalFactCheckFixtureCatalog.FIXTURE_COUNT);
         assertThat(schedule).extracting(ThinkingDiagnosticScheduleEntry::sequence)
                 .containsExactlyElementsOf(
                         java.util.stream.IntStream.range(0, schedule.size()).boxed().toList());
@@ -52,7 +56,7 @@ class ThinkingDiagnosticProtocolTest {
                 assertThat(entry.seed()).isEqualTo(ThinkingDiagnosticProtocol.SEED));
 
         List<String> firstArmFixtures = schedule.stream()
-                .filter(entry -> entry.armId().equals("subject-thinking-enabled-64"))
+                .filter(entry -> entry.armId().equals("fact-check-subject-provider-default-64"))
                 .map(ThinkingDiagnosticScheduleEntry::fixtureId)
                 .toList();
         assertThat(firstArmFixtures).containsExactlyElementsOf(
@@ -60,12 +64,16 @@ class ThinkingDiagnosticProtocolTest {
     }
 
     @Test
-    void refusesAnArmThatWouldInheritTheModelsOwnReasoningDefault() {
+    void refusesAnImplicitOrUnregisteredProviderDefaultPolicy() {
         assertThatThrownBy(() -> new ThinkingDiagnosticArm(
                 "inherited", ThinkingDiagnosticModelRole.SUBJECT,
-                ChatReasoningPolicy.PROVIDER_DEFAULT, 64))
+                ChatReasoningPolicy.PROVIDER_DEFAULT,
+                ThinkingDiagnosticExecutionBoundary.CHAT_INVOCATION, 64, false))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("explicit reasoning policy");
+                .hasMessageContaining("explicitly measured pre-registered condition");
+        assertThatThrownBy(() -> ThinkingDiagnosticProtocol.requireArm("unregistered-default"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unknown diagnostic arm");
     }
 
     @Test

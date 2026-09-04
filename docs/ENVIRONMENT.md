@@ -1051,12 +1051,15 @@ private durable root `local/evidence/thinking-diagnostic/`.
 | `--ollama-version` | Yes | The observed local runtime version, recorded with the run. |
 | `--output-dir` | Yes | One new dated direct child of `local/evidence/thinking-diagnostic/`. |
 
-The protocol is locked in code before any evidence directory is allocated: five
-arms in a fixed order (subject with reasoning explicitly enabled and explicitly
-disabled at `64` output tokens, the same pair at `256`, and the control with
-reasoning explicitly disabled at `64`), the tracked public-safe fact-check
-fixture catalog in its confirmed order, temperature `0.0`, seed `42`, `PT2M`,
-one attempt per row, pull strategy `never`, and 30 retained rows. The runner
+The current protocol is locked in code before any evidence directory is
+allocated: seven arms in a fixed order at the `64`-token budget — fact-check
+subject `PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED`; chat subject
+`PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED`; then chat control
+`PROVIDER_DEFAULT`. Each policy is named, provider default is an explicitly
+registered measured condition, and the tracked six fixtures run once per arm
+in catalog order for 42 retained rows. Both boundaries receive the identical
+rendered fact-check prompt. Temperature is `0.0`, seed `42`, timeout `PT2M`,
+the attempt limit is one, and pull strategy is `never`. The runner
 requires a clean worktree at a full Git commit, resolves both full immutable
 digests and their advertised capabilities before allocation, and re-checks both
 identities and the Git baseline before writing evidence.
@@ -1071,7 +1074,22 @@ Offline inspection is provider-free and never starts Spring:
 ```
 
 Recorded assistant content and reasoning text stay in the ignored raw artifact.
-The deterministic `SUMMARY.md` carries per-arm aggregates only.
+The deterministic `SUMMARY.md` carries per-arm aggregates only. Version-aware
+offline readers accept protocol v1 and v2: the v1 wire schema, manifest engine
+and settings, analyzer, and report renderer remain fixed so retained v1 evidence
+can continue to verify and regenerate the same summary bytes. Protocol v2
+requires the execution boundary on every arm and row and records the derived
+policy and boundary pairs in manifest settings. Chat-boundary rows keep fixture
+hashes and the expected verdict as provenance but leave both judge-verdict
+fields absent.
+
+The completed v2 run is retained under
+`local/evidence/thinking-diagnostic/2026-09-04-reasoning-default-boundaries/`.
+It ran once from clean commit `acc397990afb7d8376e6c2f3a5a22e765d306410`
+against Ollama `0.33.3` and the two exact model digests recorded in its manifest.
+Both offline commands above passed after the run and regenerated the same
+summary bytes. Raw content, reasoning, evaluator output, and per-row payloads
+remain in the ignored evidence only.
 
 ### Reasoning policy across the other suites
 

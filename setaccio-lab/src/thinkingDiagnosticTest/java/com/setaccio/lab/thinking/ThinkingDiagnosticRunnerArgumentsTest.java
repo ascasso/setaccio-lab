@@ -54,7 +54,8 @@ class ThinkingDiagnosticRunnerArgumentsTest {
     @Test
     void requiresAnInjectedJudgeFactorySoNothingConstructsAProviderClientImplicitly() {
         assertThatThrownBy(() -> new ThinkingDiagnosticExecutor(
-                null, ThinkingDiagnosticTestSupport.prompt()))
+                null, new ThinkingDiagnosticTestSupport.PolicyAwareChatFactory(),
+                ThinkingDiagnosticTestSupport.prompt()))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessageContaining("judgeFactory");
     }

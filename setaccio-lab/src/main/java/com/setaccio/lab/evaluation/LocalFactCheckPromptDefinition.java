@@ -49,6 +49,14 @@ public final class LocalFactCheckPromptDefinition {
         return sha256;
     }
 
+    /** Renders the exact evaluator prompt so another invocation boundary can receive it unchanged. */
+    public String render(String document, String claim) {
+        if (document == null || claim == null) {
+            throw new IllegalArgumentException("document and claim must not be null");
+        }
+        return text.replace(DOCUMENT_PLACEHOLDER, document).replace(CLAIM_PLACEHOLDER, claim);
+    }
+
     private static byte[] loadBytes() {
         try (var input = new ClassPathResource(RESOURCE_PATH).getInputStream()) {
             return input.readAllBytes();

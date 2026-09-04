@@ -16,6 +16,7 @@ import java.util.Objects;
 public record ThinkingDiagnosticRow(
         int sequence,
         String armId,
+        ThinkingDiagnosticExecutionBoundary executionBoundary,
         ThinkingDiagnosticModelRole modelRole,
         String requestedModel,
         ChatReasoningPolicy requestedReasoningPolicy,
@@ -50,6 +51,8 @@ public record ThinkingDiagnosticRow(
         if (armId == null || armId.isBlank()) {
             throw new IllegalArgumentException("armId must not be blank");
         }
+        executionBoundary = Objects.requireNonNull(
+                executionBoundary, "executionBoundary must not be null");
         modelRole = Objects.requireNonNull(modelRole, "modelRole must not be null");
         if (requestedModel == null || requestedModel.isBlank()) {
             throw new IllegalArgumentException("requestedModel must not be blank");

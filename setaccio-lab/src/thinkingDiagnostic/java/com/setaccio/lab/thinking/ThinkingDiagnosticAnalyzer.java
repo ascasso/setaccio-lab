@@ -35,16 +35,19 @@ public final class ThinkingDiagnosticAnalyzer {
 
         validateLockedProtocol(result, failures);
         List<ThinkingDiagnosticScheduleEntry> expectedSchedule =
-                ThinkingDiagnosticProtocol.schedule(catalog);
+                ThinkingDiagnosticProtocol.schedule(catalog, result.protocolVersion());
+        List<ThinkingDiagnosticArm> expectedArms =
+                ThinkingDiagnosticProtocol.arms(result.protocolVersion());
         if (!expectedSchedule.equals(result.orderedSchedule())) {
             failures.add("Retained schedule does not match the locked diagnostic schedule.");
         }
-        if (!ThinkingDiagnosticProtocol.ARMS.equals(result.arms())) {
+        if (!expectedArms.equals(result.arms())) {
             failures.add("Retained arms do not match the locked diagnostic arms.");
         }
-        if (result.rows().size() != ThinkingDiagnosticProtocol.ROW_COUNT) {
+        int expectedRowCount = ThinkingDiagnosticProtocol.rowCount(result.protocolVersion());
+        if (result.rows().size() != expectedRowCount) {
             failures.add("Diagnostic must retain exactly "
-                    + ThinkingDiagnosticProtocol.ROW_COUNT + " rows.");
+                    + expectedRowCount + " rows.");
         }
         if (!catalog.id().equals(result.fixtureCatalogId())
                 || !catalog.version().equals(result.fixtureCatalogVersion())
@@ -84,14 +87,15 @@ public final class ThinkingDiagnosticAnalyzer {
                     || row.seed() != expected.seed()) {
                 failures.add("Row " + position + " does not match its locked schedule position.");
             }
-            ThinkingDiagnosticArm arm = ThinkingDiagnosticProtocol.ARMS.stream()
+            ThinkingDiagnosticArm arm = expectedArms.stream()
                     .filter(candidate -> candidate.armId().equals(expected.armId()))
                     .findFirst()
                     .orElse(null);
             if (arm != null) {
                 if (row.maxOutputTokens() != arm.maxOutputTokens()
                         || row.requestedReasoningPolicy() != arm.reasoningPolicy()
-                        || row.modelRole() != arm.modelRole()) {
+                        || row.modelRole() != arm.modelRole()
+                        || row.executionBoundary() != arm.executionBoundary()) {
                     failures.add("Row " + position + " does not match its arm settings.");
                 }
                 ThinkingDiagnosticModelIdentity identity = identities.get(arm.modelRole());
@@ -119,7 +123,7 @@ public final class ThinkingDiagnosticAnalyzer {
     }
 
     private void validateLockedProtocol(ThinkingDiagnosticResult result, List<String> failures) {
-        if (result.protocolVersion() != ThinkingDiagnosticProtocol.VERSION
+        if (!ThinkingDiagnosticProtocol.supportsVersion(result.protocolVersion())
                 || !ThinkingDiagnosticProtocol.PROVIDER.equals(result.provider())
                 || !ThinkingDiagnosticProtocol.ENDPOINT_CATEGORY.equals(result.endpointCategory())
                 || !ThinkingDiagnosticProtocol.EXECUTION_STRATEGY.equals(result.executionStrategy())
@@ -129,6 +133,12 @@ public final class ThinkingDiagnosticAnalyzer {
                 || result.maxAttempts() != ThinkingDiagnosticProtocol.MAX_ATTEMPTS
                 || result.requestTimeoutMillis() != ThinkingDiagnosticProtocol.REQUEST_TIMEOUT.toMillis()) {
             failures.add("Retained diagnostic settings do not match the locked protocol.");
+        }
+        if (result.protocolVersion() == ThinkingDiagnosticProtocol.VERSION
+                && (!ThinkingDiagnosticProtocol.PROMPT_DELIVERY.equals(result.promptDelivery())
+                || !ThinkingDiagnosticProtocol.POLICY_COMPARISON.equals(result.policyComparison())
+                || !ThinkingDiagnosticProtocol.BOUNDARY_COMPARISON.equals(result.boundaryComparison()))) {
+            failures.add("Retained diagnostic comparison settings do not match protocol v2.");
         }
         if (!prompt.id().equals(result.promptId())
                 || !prompt.version().equals(result.promptVersion())
@@ -175,6 +185,13 @@ public final class ThinkingDiagnosticAnalyzer {
             }
             return;
         }
+        if (row.executionBoundary() == ThinkingDiagnosticExecutionBoundary.CHAT_INVOCATION) {
+            if (row.normalizedJudgeVerdict() != null || row.expectedVerdictMatched() != null) {
+                failures.add("Row " + position + " is a chat-boundary row but records a judge verdict.");
+            }
+        } else if ((row.normalizedJudgeVerdict() == null) != (row.expectedVerdictMatched() == null)) {
+            failures.add("Row " + position + " has an incoherent fact-check verdict pair.");
+        }
         ThinkingDiagnosticOutcome expected = row.contentPresent()
                 ? row.thinkingPresence() == ChatThinkingPresence.PRESENT
                         ? ThinkingDiagnosticOutcome.CONTENT_WITH_THINKING
@@ -217,6 +234,7 @@ public final class ThinkingDiagnosticAnalyzer {
                     .orElse(null);
             summaries.add(new ArmSummary(
                     arm.armId(),
+                    arm.executionBoundary(),
                     arm.modelRole(),
                     arm.reasoningPolicy().name(),
                     arm.maxOutputTokens(),
@@ -235,6 +253,7 @@ public final class ThinkingDiagnosticAnalyzer {
     /** Deterministic per-arm aggregate. Carries counts only, never recorded text. */
     public record ArmSummary(
             String armId,
+            ThinkingDiagnosticExecutionBoundary executionBoundary,
             ThinkingDiagnosticModelRole modelRole,
             String reasoningPolicy,
             int maxOutputTokens,
