@@ -1083,6 +1083,14 @@ policy and boundary pairs in manifest settings. Chat-boundary rows keep fixture
 hashes and the expected verdict as provenance but leave both judge-verdict
 fields absent.
 
+The completed v2 run is retained under
+`local/evidence/thinking-diagnostic/2026-09-04-reasoning-default-boundaries/`.
+It ran once from clean commit `acc397990afb7d8376e6c2f3a5a22e765d306410`
+against Ollama `0.33.3` and the two exact model digests recorded in its manifest.
+Both offline commands above passed after the run and regenerated the same
+summary bytes. Raw content, reasoning, evaluator output, and per-row payloads
+remain in the ignored evidence only.
+
 ### Reasoning policy across the other suites
 
 The provider-neutral `ChatReasoningPolicy` has three values, and

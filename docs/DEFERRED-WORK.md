@@ -290,14 +290,25 @@ policy-within-boundary plus matching-policy boundary pairs are derived from the
 recorded arms. Version-aware readers preserve the original v1 wire format,
 manifest engine and settings, analyzer rules, and report bytes.
 
-Until the separately authorized v2 run completes and verifies, the two links
-remain unmeasured and the 2026-09-03 limitations stand unchanged. The first
-follow-up — whether any closed suite should replace `PROVIDER_DEFAULT` with an
-explicit policy — remains deferred and is not decided by this implementation.
+The separately authorized v2 run completed once from clean commit `acc3979`
+under Ollama `0.33.3`, retained all 42 rows, and verified and reanalyzed offline.
+At both boundaries, subject `PROVIDER_DEFAULT` reproduced the `ENABLED`
+aggregate: one of six rows with content, five with reasoning, and the same five
+at the full budget with finish reason `length`. Subject `DISABLED` produced
+content in all six rows at both boundaries with no reasoning; the non-thinking
+provider-default chat control also produced content in all six. Thus the
+provider-default behavior and the chat-boundary mechanism are measured for this
+exact artifact, prompt, fixture catalog, seed, budget, and runtime rather than
+inferred only from framework behavior. This does not establish the historical
+cause of any retained response.
 
-Nothing in this v2 implementation authorizes changing a closed suite, rerunning,
-repairing, replacing, or reinterpreting retained evidence, or withdrawing a
-closeout. The explicit v1 compatibility acceptance is limited to provider-free
+The first follow-up — whether any closed suite should replace
+`PROVIDER_DEFAULT` with an explicit policy — remains deferred. The result
+surfaces the implication for the owner but does not decide it.
+
+Nothing in this v2 implementation or run authorizes changing a closed suite,
+rerunning, repairing, replacing, or reinterpreting retained evidence, or
+withdrawing a closeout. The explicit v1 compatibility acceptance was limited to provider-free
 verification and byte-identical summary regeneration against the preserved
 2026-09-03 diagnostic before the new run.
 

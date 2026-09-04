@@ -257,13 +257,26 @@ bounded closeout is in
 
 The v2 implementation and its pre-registered schedule are recorded in
 [`docs/logs/2026-09-04-reasoning-default-boundary-implementation.md`](logs/2026-09-04-reasoning-default-boundary-implementation.md);
-that implementation record does not itself claim a live result.
+that implementation record does not itself claim a live result. One v2 run then
+completed from clean commit `acc3979` under Ollama `0.33.3`, retaining all 42
+one-attempt rows. At both boundaries, subject `PROVIDER_DEFAULT` and `ENABLED`
+each produced content in one of six rows, reasoning in five, and five rows at
+the full 64-token budget with finish reason `length`; `DISABLED` produced
+content in all six, no reasoning, and no row at budget. The non-thinking chat
+control under provider default produced content in all six with no reasoning.
+Both matching-policy boundary aggregates were identical. The evidence verified
+and reanalyzed offline without hash drift. This measures provider-default
+behavior and both boundaries for the exact protocol; it does not establish the
+historical cause of a retained response, generalize across artifacts or
+runtimes, or decide a policy change for a closed suite. See
+[`docs/logs/2026-09-04-reasoning-default-boundary-run.md`](logs/2026-09-04-reasoning-default-boundary-run.md).
 
 The Phase 2 chat matrix, Phase 5 answer matrix, and Phase 4 fact-check suite
 keep their existing protocol versions and row schemas. They continue to send no
 reasoning policy, so their retained evidence still verifies and reanalyzes
 unchanged, and their inherited-default behavior is recorded as a named
-limitation rather than silently changed.
+limitation rather than silently changed. The new result surfaces an implication
+for the owner but does not alter those protocols or make the policy decision.
 
 ## Local Fixture Evaluation Benchmark
 

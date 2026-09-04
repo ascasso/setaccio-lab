@@ -87,15 +87,30 @@ boundary was exercised live, so the chat and answer-matrix empties are
 consistent with this mechanism but untested by it. See
 [`docs/logs/2026-09-03-thinking-diagnostic-run.md`](docs/logs/2026-09-03-thinking-diagnostic-run.md).
 
-A version-aware second diagnostic protocol is implemented to measure those two
-gaps without changing or reinterpreting the first run. Its fixed 64-token
-schedule adds explicit `PROVIDER_DEFAULT`, `ENABLED`, and `DISABLED` subject
-arms at both the fact-check and provider-neutral chat boundaries, plus a
-`PROVIDER_DEFAULT` non-thinking chat control. Both boundaries receive the same
-rendered fact-check prompt. The v1 reader, verifier, analyzer, and report path
-remain available so the 2026-09-03 evidence can continue to verify and
-reanalyze byte-for-byte. No v2 live result is claimed before its separately
-recorded clean-baseline run.
+A version-aware second diagnostic ran once from clean commit `acc3979` to
+measure those two gaps without changing or reinterpreting the first run. Its
+fixed 64-token schedule sent the identical rendered fact-check prompt through
+both the fact-check and provider-neutral chat boundaries.
+
+| Boundary and artifact | Policy | Rows with content | Rows with reasoning | Rows at budget |
+| --- | --- | --- | --- | --- |
+| fact-check `gemma4:e2b` | provider default | 1 of 6 | 5 of 6 | 5 of 6 |
+| fact-check `gemma4:e2b` | enabled | 1 of 6 | 5 of 6 | 5 of 6 |
+| fact-check `gemma4:e2b` | disabled | 6 of 6 | 0 of 6 | 0 of 6 |
+| chat `gemma4:e2b` | provider default | 1 of 6 | 5 of 6 | 5 of 6 |
+| chat `gemma4:e2b` | enabled | 1 of 6 | 5 of 6 | 5 of 6 |
+| chat `gemma4:e2b` | disabled | 6 of 6 | 0 of 6 | 0 of 6 |
+| chat `granite4.1:3b` | provider default | 6 of 6 | 0 of 6 | 0 of 6 |
+
+For this exact subject artifact, prompt, fixture catalog, seed, budget, and
+runtime, provider default reproduced the enabled pattern at both boundaries;
+the previously inferred default-to-reasoning mechanism is therefore measured
+for this protocol. Matching subject policies also produced the same aggregates
+through both boundaries. This does not establish the historical cause of any
+retained row or decide that a closed suite should change policy. Both v1 and v2
+evidence verify and reanalyze offline; the v1 summary remained byte-identical.
+See
+[`docs/logs/2026-09-04-reasoning-default-boundary-run.md`](docs/logs/2026-09-04-reasoning-default-boundary-run.md).
 
 ### The tool-calling artifact rejects tool-bearing requests today
 

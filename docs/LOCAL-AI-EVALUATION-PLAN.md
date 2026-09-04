@@ -235,6 +235,16 @@ provenance but intentionally carry no evaluator verdict. This does not rerun,
 repair, replace, reanalyze, or reinterpret A5 or any Phase 4 evidence and does
 not decide whether a closed suite should change its reasoning policy.
 
+The single v2 run completed from clean commit `acc3979` under Ollama `0.33.3`
+and retained all 42 planned one-attempt rows. At each boundary, subject
+`PROVIDER_DEFAULT` matched `ENABLED`: one of six rows had content and five had
+reasoning, reached all 64 evaluated output tokens, and finished with `length`.
+Subject `DISABLED` produced content in all six rows at each boundary with no
+reasoning; the provider-default non-thinking chat control did the same. The run
+therefore measures the default-policy and chat-boundary links for the exact
+protocol, without establishing historical causation or changing A5, A6, any
+closed phase, or any existing suite policy.
+
 Testcontainers disposition for this cycle: **defer**. Host-Ollama execution,
 provenance, and offline verification worked; containerization would test model
 provisioning and service-connection wiring, not the observed verdict-yield

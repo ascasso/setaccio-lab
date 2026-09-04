@@ -9,6 +9,28 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Completed the single protocol-v2 reasoning-default and execution-boundary
+  diagnostic on 2026-09-04 from clean commit `acc3979` under Ollama `0.33.3`,
+  retaining all 42 planned one-attempt rows with no failure, timeout, retry,
+  repair, replacement, or omission. The required `gemma4:e2b` and
+  `granite4.1:3b` full digests matched before allocation and after execution; no
+  model was pulled or substituted. At both the fact-check and provider-neutral
+  chat boundaries, subject `PROVIDER_DEFAULT` and `ENABLED` each produced
+  content in one of six rows, reasoning in five, and five full-budget rows with
+  finish reason `length`; subject `DISABLED` produced content in all six with no
+  reasoning and no budget saturation. The provider-default non-thinking chat
+  control produced content in all six with no reasoning. Matching-policy
+  aggregates were identical across boundaries. The new v2 evidence verified
+  and reanalyzed offline without hash drift, and the retained 2026-09-03 v1 run
+  also verified and regenerated its byte-identical summary before the new run.
+  This measures the default-policy and chat-boundary links for only the exact
+  artifacts, prompt, catalog, seed, budget, and runtime; it does not establish
+  historical causation, change an existing suite's reasoning policy, revisit a
+  closed phase, or make a quality, factuality, reliability, ranking, or model
+  selection claim. Raw content, reasoning, evaluator output, and per-row
+  payloads remain ignored. Recorded in
+  `docs/logs/2026-09-04-reasoning-default-boundary-run.md`.
+
 - Implemented protocol v2 for the explicitly started reasoning-default and
   execution-boundary diagnostic without changing any closed suite. The fixed
   42-row schedule runs the tracked six fixtures once through seven `64`-token
