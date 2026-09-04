@@ -2,8 +2,10 @@
 
 Status: current after the authorized Phase 3 cohort, Phase 4 fact-check
 output-budget, and bounded Phase 5 retrieval protocol closeouts on 2026-08-30,
-the explicitly requested Phase 5 R4 embedding run on 2026-09-02, and the
-durable evidence retention migration on 2026-09-03.
+the explicitly requested Phase 5 R4 embedding run on 2026-09-02, the durable
+evidence retention migration on 2026-09-03, and the owner's 2026-09-04
+decisions on reasoning-policy status quo, the LFM diagnostic (no change), and
+the second-evidence-loss waiver.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -40,11 +42,37 @@ present there. That was the second ignored-evidence loss in the project; the
 first was the vision Prompt v1/v2 pair, closed on 2026-08-02 through a
 documented evidence-loss waiver.
 
-No waiver is claimed here and no closeout is withdrawn. Each recorded result
-was bounded to what its evidence supported and was verified when written, and
-the public-safe interpretations remain accurate. What is not currently
-reproducible is third-party or maintainer re-verification of those specific
-saved runs.
+As initially recorded here, no waiver was claimed and no closeout was
+withdrawn. Each recorded result was bounded to what its evidence supported and
+was verified when written, and the public-safe interpretations remain
+accurate. What is not currently reproducible is third-party or maintainer
+re-verification of those specific saved runs.
+
+On 2026-09-04 the project owner closed this second evidence-loss gap through a
+documented waiver, in the same shape as the 2026-08-02 vision Prompt v1/v2
+waiver (`docs/logs/2026-08-02.md`). A read-only recovery search covered the
+repository workspace — including the stray pre-durable-root
+`setaccio-lab/build/evaluation-matrix/` and
+`setaccio-lab/build/tool-compatibility/` directories, both empty — `~/.Trash`,
+`/tmp`, `$TMPDIR`, and Spotlight (`mdfind`), and found no copy of the missing
+evidence for Phase 1, Phase 2, Phase 3, the Phase 4 five-arm breakpoint study,
+Phase 5 R3/R5/R6, the fact-check A5 run, the chat matrix, the vision matrices,
+or the Anthropic O3 portability run. No Time Machine backup destination is
+configured for this host, and the local snapshot listing could not be checked
+because of an OS permission restriction, so a snapshot-level copy is not
+definitively ruled out; the owner elected to close through waiver regardless.
+
+This waiver closes the retention gap only. No closeout above is withdrawn, and
+no actual-human `adopt`/`revise`/`reject` judgment is claimed for any of the
+listed runs beyond what each already recorded — the Phase 2 `inconclusive`
+T2.5 decision, the Slice A6 fact-check interpretation, and the T3.4/T3.5/T3.6
+cohort interpretations all stand exactly as written. None of the named runs
+may be recreated under their original run names or represented as the
+original immutable evidence. Per
+[logs/2026-09-04-pending-decisions-options-memo.md](logs/2026-09-04-pending-decisions-options-memo.md)
+option 1, any future re-run of one of these suites needs its own new
+scope-start request, fresh clean-baseline commit, and new dated run directory,
+exactly like every other deferred re-run gate in this index.
 
 On 2026-09-03 the durable evidence root was adopted to stop the recurrence.
 Formal run evidence is now allocated only under the private, ignored
@@ -176,6 +204,13 @@ underlying model architecture's latent tool-calling ability. See
 No Phase 1 or Phase 2 evidence or closeout was rerun, repaired, replaced,
 reinterpreted, or rewritten by that diagnostic.
 
+On 2026-09-04, after reviewing
+[logs/2026-09-04-pending-decisions-options-memo.md](logs/2026-09-04-pending-decisions-options-memo.md),
+the project owner decided this diagnostic warrants no change: Phase 1 and
+Phase 2 keep their exact recorded status above, cause unidentified, and the
+existing cross-reference paragraph stands as the only link between the two.
+No further diagnostic work is authorized by this decision.
+
 ## Deferred From the August Cycle
 
 | Item | Status and reason | Required gate before work begins |
@@ -303,8 +338,15 @@ inferred only from framework behavior. This does not establish the historical
 cause of any retained response.
 
 The first follow-up — whether any closed suite should replace
-`PROVIDER_DEFAULT` with an explicit policy — remains deferred. The result
-surfaces the implication for the owner but does not decide it.
+`PROVIDER_DEFAULT` with an explicit policy — was decided by the project owner
+on 2026-09-04 after reviewing
+[logs/2026-09-04-pending-decisions-options-memo.md](logs/2026-09-04-pending-decisions-options-memo.md):
+status quo. The chat matrix, Anthropic portability matrix, Phase 5 answer
+matrix, and fact-check suites keep sending `PROVIDER_DEFAULT`. No
+`ChatGenerationOption` constant, `manifestSettings()` shape, or suite schema
+changes as a result. The recorded limitation and the two diagnostic runs above
+stand as the only measurement of the default-policy/chat-boundary link for
+this artifact; nothing further is authorized or required by this decision.
 
 Nothing in this v2 implementation or run authorizes changing a closed suite,
 rerunning, repairing, replacing, or reinterpreting retained evidence, or

@@ -9,6 +9,20 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- Recorded the project owner's decisions on the three items raised in the
+  2026-09-04 options memo. Reasoning policy in the existing chat matrix,
+  Anthropic portability matrix, Phase 5 answer matrix, and fact-check suites:
+  status quo, `PROVIDER_DEFAULT` unchanged, no schema change. The 2026-09-03
+  LFM tool-capability diagnostic against closed Phase 1/Phase 2: as is, no
+  change to their recorded status. The second ignored-evidence loss: waived,
+  in the same shape as the 2026-08-02 vision waiver, after a read-only
+  recovery search across the repository workspace (including stray
+  pre-durable-root `build/evaluation-matrix` and `build/tool-compatibility`
+  directories, both empty), `~/.Trash`, `/tmp`/`$TMPDIR`, and Spotlight found
+  no copy of the missing evidence; no closeout is withdrawn and no named run
+  may be recreated under its original name. Recorded in
+  `docs/logs/2026-09-04-three-pending-decisions.md`.
+
 - Prepared an options memo for three recorded open decisions — explicit
   reasoning policy in the existing chat matrix, Anthropic portability matrix,
   Phase 5 answer matrix, and fact-check suites; whether the 2026-09-03 LFM
