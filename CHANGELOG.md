@@ -7,6 +7,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Updated the Gradle Wrapper from 9.7.1 to 9.8.1. Recorded in
+  `docs/logs/2026-10-11-gradle-wrapper-9.8.1.md`.
+
 ## [0.1.0] - 2026-09-04
 
 First tagged release. Everything below was previously recorded under
