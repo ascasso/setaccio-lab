@@ -1142,7 +1142,8 @@ preflight. Phase 4's 64/256 arms must still run from the same clean commit.
 The scope is limited to already-installed models on loopback Ollama. It does
 not authorize pulls, downloads, removals, renames, silent substitutions,
 non-loopback endpoints, remote providers, credentials, spending, Docker,
-publication of ignored raw output, pushes, releases, or tags. New formal
+publication of ignored raw output, releases, or tags. Branch pushes follow
+the separate Standing Work Loop in [AGENTS.md](../AGENTS.md). New formal
 experiments still need their explicit scope-start request and slice-specific
 preflight, but not another local-call or local-run authorization.
 

@@ -23,6 +23,14 @@ first, then a bounded MCP contract plan. The current change creates the fresh
 branch and documents that sequence; it does not start MCP implementation or a
 new model run. Tag publication remains a separate decision.
 
+The owner revised the standing Git closeout rule on 2026-10-11: after a
+completed batch of one or more commits, attempt one normal push of the current
+branch to `origin`, with no automatic retry after failure and remote SHA
+verification on success. [AGENTS.md](../AGENTS.md) owns the exact rule. Earlier
+closeouts record their then-current authorization; they do not override this
+rule for future work. Tag publication, releases, PRs, merges, and promotion
+remain separate actions.
+
 The R4 embedding-retrieval slice was explicitly started and executed once on
 2026-09-02 using the prioritized versioned `qwen3-embedding:0.6b` tag, which the
 project owner pulled that day before authorizing the run. A read-only check

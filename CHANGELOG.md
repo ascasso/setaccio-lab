@@ -9,6 +9,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Changed the standing work loop to attempt one normal branch push after each
+  completed batch of one or more commits, verify the remote SHA on success,
+  and report failures without automatic retry. Aligned active workflow guides;
+  tag publication remains separately authorized. Recorded in
+  `docs/logs/2026-10-11-single-push-attempt-guidance.md`.
 - Recorded the owner-selected cleanup-then-MCP sequence in
   `docs/NEXT-WORK-PLAN.md`, corrected stale release/promotion and roadmap
   status, and aligned the active guidance. Recorded in

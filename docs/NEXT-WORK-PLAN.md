@@ -90,8 +90,11 @@ The embedding proposal does not replace the owner's cleanup-then-MCP choice.
 
 ## Completion Boundaries
 
-Each implemented slice follows the standing verify/document/log/commit loop.
-Pushes remain separately requested. Existing endpoints, closed protocols,
+Each implemented slice follows the standing verify/document/log/commit loop,
+then one normal branch-push attempt after its completed batch of one or more
+commits, under [AGENTS.md](../AGENTS.md). Report failure without automatic
+retry, and verify the remote branch SHA on success. Tags remain separately
+requested. Existing endpoints, closed protocols,
 prompt defaults, reasoning policies, and retained evidence are unchanged by
 this plan. Model pulls, remote providers, credentials, spending, Docker,
 publication outside the existing permitted summaries/manifests, and new

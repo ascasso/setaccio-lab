@@ -1667,8 +1667,9 @@ slice. It also does not weaken the experimental contract:
 The authorization is local-only. It does not authorize pulling, downloading,
 removing, renaming, or silently substituting a model; a non-loopback endpoint;
 remote-provider or credential use; provider spending; Docker; publication of
-ignored raw output; a push; a release; or a tag. Those actions retain their
-existing separate gates.
+ignored raw output; a release; or a tag. Those actions retain their
+existing separate gates. Branch pushes follow the Standing Work Loop in
+[AGENTS.md](../AGENTS.md).
 
 # Phase 4 — Fact-check output-budget compatibility
 
@@ -2082,7 +2083,10 @@ Use the repository’s normal integration branch flow.
 
 Commit every completed in-scope slice after verification.
 
-Do not push without explicit instruction.
+After each completed batch of one or more commits, follow [AGENTS.md](../AGENTS.md):
+attempt one normal push of the current branch to `origin`, report failure
+without automatic retry, and verify the remote branch SHA on success. Do not
+include tags or use a force-push.
 
 ## Suggested commit sequence for Phase 1
 
@@ -2390,9 +2394,10 @@ inspection and invocation; it does not start R4 or waive these gates:
    correctness, semantic relevance, human support, evaluator ground truth,
    model ranking, or selection from that future execution.
 
-Remote providers, credentials, spending, Docker, release, tag, push, and
+Remote providers, credentials, spending, Docker, release, tag, and
 branch promotion remain separate decisions. Meeting these prerequisites does
-not itself authorize a new R4 run.
+not itself authorize a new R4 run. Branch pushes follow the Standing Work Loop
+in [AGENTS.md](../AGENTS.md).
 
 # Codex Execution Runbook
 
@@ -2458,7 +2463,8 @@ Do not implement a later slice. For any explicitly requested repository work,
 already-installed loopback Ollama calls are standing-authorized whenever
 useful; no separate exact-action approval is required. Never infer permission
 here for an unrequested scope, remote-provider call, model pull, Docker use,
-credential access, publication of ignored evidence, push, release, or tag.
+credential access, publication of ignored evidence, release, or tag.
+Branch pushes follow AGENTS.md's standing work loop after completed commits.
 
 Implement the smallest suite-specific design satisfying the locked contract.
 Do not widen existing main-code visibility or create generic abstractions just
@@ -2467,7 +2473,9 @@ occurs, stop without inventing a workaround and report the exact evidence.
 
 When the slice is complete, update the dated public-safe log and any other docs
 named by the packet, verify them, and commit only the in-scope paths. Do not
-push.
+include tags. After completing the batch of one or more commits, attempt one
+normal push of the current branch to origin under AGENTS.md. Report failure
+without automatic retry; verify the remote branch SHA on success.
 ```
 
 ## Universal completion contract
@@ -2482,7 +2490,10 @@ Every implementation packet must finish with all of the following:
 4. `git diff --check` passes and the packet's focused Gradle tasks pass.
 5. The dated log distinguishes implementation from execution and lists actions
    that remain unauthorized.
-6. One focused commit contains only the completed packet. No push occurs.
+6. One focused commit contains only the completed packet. After the completed
+   batch of one or more commits, one normal branch push is attempted under
+   `AGENTS.md`; its result and remote SHA verification are reported, with no
+   automatic retry, force-push, or tag publication.
 
 Phase closeout additionally runs the full provider-free verification command
 recorded in that phase's packet and aligns `README.md`, `AGENTS.md`,

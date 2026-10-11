@@ -291,6 +291,11 @@ The lab app uses port `8082`.
 Project versions follow [Semantic Versioning](https://semver.org/).
 Changelog entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+The [repository work loop](AGENTS.md) requires verification, documentation,
+logging, focused commits, and one normal push attempt to `origin` after each
+completed batch of one or more commits. Report a failed attempt without
+automatic retries; verify the remote branch SHA after a successful push.
+
 ## License
 
 Apache License 2.0. See [LICENSE](LICENSE).
