@@ -8,6 +8,11 @@ The closeout language throughout is deliberate. Where a section says a result
 does not establish quality, reliability, ranking, or selection, that boundary is
 part of the record and should not be paraphrased into a stronger claim.
 
+The owner selected cleanup followed by MCP planning on 2026-10-11; the
+[next-work plan](NEXT-WORK-PLAN.md) records that sequence. No MCP endpoint,
+transport, or matrix is implemented by this documentation change. The existing
+Phase 5 embedding boundary is an opt-in retrieval capability; it is not an
+interactive `/api/lab/embeddings` endpoint.
 
 ## Shared Evidence Lifecycle Foundation
 

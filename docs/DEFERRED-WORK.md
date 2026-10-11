@@ -6,7 +6,8 @@ the explicitly requested Phase 5 R4 embedding run on 2026-09-02, the durable
 evidence retention migration on 2026-09-03, and the owner's 2026-09-04
 decisions on reasoning-policy status quo, the LFM diagnostic (no change), and
 the second-evidence-loss waiver, and the owner's 2026-09-04 authorization of
-the first release, `0.1.0`.
+the first release, `0.1.0`, its subsequent promotion, and the owner's
+2026-10-11 selection of cleanup followed by MCP planning.
 
 This is the tracked index for completed boundaries and work intentionally
 outside the completed August scope. It distinguishes completed, deferred,
@@ -15,6 +16,12 @@ calls to already-installed loopback models for explicitly requested repository
 work without per-call or per-run approval. A listing here does not itself
 start an unrequested scope or authorize Docker use, credentials, spending,
 remote providers, a release, or a tag.
+
+The selected next sequence is documented in
+[NEXT-WORK-PLAN.md](NEXT-WORK-PLAN.md): documentation and repository cleanup
+first, then a bounded MCP contract plan. The current change creates the fresh
+branch and documents that sequence; it does not start MCP implementation or a
+new model run. Tag publication remains a separate decision.
 
 The R4 embedding-retrieval slice was explicitly started and executed once on
 2026-09-02 using the prioritized versioned `qwen3-embedding:0.6b` tag, which the
@@ -222,7 +229,7 @@ No further diagnostic work is authorized by this decision.
 | Fact-check output-budget compatibility | The initial F1-F4 `64`/`256` study is complete, including the owner-selected Outcome A closeout. The separately planned five-arm `64`/`96`/`128`/`192`/`256` breakpoint follow-up ran once from clean commit `0d4e00991a2bb6b432b3afcd4a2b3ec4978fbd0b`, then verified and reanalyzed offline. In this exact study, valid-verdict yield was flat at 2/12 for the tested 64–128 token budgets and was higher at 192 tokens (6/12) and 256 tokens (12/12). I treat this as a protocol-specific association, not evidence of a causal threshold, a generally optimal budget, or model reliability. Completion-token counts remain only an output-limit proxy. The new ignored evidence does not reuse, alter, or repair the immutable pair. | Preserve all five saved arms. No arm may be rerun, replaced, repaired, altered, or published. Any new experiment or interpretation rule requires separate explicit authorization. |
 | Testcontainers fact-check path | Deferred. The host-Ollama runner, provenance, and offline verification worked; container provisioning would not answer the observed verdict-yield question. | Establish a distinct service-connection or provisioning question. Keep any typed Ollama dependency, container task, and Docker behavior in `setaccio-testcontainers`, opt-in, and outside normal `test`, `build`, and CI. |
 | Embedding retrieval, answer generation, and relevancy evaluation | R0–R6 implementation is complete: the approved public corpus, confirmed query catalog, deterministic lexical baseline, saved retrieval-only evidence, opt-in local embedding/answer boundaries, and opt-in R6 evaluator boundary preserve the required identities and evidence lifecycle. Retained R3, R5, and R6 evidence verifies offline; R5 and R6 are the completed local-model executions. R4 formal embedding execution completed once on 2026-09-02 from clean commit `4c13b4ac24f4b0d39497f662b9df0c930169f35f` using the `qwen3-embedding:0.6b` tag at digest `ac6da0dfba84a81fdbfbaf330198c33cd77c4cdfc53e8bc50eb581914a15621d`, which the owner pulled that day rather than it being already installed; read-only inspection confirmed the literal `embedding` capability before any evidence directory was allocated, and the retained ignored evidence verified offline at top K `5`. One R5 clean-baseline matrix completed on 2026-08-30 from commit `c724e5a93c89eb5de8a11e9d1774a523f77bda37`; one R6 clean-baseline matrix then completed from commit `f704d989429a10769ce334276dc79de5bd7cd308` against that verified R5 source. R6 used the operationally selected already-installed `granite4.1:3b` artifact and full digest, separate from R5's answer artifact. It retained all 14 rows and its ignored evidence verified and reanalyzed offline: eight eligible evaluator calls completed, two missing-context rows and four unavailable-answer rows were not attempted, and no unavailable-model, timeout, provider-failure, empty-response, or malformed-verdict outcome occurred. The relationship was recorded as separate evaluator for every row; it does not establish independence. Retrieval expectation, evaluator observation, self-evaluation, human support, and answer correctness remain separate. None of this establishes embedding quality, evaluator ground truth, answer correctness, semantic relevance, model quality, or ranking. | Preserve the ignored R3/R4/R5/R6 evidence; do not rerun, repair, replace, reanalyze, mutate, or publish raw answers, vectors, or evaluator output. Any further R4 run needs a new explicit scope-start request and a fresh read-only check proving the candidate's literal `embedding` capability (not merely `embedding length`), then a new clean-baseline lock of its tag, full digest, chunking, normalization, distance, top-K, one-attempt, no-pull, and non-overwriting-evidence contract into a new dated directory. The standing local Ollama policy covers the local inspection and invocation; it does not start R4, permit a model pull, or waive the formal protocol. Do not conduct human semantic review under this closeout. Pulls, remote providers, credentials, spending, and Docker remain separately gated. |
-| Release, tag, and promotion | The owner authorized and decided the first release on 2026-09-04: version `0.1.0` (promoted from the unbumped, never-tagged `0.1.0-alpha.2`), and explicitly declined to fast-forward `origin/master` to `origin/develop` as part of it. `CHANGELOG.md`'s `Unreleased` section is cut into `## [0.1.0] - 2026-09-04`; see [logs/2026-09-04-release-0.1.0.md](logs/2026-09-04-release-0.1.0.md). Creating a local tag was authorized by that decision; pushing the tag or any commit, opening a pull request, and merging were not, and remain separately gated. | Push, PR, and merge to land this on `origin/develop` need separate explicit instruction. Any further release beyond `0.1.0` needs its own version and scope decision. |
+| Release, tag, and promotion | The owner cut `0.1.0` on 2026-09-04 and initially excluded `master` promotion from that release action. Subsequent PR [#81](https://github.com/ascasso/setaccio-lab/pull/81) landed it on `develop`, and PR [#82](https://github.com/ascasso/setaccio-lab/pull/82) promoted it to `master` the same day. PR [#84](https://github.com/ascasso/setaccio-lab/pull/84) also promoted the later wrapper update on 2026-10-11; the branch file trees now match. Local annotated `v0.1.0` targets `016eef3`; no matching GitHub tag exists as checked on 2026-10-11. The dated [release log](logs/2026-09-04-release-0.1.0.md) preserves the original authorization and records later promotion separately. | Release landing and those promotions are complete. Publishing `v0.1.0` still requires an explicit push instruction in that session. Further releases need their own version and scope decision. See [NEXT-WORK-PLAN.md](NEXT-WORK-PLAN.md) for the cleanup checklist. |
 
 ## Completed Phase 3 Boundary
 
@@ -357,13 +364,18 @@ verification and byte-identical summary regeneration against the preserved
 
 ## Deferred Through the Current Roadmap
 
-The following do not enter the current three-phase path unless the plan is
-explicitly revised:
+The Phase 0-5 protocol path is complete, including its bounded embedding,
+answer-generation, and relevancy surfaces. The owner selected MCP planning
+as the next expansion topic on 2026-10-11; see
+[NEXT-WORK-PLAN.md](NEXT-WORK-PLAN.md). Implementation remains a later slice.
+The following are outside the closed protocols and require a specific plan
+before implementation:
 
 - additional remote providers beyond the one authorized Anthropic proof;
-- additional model types such as embeddings, image generation, audio
-  transcription, text to speech, and moderation;
-- MCP, RAG, vector stores, and other retrieval infrastructure;
+- model-type coverage beyond the existing bounded chat and embedding paths,
+  such as image generation, audio transcription, text to speech, and moderation;
+- MCP implementation, general RAG, vector stores, and retrieval infrastructure
+  beyond the completed Phase 5 fixtures;
 - new Tool Search indexes or a broad tool-calling expansion beyond the prepared
   narrow standard-advisor compatibility study;
 - container runtime work other than a separately justified

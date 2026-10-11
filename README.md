@@ -207,6 +207,10 @@ closeout is in [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md). Deferred scope,
 start gates, and non-authorization boundaries are indexed in
 [`docs/DEFERRED-WORK.md`](docs/DEFERRED-WORK.md).
 
+The selected next work is cleanup followed by a bounded MCP plan; see
+[`docs/NEXT-WORK-PLAN.md`](docs/NEXT-WORK-PLAN.md). MCP implementation and new
+model runs remain later work.
+
 ## Evaluation scope
 
 The harness should grow with Spring AI's supported provider and model-type surface. The intent is to make it possible to test comparable prompts, inputs, outputs, options, and error behavior across major providers such as Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama.

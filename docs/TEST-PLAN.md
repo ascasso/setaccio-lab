@@ -578,4 +578,9 @@ No completed phase places a live model call in default tests or CI.
 - Add model-type tests for chat completion, embedding, text to image, audio transcription, text to speech, and moderation.
 - Add detailed local Ollama setup docs before adding required Ollama live-test workflows.
 - Add a dedicated `setaccio-testcontainers` integration-test task before adding Docker-backed tests.
-- Add MCP tests after direct Spring AI tool-calling tests are reliable.
+- The owner selected MCP planning after cleanup; see
+  [NEXT-WORK-PLAN.md](NEXT-WORK-PLAN.md). Specify provider-free tests before
+  implementing the boundary: direct/MCP discovery and schema parity, argument
+  validation, callback failure, transport failure, timeout, and lifecycle
+  cleanup. Prove one local transport without a model before proposing a new
+  controlled model comparison; existing closed studies remain unchanged.

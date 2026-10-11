@@ -9,6 +9,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Recorded the owner-selected cleanup-then-MCP sequence in
+  `docs/NEXT-WORK-PLAN.md`, corrected stale release/promotion and roadmap
+  status, and aligned the active guidance. Recorded in
+  `docs/logs/2026-10-11-cleanup-mcp-plan.md`.
 - Updated the Gradle Wrapper from 9.7.1 to 9.8.1. Recorded in
   `docs/logs/2026-10-11-gradle-wrapper-9.8.1.md`.
 

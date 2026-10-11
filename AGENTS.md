@@ -691,6 +691,11 @@ public-safe list of deferred scope, start gates, and non-authorization
 boundaries. Keep it aligned with this section, the environment guide, test
 plan, changelog, and dated log when the status of a deferred item changes.
 
+The owner selected cleanup followed by MCP planning on 2026-10-11. Follow
+[NEXT-WORK-PLAN.md](docs/NEXT-WORK-PLAN.md) for the successor sequence. That
+documentation change creates a fresh branch and records the plan; it does not
+start MCP implementation, model execution, branch deletion, or tag publication.
+
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
 - Phase 4 is closed: the initial F1–F4 work and the separately planned five-arm

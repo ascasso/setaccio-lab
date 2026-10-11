@@ -32,6 +32,10 @@ use, credential use, remote-provider expenditure, evidence mutation,
 reanalysis, rerun, repair, replacement, release, tag, push, or branch
 promotion. Future work still begins only through separately authorized scope.
 
+On 2026-10-11 the owner selected cleanup followed by MCP planning as successor
+work. [NEXT-WORK-PLAN.md](NEXT-WORK-PLAN.md) records that sequence without
+reopening this closed protocol or starting MCP implementation.
+
 Execution hardening completed on 2026-08-15: Phase 1 decisions are locked and
 every formal slice has a Codex dispatch packet below. The T0.1 documentation
 packet completed on 2026-08-17, and provider-free T1.1-T1.8 implementation was
@@ -2300,6 +2304,10 @@ Add another provider only for a specific capability question, such as:
 ## MCP
 
 Postpone until the direct tool-calling compatibility baseline is understood.
+
+The direct study is now closed, and the owner selected a separate MCP plan
+after cleanup on 2026-10-11. Follow [NEXT-WORK-PLAN.md](NEXT-WORK-PLAN.md) for
+that successor design; this historical study still contains no MCP slice.
 
 MCP would add:
 

@@ -4,6 +4,12 @@ This project should keep default builds local-safe. Unit tests and smoke tests m
 
 Live provider checks are opt-in and should use environment variables or ignored local config only. Do not commit `.env`, credentials, generated audio/image outputs, or provider response payloads outside ignored build directories.
 
+The [next-work plan](NEXT-WORK-PLAN.md) selects MCP contract planning after
+cleanup. No MCP dependency, transport, server startup, endpoint, or environment
+variable is enabled by that plan. Select and document one local transport
+against the pinned framework versions before adding its wiring. The detailed
+Ollama setup guide below remains a separate documentation follow-up.
+
 ## Durable Formal Evidence Root
 
 Formal run evidence is allocated only under the private, ignored durable root
