@@ -9,6 +9,11 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Updated the Gradle Wrapper from 9.8.1 to 9.8.2 and documented the build
+  toolchain. Dated the README capability diagnostic and cleanup checkpoint
+  wording to avoid implying fresh runtime or branch verification. Recorded in
+  `docs/logs/2026-10-24-gradle-wrapper-9.8.2.md`.
+
 - Changed the standing work loop to attempt one normal branch push after each
   completed batch of one or more commits, verify the remote SHA on success,
   and report failures without automatic retry. Aligned active workflow guides;

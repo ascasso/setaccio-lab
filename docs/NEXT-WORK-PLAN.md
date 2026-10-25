@@ -12,7 +12,7 @@ extension, repair, or replacement of any closed experiment.
 
 | Item | Status and next action |
 | --- | --- |
-| Fresh branch | Completed: `feature/cleanup-mcp-plan`, based on current `origin/develop`. |
+| Fresh branch | Completed: `feature/cleanup-mcp-plan`, created from `origin/develop` at `a2f7754` on 2026-10-11. |
 | Release documentation | Corrected in this change. Release `0.1.0` landed on `develop` through PR #81 and on `master` through PR #82 on 2026-09-04. The original release authorization is preserved in its dated log, with a later promotion note. |
 | Roadmap wording | Corrected in this change: the completed path is Phase 0-5, including bounded embedding retrieval, answer generation, and relevancy evaluation. MCP is the selected next planning topic. |
 | Merged branch cleanup | Pending execution. The candidates below are contained in `origin/develop`; recheck ancestry, worktree use, and local/remote ref existence before removing any named branch. This documentation change removes no refs. |

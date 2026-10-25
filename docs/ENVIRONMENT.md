@@ -10,6 +10,12 @@ variable is enabled by that plan. Select and document one local transport
 against the pinned framework versions before adding its wiring. The detailed
 Ollama setup guide below remains a separate documentation follow-up.
 
+## Build Toolchain
+
+Use the tracked Gradle Wrapper (`./gradlew`), pinned to Gradle `9.8.2`.
+The Java compilation and test toolchain remains Java 25; the launcher JVM
+reported by `./gradlew --version` can differ from that toolchain.
+
 ## Durable Formal Evidence Root
 
 Formal run evidence is allocated only under the private, ignored durable root

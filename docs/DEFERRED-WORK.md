@@ -19,9 +19,9 @@ remote providers, a release, or a tag.
 
 The selected next sequence is documented in
 [NEXT-WORK-PLAN.md](NEXT-WORK-PLAN.md): documentation and repository cleanup
-first, then a bounded MCP contract plan. The current change creates the fresh
-branch and documents that sequence; it does not start MCP implementation or a
-new model run. Tag publication remains a separate decision.
+first, then a bounded MCP contract plan. The 2026-10-11 cleanup created the
+fresh branch and documented that sequence; it did not start MCP implementation
+or a new model run. Tag publication remains a separate decision.
 
 The owner revised the standing Git closeout rule on 2026-10-11: after a
 completed batch of one or more commits, attempt one normal push of the current
