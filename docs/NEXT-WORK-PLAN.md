@@ -3,7 +3,7 @@
 Status: cleanup selected on 2026-10-11; merged-branch cleanup completed on
 2026-10-24. The working branch remains `feature/cleanup-mcp-plan`, created
 from `origin/develop` at `a2f7754`. M0 is the next planning deliverable;
-tag publication remains a separate decision.
+the existing `v0.1.0` source release was published on 2026-10-24.
 
 The authorized Phase 0-5 work remains closed. This is a successor plan, not an
 extension, repair, or replacement of any closed experiment.
@@ -16,7 +16,7 @@ extension, repair, or replacement of any closed experiment.
 | Release documentation | Corrected in this change. Release `0.1.0` landed on `develop` through PR #81 and on `master` through PR #82 on 2026-09-04. The original release authorization is preserved in its dated log, with a later promotion note. |
 | Roadmap wording | Corrected in this change: the completed path is Phase 0-5, including bounded embedding retrieval, answer generation, and relevancy evaluation. MCP is the selected next planning topic. |
 | Merged branch cleanup | Completed on 2026-10-24. All seven listed local branches were ancestors of refreshed `origin/develop` and unused by worktrees, then removed. Six remote branches were already absent; the remaining `feature/tool-compatibility-plan` remote branch was removed. Local and remote absence verified. |
-| Tag publication | Preparation requested on 2026-10-24; [notes and publication checklist](releases/0.1.0-publication.md) are prepared. Publication approval pending. Local annotated `v0.1.0` targets `016eef300764af4fa69898eba0eefb677a07b96f`; GitHub has no matching tag as checked on 2026-10-11. Push only if explicitly requested in that session; do not recreate or move the tag. |
+| Tag publication | Completed on 2026-10-24 with explicit owner approval. Existing annotated `v0.1.0` at `016eef300764af4fa69898eba0eefb677a07b96f` was pushed unchanged and [published](https://github.com/ascasso/setaccio-lab/releases/tag/v0.1.0). See the [publication record](releases/0.1.0-publication.md). |
 | Detailed Ollama setup guide | Retained documentation follow-up. Cover tested loopback setup, manual installation, explicit installed models, and opt-in calls with no automatic pull. It can be scheduled separately and is not a prerequisite for provider-free MCP planning. |
 
 The removed merged local branches were:
@@ -58,7 +58,7 @@ general MCP gateway to this first comparison.
 M0 is the next planning deliverable after the cleanup pass. The table is a
 work sequence, not a claim that an MCP surface, task, or test already exists
 and not an instruction to execute every slice now. Detailed design can proceed
-while the independent tag-publication decision remains pending.
+independently of the completed 0.1.0 publication.
 
 ## Embedding Proposal Considered
 

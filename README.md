@@ -289,10 +289,10 @@ The lab app uses port `8082`.
 
 ## Release publication
 
-The existing `v0.1.0` source release is prepared for publication. Review the
-[release notes](docs/releases/0.1.0-notes.md) and
-[publication checklist](docs/releases/0.1.0-publication.md). The tag predates
-current maintenance changes; publication remains pending approval.
+[Setaccio Lab 0.1.0](https://github.com/ascasso/setaccio-lab/releases/tag/v0.1.0) was published on
+2026-10-24 (local date). See the [release notes](docs/releases/0.1.0-notes.md)
+and [publication record](docs/releases/0.1.0-publication.md). The tag predates
+current maintenance changes.
 
 ## Project standards
 

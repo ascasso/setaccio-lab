@@ -9,6 +9,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Published the existing unchanged `v0.1.0` tag and GitHub source release
+  with explicit owner approval. Recorded in
+  `docs/logs/2026-10-24-release-publication.md`.
+
 - Prepared source-release notes and an exact-tag publication checklist for
   the existing `v0.1.0`, without publishing it. Recorded in
   `docs/logs/2026-10-24-release-publication-preparation.md`.
