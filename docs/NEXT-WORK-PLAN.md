@@ -1,9 +1,9 @@
 # Next Work: Cleanup, Then MCP
 
-Status: selected by the project owner on 2026-10-11. This change creates
-`feature/cleanup-mcp-plan` from `origin/develop` at `a2f7754` and records the
-next work. It completes documentation cleanup; branch removal, tag publication,
-MCP implementation, and new model runs are not performed by this change.
+Status: cleanup selected on 2026-10-11; merged-branch cleanup completed on
+2026-10-24. The working branch remains `feature/cleanup-mcp-plan`, created
+from `origin/develop` at `a2f7754`. M0 is the next planning deliverable;
+tag publication remains a separate decision.
 
 The authorized Phase 0-5 work remains closed. This is a successor plan, not an
 extension, repair, or replacement of any closed experiment.
@@ -15,11 +15,11 @@ extension, repair, or replacement of any closed experiment.
 | Fresh branch | Completed: `feature/cleanup-mcp-plan`, created from `origin/develop` at `a2f7754` on 2026-10-11. |
 | Release documentation | Corrected in this change. Release `0.1.0` landed on `develop` through PR #81 and on `master` through PR #82 on 2026-09-04. The original release authorization is preserved in its dated log, with a later promotion note. |
 | Roadmap wording | Corrected in this change: the completed path is Phase 0-5, including bounded embedding retrieval, answer generation, and relevancy evaluation. MCP is the selected next planning topic. |
-| Merged branch cleanup | Pending execution. The candidates below are contained in `origin/develop`; recheck ancestry, worktree use, and local/remote ref existence before removing any named branch. This documentation change removes no refs. |
+| Merged branch cleanup | Completed on 2026-10-24. All seven listed local branches were ancestors of refreshed `origin/develop` and unused by worktrees, then removed. Six remote branches were already absent; the remaining `feature/tool-compatibility-plan` remote branch was removed. Local and remote absence verified. |
 | Tag publication | Decision pending. Local annotated `v0.1.0` targets `016eef300764af4fa69898eba0eefb677a07b96f`; GitHub has no matching tag as checked on 2026-10-11. Push only if explicitly requested in that session; do not recreate or move the tag. |
 | Detailed Ollama setup guide | Retained documentation follow-up. Cover tested loopback setup, manual installation, explicit installed models, and opt-in calls with no automatic pull. It can be scheduled separately and is not a prerequisite for provider-free MCP planning. |
 
-The merged local branch candidates are:
+The removed merged local branches were:
 
 - `feature/anthropic-portability`
 - `feature/chat-evidence-reuse`

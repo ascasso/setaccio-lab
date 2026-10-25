@@ -9,6 +9,9 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Completed the seven-branch merged cleanup and marked M0 as the next
+  planning deliverable. Recorded in `docs/logs/2026-10-24-merged-branch-cleanup.md`.
+
 - Updated the Gradle Wrapper from 9.8.1 to 9.8.2 and documented the build
   toolchain. Dated the README capability diagnostic and cleanup checkpoint
   wording to avoid implying fresh runtime or branch verification. Recorded in

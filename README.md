@@ -207,7 +207,8 @@ closeout is in [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md). Deferred scope,
 start gates, and non-authorization boundaries are indexed in
 [`docs/DEFERRED-WORK.md`](docs/DEFERRED-WORK.md).
 
-The selected next work is cleanup followed by a bounded MCP plan; see
+Merged-branch cleanup completed on 2026-10-24. The next deliverable is a
+bounded MCP contract plan (M0); see
 [`docs/NEXT-WORK-PLAN.md`](docs/NEXT-WORK-PLAN.md). MCP implementation and new
 model runs remain later work.
 
