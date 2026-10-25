@@ -4,7 +4,7 @@ This file is the repo-local guide for Codex, Claude Code, and other AI agents wo
 
 ## Standing Work Loop
 
-A completed, in-scope change is finished only when all four are done:
+A completed, in-scope change is finished only when all five are done:
 
 1. **Verify.** Run the relevant Gradle build and any affected provider-free
    test task.
@@ -17,10 +17,17 @@ A completed, in-scope change is finished only when all four are done:
    claim or authorize.
 4. **Commit.** One focused commit per inseparable change. Report the modified
    files and the verification run.
+5. **Push attempt.** After completing a batch of one or more commits, attempt
+   exactly one normal push of the current working branch to `origin`. This is
+   standing authorization; no separate per-session push request is needed.
+   Use an explicit refspec for that branch and `--no-follow-tags`; if it lacks
+   an upstream, set its `origin` upstream in the same attempt. On success,
+   verify the remote branch SHA matches local `HEAD`. Report the result.
 
-Do not push. Pushing is separately gated: push only when the user asks in that
-session, never as the tail of another task, and never because an earlier
-session was allowed to push.
+If the push fails, report the reason and stop automatic push attempts. Do not
+retry, force-push, or change the target to make it succeed. This standing rule
+publishes only the completed commits on the current branch; tags, releases,
+pull requests, merges, and branch promotion remain separately authorized.
 
 Read and follow the repository's `.gitignore` before creating, inspecting, or
 including files. Treat its rules as authoritative for generated outputs,
@@ -35,8 +42,8 @@ untracked; do not bypass or weaken those rules without explicit instruction.
 - Never add credentials, tokens, API keys, or private endpoint details to tracked files.
 - Never add Docker or Testcontainers dependencies to `setaccio-lab`; keep them in `setaccio-testcontainers`.
 - Never make `setaccio-lab` depend on `setaccio-testcontainers`.
-- Never push without explicit user instruction, in any session, including
-  immediately after committing completed work.
+- Never force-push, automatically retry a failed push, push another branch,
+  or include tags under the standing branch-push authorization.
 - Never allocate new formal run evidence under `build/`. The durable root is
   `setaccio-lab/local/evidence/<suite>/<run-id>/`; `build/` paths are accepted
   for reading already-saved evidence only.
@@ -58,8 +65,8 @@ identity, attempt, evidence-integrity, and no-selective-retry rules. Model
 pulls or downloads, removals, renames, silent substitutions, non-loopback
 endpoints, remote providers, credentials, spending, Docker, publication of
 ignored output beyond the deterministic summaries and manifests the Publication
-Boundary in `docs/DEFERRED-WORK.md` permits, pushes, releases, and tags remain
-separately gated.
+Boundary in `docs/DEFERRED-WORK.md` permits, releases, and tags remain
+separately gated. Branch pushes follow the Standing Work Loop above.
 
 ## Repository Purpose
 
@@ -679,8 +686,8 @@ Pending and separately deferred:
   evidence remains immutable and protocol-bound. Pulls,
   downloads, removals, renames, silent substitutions, remote providers,
   credentials, spending, Docker, publication of ignored output beyond what the
-  Publication Boundary in `docs/DEFERRED-WORK.md` permits, pushes, releases,
-  and tags remain separately gated.
+  Publication Boundary in `docs/DEFERRED-WORK.md` permits, releases,
+  and tags remain separately gated. Branch pushes follow the Standing Work Loop.
 - Any further Anthropic call, another provider/model type, or endpoint migration
   requires a new explicit scope and authorization. The completed Phase 3 proof
   does not grant standing remote-call or spending authority; keep the existing
@@ -690,6 +697,11 @@ The tracked [deferred-work index](docs/DEFERRED-WORK.md) is the canonical
 public-safe list of deferred scope, start gates, and non-authorization
 boundaries. Keep it aligned with this section, the environment guide, test
 plan, changelog, and dated log when the status of a deferred item changes.
+
+The owner selected cleanup followed by MCP planning on 2026-10-11. Follow
+[NEXT-WORK-PLAN.md](docs/NEXT-WORK-PLAN.md) for the successor sequence. That
+documentation change creates a fresh branch and records the plan; it does not
+start MCP implementation, model execution, branch deletion, or tag publication.
 
 - If Prompt v2 is reconsidered later, create a separately authorized paired
   controlled protocol with new preserved evidence and actual human review.
@@ -871,8 +883,9 @@ The lab app uses port `8082`.
 ## Git Workflow
 
 Follow the Standing Work Loop above for every change: verify, document, log,
-commit. Keep unrelated user changes unstaged and uncommitted. Report the
-modified files and the verification run with each commit.
+commit, then one push attempt after the completed batch. Keep unrelated user
+changes unstaged and uncommitted. Report the modified files, verification run,
+and push result.
 
 Standing closeout instruction for workflow-guidance corrections:
 
@@ -888,8 +901,8 @@ Standing closeout instruction for workflow-guidance corrections:
   inseparable change. Split commits into logical chunks when independently
   useful changes, such as repository-policy guidance and functional workflow
   behavior, can be reviewed or reverted separately.
-- This standing instruction does not authorize a push. Push only when the user
-  explicitly requests it.
+- After completing the correction's one or more commits, follow the Standing
+  Work Loop's single branch-push attempt and remote verification rule.
 
 Before committing in a future session:
 

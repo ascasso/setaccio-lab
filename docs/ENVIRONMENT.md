@@ -4,6 +4,18 @@ This project should keep default builds local-safe. Unit tests and smoke tests m
 
 Live provider checks are opt-in and should use environment variables or ignored local config only. Do not commit `.env`, credentials, generated audio/image outputs, or provider response payloads outside ignored build directories.
 
+The [next-work plan](NEXT-WORK-PLAN.md) selects MCP contract planning after
+cleanup. No MCP dependency, transport, server startup, endpoint, or environment
+variable is enabled by that plan. Select and document one local transport
+against the pinned framework versions before adding its wiring. The detailed
+Ollama setup guide below remains a separate documentation follow-up.
+
+## Build Toolchain
+
+Use the tracked Gradle Wrapper (`./gradlew`), pinned to Gradle `9.8.2`.
+The Java compilation and test toolchain remains Java 25; the launcher JVM
+reported by `./gradlew --version` can differ from that toolchain.
+
 ## Durable Formal Evidence Root
 
 Formal run evidence is allocated only under the private, ignored durable root
@@ -1136,7 +1148,8 @@ preflight. Phase 4's 64/256 arms must still run from the same clean commit.
 The scope is limited to already-installed models on loopback Ollama. It does
 not authorize pulls, downloads, removals, renames, silent substitutions,
 non-loopback endpoints, remote providers, credentials, spending, Docker,
-publication of ignored raw output, pushes, releases, or tags. New formal
+publication of ignored raw output, releases, or tags. Branch pushes follow
+the separate Standing Work Loop in [AGENTS.md](../AGENTS.md). New formal
 experiments still need their explicit scope-start request and slice-specific
 preflight, but not another local-call or local-run authorization.
 
