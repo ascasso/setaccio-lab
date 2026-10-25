@@ -112,7 +112,7 @@ evidence verify and reanalyze offline; the v1 summary remained byte-identical.
 See
 [`docs/logs/2026-09-04-reasoning-default-boundary-run.md`](docs/logs/2026-09-04-reasoning-default-boundary-run.md).
 
-### The tool-calling artifact rejects tool-bearing requests today
+### The tool-calling artifact rejected tool-bearing requests in the September diagnostic
 
 Phase 1's 16 tool-compatibility rows and Phase 2's 32 interleaved attempts
 stopped at the same first `PROVIDER_FAILURE` turn, in both the untreated and
@@ -121,7 +121,7 @@ prompted conditions, against
 final response, usage, output-limit, or visible-reasoning observation was
 retained, and the retained evidence does not identify the underlying cause.
 
-A small standalone diagnostic tested the currently deployed artifact directly.
+A small standalone diagnostic on 2026-09-03 tested the then-installed artifact directly.
 Two otherwise byte-identical, non-streaming, direct Ollama `/api/chat` calls —
 temperature `0.0`, seed `42`, `512` output tokens, no retries — differed only
 in whether a single minimal tool definition was attached. The tool-bearing call
@@ -129,7 +129,7 @@ was rejected synchronously with HTTP `400` and an explicit provider error
 stating the model does not support tools; the tool-free call succeeded (HTTP
 `200`, complete response).
 
-The currently deployed artifact/runtime rejects this tool-bearing request at
+The artifact/runtime tested on 2026-09-03 rejected this tool-bearing request at
 the provider boundary. This is consistent with the historical Phase 1 and
 Phase 2 `PROVIDER_FAILURE` observations, but it does not prove that boundary
 rejection was their historical cause — this diagnostic ran under Ollama
@@ -207,6 +207,11 @@ closeout is in [`docs/CAPABILITIES.md`](docs/CAPABILITIES.md). Deferred scope,
 start gates, and non-authorization boundaries are indexed in
 [`docs/DEFERRED-WORK.md`](docs/DEFERRED-WORK.md).
 
+Merged-branch cleanup completed on 2026-10-24. The next deliverable is a
+bounded MCP contract plan (M0); see
+[`docs/NEXT-WORK-PLAN.md`](docs/NEXT-WORK-PLAN.md). MCP implementation and new
+model runs remain later work.
+
 ## Evaluation scope
 
 The harness should grow with Spring AI's supported provider and model-type surface. The intent is to make it possible to test comparable prompts, inputs, outputs, options, and error behavior across major providers such as Anthropic, OpenAI, Microsoft, Amazon, Google, and Ollama.
@@ -239,7 +244,7 @@ Useful contribution areas include:
 ## Requirements
 
 - Java 25
-- Gradle wrapper from this repo
+- Gradle 9.8.2 via the wrapper from this repo
 - Optional: local Ollama for live lab runs
 
 Provider credentials and live-test switches are documented in [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md). Default builds do not require AI provider credentials.
@@ -282,10 +287,22 @@ Most Gradle dependency versions are centralized in [`gradle/libs.versions.toml`]
 
 The lab app uses port `8082`.
 
+## Release publication
+
+[Setaccio Lab 0.1.0](https://github.com/ascasso/setaccio-lab/releases/tag/v0.1.0) was published on
+2026-10-24 (local date). See the [release notes](docs/releases/0.1.0-notes.md)
+and [publication record](docs/releases/0.1.0-publication.md). The tag predates
+current maintenance changes.
+
 ## Project standards
 
 Project versions follow [Semantic Versioning](https://semver.org/).
 Changelog entries follow [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
+The [repository work loop](AGENTS.md) requires verification, documentation,
+logging, focused commits, and one normal push attempt to `origin` after each
+completed batch of one or more commits. Report a failed attempt without
+automatic retries; verify the remote branch SHA after a successful push.
 
 ## License
 
