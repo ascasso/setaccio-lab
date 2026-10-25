@@ -9,6 +9,10 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Prepared source-release notes and an exact-tag publication checklist for
+  the existing `v0.1.0`, without publishing it. Recorded in
+  `docs/logs/2026-10-24-release-publication-preparation.md`.
+
 - Completed the seven-branch merged cleanup and marked M0 as the next
   planning deliverable. Recorded in `docs/logs/2026-10-24-merged-branch-cleanup.md`.
 

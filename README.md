@@ -287,6 +287,13 @@ Most Gradle dependency versions are centralized in [`gradle/libs.versions.toml`]
 
 The lab app uses port `8082`.
 
+## Release publication
+
+The existing `v0.1.0` source release is prepared for publication. Review the
+[release notes](docs/releases/0.1.0-notes.md) and
+[publication checklist](docs/releases/0.1.0-publication.md). The tag predates
+current maintenance changes; publication remains pending approval.
+
 ## Project standards
 
 Project versions follow [Semantic Versioning](https://semver.org/).
