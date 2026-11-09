@@ -12,7 +12,7 @@ Ollama setup guide below remains a separate documentation follow-up.
 
 ## Build Toolchain
 
-Use the tracked Gradle Wrapper (`./gradlew`), pinned to Gradle `9.8.2`.
+Use the tracked Gradle Wrapper (`./gradlew`), pinned to Gradle `9.9.0`.
 The Java compilation and test toolchain remains Java 25; the launcher JVM
 reported by `./gradlew --version` can differ from that toolchain.
 

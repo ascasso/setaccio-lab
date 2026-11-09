@@ -244,7 +244,7 @@ Useful contribution areas include:
 ## Requirements
 
 - Java 25
-- Gradle 9.8.2 via the wrapper from this repo
+- Gradle 9.9.0 via the wrapper from this repo
 - Optional: local Ollama for live lab runs
 
 Provider credentials and live-test switches are documented in [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md). Default builds do not require AI provider credentials.
