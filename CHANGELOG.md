@@ -9,6 +9,12 @@ and this project follows [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Updated the Gradle Wrapper distribution from 9.9.0 to 9.9.2.
+  Recorded in `docs/logs/2026-11-19-gradle-wrapper-9.9.2.md`.
+
+
+### Changed
+
 - Updated the Gradle Wrapper from 9.8.2 to 9.9.0, including the wrapper JAR.
   Recorded in `docs/logs/2026-11-09-gradle-wrapper-9.9.0.md`.
 
